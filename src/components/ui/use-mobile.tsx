@@ -1,7 +1,4 @@
 
-/*
-This file is a utility hook and does not contain styling. The comment has been updated for consistency with the neo-brutalist project's documentation style. No functional changes are needed.
-*/
 "use client";
 
 import * as React from "react";

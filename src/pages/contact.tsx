@@ -53,15 +53,13 @@ export default function ContactPage() {
         <meta property="og:url" content={pageUrl} />
         <link rel="canonical" href={pageUrl} />
       </Head>
-      <main className="mx-auto max-w-5xl px-4 py-16 md:py-24">
+      <main className="mx-auto max-w-5xl px-4 py-16 font-sans md:py-24">
         <motion.header 
-          initial={{ opacity: 0, y: -20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5 }}
+          initial="hidden" animate="visible" variants={itemVariants}
           className="mb-16 text-center"
         >
-          <h1 className="text-5xl font-bold text-black md:text-6xl">Get In Touch</h1>
-          <p className="mx-auto mt-4 max-w-2xl text-xl text-neutral-600">
+          <h1 className="text-5xl font-black text-foreground md:text-6xl">Get In Touch</h1>
+          <p className="mx-auto mt-4 max-w-2xl text-xl text-muted-foreground">
             Have a project in mind or just want to say hello? I'd love to hear from you.
           </p>
           <div className="mt-8 flex justify-center gap-4">
@@ -70,10 +68,10 @@ export default function ContactPage() {
                       <Mail className="mr-2 size-5" /> Email Me
                   </a>
               </Button>
-              <Button asChild variant="outline" size="icon" aria-label="GitHub">
+              <Button asChild variant="secondary" size="icon" aria-label="GitHub">
                   <a href="https://github.com/akshay-bharadva" target="_blank" rel="noopener noreferrer"><Github /></a>
               </Button>
-              <Button asChild variant="outline" size="icon" aria-label="LinkedIn">
+              <Button asChild variant="secondary" size="icon" aria-label="LinkedIn">
                   <a href="https://www.linkedin.com/in/akshay-bharadva/" target="_blank" rel="noopener noreferrer"><Linkedin /></a>
               </Button>
           </div>
@@ -81,30 +79,31 @@ export default function ContactPage() {
 
         {(isLoading || (!isLoading && serviceSection?.portfolio_items && serviceSection.portfolio_items.length > 0)) && (
           <motion.div className="mt-24">
-              <h2 className="mb-10 text-center text-4xl font-bold text-neutral-500">What I Can Do For You</h2>
+              <motion.h2 variants={itemVariants} initial="hidden" whileInView="visible" viewport={{ once: true }} className="mb-10 text-center text-4xl font-bold text-muted-foreground">What I Can Do For You</motion.h2>
               {isLoading && (
-                 <div className="flex justify-center"><Loader2 className="h-8 w-8 animate-spin text-black" /></div>
+                 <div className="flex justify-center"><Loader2 className="size-8 animate-spin text-muted-foreground"/></div>
               )}
               {!isLoading && serviceSection?.portfolio_items && (
                 <motion.div 
                   variants={containerVariants}
                   initial="hidden"
-                  animate="visible"
+                  whileInView="visible"
+                  viewport={{ once: true, amount: 0.2 }}
                   className="grid grid-cols-1 gap-8 md:grid-cols-2 lg:grid-cols-3"
                 >
                   {serviceSection.portfolio_items.map((service) => (
                     <motion.div 
                       key={service.id}
                       variants={itemVariants}
-                      className="flex h-full flex-col rounded-none border-2 border-black bg-white p-8 text-black shadow-[6px_6px_0_#000] transition-transform duration-200 hover:-translate-y-1 hover:shadow-[8px_8px_0_#000]"
+                      className="flex h-full flex-col rounded-lg bg-blueprint-bg p-8 transition-transform duration-200 hover:-translate-y-1"
                     >
-                      <h3 className="mb-3 text-2xl font-bold text-black">{service.title}</h3>
-                      <p className="mb-6 flex-grow text-neutral-600">{service.subtitle}</p>
+                      <h3 className="mb-3 text-2xl font-bold text-foreground">{service.title}</h3>
+                      <p className="mb-6 flex-grow text-muted-foreground">{service.subtitle}</p>
                       {service.tags && (
                         <ul className="mb-8 space-y-3">
                           {service.tags.map(tag => (
-                            <li key={tag} className="flex items-start text-neutral-700">
-                              <Check className="mr-3 mt-1 size-4 shrink-0 text-black" />
+                            <li key={tag} className="flex items-start text-muted-foreground">
+                              <Check className="mr-3 mt-1 size-4 shrink-0 text-primary" />
                               <span>{tag}</span>
                             </li>
                           ))}
@@ -120,3 +119,4 @@ export default function ContactPage() {
     </Layout>
   );
 }
+

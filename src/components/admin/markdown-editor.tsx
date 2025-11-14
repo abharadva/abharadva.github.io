@@ -1,10 +1,10 @@
 
+
 "use client";
 
 import { useState, useEffect, useRef } from "react";
 import DOMPurify from "dompurify";
-import { Button } from "@/components/ui/button";
-import { Bold, Italic, Code, CodeSquare, Link as LinkIcon, Image as ImageIcon, Heading1, Heading2, Heading3, List, Quote } from "lucide-react";
+import { Button } from "../ui/button";
 
 interface MarkdownEditorProps {
   value: string;
@@ -14,34 +14,31 @@ interface MarkdownEditorProps {
 }
 
 const markdownToHtml = (markdown: string): string => {
-    if (typeof window === 'undefined' || !DOMPurify.sanitize) {
-        return markdown; // Fallback for SSR
-    }
-    const sanitizedMarkdown = DOMPurify.sanitize(markdown);
-
-    let html = ' ' + sanitizedMarkdown;
-    html = html
-        .replace(/\n/g, '\n<br>')
-        .replace(/```([\s\S]*?)```/g, (_match, p1) => `<pre class='bg-black text-white p-3 my-3 rounded-none overflow-x-auto'><code class='font-mono'>${p1.replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/\n<br>/g, '\n')}</code></pre>`)
-        .replace(/`([^`]+)`/g, "<code class='bg-neutral-200 text-black px-1 py-0.5 font-mono text-sm'>$1</code>")
-        .replace(/^# (.*$)/gim, "<h1 class='font-bold text-3xl'>$1</h1>")
-        .replace(/^## (.*$)/gim, "<h2 class='font-bold text-2xl'>$1</h2>")
-        .replace(/^### (.*$)/gim, "<h3 class='font-bold text-xl'>$1</h3>")
-        .replace(/\!\[([^\]]*)\]\(([^)]+)\)/g, '<img src="$2" alt="$1" loading="lazy" class="max-w-full h-auto my-3 rounded-none border-2 border-black" />')
-        .replace(/\[([^\]]+)\]\(([^)]+)\)/g, '<a href="$2" target="_blank" rel="noopener noreferrer" class="text-blue-600 underline">$1</a>')
-        .replace(/\*\*(.*?)\*\*|__(.*?)__/gim, "<strong>$1$2</strong>")
-        .replace(/\*(.*?)\*|_(.*?)_/gim, "<em>$1$2</em>")
-        .replace(/^\> (.*$)/gim, "<blockquote class='border-l-4 border-black pl-4'>$1</blockquote>")
-        .replace(/^\s*([-*+]) (.*)/gm, "<ul class='list-disc pl-5'><li>$2</li></ul>")
-        .replace(/^\s*(\d+\.) (.*)/gm, "<ol class='list-decimal pl-5'><li>$2</li></ol>")
-        .replace(/<\/ul>(\n<br>)*<ul>/g, '')
-        .replace(/<\/ol>(\n<br>)*<ol>/g, '');
-
-    html = html.split(/(<br>\s*){2,}/).map(p => p.trim() ? `<p>${p.replace(/^(<br>\s*)+|(<br>\s*)+$/g, '')}</p>` : '').join('');
-    html = html.replace(/<p>(<(pre|blockquote|ul|ol|h[1-3]))/g, '$1').replace(/(<\/(pre|blockquote|ul|ol|h[1-3])>)<\/p>/g, '$1');
-
-    return `<div class='prose max-w-none'>${html}</div>`;
+  if (typeof window === 'undefined' || !DOMPurify.sanitize) {
+    return markdown; // Fallback for SSR
+  }
+  let html = DOMPurify.sanitize(markdown)
+    .replace(/^# (.*$)/gim, "<h1>$1</h1>")
+    .replace(/^## (.*$)/gim, "<h2>$1</h2>")
+    .replace(/^### (.*$)/gim, "<h3>$1</h3>")
+    .replace(/\*\*(.*?)\*\*|__(.*?)__/gim, "<strong>$1$2</strong>")
+    .replace(/\*(.*?)\*|_(.*?)_/gim, "<em>$1$2</em>")
+    .replace(/!\[([^\]]*)\]\(([^)]+)\)/gim, '<img src="$2" alt="$1" loading="lazy" />')
+    .replace(/\[([^\]]+)\]\(([^)]+)\)/gim, '<a href="$2" target="_blank" rel="noopener noreferrer">$1</a>')
+    .replace(/```([\s\S]*?)```/gim, (match, p1) => `<pre><code>${p1.replace(/</g, "&lt;").replace(/>/g, "&gt;")}</code></pre>`)
+    .replace(/`(.*?)`/gim, "<code>$1</code>")
+    .replace(/^\> (.*$)/gim, "<blockquote>$1</blockquote>")
+    .replace(/^\s*([-*+]) (.*)/gm, "<li>$2</li>")
+    .replace(/(<li>.*<\/li>)/gm, '<ul>$1</ul>')
+    .replace(/<\/ul>\s*<ul>/g, '')
+    .replace(/^\s*(\d+\.) (.*)/gm, "<li>$2</li>")
+    .replace(/(<li>.*<\/li>)/gm, '<ol>$1</ol>')
+    .replace(/<\/ol>\s*<ol>/g, '')
+    .replace(/\n\n/g, "</p><p>")
+    .replace(/\n/g, "<br />");
+  return `<div class="prose prose-sm dark:prose-invert max-w-none">${html}</div>`;
 };
+
 
 export default function MarkdownEditor({
   value,
@@ -62,54 +59,44 @@ export default function MarkdownEditor({
   const insertMarkdown = (before: string, after = "", placeholderText = "") => {
     const textarea = textareaRef.current;
     if (!textarea) return;
-
     const start = textarea.selectionStart;
     const end = textarea.selectionEnd;
     const selectedText = value.substring(start, end);
     const textToInsert = selectedText || placeholderText;
-    const newText =
-      value.substring(0, start) +
-      before +
-      textToInsert +
-      after +
-      value.substring(end);
-
+    const newText = value.substring(0, start) + before + textToInsert + after + value.substring(end);
     onChange(newText);
     setTimeout(() => {
       textarea.focus();
-      textarea.setSelectionRange(
-        start + before.length,
-        start + before.length + textToInsert.length,
-      );
+      textarea.setSelectionRange(start + before.length, start + before.length + textToInsert.length);
     }, 0);
   };
 
   const toolbarButtons = [
-    { label: "H1", action: () => insertMarkdown("# ", "", "Heading 1"), icon: <Heading1 className="size-4"/> },
-    { label: "H2", action: () => insertMarkdown("## ", "", "Heading 2"), icon: <Heading2 className="size-4"/> },
-    { label: "H3", action: () => insertMarkdown("### ", "", "Heading 3"), icon: <Heading3 className="size-4"/> },
-    { label: "Bold", action: () => insertMarkdown("**", "**", "bold text"), icon: <Bold className="size-4"/> },
-    { label: "Italic", action: () => insertMarkdown("*", "*", "italic text"), icon: <Italic className="size-4"/> },
-    { label: "Code", action: () => insertMarkdown("`", "`", "inline code"), icon: <Code className="size-4"/> },
-    { label: "Code Block", action: () => insertMarkdown("```\n", "\n```", "code block"), icon: <CodeSquare className="size-4"/> },
-    { label: "Link", action: () => insertMarkdown("[", "](url)", "link text"), icon: <LinkIcon className="size-4"/> },
-    { label: "Image", action: () => insertMarkdown("![alt text](", ")", "image url"), icon: <ImageIcon className="size-4"/> },
-    { label: "List", action: () => insertMarkdown("\n- ", "", "List item"), icon: <List className="size-4"/> },
-    { label: "Quote", action: () => insertMarkdown("\n> ", "", "Quote"), icon: <Quote className="size-4"/> },
+    { label: "H1", action: () => insertMarkdown("# ", "", "H1"), icon: "H1" },
+    { label: "H2", action: () => insertMarkdown("## ", "", "H2"), icon: "H2" },
+    { label: "H3", action: () => insertMarkdown("### ", "", "H3"), icon: "H3" },
+    { label: "Bold", action: () => insertMarkdown("**", "**", "bold"), icon: "B" },
+    { label: "Italic", action: () => insertMarkdown("*", "*", "italic"), icon: "I" },
+    { label: "Code", action: () => insertMarkdown("`", "`", "code"), icon: "</>" },
+    { label: "Block", action: () => insertMarkdown("```\n", "\n```", "block"), icon: "{}" },
+    { label: "Link", action: () => insertMarkdown("[", "](url)", "link"), icon: "🔗" },
+    { label: "Image", action: () => insertMarkdown("![alt](", ")", "url"), icon: "🖼️" },
+    { label: "List", action: () => insertMarkdown("- ", "", "item"), icon: "•" },
+    { label: "Quote", action: () => insertMarkdown("> ", "", "quote"), icon: "❝" },
   ];
 
   return (
-    <div className="overflow-hidden rounded-none border-2 border-black bg-white">
-      <div className="flex flex-col items-stretch gap-2 border-b-2 border-black bg-neutral-100 p-2 sm:flex-row sm:items-center sm:justify-between">
+    <div className="overflow-hidden rounded-lg border bg-card text-card-foreground">
+      <div className="flex flex-col items-stretch gap-2 border-b bg-secondary/50 p-2 sm:flex-row sm:items-center sm:justify-between">
         <div className="flex flex-wrap items-center gap-1">
           {toolbarButtons.map((button) => (
             <Button
               key={button.label}
               type="button"
-              variant="ghost"
-              size="icon"
               onClick={button.action}
-              className="h-8 w-8"
+              variant="ghost"
+              size="sm"
+              className="h-8 px-2"
               title={button.label}
             >
               {button.icon}
@@ -117,22 +104,22 @@ export default function MarkdownEditor({
           ))}
         </div>
 
-        <div className="flex self-end rounded-none border-2 border-black bg-white p-0.5 sm:self-center">
+        <div className="flex self-end rounded-md border bg-secondary p-0.5">
           <Button
             type="button"
+            onClick={() => setActiveTab("write")}
             variant={activeTab === 'write' ? 'secondary' : 'ghost'}
             size="sm"
-            onClick={() => setActiveTab("write")}
-            className="flex-1 rounded-none"
+            className="h-7"
           >
             Write
           </Button>
           <Button
             type="button"
+            onClick={() => setActiveTab("preview")}
             variant={activeTab === 'preview' ? 'secondary' : 'ghost'}
             size="sm"
-            onClick={() => setActiveTab("preview")}
-            className="flex-1 rounded-none"
+            className="h-7"
           >
             Preview
           </Button>
@@ -147,21 +134,21 @@ export default function MarkdownEditor({
             value={value}
             onChange={(e) => onChange(e.target.value)}
             placeholder={placeholder}
-            className="h-full w-full resize-none rounded-b-md border-none bg-white p-4 text-sm text-black focus:outline-none"
+            className="h-full w-full resize-none rounded-b-lg border-none bg-card p-4 font-mono text-sm text-card-foreground focus:outline-none"
             spellCheck="false"
           />
         ) : (
           <div
-            className="h-full overflow-auto bg-white p-4 text-black"
+            className="h-full overflow-auto p-4"
             dangerouslySetInnerHTML={{ __html: renderedHtml }}
           />
         )}
       </div>
 
-      <div className="border-t-2 border-black bg-neutral-100 px-4 py-1.5 text-xs text-neutral-500">
+      <div className="border-t bg-secondary/50 px-4 py-2 text-xs text-muted-foreground">
         <div className="flex items-center justify-between">
-          <span>Markdown supported</span>
-          <span>{value.length} characters</span>
+          <span className="font-semibold">Markdown supported</span>
+          <span className="font-semibold">{value.length} characters</span>
         </div>
       </div>
     </div>

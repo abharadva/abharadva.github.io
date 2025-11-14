@@ -1,9 +1,4 @@
 
-/*
-This file is updated for the neo-brutalist design system.
-- The subtle, 1px separator is replaced with a thick, `h-[2px]` or `w-[2px]` solid `bg-black` line.
-- This creates a much stronger visual division, aligning with the bold and raw aesthetic of the new theme.
-*/
 "use client";
 
 import * as React from "react";
@@ -24,8 +19,8 @@ const Separator = React.forwardRef<
       decorative={decorative}
       orientation={orientation}
       className={cn(
-        "shrink-0 bg-black",
-        orientation === "horizontal" ? "h-[2px] w-full" : "h-full w-[2px]",
+        "shrink-0 bg-border",
+        orientation === "horizontal" ? "h-[1px] w-full" : "h-full w-[1px]",
         className
       )}
       {...props}
@@ -35,3 +30,4 @@ const Separator = React.forwardRef<
 Separator.displayName = SeparatorPrimitive.Root.displayName;
 
 export { Separator };
+

@@ -1,10 +1,10 @@
-
 /*
-This file is redesigned for the neo-brutalist theme.
-- The page header is made bolder and more direct.
-- Post cards now use the brutalist `Card` component, featuring hard shadows, thick borders, and a stark layout.
-- All subtle design elements (hover effects, soft shadows, rounded corners) are replaced with high-contrast, sharp-edged equivalents.
-- The `font-mono` is applied to give a more raw, technical feel.
+This file is redesigned for the kinetic typography theme.
+- The heavy, neo-brutalist styles for the header and post cards are replaced with a clean, modern, and minimalist design.
+- The page header is simplified with modern typography.
+- Post cards are now built using the redesigned `Card` component, featuring a cleaner layout, hover effects, and better typographic hierarchy.
+- Metadata (date, views, read time) is presented more elegantly.
+- The empty/loading states are updated to match the new aesthetic.
 */
 import Link from "next/link";
 import { supabase } from "@/supabase/client";
@@ -18,12 +18,13 @@ import { formatDate } from "@/lib/utils";
 import { Eye, Clock, Loader2 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Card } from "@/components/ui/card";
+import Image from "next/image";
 
 const calculateReadTime = (content: string = ""): number => {
   const wordsPerMinute = 225;
   const textLength = content.split(/\s+/).filter(Boolean).length;
   const time = Math.ceil(textLength / wordsPerMinute);
-  return Math.max(1, time);
+  return Math.max(1, time); // Ensure read time is at least 1 minute
 };
 
 export default function BlogIndexPage() {
@@ -65,11 +66,11 @@ export default function BlogIndexPage() {
   };
 
   if (loading) {
-    return <Layout><div className="flex min-h-[50vh] items-center justify-center"><Loader2 className="h-8 w-8 animate-spin text-neutral-500" /></div></Layout>;
+    return <Layout><div className="flex min-h-[50vh] items-center justify-center"><Loader2 className="h-8 w-8 animate-spin text-muted-foreground" /></div></Layout>;
   }
 
   if (error) {
-    return <Layout><div className="flex min-h-[50vh] items-center justify-center p-4"><div className="rounded-none border-2 border-destructive bg-red-100 p-6 font-bold text-destructive">Error loading posts: {error}</div></div></Layout>;
+    return <Layout><div className="flex min-h-[50vh] items-center justify-center p-4"><div className="rounded-md border border-destructive/50 bg-destructive/10 p-6 font-medium text-destructive">Error loading posts: {error}</div></div></Layout>;
   }
 
   return (
@@ -87,12 +88,12 @@ export default function BlogIndexPage() {
           initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5 }}
-          className="mb-12 border-b-2 border-black pb-8 text-center"
+          className="mb-12 border-b border-border pb-8 text-center"
         >
-          <h1 className="text-5xl font-bold tracking-tighter text-black md:text-6xl">
+          <h1 className="text-5xl font-black tracking-tighter text-foreground md:text-6xl">
             The Blog
           </h1>
-          <p className="mt-3 text-lg text-neutral-600">
+          <p className="mt-3 text-lg text-muted-foreground">
             A collection of articles on web development, design, and technology.
           </p>
         </motion.header>
@@ -100,7 +101,7 @@ export default function BlogIndexPage() {
         {posts.length === 0 && !loading && (
           <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="py-16 text-center">
             <h3 className="text-2xl font-bold">No Posts Yet</h3>
-            <p className="text-neutral-500">Check back soon for new articles.</p>
+            <p className="text-muted-foreground">Check back soon for new articles.</p>
           </motion.div>
         )}
 
@@ -114,11 +115,11 @@ export default function BlogIndexPage() {
             const readTime = calculateReadTime(post.content || "");
             return (
               <motion.div key={post.id} variants={itemVariants} role="article">
-                <Link href={`/blog/${post.slug}`} className="group block focus:outline-none focus-visible:ring-2 focus-visible:ring-black">
-                  <Card className="overflow-hidden transition-all duration-300 hover:shadow-[8px_8px_0_#000] md:flex">
+                <Link href={`/blog/${post.slug}`} className="group block focus:outline-none focus-visible:ring-2 focus-visible:ring-ring rounded-lg">
+                  <Card className="overflow-hidden transition-all duration-300 hover:border-accent hover:shadow-lg md:flex">
                     {post.cover_image_url && (
-                      <div className="md:w-1/3 overflow-hidden border-b-2 md:border-b-0 md:border-r-2 border-black">
-                        <img
+                      <div className="md:w-1/3 overflow-hidden">
+                        <Image
                           src={post.cover_image_url}
                           alt={`Cover image for ${post.title}`}
                           className="h-48 w-full object-cover transition-transform duration-500 group-hover:scale-105 md:h-full"
@@ -128,15 +129,15 @@ export default function BlogIndexPage() {
                     )}
                     <div className="flex flex-col p-6 md:w-2/3">
                       <div className="flex-grow">
-                         {post.tags && post.tags[0] && <Badge className="mb-2">{post.tags[0]}</Badge>}
-                        <h2 className="mb-2 text-2xl font-bold tracking-tight text-black transition-colors group-hover:text-blue-600">
+                         {post.tags && post.tags[0] && <Badge variant="outline" className="mb-2">{post.tags[0]}</Badge>}
+                        <h2 className="mb-2 text-2xl font-bold tracking-tight text-foreground transition-colors group-hover:text-accent">
                           {post.title}
                         </h2>
-                        <p className="mb-4 leading-relaxed text-neutral-600 line-clamp-2">
+                        <p className="mb-4 leading-relaxed text-muted-foreground line-clamp-2">
                           {post.excerpt || "Click to read more..."}
                         </p>
                       </div>
-                      <footer className="mt-auto flex items-center gap-4 text-xs font-bold text-neutral-500">
+                      <footer className="mt-auto flex items-center gap-4 text-xs font-medium text-muted-foreground">
                         <time dateTime={post.published_at || post.created_at || ""}>
                           {formatDate(post.published_at || post.created_at || new Date())}
                         </time>

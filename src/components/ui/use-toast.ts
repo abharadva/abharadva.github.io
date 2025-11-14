@@ -1,7 +1,4 @@
 
-/*
-This file contains the logic for the Shadcn/UI toast system and has no direct styling. The comment is updated for consistency. The visual appearance is controlled by the `toast.tsx` component, which has already been updated for the neo-brutalist theme.
-*/
 "use client";
 
 import * as React from "react";
@@ -185,3 +182,4 @@ function useToast() {
 }
 
 export { useToast, toast };
+

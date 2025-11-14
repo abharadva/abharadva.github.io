@@ -1,10 +1,4 @@
 
-/*
-This file is updated for the neo-brutalist design.
-- The font is changed to `font-bold` to give labels more emphasis and a blockier feel.
-- Base styling now includes `block` and `mb-1` for a standard top-aligned label layout.
-- The color is changed to `text-black` to fit the high-contrast theme.
-*/
 "use client";
 
 import * as React from "react";
@@ -14,7 +8,7 @@ import { cva, type VariantProps } from "class-variance-authority";
 import { cn } from "@/lib/utils";
 
 const labelVariants = cva(
-  "mb-1 block text-sm font-bold leading-none text-black peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+  "text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
 );
 
 const Label = React.forwardRef<

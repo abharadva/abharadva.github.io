@@ -1,11 +1,4 @@
 
-/*
-This file is updated for the neo-brutalist style.
-- The `toggleVariants` cva is overhauled. Modern styles are replaced with `border-2`, `rounded-none`, and `shadow-[...]`.
-- The pressed state (`data-[state=on]`) now uses a solid, high-contrast color (yellow) for clear feedback.
-- The outline variant is updated to match the new bold design language.
-- The font is made bold to fit the theme.
-*/
 "use client";
 
 import * as React from "react";
@@ -15,13 +8,13 @@ import { cva, type VariantProps } from "class-variance-authority";
 import { cn } from "@/lib/utils";
 
 const toggleVariants = cva(
-  "inline-flex items-center justify-center rounded-none border-2 border-black text-sm font-bold ring-offset-background transition-colors hover:bg-neutral-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-black focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 data-[state=on]:bg-yellow-300 data-[state=on]:text-black",
+  "inline-flex items-center justify-center rounded-md text-sm font-medium ring-offset-background transition-colors hover:bg-muted hover:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 data-[state=on]:bg-accent data-[state=on]:text-accent-foreground",
   {
     variants: {
       variant: {
-        default: "bg-transparent text-black",
+        default: "bg-transparent",
         outline:
-          "bg-transparent hover:bg-neutral-100",
+          "border border-input bg-transparent hover:bg-accent hover:text-accent-foreground",
       },
       size: {
         default: "h-10 px-3",

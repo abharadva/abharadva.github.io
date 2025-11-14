@@ -1,12 +1,4 @@
 
-/*
-This file is updated to apply a neo-brutalist theme.
-- The soft `border-b` is replaced with a `border-b-2 border-black`.
-- Rounded corners are removed.
-- Focus rings are updated to be solid black outlines.
-- Font is now `font-mono`.
-- Hover underline is maintained for usability.
-*/
 "use client";
 
 import * as React from "react";
@@ -23,7 +15,7 @@ const AccordionItem = React.forwardRef<
 >(({ className, ...props }, ref) => (
   <AccordionPrimitive.Item
     ref={ref}
-    className={cn("border-b-2 border-black", className)}
+    className={cn("border-b", className)}
     {...props}
   />
 ));
@@ -37,7 +29,7 @@ const AccordionTrigger = React.forwardRef<
     <AccordionPrimitive.Trigger
       ref={ref}
       className={cn(
-        "flex flex-1 items-center justify-between py-4 font-bold transition-all hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-black [&[data-state=open]>svg]:rotate-180",
+        "flex flex-1 items-center justify-between py-4 font-medium transition-all hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 [&[data-state=open]>svg]:rotate-180",
         className
       )}
       {...props}
@@ -58,7 +50,7 @@ const AccordionContent = React.forwardRef<
     className="overflow-hidden text-sm transition-all data-[state=closed]:animate-accordion-up data-[state=open]:animate-accordion-down"
     {...props}
   >
-    <div className={cn("pb-4 pt-0 text-neutral-700", className)}>
+    <div className={cn("pb-4 pt-0 text-muted-foreground", className)}>
       {children}
     </div>
   </AccordionPrimitive.Content>

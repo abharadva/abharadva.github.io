@@ -1,8 +1,7 @@
 
-import { PropsWithChildren } from "react";
-import { ArrowUpRight } from "lucide-react";
 
-type TechnologyProps = PropsWithChildren;
+import { ArrowUpRight } from "lucide-react";
+import { PropsWithChildren } from "react";
 
 interface TechItem {
   name: string;
@@ -21,37 +20,34 @@ const TECHNOLOGIES: TechItem[] = [
   { href: "https://supabase.com/", name: "Supabase", desc: "The open-source Firebase alternative. Backend-as-a-Service built on PostgreSQL." },
 ];
 
-export default function Technology({ children }: TechnologyProps) {
+export default function Technology({ children }: PropsWithChildren) {
   return (
     <section className="my-12 py-12">
-      <h2 className="mb-8 border-b-2 border-black pb-3 text-3xl font-bold text-black">
-        Tech Stack
+      <h2 className="mb-8 font-mono text-3xl font-bold text-foreground">
+        / Tech Stack
       </h2>
-      <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
+      <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
         {TECHNOLOGIES.map((tech) => (
-          <div
+          <a
             key={tech.href}
-            className="group flex flex-col rounded-none border-2 border-black bg-white p-5 transition-all duration-200 hover:shadow-[4px_4px_0_#000]"
+            href={tech.href}
+            rel="noopener noreferrer"
+            target="_blank"
+            className="group rounded-lg bg-blueprint-bg p-5 transition-all duration-200 hover:border-primary/80 hover:shadow-lg hover:shadow-primary/10"
           >
-            <a
-              href={tech.href}
-              rel="noopener noreferrer"
-              target="_blank"
-              className="mb-1 inline-flex items-center self-start text-xl font-bold text-black transition-colors group-hover:text-blue-600 group-hover:underline"
-            >
-              <span>{tech.name}</span>
-              <ArrowUpRight className="ml-1.5 size-4" />
-            </a>
-            <p className="grow text-sm leading-relaxed text-neutral-600">
+            <div className="flex items-center justify-between">
+              <h3 className="font-mono text-xl font-bold text-foreground transition-colors group-hover:text-primary">
+                {tech.name}
+              </h3>
+              <ArrowUpRight className="size-4 text-muted-foreground transition-transform group-hover:-translate-y-1 group-hover:translate-x-1" />
+            </div>
+            <p className="mt-2 text-sm leading-relaxed text-muted-foreground">
               {tech.desc}
             </p>
-          </div>
+          </a>
         ))}
       </div>
       {children && <div className="mt-6">{children}</div>}
-      <p className="mt-8 text-center font-bold text-neutral-600">
-        ...and always eager to learn more to get the job done right!
-      </p>
     </section>
   );
 }

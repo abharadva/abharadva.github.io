@@ -1,9 +1,7 @@
-
 /** @type {import('next').NextConfig} */
 
-const repoName = process.env.GITHUB_REPOSITORY ? process.env.GITHUB_REPOSITORY.split('/')[1] : '';
-
 const nextConfig = {
+  output: 'export',
   reactStrictMode: true,
   trailingSlash: true,
   images: {
@@ -11,8 +9,10 @@ const nextConfig = {
     domains: ['images.unsplash.com', 'avatars.githubusercontent.com'],
   },
   
-  basePath: repoName ? `/${repoName}` : '',
-  assetPrefix: repoName ? `/${repoName}/` : '/',
+  // For a user/organization GitHub Pages site like <username>.github.io,
+  // the basePath and assetPrefix must be empty strings.
+  basePath: '',
+  assetPrefix: '',
 };
 
 module.exports = nextConfig;

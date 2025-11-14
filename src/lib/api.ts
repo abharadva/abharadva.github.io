@@ -1,4 +1,3 @@
-
 import type { BlogPost, PortfolioSection } from "@/types";
 import { supabase } from "@/supabase/client";
 
@@ -31,7 +30,7 @@ export async function fetchBlogPostBySlug(
       .eq("published", true)
       .single();
 
-    if (error && error.code !== "PGRST116") { // PGRST116 means no rows found, which is a valid case.
+    if (error && error.code !== "PGRST116") {
       throw new Error(error.message || "Post not found or error fetching");
     }
     return data || null;

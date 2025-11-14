@@ -16,30 +16,13 @@ export default function App({ Component, pageProps }: AppProps) {
   const router = useRouter();
 
   const pageVariants = {
-    initial: {
-      opacity: 0,
-      y: 5,
-    },
-    animate: {
-      opacity: 1,
-      y: 0,
-      transition: {
-        duration: 0.3,
-        ease: "easeInOut",
-      },
-    },
-    exit: {
-      opacity: 0,
-      y: -5,
-      transition: {
-        duration: 0.2,
-        ease: "easeInOut",
-      },
-    },
+    initial: { opacity: 0, y: 5 },
+    animate: { opacity: 1, y: 0, transition: { duration: 0.3, ease: "easeInOut" } },
+    exit: { opacity: 0, y: -5, transition: { duration: 0.2, ease: "easeInOut" } },
   };
 
   return (
-    <ThemeProvider attribute="class" defaultTheme="light" enableSystem={false}>
+    <ThemeProvider attribute="class" defaultTheme="dark" enableSystem={false}>
       <AnimatePresence
         mode="wait"
         initial={false}
@@ -60,3 +43,4 @@ export default function App({ Component, pageProps }: AppProps) {
     </ThemeProvider>
   );
 }
+

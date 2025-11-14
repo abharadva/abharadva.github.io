@@ -1,7 +1,4 @@
 
-/*
-This file's comment is updated for consistency with the neo-brutalist redesign. The functionality, which renders toasts from the `useToast` hook, remains the same. The visual appearance is controlled by `toast.tsx`, which has been updated.
-*/
 "use client";
 
 import {

@@ -16,7 +16,8 @@ module.exports = {
     },
     extend: {
       fontFamily: {
-        mono: ["'Space Mono'", "monospace"],
+        sans: ["Inter", "sans-serif"],
+        mono: ["IBM Plex Mono", "monospace"],
         tahu: ["var(--font-tahu)", "sans-serif"],
       },
       colors: {
@@ -54,17 +55,17 @@ module.exports = {
           foreground: "hsl(var(--card-foreground))",
         },
         chart: {
-          1: "#2563eb",
-          2: "#60a5fa",
-          3: "#facc15",
-          4: "#9333ea",
-          5: "#f43f5e",
+          1: "hsl(var(--chart-1))",
+          2: "hsl(var(--chart-2))",
+          3: "hsl(var(--chart-3))",
+          4: "hsl(var(--chart-4))",
+          5: "hsl(var(--chart-5))",
         },
       },
       borderRadius: {
         lg: "var(--radius)",
-        md: "calc(var(--radius))",
-        sm: "calc(var(--radius))",
+        md: "calc(var(--radius) - 2px)",
+        sm: "calc(var(--radius) - 4px)",
       },
       keyframes: {
         "accordion-down": {

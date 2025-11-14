@@ -1,10 +1,4 @@
 
-/*
-This file is updated for the new neo-brutalist design.
-- The subtle, modern style of the navigation buttons is replaced with the newly designed brutalist `Button` component, featuring hard shadows and thick borders.
-- The `rounded-full` shape of the buttons is replaced with `rounded-none` to match the sharp aesthetic.
-- The overall container is now styled with a `border-2 border-black`, making it a distinct, blocky element.
-*/
 "use client";
 
 import * as React from "react";
@@ -144,7 +138,7 @@ const Carousel = React.forwardRef<
         <div
           ref={ref}
           onKeyDownCapture={handleKeyDown}
-          className={cn("relative rounded-none border-2 border-black p-4", className)}
+          className={cn("relative", className)}
           role="region"
           aria-roledescription="carousel"
           {...props}
@@ -213,7 +207,7 @@ const CarouselPrevious = React.forwardRef<
       variant={variant}
       size={size}
       className={cn(
-        "absolute h-8 w-8",
+        "absolute h-8 w-8 rounded-full",
         orientation === "horizontal"
           ? "-left-12 top-1/2 -translate-y-1/2"
           : "-top-12 left-1/2 -translate-x-1/2 rotate-90",
@@ -242,7 +236,7 @@ const CarouselNext = React.forwardRef<
       variant={variant}
       size={size}
       className={cn(
-        "absolute h-8 w-8",
+        "absolute h-8 w-8 rounded-full",
         orientation === "horizontal"
           ? "-right-12 top-1/2 -translate-y-1/2"
           : "-bottom-12 left-1/2 -translate-x-1/2 rotate-90",

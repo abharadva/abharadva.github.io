@@ -1,11 +1,4 @@
 
-/*
-This file has been updated to apply the neo-brutalist theme.
-- The clean, minimalist sidebar design is replaced with a raw, blocky aesthetic featuring thick borders and sharp corners (`rounded-none`).
-- Components like `SidebarHeader`, `SidebarFooter`, and `SidebarGroup` now have strong visual separation with `border-2`.
-- `SidebarMenuButton` active and hover states use the new theme's high-contrast colors (yellow and neutral gray).
-- The `SidebarRail` hover effect is made more prominent.
-*/
 "use client";
 
 import * as React from "react";
@@ -195,8 +188,8 @@ const Sidebar = React.forwardRef<
       return (
         <aside
           className={cn(
-            "flex h-svh w-[--sidebar-width] flex-col border-2 border-black bg-white text-black",
-            side === "left" ? "border-r-2" : "border-l-2",
+            "flex h-svh w-[--sidebar-width] flex-col border bg-background text-foreground",
+            side === "left" ? "border-r" : "border-l",
             className
           )}
           ref={ref}
@@ -214,8 +207,8 @@ const Sidebar = React.forwardRef<
             data-sidebar="sidebar"
             data-mobile="true"
             className={cn(
-              "w-[--sidebar-width] bg-white p-0 text-black [&>button]:hidden",
-              side === "left" ? "border-r-2" : "border-l-2"
+              "w-[--sidebar-width] bg-background p-0 text-foreground [&>button]:hidden",
+              side === "left" ? "border-r" : "border-l"
             )}
             style={{ "--sidebar-width": SIDEBAR_WIDTH_MOBILE } as React.CSSProperties}
             side={side}
@@ -229,7 +222,7 @@ const Sidebar = React.forwardRef<
     return (
       <div
         ref={ref}
-        className="group peer hidden text-black md:block"
+        className="group peer hidden text-foreground md:block"
         data-state={state}
         data-collapsible={state === "collapsed" ? collapsible : ""}
         data-variant={variant}
@@ -255,7 +248,7 @@ const Sidebar = React.forwardRef<
             variant === "floating" && "p-2 group-data-[collapsible=icon]:w-[calc(var(--sidebar-width-icon)_+_theme(spacing.4)_)]",
             variant === "inset" && "m-2 group-data-[collapsible=icon]:w-[calc(var(--sidebar-width-icon)_+_theme(spacing.4)_)]",
             variant === "sidebar" && "group-data-[collapsible=icon]:w-[--sidebar-width-icon]",
-            variant !== "floating" && variant !== "inset" && (side === "left" ? "border-r-2" : "border-l-2"),
+            variant !== "floating" && variant !== "inset" && (side === "left" ? "border-r" : "border-l"),
             className
           )}
           {...props}
@@ -263,9 +256,9 @@ const Sidebar = React.forwardRef<
           <div
             data-sidebar="sidebar"
             className={cn(
-              "flex h-full w-full flex-col rounded-none border-2 border-black bg-white shadow-[8px_8px_0_#000]",
-              (variant === "floating" || variant === "inset") && "rounded-none",
-              variant === "sidebar" && "shadow-none border-0"
+              "flex h-full w-full flex-col rounded-lg border bg-background shadow-sm",
+              (variant === "floating" || variant === "inset") && "rounded-lg",
+              variant === "sidebar" && "shadow-none border-0 rounded-none"
             )}
           >
             {children}
@@ -318,7 +311,7 @@ const SidebarRail = React.forwardRef<
       onClick={toggleSidebar}
       title="Toggle Sidebar"
       className={cn(
-        "absolute inset-y-0 z-20 hidden w-2 -translate-x-1/2 cursor-col-resize transition-all ease-linear after:absolute after:inset-y-0 after:left-1/2 after:w-px after:bg-black hover:after:bg-yellow-400 group-data-[side=left]:-right-2 group-data-[side=right]:left-0 sm:flex",
+        "absolute inset-y-0 z-20 hidden w-2 -translate-x-1/2 cursor-col-resize transition-all ease-linear after:absolute after:inset-y-0 after:left-1/2 after:w-px after:bg-border hover:after:bg-accent group-data-[side=left]:-right-2 group-data-[side=right]:left-0 sm:flex",
         "group-data-[collapsible=offcanvas]:hidden",
         className
       )}
@@ -336,8 +329,8 @@ const SidebarInset = React.forwardRef<
     <main
       ref={ref}
       className={cn(
-        "relative flex min-h-svh flex-1 flex-col bg-white",
-        "md:peer-data-[variant=inset]:m-2 md:peer-data-[variant=inset]:rounded-none md:peer-data-[variant=inset]:border-2",
+        "relative flex min-h-svh flex-1 flex-col bg-background",
+        "md:peer-data-[variant=inset]:m-2 md:peer-data-[variant=inset]:rounded-lg md:peer-data-[variant=inset]:border",
         "md:peer-data-[state=expanded]:peer-data-[variant=inset]:peer-data-[side=left]:ml-[calc(var(--sidebar-width)_+theme(spacing.2))]",
         "md:peer-data-[state=expanded]:peer-data-[variant=inset]:peer-data-[side=right]:mr-[calc(var(--sidebar-width)+theme(spacing.2))]",
         "md:peer-data-[state=collapsed]:peer-data-[variant=inset]:peer-data-[collapsible=icon]:peer-data-[side=left]:ml-[calc(var(--sidebar-width-icon)+theme(spacing.4)+theme(spacing.2))]",
@@ -373,7 +366,7 @@ const SidebarHeader = React.forwardRef<
     <div
       ref={ref}
       data-sidebar="header"
-      className={cn("flex flex-col gap-2 p-2 border-b-2 border-black", className)}
+      className={cn("flex flex-col gap-2 p-2 border-b", className)}
       {...props}
     />
   );
@@ -388,7 +381,7 @@ const SidebarFooter = React.forwardRef<
     <div
       ref={ref}
       data-sidebar="footer"
-      className={cn("flex flex-col gap-2 p-2 border-t-2 border-black mt-auto", className)}
+      className={cn("flex flex-col gap-2 p-2 border-t mt-auto", className)}
       {...props}
     />
   );
@@ -436,7 +429,7 @@ const SidebarGroup = React.forwardRef<
     <div
       ref={ref}
       data-sidebar="group"
-      className={cn("relative flex w-full min-w-0 flex-col rounded-none border-2 border-black bg-neutral-100 p-2", className)}
+      className={cn("relative flex w-full min-w-0 flex-col", className)}
       {...props}
     />
   );
@@ -454,7 +447,7 @@ const SidebarGroupLabel = React.forwardRef<
       ref={ref}
       data-sidebar="group-label"
       className={cn(
-        "duration-200 flex h-8 shrink-0 items-center rounded-none px-2 text-xs font-bold text-neutral-500 outline-none transition-[margin,opacity] ease-linear",
+        "duration-200 flex h-8 shrink-0 items-center rounded-md px-2 text-xs font-medium text-muted-foreground outline-none transition-[margin,opacity] ease-linear",
         "group-data-[collapsible=icon]:-mt-8 group-data-[collapsible=icon]:opacity-0 group-data-[collapsible=icon]:h-0 group-data-[collapsible=icon]:p-0 group-data-[collapsible=icon]:invisible",
         className
       )}
@@ -477,7 +470,7 @@ const SidebarGroupAction = React.forwardRef<
       variant="ghost"
       size="icon"
       className={cn(
-        "absolute right-1 top-1.5 !w-6 !h-6 p-0 text-neutral-500",
+        "absolute right-1 top-1.5 !w-6 !h-6 p-0 text-muted-foreground",
         "after:absolute after:-inset-2 after:md:hidden",
         "group-data-[collapsible=icon]:hidden",
         className
@@ -528,12 +521,12 @@ const SidebarMenuItem = React.forwardRef<
 SidebarMenuItem.displayName = "SidebarMenuItem";
 
 const sidebarMenuButtonVariants = cva(
-  "peer/menu-button flex w-full items-center gap-2 overflow-hidden rounded-none p-2 text-left text-sm font-bold outline-none ring-black transition-colors duration-150 hover:bg-neutral-100 focus-visible:ring-2 active:bg-neutral-200 disabled:pointer-events-none disabled:opacity-50 group-has-[[data-sidebar=menu-action]]/menu-item:pr-8 aria-disabled:pointer-events-none aria-disabled:opacity-50 data-[active=true]:bg-yellow-300 data-[active=true]:text-black data-[state=open]:bg-neutral-100 group-data-[collapsible=icon]:!size-8 group-data-[collapsible=icon]:!p-2 [&>span:last-child]:truncate [&>svg]:size-4 [&>svg]:shrink-0",
+  "peer/menu-button flex w-full items-center gap-2 overflow-hidden rounded-md p-2 text-left text-sm font-medium outline-none ring-ring transition-colors duration-150 hover:bg-accent hover:text-accent-foreground focus-visible:ring-2 active:bg-accent/80 disabled:pointer-events-none disabled:opacity-50 group-has-[[data-sidebar=menu-action]]/menu-item:pr-8 aria-disabled:pointer-events-none aria-disabled:opacity-50 data-[active=true]:bg-primary data-[active=true]:text-primary-foreground data-[state=open]:bg-secondary group-data-[collapsible=icon]:!size-8 group-data-[collapsible=icon]:!p-2 [&>span:last-child]:truncate [&>svg]:size-4 [&>svg]:shrink-0",
   {
     variants: {
       variant: {
-        default: "text-black",
-        outline: "border-2 border-black bg-transparent",
+        default: "text-foreground",
+        outline: "border bg-transparent",
       },
       size: {
         default: "h-8 group-data-[collapsible=icon]:justify-center",
@@ -640,11 +633,11 @@ const SidebarMenuAction = React.forwardRef<
       variant="ghost"
       size="icon"
       className={cn(
-        "!absolute !right-1 !top-1/2 !-translate-y-1/2 !w-6 !h-6 !p-0 text-neutral-500",
+        "!absolute !right-1 !top-1/2 !-translate-y-1/2 !w-6 !h-6 !p-0 text-muted-foreground",
         "after:absolute after:-inset-2 after:md:hidden",
         "group-data-[collapsible=icon]:hidden",
         showOnHover &&
-          "group-focus-within/menu-item:opacity-100 group-hover/menu-item:opacity-100 data-[state=open]:opacity-100 peer-data-[active=true]/menu-button:text-black md:opacity-0",
+          "group-focus-within/menu-item:opacity-100 group-hover/menu-item:opacity-100 data-[state=open]:opacity-100 peer-data-[active=true]/menu-button:text-primary-foreground md:opacity-0",
         className
       )}
       {...props}
@@ -661,8 +654,8 @@ const SidebarMenuBadge = React.forwardRef<
     ref={ref}
     data-sidebar="menu-badge"
     className={cn(
-      "absolute right-2 top-1/2 -translate-y-1/2 flex h-5 min-w-5 items-center justify-center rounded-full bg-black px-1.5 text-xs font-medium text-white select-none pointer-events-none",
-      "peer-hover/menu-button:bg-neutral-800 peer-data-[active=true]/menu-button:bg-black peer-data-[active=true]/menu-button:text-yellow-300",
+      "absolute right-2 top-1/2 -translate-y-1/2 flex h-5 min-w-5 items-center justify-center rounded-full bg-primary px-1.5 text-xs font-medium text-primary-foreground select-none pointer-events-none",
+      "peer-hover/menu-button:bg-primary/80 peer-data-[active=true]/menu-button:bg-accent peer-data-[active=true]/menu-button:text-accent-foreground",
       "group-data-[collapsible=icon]:hidden",
       className
     )}
@@ -683,12 +676,12 @@ const SidebarMenuSkeleton = React.forwardRef<
     <div
       ref={ref}
       data-sidebar="menu-skeleton"
-      className={cn("rounded-none h-8 flex gap-2 px-2 items-center", className)}
+      className={cn("rounded-md h-8 flex gap-2 px-2 items-center", className)}
       {...props}
     >
-      {showIcon && <Skeleton className="size-4 rounded-none" data-sidebar="menu-skeleton-icon" />}
+      {showIcon && <Skeleton className="size-4 rounded-sm" data-sidebar="menu-skeleton-icon" />}
       <Skeleton
-        className="h-4 max-w-[--skeleton-width] flex-1 rounded-none"
+        className="h-4 max-w-[--skeleton-width] flex-1 rounded-sm"
         data-sidebar="menu-skeleton-text"
         style={{ "--skeleton-width": width } as React.CSSProperties}
       />
@@ -705,7 +698,7 @@ const SidebarMenuSub = React.forwardRef<
     ref={ref}
     data-sidebar="menu-sub"
     className={cn(
-      "mx-3.5 flex min-w-0 translate-x-px flex-col gap-1 border-l-2 border-black pl-3.5 py-1",
+      "mx-3.5 flex min-w-0 translate-x-px flex-col gap-1 border-l pl-3.5 py-1",
       "group-data-[collapsible=icon]:hidden",
       className
     )}
@@ -740,8 +733,8 @@ const SidebarMenuSubButton = React.forwardRef<
         data-size={size}
         data-active={isActive ? "true" : undefined}
         className={cn(
-          "flex h-7 min-w-0 -translate-x-px items-center gap-2 overflow-hidden rounded-none px-2 text-neutral-500 outline-none ring-black hover:bg-neutral-100 hover:text-black focus-visible:ring-1 active:bg-neutral-200 disabled:pointer-events-none disabled:opacity-50 aria-disabled:pointer-events-none aria-disabled:opacity-50 [&>span:last-child]:truncate [&>svg]:size-4 [&>svg]:shrink-0 [&>svg]:text-neutral-400 font-normal",
-          "data-[active=true]:bg-yellow-100 data-[active=true]:text-black data-[active=true]:[&>svg]:text-black data-[active=true]:font-bold",
+          "flex h-7 min-w-0 -translate-x-px items-center gap-2 overflow-hidden rounded-md px-2 text-muted-foreground outline-none ring-ring hover:bg-accent/50 hover:text-accent-foreground focus-visible:ring-1 active:bg-accent/80 disabled:pointer-events-none disabled:opacity-50 aria-disabled:pointer-events-none aria-disabled:opacity-50 [&>span:last-child]:truncate [&>svg]:size-4 [&>svg]:shrink-0 [&>svg]:text-muted-foreground font-normal",
+          "data-[active=true]:bg-accent data-[active=true]:text-accent-foreground data-[active=true]:[&>svg]:text-accent-foreground data-[active=true]:font-medium",
           size === "sm" && "text-xs h-6",
           size === "md" && "text-sm h-7",
           "group-data-[collapsible=icon]:hidden",
@@ -757,61 +750,3 @@ const SidebarMenuSubButton = React.forwardRef<
 SidebarMenuSubButton.displayName = "SidebarMenuSubButton";
 
 export { Sidebar, SidebarContent, SidebarFooter, SidebarGroup, SidebarGroupAction, SidebarGroupContent, SidebarGroupLabel, SidebarHeader, SidebarInput, SidebarInset, SidebarMenu, SidebarMenuAction, SidebarMenuBadge, SidebarMenuButton, SidebarMenuItem, SidebarMenuSkeleton, SidebarMenuSub, SidebarMenuSubButton, SidebarMenuSubItem, SidebarProvider, SidebarRail, SidebarSeparator, SidebarTrigger, useSidebar };
-=== skeleton.tsx ===
-/*
-This file is updated for the neo-brutalist design system.
-- Rounded corners are removed and replaced with `rounded-none`.
-- The subtle muted background is changed to a slightly darker `neutral-200` to provide enough contrast on the white background.
-- A `border-2 border-black` is added to give the skeleton a defined, blocky shape, consistent with other components in the theme.
-*/
-import { cn } from "@/lib/utils";
-
-function Skeleton({
-  className,
-  ...props
-}: React.HTMLAttributes<HTMLDivElement>) {
-  return (
-    <div
-      className={cn("animate-pulse rounded-none bg-neutral-200 border-2 border-black", className)}
-      {...props}
-    />
-  );
-}
-
-export { Skeleton };
-=== slider.tsx ===
-/*
-This file is updated to apply a neo-brutalist style.
-- The soft, rounded aesthetic of the track and thumb is replaced with sharp, blocky elements.
-- `SliderPrimitive.Track` is now a rectangle with `rounded-none` and a thick `border-2`.
-- `SliderPrimitive.Thumb` is restyled as a square, also with a thick border, to act as the slider handle.
-- High-contrast colors are used for the track, range, and thumb to ensure clarity and fit the theme.
-*/
-"use client";
-
-import * as React from "react";
-import * as SliderPrimitive from "@radix-ui/react-slider";
-
-import { cn } from "@/lib/utils";
-
-const Slider = React.forwardRef<
-  React.ElementRef<typeof SliderPrimitive.Root>,
-  React.ComponentPropsWithoutRef<typeof SliderPrimitive.Root>
->(({ className, ...props }, ref) => (
-  <SliderPrimitive.Root
-    ref={ref}
-    className={cn(
-      "relative flex w-full touch-none select-none items-center",
-      className
-    )}
-    {...props}
-  >
-    <SliderPrimitive.Track className="relative h-4 w-full grow overflow-hidden rounded-none border-2 border-black bg-neutral-200">
-      <SliderPrimitive.Range className="absolute h-full bg-yellow-300" />
-    </SliderPrimitive.Track>
-    <SliderPrimitive.Thumb className="block h-6 w-6 rounded-none border-2 border-black bg-white ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-black focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50" />
-  </SliderPrimitive.Root>
-));
-Slider.displayName = SliderPrimitive.Root.displayName;
-
-export { Slider };

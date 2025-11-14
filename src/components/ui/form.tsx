@@ -1,9 +1,4 @@
-/*
-This file, which provides logic for `react-hook-form`, is updated for the neo-brutalist design system.
-- `FormLabel` is made bolder.
-- `FormMessage` (the error message) is restyled from simple text to a blocky, bordered component for a more prominent, brutalist look.
-- `FormDescription` text color is adjusted for the new theme.
-*/
+
 "use client";
 
 import * as React from "react";
@@ -142,7 +137,7 @@ const FormDescription = React.forwardRef<
     <p
       ref={ref}
       id={formDescriptionId}
-      className={cn("text-[0.8rem] text-neutral-500", className)}
+      className={cn("text-[0.8rem] text-muted-foreground", className)}
       {...props}
     />
   );
@@ -164,7 +159,7 @@ const FormMessage = React.forwardRef<
     <p
       ref={ref}
       id={formMessageId}
-      className={cn("text-sm font-bold text-destructive p-2 bg-red-100 border-2 border-destructive rounded-none", className)}
+      className={cn("text-[0.8rem] font-medium text-destructive", className)}
       {...props}
     >
       {body}

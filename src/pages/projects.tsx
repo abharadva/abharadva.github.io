@@ -1,11 +1,4 @@
 
-/*
-This file is updated for the neo-brutalist design system.
-- The `Layout` provides the page structure.
-- Styling is now fully handled by the `ProjectsComponent`, which has been updated with a raw, blocky aesthetic.
-- `font-mono` is inherited from the global styles.
-- Head tags and metadata are unchanged.
-*/
 import Layout from "@/components/layout";
 import ProjectsComponent from "@/components/projects";
 import Head from "next/head";

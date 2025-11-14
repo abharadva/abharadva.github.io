@@ -5,9 +5,7 @@ import Layout from "@/components/layout";
 export default function AdminLoginPage() {
   return (
     <Layout>
-      <div>
-        <SupabaseLogin />
-      </div>
+      <SupabaseLogin />
     </Layout>
   );
 }

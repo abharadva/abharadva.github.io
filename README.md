@@ -1,7 +1,6 @@
-
 # Personal Portfolio
 
-This repository contains the source code for my personal portfolio and blog, completely redesigned with a neo-brutalist theme. It's a full-stack application built with Next.js and Supabase, featuring a comprehensive, secure admin panel for content management.
+This repository contains the source code for my personal portfolio and blog, completely redesigned with a minimalist dark theme. It's a full-stack application built with Next.js and Supabase, featuring a comprehensive, secure admin panel for content management.
 
 ---
 
@@ -9,12 +8,14 @@ This repository contains the source code for my personal portfolio and blog, com
 
 ### Public-Facing Site
 
-- **Neo-Brutalist Theme:** A high-contrast, raw design with thick borders, hard shadows, and a monospaced font, built with Tailwind CSS and shadcn/ui.
+- **Minimalist Dark Theme:** A sleek, modern design built with Tailwind CSS and shadcn/ui.
 - **Kinetic Typography:** Engaging animated headings on the homepage for a dynamic first impression.
 - **Fully Responsive:** Optimized for all devices, from mobile phones to desktops.
-- **Dynamic Content Sections:** All content sections like "Work Experience," "Tech Stack," and "Tools" are dynamically populated from the CMS.
+- **Interactive Project Showcase:** An elegant project list with hover-to-preview image effects.
+- **Dynamic Content Sections:** "Work Experience," "Tech Stack," and "Tools" sections are all dynamically populated from the CMS.
 - **Full-Featured Blog:**
-  - Utilitarian, readable article layout with styled code blocks.
+  - Clean, readable article layout using Tailwind Prose.
+  - Reading progress bar for long articles.
   - Server-side rendering (SSR) for fast loads and SEO.
   - View counter for posts.
 
@@ -23,11 +24,16 @@ This repository contains the source code for my personal portfolio and blog, com
 - **Secure Authentication:**
   - Email/Password login powered by Supabase Auth.
   - **Mandatory Two-Factor Authentication (MFA/TOTP)** for admin access, ensuring high security.
+- **Command Calendar (New!):**
+  - A unified, interactive calendar view serving as the primary operational dashboard.
+  - Visualizes task deadlines, personal events, and past financial transactions.
+  - **30-Day Cash Flow Forecasting:** Automatically projects future income and expenses from recurring rules onto the calendar.
+  - Demonstrates complex data integration and a user-centric workflow.
 - **Comprehensive Dashboard:**
   - At-a-glance statistics: Monthly earnings/expenses, task progress, total notes, and blog views.
   - Quick access to recently updated blog posts and pinned notes.
 - **Content Management System (CMS):**
-  - Manage all public-facing portfolio sections.
+  - Manage all public-facing portfolio sections ("Experience," "Projects," "Services," etc.).
   - Drag-and-drop reordering for sections.
   - CRUD (Create, Read, Update, Delete) functionality for all portfolio items.
 - **Blog Manager:**
@@ -38,7 +44,8 @@ This repository contains the source code for my personal portfolio and blog, com
 - **Personal Management Tools:**
   - **Task Manager:** A Kanban-style board to track tasks with sub-task support, priorities, and due dates.
   - **Notes Manager:** A simple, effective tool for personal notes with pinning functionality.
-  - **Finance Tracker:** Log earnings and expenses and view monthly/yearly summaries.
+  - **Finance Tracker:** Log earnings/expenses, manage recurring transactions, and view monthly/yearly summaries.
+  - **Backend Automation:** Recurring transactions are processed automatically into the ledger via a daily scheduled serverless function.
 - **Security Settings:**
   - Manage MFA authenticators.
   - Securely change the admin account password.
@@ -48,14 +55,14 @@ This repository contains the source code for my personal portfolio and blog, com
 ## 🛠️ Tech Stack
 
 - **Framework:** [Next.js](https://nextjs.org/) (React)
-- **Backend & Database:** [Supabase](https://supabase.com/) (PostgreSQL, Auth, Storage)
+- **Backend & Database:** [Supabase](https://supabase.com/) (PostgreSQL, Auth, Storage, Edge Functions)
 - **Styling:** [Tailwind CSS](https://tailwindcss.com/)
-- **UI Components:** [shadcn/ui](https://ui.shadcn.com/) (built on Radix UI), heavily customized for neo-brutalism.
+- **UI Components:** [shadcn/ui](https://ui.shadcn.com/) (built on Radix UI)
 - **Animation:** [Framer Motion](https://www.framer.com/motion/)
 - **Forms:** [React Hook Form](https://react-hook-form.com/) with [Zod](https://zod.dev/) for validation
 - **Markdown:** [ReactMarkdown](https://github.com/remarkjs/react-markdown)
 - **Language:** [TypeScript](https://www.typescriptlang.org/)
-- **Deployment:** Vercel, Netlify, or any static host (GitHub Pages for static export)
+- **Deployment:** GitHub Pages (for static export) / Vercel
 
 ---
 
@@ -74,7 +81,7 @@ This repository contains the source code for my personal portfolio and blog, com
 │   │   ├── admin/      # Admin panel pages (login, dashboard, etc.)
 │   │   ├── api/        # API routes (not used for static export)
 │   │   ├── blog/       # Blog index and [slug] pages
-│   │   └── ...         # Public-facing pages (home, about, etc.)
+│   │   └── ...         # Public-facing pages (home, about, work)
 │   ├── styles/         # Global CSS and Tailwind setup
 │   ├── supabase/       # Supabase client configuration
 │   └── types/          # TypeScript type definitions
@@ -112,31 +119,35 @@ npm install
 This project is tightly integrated with Supabase. You'll need a free Supabase account.
 
 1.  **Create a Supabase Project:**
+
     - Go to [supabase.com](https://supabase.com) and create a new project.
     - Once created, navigate to **Project Settings** > **API**.
     - Find your **Project URL** and **`anon`, `public` key**.
 
 2.  **Create Environment File:**
-    - In the root of the project, create a new file named `.env.local`.
-    - Add the following, replacing the values with your Supabase credentials:
+
+    - In the root of the project, create a new file named `.env`.
+    - Copy the contents of `.env.example` (if provided) or add the following, replacing the values with your Supabase credentials:
 
     ```env
     NEXT_PUBLIC_SUPABASE_URL=YOUR_SUPABASE_PROJECT_URL
     NEXT_PUBLIC_SUPABASE_ANON_KEY=YOUR_SUPABASE_ANON_PUBLIC_KEY
     NEXT_PUBLIC_BUCKET_NAME=blog-assets
-    NEXT_PUBLIC_SITE_URL=http://localhost:3000
+    NEXT_PUBLIC_SITE_URL=http://localhost:8888
     ```
 
 3.  **Run SQL Setup Scripts:**
+
     - Navigate to the **SQL Editor** in your Supabase dashboard.
     - Click **+ New query**.
     - Copy the entire SQL script from the `supabase.md` file in this repository and paste it into the SQL editor.
     - Click **Run**. This will create all the necessary tables, policies (RLS), triggers, and functions.
 
 4.  **Create Storage Bucket:**
+
     - Navigate to **Storage** in your Supabase dashboard.
     - Click **Create a new bucket**.
-    - Enter the bucket name you defined in your `.env.local` file (e.g., `blog-assets`).
+    - Enter the bucket name you defined in your `.env` file (e.g., `blog-assets`).
     - Toggle **Public bucket** to ON.
     - Click **Create bucket**. The RLS policies from the SQL script will automatically apply.
 
@@ -150,21 +161,301 @@ This project is tightly integrated with Supabase. You'll need a free Supabase ac
 npm run dev
 ```
 
-The application will be available at `http://localhost:3000`.
+The application will be available at `http://localhost:8888`.
 
 ---
 
 ## 🔑 Accessing the Admin Panel
 
-1.  **Navigate to the Login Page:** Go to `http://localhost:3000/admin/login`.
-2.  **Create Your Admin Account:** Since Supabase Auth doesn't have a sign-up form by default, you need to add your user manually.
-    - In your Supabase dashboard, go to **Authentication** > **Users**.
-    - Click **Create user**.
-    - Enter your email and a strong password. The user will be created and confirmed automatically.
-3.  **First Login & MFA Setup:**
-    - Log in with your new credentials.
+1.  **Navigate to the Login Page:** Go to `http://localhost:8888/admin/login`.
+2.  **Create Your Admin Account:** Since this is a new setup, you don't have a user yet. **Use the sign-up form on the login page** to create your admin account. Supabase will send a confirmation email.
+3.  **Confirm Your Email:** Click the link in the confirmation email.
+4.  **First Login & MFA Setup:**
+    - Log in again with your new credentials.
     - You will be automatically redirected to the MFA setup page (`/admin/setup-mfa`).
     - Scan the QR code with your authenticator app (e.g., Google Authenticator, Authy).
     - Enter the 6-digit code to verify and complete the setup.
     - You will be redirected to the admin dashboard.
-4.  **Subsequent Logins:** For all future logins, you will be prompted to enter an MFA code after your password.
+5.  **Subsequent Logins:** For all future logins, you will be prompted to enter an MFA code after your password.
+
+---
+
+## 🚀 Deployment to GitHub Pages
+
+This guide explains how to deploy the portfolio as a static site to GitHub Pages using GitHub Actions.
+
+### 1. Configure `next.config.js`
+
+Ensure your `next.config.js` is set up for static export. The following settings are required:
+
+```javascript
+/** @type {import('next').NextConfig} */
+const nextConfig = {
+  reactStrictMode: true,
+  trailingSlash: true, // Important for GitHub Pages routing
+  images: {
+    unoptimized: true, // Required for next/export
+  },
+};
+
+module.exports = nextConfig;
+```
+
+### 2. Add Environment Variables to GitHub
+
+To allow GitHub Actions to build your site, you must add your Supabase credentials as repository secrets.
+
+1.  Go to your GitHub repository.
+2.  Click on **Settings** > **Secrets and variables** > **Actions**.
+3.  Click **New repository secret** for each of the following variables from your `.env` file:
+    - `NEXT_PUBLIC_SUPABASE_URL`
+    - `NEXT_PUBLIC_SUPABASE_ANON_KEY`
+    - `NEXT_PUBLIC_BUCKET_NAME`
+    - `NEXT_PUBLIC_SITE_URL` (Set this to your public GitHub Pages URL, e.g., `https://your-username.github.io/your-repo-name`)
+
+### 3. Create the GitHub Actions Workflow
+
+1.  In your repository, create a directory path: `.github/workflows/`.
+2.  Inside `workflows`, create a new file named `deploy.yml`.
+3.  Paste the following code into `deploy.yml`:
+
+```yaml
+name: Deploy Next.js site to Pages
+
+on:
+  # Runs on pushes targeting the default branch
+  push:
+    branches: ["main"]
+
+  # Allows you to run this workflow manually from the Actions tab
+  workflow_dispatch:
+
+# Sets permissions of the GITHUB_TOKEN to allow deployment to GitHub Pages
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+# Allow only one concurrent deployment, skipping runs queued between the run in-progress and latest queued.
+# However, do NOT cancel in-progress runs as we want to allow these production deployments to complete.
+concurrency:
+  group: "pages"
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Detect package manager
+        id: detect-package-manager
+        run: |
+          if [ -f "${{ github.workspace }}/yarn.lock" ]; then
+            echo "manager=yarn" >> $GITHUB_OUTPUT
+            echo "command=install" >> $GITHUB_OUTPUT
+            echo "runner=yarn" >> $GITHUB_OUTPUT
+            exit 0
+          elif [ -f "${{ github.workspace }}/package.json" ]; then
+            echo "manager=npm" >> $GITHUB_OUTPUT
+            echo "command=ci" >> $GITHUB_OUTPUT
+            echo "runner=npx --no-install" >> $GITHUB_OUTPUT
+            exit 0
+          else
+            echo "Unable to determine package manager"
+            exit 1
+          fi
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: "18"
+          cache: ${{ steps.detect-package-manager.outputs.manager }}
+      - name: Setup Pages
+        uses: actions/configure-pages@v4
+        with:
+          static_site_generator: next
+      - name: Restore cache
+        uses: actions/cache@v4
+        with:
+          path: |
+            .next/cache
+          key: ${{ runner.os }}-nextjs-${{ hashFiles('**/package-lock.json', '**/yarn.lock') }}-${{ hashFiles('**.[jt]s', '**.[jt]sx') }}
+          restore-keys: |
+            ${{ runner.os }}-nextjs-${{ hashFiles('**/package-lock.json', '**/yarn.lock') }}-
+      - name: Install dependencies
+        run: ${{ steps.detect-package-manager.outputs.manager }} ${{ steps.detect-package-manager.outputs.command }}
+
+      - name: Create .env file
+        run: |
+          echo "NEXT_PUBLIC_SUPABASE_URL=${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}" >> .env
+          echo "NEXT_PUBLIC_SUPABASE_ANON_KEY=${{ secrets.NEXT_PUBLIC_SUPABASE_ANON_KEY }}" >> .env
+          echo "NEXT_PUBLIC_BUCKET_NAME=${{ secrets.NEXT_PUBLIC_BUCKET_NAME }}" >> .env
+          echo "NEXT_PUBLIC_SITE_URL=${{ secrets.NEXT_PUBLIC_SITE_URL }}" >> .env
+
+      - name: Build with Next.js
+        run: ${{ steps.detect-package-manager.outputs.runner }} next build
+      - name: Static HTML export with Next.js
+        run: ${{ steps.detect-package-manager.outputs.runner }} next export
+      - name: Upload artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: ./out
+
+  deploy:
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    runs-on: ubuntu-latest
+    needs: build
+    steps:
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
+```
+
+### 4. Enable GitHub Pages
+
+After you push these changes to your `main` branch, the deployment action will run for the first time.
+
+1.  Wait for the `Deploy Next.js site to Pages` action to complete successfully.
+2.  In your GitHub repository, go to **Settings** > **Pages**.
+3.  Under **Build and deployment**, set the **Source** to **GitHub Actions**.
+4.  GitHub will automatically detect the artifact and deploy it.
+
+Your site will be deployed and available at the URL shown on the Pages settings page.
+
+---
+
+## 📜 Available Scripts
+
+- `npm run dev`: Starts the development server.
+- `npm run build`: Creates a production build of the application.
+- `npm run start`: Starts the production server (after building).
+- `npm run lint`: Runs the ESLint linter.
+- `npm run export`: Exports the application to static HTML, which can be deployed anywhere.
+- `npm run format`: Formats all code using Prettier.
+
+
+
+
+---
+
+This tree maps each page file to the primary, non-UI custom components it renders. It helps visualize the architecture and how components are composed to build the final views.
+
+### Legend
+
+-   `🌳` **Root** (The main application wrapper)
+-   `📄` **Page** (A file within the `src/pages/` directory)
+-   `🧩` **Component** (A reusable component from `src/components/`)
+-   `🔒` **Admin Component** (A component specific to the admin panel)
+-   `(Internal)` A component defined and used only within that specific page file.
+-   `(Conditional)` A component that is rendered based on user interaction (e.g., clicking a tab).
+
+---
+
+### Component Tree
+
+```
+🌳 src/pages/_app.tsx
+└── 🧩 ThemeProvider (Wraps all pages)
+
+    ├── 📄 src/pages/index.tsx (Home Page)
+    │   └── 🧩 Layout
+    │       ├── 🧩 Hero
+    │       ├── 🧩 Projects
+    │       │   └── 🧩 ProjectCard (Repeated)
+    │       └── 🧩 Experience
+    │
+    ├── 📄 src/pages/about.tsx
+    │   └── 🧩 Layout
+    │       ├── 🧩 Technology
+    │       └── 🧩 Tools
+    │
+    ├── 📄 src/pages/blog/index.tsx
+    │   └── 🧩 Layout (Contains logic for listing blog posts)
+    │
+    ├── 📄 src/pages/blog/[slug].tsx
+    │   └── 🧩 Layout
+    │       ├── (Internal) PostHeader
+    │       ├── (Internal) AuthorInfo
+    │       ├── (Internal) PostContent
+    │       │   └── (Internal) CodeBlock (For Markdown rendering)
+    │       └── (Internal) PostTagsSidebar
+    │
+    ├── 📄 src/pages/contact.tsx
+    │   └── 🧩 Layout (Contains logic for displaying services)
+    │
+    ├── 📄 src/pages/experience.tsx
+    │   └── 🧩 Layout
+    │       └── 🧩 Experience
+    │
+    ├── 📄 src/pages/projects.tsx
+    │   └── 🧩 Layout
+    │       └── 🧩 Projects
+    │           └── 🧩 ProjectCard (Repeated)
+    │
+    ├── 📄 src/pages/showcase.tsx
+    │   └── 🧩 Layout
+    │       └── (Internal) ShowcaseItemCard (Repeated)
+    │
+    ├── 📄 src/pages/404.tsx
+    │   └── 🧩 Layout
+    │       └── 🧩 NotFound
+    │
+    ├── 📄 src/pages/ui.tsx (And other UI documentation pages)
+    │   └── 🧩 Layout
+    │       └── (Internal) ComponentDisplay (Demonstrates all `ui/` components)
+    │
+    ├─ 🔒 Admin Section
+    │   ├── 📄 src/pages/admin/index.tsx
+    │   │   └── 🧩 Layout (Contains redirection logic)
+    │   │
+    │   ├── 📄 src/pages/admin/login.tsx
+    │   │   └── 🧩 Layout
+    │   │       └── 🔒 SupabaseLogin
+    │   │
+    │   ├── 📄 src/pages/admin/mfa-challenge.tsx
+    │   │   └── 🧩 Layout
+    │   │       └── 🔒 SupabaseMFAChallenge
+    │   │
+    │   ├── 📄 src/pages/admin/setup-mfa.tsx
+    │   │   └── 🧩 Layout
+    │   │       └── 🔒 SupabaseMFASetup
+    │   │
+    │   └── 📄 src/pages/admin/dashboard.tsx
+    │       └── 🧩 Layout
+    │           └── 🔒 AdminDashboard
+    │               ├── 🔒 BlogManager (Conditional)
+    │               │   └── 🔒 BlogEditor
+    │               │       └── 🔒 AdvancedMarkdownEditor
+    │               │           └── 🔒 MarkdownEditor
+    │               ├── 🔒 ContentManager (Conditional)
+    │               │   └── (Internal) SectionEditor
+    │               ├── 🔒 TaskManager (Conditional)
+    │               │   ├── (Internal) TaskCard
+    │               │   └── (Internal) SubTaskList
+    │               ├── 🔒 NotesManager (Conditional)
+    │               │   └── 🔒 NoteEditor
+    │               ├── 🔒 FinanceManager (Conditional)
+    │               │   ├── (Internal) GoalCard
+    │               │   ├── 🔒 TransactionForm
+    │               │   ├── 🔒 RecurringTransactionForm
+    │               │   └── 🔒 FinancialGoalForm
+    │               └── 🔒 SecuritySettings (Conditional)
+    │
+    └─ 🧩 Shared Layout Components (Used by `Layout`)
+        ├── 🧩 Header
+        │   └── 🧩 Container
+        ├── 🧩 MobileHeader
+        ├── 🧩 Footer
+        │   └── 🧩 Container
+        └── 🧩 Container (Wraps page content)
+```
+
+### Architectural Summary
+
+-   **Global Wrapper:** `_app.tsx` wraps the entire application with `ThemeProvider`.
+-   **Core Structure:** Nearly every page utilizes the `Layout` component, which provides the consistent header, footer, and main content area.
+-   **Content Pages:** Public-facing pages (`/`, `/about`, `/projects`, etc.) are composed of a few high-level, presentational components (`Hero`, `Projects`, `Experience`).
+-   **Admin Panel:** The `/admin/dashboard` page is the main hub for the admin section. It acts as a shell that conditionally renders one of several "Manager" components (`BlogManager`, `TaskManager`, etc.), each of which is a self-contained application for its specific domain.
+-   **Component Nesting:** Deeper components, like `BlogEditor` or `AdvancedMarkdownEditor`, are nested within their respective manager components, promoting encapsulation and clear separation of concerns.

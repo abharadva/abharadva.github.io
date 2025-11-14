@@ -1,11 +1,4 @@
-/*
-This file has been updated to reflect the new neo-brutalist design system.
-- The layout is centered, but elements now feature hard shadows and thick borders.
-- All soft styles (rounded corners, subtle shadows) have been replaced.
-- Font is now 'Space Mono' via the inherited `font-mono` class.
-- The `Input` and `Button` components are restyled versions from the updated UI kit.
-- The Lock icon container has a bold, contrasting style.
-*/
+
 "use client";
 
 import React, { useState, useEffect } from "react";
@@ -108,16 +101,16 @@ export default function SupabaseLogin() {
       exit="exit"
       variants={pageVariants}
       transition={{ duration: 0.3 }}
-      className="flex min-h-screen items-center justify-center bg-background px-4 font-mono"
+      className="flex min-h-screen items-center justify-center bg-grid-pattern px-4"
     >
-      <div className="w-full max-w-sm space-y-8 rounded-none border-2 border-black bg-white p-8 shadow-[8px_8px_0_#000]">
+      <div className="w-full max-w-sm space-y-8 rounded-lg bg-blueprint-bg p-8">
         <div className="text-center">
-          <div className="mx-auto mb-4 flex size-12 items-center justify-center rounded-none border-2 border-black bg-yellow-300">
-            <Lock className="size-6 text-black" />
+          <div className="mx-auto mb-4 flex size-12 items-center justify-center rounded-full bg-secondary">
+            <Lock className="size-6 text-primary" />
           </div>
-          <h2 className="text-3xl font-bold text-black">Admin Access</h2>
-          <p className="mt-2 text-neutral-600">
-            Sign in to manage your portfolio.
+          <h2 className="font-mono text-3xl font-bold text-foreground">Admin Access</h2>
+          <p className="mt-2 text-muted-foreground">
+            Authenticate to access the command center.
           </p>
         </div>
 
@@ -130,7 +123,7 @@ export default function SupabaseLogin() {
               type="email"
               autoComplete="email"
               required
-              placeholder="you@example.com"
+              placeholder="operator@domain.com"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
             />
@@ -143,7 +136,7 @@ export default function SupabaseLogin() {
               type="password"
               autoComplete="current-password"
               required
-              placeholder="Enter your password"
+              placeholder="Enter access key"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
             />
@@ -155,9 +148,9 @@ export default function SupabaseLogin() {
                 initial={{ opacity: 0, height: 0 }}
                 animate={{ opacity: 1, height: "auto" }}
                 exit={{ opacity: 0, height: 0 }}
-                className="rounded-none border-2 border-destructive bg-red-100 p-3"
+                className="rounded-md border border-destructive/50 bg-destructive/10 p-3"
               >
-                <p className="text-sm font-bold text-destructive">{error}</p>
+                <p className="text-sm font-medium text-destructive">{error}</p>
               </motion.div>
             )}
           </AnimatePresence>
@@ -166,10 +159,10 @@ export default function SupabaseLogin() {
             {isLoading ? (
               <>
                 <Loader2 className="mr-2 size-4 animate-spin" />
-                Signing In...
+                Authenticating...
               </>
             ) : (
-              "Sign In"
+              "Authorize"
             )}
           </Button>
         </form>
