@@ -4,7 +4,9 @@ import { config as appConfig } from "@/lib/config";
 import type { PortfolioSection, PortfolioItem } from "@/types";
 import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
-import ReactMarkdown from "react-markdown";
+import ReactMarkdown from 'react-markdown';
+import remarkGfm from 'remark-gfm';
+import rehypeRaw from 'rehype-raw';
 
 import Link from "next/link";
 import { ArrowUpRight, Calendar, Loader2, AlertTriangle } from "lucide-react";
@@ -53,7 +55,9 @@ const ShowcaseItemCard: React.FC<{ item: PortfolioItem }> = ({ item }) => {
       <CardContent className="flex-grow pb-4">
         {item.description && (
           <div className="prose prose-sm dark:prose-invert text-muted-foreground line-clamp-4">
-            <ReactMarkdown>{item.description}</ReactMarkdown>
+            <ReactMarkdown remarkPlugins={[remarkGfm]} rehypePlugins={[rehypeRaw]}>
+              {item.description}
+            </ReactMarkdown>
           </div>
         )}
       </CardContent>
@@ -172,7 +176,7 @@ export default function ShowcasePage() {
               {section.type === "markdown" && section.content && (
                 <motion.div variants={fadeInUp}>
                   <div className="prose dark:prose-invert max-w-3xl rounded-xl border bg-card/30 p-8 md:p-10 shadow-sm backdrop-blur-sm">
-                     <ReactMarkdown>{section.content}</ReactMarkdown>
+                     <ReactMarkdown remarkPlugins={[remarkGfm]} rehypePlugins={[rehypeRaw]}>{section.content}</ReactMarkdown>
                   </div>
                 </motion.div>
               )}

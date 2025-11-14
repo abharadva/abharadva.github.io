@@ -3,8 +3,6 @@ import Layout from "@/components/layout";
 import React, { useState, useEffect, useRef } from "react";
 import Link from "next/link";
 import { cn } from "@/lib/utils";
-import { Prism as SyntaxHighlighter } from "react-syntax-highlighter";
-import { materialDark } from "react-syntax-highlighter/dist/cjs/styles/prism";
 
 // --- Icon Imports ---
 import { Terminal, Settings, User as UserIcon, CreditCard, CalendarIcon, Home as HomeIcon, Search as SearchIcon, Palette, ChevronsUpDown, Link2, ImageIcon, AlignLeft, Bold, Italic, Underline, CheckCircle, XCircle, Info, MessageSquare, Code, List, ListOrdered, AlertTriangle, Loader2, Github, LogOut, PlusCircle, User, Home, Search } from "lucide-react";

@@ -1,7 +1,5 @@
-
 import "@/styles/globals.css";
-import "@uiw/react-md-editor/markdown-editor.css";
-import "@uiw/react-markdown-preview/markdown.css";
+import "prism-themes/themes/prism-one-dark.css";
 import type { AppProps } from "next/app";
 import localFont from "next/font/local";
 import { motion, AnimatePresence } from "framer-motion";
@@ -45,4 +43,3 @@ export default function App({ Component, pageProps }: AppProps) {
     </ThemeProvider>
   );
 }
-
