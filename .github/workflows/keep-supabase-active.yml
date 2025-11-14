@@ -1,0 +1,75 @@
+name: Supabase Keep alive
+
+on:
+  schedule:
+    - cron: "0 12 * * *"
+  workflow_dispatch:
+
+jobs:
+  ping-supabase:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Ping Supabase RPC Function
+        id: ping
+        env:
+          SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
+          SUPABASE_ANON_KEY: ${{ secrets.NEXT_PUBLIC_SUPABASE_ANON_KEY }}
+        run: |
+          echo "Pinging Supabase..."
+          HTTP_STATUS=$(curl -s -w "%{http_code}" -o response.txt \
+            -H "apikey: $SUPABASE_ANON_KEY" \
+            -H "Content-Type: application/json" \
+            "$SUPABASE_URL/rest/v1/rpc/ping")
+
+          RESPONSE_BODY=$(cat response.txt)
+          echo "HTTP_STATUS=$HTTP_STATUS" >> $GITHUB_ENV
+          echo "RESPONSE_BODY<<EOF" >> $GITHUB_ENV
+          echo "$RESPONSE_BODY" >> $GITHUB_ENV
+          echo "EOF" >> $GITHUB_ENV
+
+      - name: Send result to Discord
+        env:
+          DISCORD_WEBHOOK: ${{ secrets.DISCORD_WEBHOOK_URL }}
+          HTTP_STATUS: ${{ env.HTTP_STATUS }}
+          RESPONSE_BODY: ${{ env.RESPONSE_BODY }}
+          GITHUB_REPOSITORY: ${{ github.repository }}
+          GITHUB_RUN_ID: ${{ github.run_id }}
+        run: |
+          STATUS_EMOJI="🟢"
+          MESSAGE="✅ Supabase ping succeeded!"
+          COLOR=3066993  # Green
+
+          if [ "$HTTP_STATUS" != "200" ]; then
+            STATUS_EMOJI="🔴"
+            MESSAGE="❌ Supabase ping failed with status: $HTTP_STATUS"
+            COLOR=15158332  # Red
+          fi
+
+          TIMESTAMP=$(date -u +"%Y-%m-%d %H:%M:%S UTC")
+
+          PAYLOAD=$(jq -n \
+            --arg emoji "$STATUS_EMOJI" \
+            --arg msg "$MESSAGE" \
+            --arg body "$RESPONSE_BODY" \
+            --arg time "$TIMESTAMP" \
+            --arg repo "$GITHUB_REPOSITORY" \
+            --arg run "$GITHUB_RUN_ID" \
+            --arg url "https://github.com/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID" \
+            --argjson color "$COLOR" \
+            '{
+              "username": "Supabase Monitor",
+              "embeds": [{
+                "title": "\($emoji) Supabase RPC Ping",
+                "description": "\($msg)\n\n```json\n\($body)\n```",
+                "color": $color,
+                "footer": {
+                  "text": "Repo: \($repo) • Run: \($run) • \($time)"
+                },
+                "url": $url
+              }]
+            }')
+
+          curl -s -H "Content-Type: application/json" \
+            -d "$PAYLOAD" \
+            "$DISCORD_WEBHOOK"
