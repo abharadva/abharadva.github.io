@@ -22,32 +22,32 @@ const USED_TOOLS: ToolItem[] = [
 export default function Tools({ children }: ToolsProps) {
   return (
     <section className="my-12 py-12">
-      <h2 className="mb-8 border-b-2 border-foreground pb-3 text-3xl font-black uppercase text-foreground">
+      <h2 className="mb-8 border-b-2 border-black pb-3 text-3xl font-bold text-black">
         Tools I Use
       </h2>
       <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
         {USED_TOOLS.map((tool) => (
            <div
             key={tool.href}
-            className="group flex flex-col rounded-none border-2 border-foreground bg-card p-5 shadow-[4px_4px_0px_#000] transition-all duration-200 hover:shadow-none hover:border-accent active:translate-x-1 active:translate-y-1 dark:shadow-[4px_4px_0px_#FFF]"
+            className="group flex flex-col rounded-none border-2 border-black bg-white p-5 transition-all duration-200 hover:shadow-[4px_4px_0_#000]"
           >
             <a
               href={tool.href}
               rel="noopener noreferrer"
               target="_blank"
-              className="mb-1 inline-flex items-center self-start text-xl font-bold text-foreground transition-colors group-hover:text-accent"
+              className="mb-1 inline-flex items-center self-start text-xl font-bold text-black transition-colors group-hover:text-blue-600 group-hover:underline"
             >
               <span>{tool.name}</span>
-              <ArrowUpRight className="ml-1.5 size-4 transition-transform group-hover:-translate-y-0.5 group-hover:translate-x-0.5" />
+              <ArrowUpRight className="ml-1.5 size-4" />
             </a>
-            <p className="grow text-sm leading-relaxed text-muted-foreground">
+            <p className="grow text-sm leading-relaxed text-neutral-600">
               {tool.desc}
             </p>
           </div>
         ))}
       </div>
       {children && <div className="mt-6">{children}</div>}
-       <p className="mt-8 text-center font-bold text-muted-foreground">
+       <p className="mt-8 text-center font-bold text-neutral-600">
         ...plus a healthy dose of coffee and curiosity!
       </p>
     </section>

@@ -1,10 +1,9 @@
 
 /*
-This file is updated for the new neo-brutalist design system.
-- The conventional round radio buttons are replaced with a stark, square design.
-- `RadioGroupItem` is now styled to be a `rounded-none` square with a `border-2`.
-- The checked state is indicated by a filled square using the theme's high-contrast `primary` color.
-- Focus rings are updated for high contrast.
+This file has been updated for the neo-brutalist design.
+- The standard round `RadioGroupItem` is replaced with a sharp-cornered (`rounded-none`), bordered square to match the blocky aesthetic.
+- The checked indicator is changed from a circle to a solid filled square, providing a stark and clear visual state.
+- Focus rings are updated to use solid black for consistency.
 */
 "use client";
 
@@ -36,13 +35,13 @@ const RadioGroupItem = React.forwardRef<
     <RadioGroupPrimitive.Item
       ref={ref}
       className={cn(
-        "aspect-square h-4 w-4 rounded-none border-2 border-primary text-primary ring-offset-background focus:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50",
+        "aspect-square h-4 w-4 rounded-none border-2 border-black text-black ring-offset-background focus:outline-none focus-visible:ring-2 focus-visible:ring-black focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50",
         className
       )}
       {...props}
     >
       <RadioGroupPrimitive.Indicator className="flex items-center justify-center">
-        <div className="h-full w-full bg-current" />
+        <div className="h-full w-full bg-black" />
       </RadioGroupPrimitive.Indicator>
     </RadioGroupPrimitive.Item>
   );

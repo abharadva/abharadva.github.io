@@ -1,9 +1,8 @@
-
 /*
-This file is updated to match the new neo-brutalist design.
-- The clean, borderless look is replaced with a `border-2 border-foreground`.
-- The `rounded-full` style is changed to `rounded-none` for a sharp, square avatar.
-- The fallback background now uses the theme's `muted` color, which is configured for high contrast.
+This file has been updated to match the new neo-brutalist design.
+- The `rounded-full` style has been replaced with `rounded-none` for a sharp, square look.
+- A `border-2 border-black` has been added to give the avatar a distinct frame, consistent with other elements.
+- The fallback background now uses a neutral color from the new theme.
 */
 "use client";
 
@@ -19,7 +18,7 @@ const Avatar = React.forwardRef<
   <AvatarPrimitive.Root
     ref={ref}
     className={cn(
-      "relative flex h-10 w-10 shrink-0 overflow-hidden rounded-none border-2 border-foreground",
+      "relative flex h-10 w-10 shrink-0 overflow-hidden rounded-none border-2 border-black",
       className
     )}
     {...props}
@@ -46,7 +45,7 @@ const AvatarFallback = React.forwardRef<
   <AvatarPrimitive.Fallback
     ref={ref}
     className={cn(
-      "flex h-full w-full items-center justify-center rounded-none bg-muted",
+      "flex h-full w-full items-center justify-center rounded-none bg-neutral-100",
       className
     )}
     {...props}

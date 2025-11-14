@@ -1,10 +1,10 @@
 
 /*
-This file is updated to implement neo-brutalist styling.
-- `SelectTrigger` and `SelectContent` now use `rounded-none`, a thick `border-2`, and a hard `shadow-[...]`.
-- The focus state on `SelectTrigger` is updated to a high-contrast ring.
-- `SelectItem` hover and selected states now use the theme's stark `accent` color.
-- Font styles and separator colors are all updated to align with the new high-contrast theme.
+This file is updated for the neo-brutalist style.
+- `SelectTrigger` and `SelectContent` are restyled with `rounded-none`, `border-2`, and hard shadows.
+- Focus states are updated to use stark black rings.
+- `SelectItem` hover and selected states now use a high-contrast yellow for clear feedback, replacing the subtle accent color.
+- Font styles and separators are aligned with the new theme's bold, raw aesthetic.
 */
 "use client";
 
@@ -25,7 +25,7 @@ const SelectTrigger = React.forwardRef<
   <SelectPrimitive.Trigger
     ref={ref}
     className={cn(
-      "flex h-10 w-full items-center justify-between rounded-none border-2 border-input bg-background px-3 py-2 text-sm font-bold ring-offset-background placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 [&>span]:line-clamp-1",
+      "flex h-10 w-full items-center justify-between rounded-none border-2 border-black bg-white px-3 py-2 text-sm font-bold ring-offset-background placeholder:text-neutral-500 focus:outline-none focus:ring-2 focus:ring-black focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 shadow-[4px_4px_0_#000]",
       className
     )}
     {...props}
@@ -81,9 +81,9 @@ const SelectContent = React.forwardRef<
     <SelectPrimitive.Content
       ref={ref}
       className={cn(
-        "relative z-50 max-h-96 min-w-[8rem] overflow-hidden rounded-none border-2 border-foreground bg-popover text-popover-foreground shadow-[4px_4px_0px_#000] data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 data-[side=bottom]:slide-in-from-top-2 data-[side=left]:slide-in-from-right-2 data-[side=right]:slide-in-from-left-2 data-[side=top]:slide-in-from-bottom-2 dark:shadow-[4px_4px_0px_#FFF]",
+        "relative z-50 max-h-96 min-w-[8rem] overflow-hidden rounded-none border-2 border-black bg-white text-black shadow-[8px_8px_0_#000] data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 data-[side=bottom]:slide-in-from-top-2 data-[side=left]:slide-in-from-right-2 data-[side=right]:slide-in-from-left-2 data-[side=top]:slide-in-from-bottom-2",
         position === "popper" &&
-          "data-[side=bottom]:translate-y-1 data-[side=left]:-translate-x-1 data-[side=right]:translate-x-1 data-[side=top]:-translate-y-1",
+          "h-[var(--radix-select-trigger-height)] w-full min-w-[var(--radix-select-trigger-width)]",
         className
       )}
       position={position}
@@ -91,11 +91,7 @@ const SelectContent = React.forwardRef<
     >
       <SelectScrollUpButton />
       <SelectPrimitive.Viewport
-        className={cn(
-          "p-1",
-          position === "popper" &&
-            "h-[var(--radix-select-trigger-height)] w-full min-w-[var(--radix-select-trigger-width)]"
-        )}
+        className={cn("p-1")}
       >
         {children}
       </SelectPrimitive.Viewport>
@@ -124,7 +120,7 @@ const SelectItem = React.forwardRef<
   <SelectPrimitive.Item
     ref={ref}
     className={cn(
-      "relative flex w-full cursor-default select-none items-center rounded-none py-1.5 pl-8 pr-2 text-sm outline-none focus:bg-accent focus:text-accent-foreground data-[disabled]:pointer-events-none data-[disabled]:opacity-50",
+      "relative flex w-full cursor-default select-none items-center rounded-none py-1.5 pl-8 pr-2 text-sm font-bold outline-none focus:bg-yellow-300 focus:text-black data-[disabled]:pointer-events-none data-[disabled]:opacity-50",
       className
     )}
     {...props}
@@ -146,7 +142,7 @@ const SelectSeparator = React.forwardRef<
 >(({ className, ...props }, ref) => (
   <SelectPrimitive.Separator
     ref={ref}
-    className={cn("-mx-1 my-1 h-px bg-muted", className)}
+    className={cn("-mx-1 my-1 h-px bg-black", className)}
     {...props}
   />
 ));

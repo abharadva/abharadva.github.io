@@ -1,9 +1,9 @@
 
 /*
-This file is updated to implement neo-brutalist styling.
-- `TooltipContent` component's modern style is replaced with `border-2`, `rounded-none`, and a hard `shadow-[...]`.
-- It now has a raw, high-contrast appearance, consistent with other popover-like components.
-- The font is updated to `font-bold` for a starker look.
+This file has been updated for the neo-brutalist style.
+- `TooltipContent` is now styled with `rounded-none`, a thick `border-2`, and a hard `shadow-[...]`.
+- The font is made bolder (`font-bold`) to match the new design.
+- The background color is a solid white with black text for maximum contrast.
 */
 "use client";
 
@@ -26,7 +26,7 @@ const TooltipContent = React.forwardRef<
     ref={ref}
     sideOffset={sideOffset}
     className={cn(
-      "z-50 overflow-hidden rounded-none border-2 border-foreground bg-popover px-3 py-1.5 text-sm font-bold text-popover-foreground shadow-[4px_4px_0px_#000] animate-in fade-in-0 zoom-in-95 data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=closed]:zoom-out-95 data-[side=bottom]:slide-in-from-top-2 data-[side=left]:slide-in-from-right-2 data-[side=right]:slide-in-from-left-2 data-[side=top]:slide-in-from-bottom-2 dark:shadow-[4px_4px_0px_#FFF]",
+      "z-50 overflow-hidden rounded-none border-2 border-black bg-white px-3 py-1.5 text-sm font-bold text-black shadow-[4px_4px_0_#000] animate-in fade-in-0 zoom-in-95 data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=closed]:zoom-out-95 data-[side=bottom]:slide-in-from-top-2 data-[side=left]:slide-in-from-right-2 data-[side=right]:slide-in-from-left-2 data-[side=top]:slide-in-from-bottom-2",
       className
     )}
     {...props}

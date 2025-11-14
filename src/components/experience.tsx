@@ -26,7 +26,7 @@ const MY_EXPERIENCES: ExperienceItem[] = [
     to: "Present",
     desc: (
         <p>
-            As an open-source contributor, I developed key pages like Pricing, Team, and Enterprise, and played a major role in the new landing page redesign. Check it out at <a href="https://signoz.io/" target="_blank" rel="noopener noreferrer" className="font-bold text-accent hover:underline underline-offset-4">signoz.io</a>.
+            As an open-source contributor, I developed key pages like Pricing, Team, and Enterprise, and played a major role in the new landing page redesign. Check it out at <a href="https://signoz.io/" target="_blank" rel="noopener noreferrer" className="font-bold text-blue-600 hover:underline underline-offset-4">signoz.io</a>.
         </p>
     ),
     techStack: ["React.js", "Docusaurus", "TypeScript"],
@@ -86,17 +86,17 @@ export default function Experience({ children }: ExperienceProps) {
         viewport={{ once: true }}
         transition={{ duration: 0.5 }}
       >
-        <h2 className="text-4xl font-black uppercase text-foreground md:text-5xl">
+        <h2 className="text-4xl font-bold text-black md:text-5xl">
           Experience
         </h2>
-        <div className="mx-auto mt-4 h-1.5 w-24 bg-accent" />
-        <span className="absolute -top-8 left-1/2 -translate-x-1/2 text-[6rem] font-black text-accent/10 -z-10 select-none" aria-hidden="true">
+        <div className="mx-auto mt-4 h-1.5 w-24 bg-yellow-300" />
+        <span className="absolute -top-8 left-1/2 -translate-x-1/2 text-[6rem] font-black text-black/5 -z-10 select-none" aria-hidden="true">
           CAREER
         </span>
       </motion.div>
 
       <div className="relative mx-auto max-w-5xl px-4">
-        <div className="absolute left-1/2 top-0 h-full w-0.5 -translate-x-1/2 bg-foreground" aria-hidden="true" />
+        <div className="absolute left-1/2 top-0 h-full w-0.5 -translate-x-1/2 bg-black" aria-hidden="true" />
         <div className="space-y-12">
           {MY_EXPERIENCES.map((exp, index) => (
             <motion.div
@@ -107,17 +107,17 @@ export default function Experience({ children }: ExperienceProps) {
               viewport={{ once: true, amount: 0.3 }}
               transition={{ duration: 0.6, ease: 'easeOut' }}
             >
-              <div className="absolute left-1/2 top-1/2 h-4 w-4 -translate-x-1/2 -translate-y-1/2 rounded-none border-4 border-background bg-foreground transition-colors group-hover:bg-accent" />
+              <div className="absolute left-1/2 top-1/2 h-4 w-4 -translate-x-1/2 -translate-y-1/2 rounded-full border-4 border-white bg-black transition-colors group-hover:bg-yellow-400" />
               <div
                 className={`w-[calc(50%-2rem)] ${index % 2 === 0 ? 'mr-auto text-right' : 'ml-auto text-left'}`}
               >
-                <div className="rounded-none border-2 border-foreground bg-card p-6 shadow-[4px_4px_0px_#000] transition-all duration-300 group-hover:border-accent group-hover:shadow-[4px_4px_0px] group-hover:shadow-accent dark:shadow-[4px_4px_0px_#FFF]">
-                  <p className="text-sm font-bold text-muted-foreground">{exp.from} - {exp.to}</p>
-                  <h3 className="text-xl font-bold text-foreground">{exp.position}</h3>
-                  <Link href={exp.orgHref} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1 text-md font-bold text-accent transition-opacity hover:opacity-80">
+                <div className="rounded-none border-2 border-black bg-white p-6 shadow-[6px_6px_0_#000] transition-all duration-300 group-hover:shadow-[8px_8px_0_#000] group-hover:-translate-y-1">
+                  <p className="text-sm font-bold text-neutral-500">{exp.from} - {exp.to}</p>
+                  <h3 className="text-xl font-bold text-black">{exp.position}</h3>
+                  <Link href={exp.orgHref} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1 text-md font-bold text-blue-600 transition-all hover:underline">
                     {exp.orgName} <ArrowUpRight className="size-3" />
                   </Link>
-                  <div className={`prose prose-sm dark:prose-invert mt-3 max-w-none text-muted-foreground ${index % 2 === 0 ? 'text-right prose-ul:text-right prose-li:text-right' : 'text-left'}`}>
+                  <div className={`prose-sm prose mt-3 max-w-none text-neutral-700 ${index % 2 === 0 ? 'text-right prose-ul:text-right prose-li:text-right' : 'text-left'}`}>
                     {exp.desc}
                   </div>
                   {exp.techStack.length > 0 && (

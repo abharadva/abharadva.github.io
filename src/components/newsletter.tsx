@@ -41,11 +41,12 @@ export default function Newsletter() {
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay: 0.4, duration: 0.5 }}
-      className="mb-12 rounded-none border-2 border-foreground bg-card p-6 shadow-[8px_8px_0px_#000] dark:shadow-[8px_8px_0px_#FFF]"
+      className="mb-12 rounded-none border-2 border-black bg-white p-6 shadow-[8px_8px_0_#000]"
     >
-      <h2 className="mb-2 text-2xl font-black uppercase text-foreground">Join The List</h2>
-      <p className="mb-4 text-muted-foreground">
-        Project updates, cool links, and maybe some bad jokes. No spam.
+      <h2 className="mb-2 text-2xl font-bold text-black">Join The List</h2>
+      <p className="mb-4 text-neutral-600">
+        Project updates, cool links, and maybe some bad jokes. Straight to your
+        inbox. No spam, ever.
       </p>
 
       <form
@@ -75,9 +76,9 @@ export default function Newsletter() {
       <AnimatePresence>
         {message && (
           <motion.div
-            initial={{ opacity: 0, height: 0, }}
-            animate={{ opacity: 1, height: "auto", }}
-            exit={{ opacity: 0, height: 0, }}
+            initial={{ opacity: 0, height: 0, marginTop: 0 }}
+            animate={{ opacity: 1, height: "auto", marginTop: "1rem" }}
+            exit={{ opacity: 0, height: 0, marginTop: 0 }}
             transition={{ duration: 0.3 }}
           >
             <Alert variant={status === "error" ? "destructive" : "default"}>

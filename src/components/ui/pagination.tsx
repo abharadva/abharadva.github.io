@@ -1,10 +1,10 @@
 
 /*
-This file is updated to implement neo-brutalist styling.
-- The main container is simplified, removing any previous wrapper styling.
-- `PaginationLink` (the buttons) now uses the redesigned `Button` component, inheriting its stark variants.
-- The `isActive` state is now styled using the primary `default` button variant for clear visual indication.
-- `PaginationPrevious` and `PaginationNext` buttons are simplified and use the brutalist `Button` style.
+This file has been updated for the neo-brutalist theme.
+- The simplified presentation is made bolder, and link items now use the new brutalist `Button` component styles.
+- `PaginationLink` now leverages `buttonVariants` to ensure consistency with buttons across the site.
+- The `isActive` state is styled with a solid yellow background and black text for clear, high-contrast feedback.
+- Previous/Next buttons are kept simple, using the `Button` component's default style.
 */
 import * as React from "react";
 import { ChevronLeft, ChevronRight, MoreHorizontal } from "lucide-react";
@@ -28,7 +28,7 @@ const PaginationContent = React.forwardRef<
 >(({ className, ...props }, ref) => (
   <ul
     ref={ref}
-    className={cn("flex flex-row items-center gap-1", className)}
+    className={cn("flex flex-row items-center gap-1 rounded-none border-2 border-black bg-white p-1", className)}
     {...props}
   />
 ));
@@ -57,9 +57,11 @@ const PaginationLink = ({
     aria-current={isActive ? "page" : undefined}
     className={cn(
       buttonVariants({
-        variant: isActive ? "default" : "outline",
+        variant: isActive ? "default" : "ghost",
         size,
       }),
+      "shadow-none active:transform-none",
+       isActive && "bg-yellow-300 text-black border-2 border-black hover:bg-yellow-400",
       className
     )}
     {...props}
@@ -74,7 +76,7 @@ const PaginationPrevious = ({
   <PaginationLink
     aria-label="Go to previous page"
     size="default"
-    className={cn("gap-1 pl-2.5", className)}
+    className={cn("gap-1 pl-2.5 shadow-none", className)}
     {...props}
   >
     <ChevronLeft className="h-4 w-4" />
@@ -90,7 +92,7 @@ const PaginationNext = ({
   <PaginationLink
     aria-label="Go to next page"
     size="default"
-    className={cn("gap-1 pr-2.5", className)}
+    className={cn("gap-1 pr-2.5 shadow-none", className)}
     {...props}
   >
     <span>Next</span>

@@ -19,10 +19,11 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 const bucketName = process.env.NEXT_PUBLIC_BUCKET_NAME || "blog-assets";
 
 interface BlogEditorProps {
-  post: Partial<BlogPost> | null;
-  onSave: (postData: Partial<BlogPost>) => Promise<void>;
-  onCancel: () => void;
+    post: Partial<BlogPost> | null;
+    onSave: (post: Partial<BlogPost>) => Promise<void>;
+    onCancel: () => void;
 }
+
 
 export default function BlogEditor({
   post,
@@ -198,8 +199,8 @@ export default function BlogEditor({
       className="mx-auto max-w-6xl"
     >
       <Card>
-        <CardHeader className="flex flex-col items-start gap-3 sm:flex-row sm:items-center sm:justify-between">
-          <CardTitle className="uppercase">
+        <CardHeader className="flex flex-col items-start gap-3 border-b-2 sm:flex-row sm:items-center sm:justify-between">
+          <CardTitle>
             {post?.id ? "Edit Post" : "Create New Post"}
           </CardTitle>
           <div className="flex items-center space-x-2">
@@ -210,14 +211,14 @@ export default function BlogEditor({
                 setFormData((prev) => ({ ...prev, published: checked }))
               }
             />
-            <Label htmlFor="published-switch" className="font-bold">
+            <Label htmlFor="published-switch" className="font-semibold">
               Published
             </Label>
           </div>
         </CardHeader>
         <CardContent>
           <form onSubmit={handleSubmit}>
-            <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
+            <div className="grid grid-cols-1 gap-6 pt-6 lg:grid-cols-3">
               <div className="space-y-6 lg:col-span-2">
                 <div className="space-y-2">
                   <Label htmlFor="title">Title *</Label>
@@ -270,7 +271,7 @@ export default function BlogEditor({
                   />
                 </div>
               </div>
-              <div className="space-y-6 rounded-none border-2 border-foreground bg-secondary/20 p-4">
+              <div className="space-y-6 rounded-none border-2 border-black bg-neutral-100 p-4">
                 <div className="space-y-2">
                   <Label htmlFor="slug">Slug *</Label>
                   <Input
@@ -324,14 +325,14 @@ export default function BlogEditor({
                     <img
                       src={formData.cover_image_url}
                       alt="Cover preview"
-                      className="mt-2 max-h-40 w-full rounded-none border-2 border-foreground object-contain"
+                      className="mt-2 max-h-40 w-full rounded-none border-2 border-black object-contain"
                     />
                   )}
                   {errors.cover_image_url && <p className="text-sm text-destructive">{errors.cover_image_url}</p>}
                 </div>
               </div>
             </div>
-            <div className="mt-8 flex flex-col justify-end gap-3 border-t-2 border-foreground pt-6 sm:flex-row">
+            <div className="mt-8 flex flex-col justify-end gap-3 border-t-2 border-black pt-6 sm:flex-row">
               <Button type="button" variant="outline" onClick={onCancel} disabled={isSaving || isUploading}>
                 Cancel
               </Button>

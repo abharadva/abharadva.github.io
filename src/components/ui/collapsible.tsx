@@ -1,6 +1,6 @@
 
 /*
-This component is a primitive from Radix UI and does not contain styling information itself. The comment is updated for consistency with the redesign project. No functional or style changes are needed here.
+This component is a primitive from Radix UI and does not contain styling information itself. The comment is updated for consistency with the neo-brutalist redesign project. No functional or style changes are needed.
 */
 "use client";
 

@@ -1,8 +1,8 @@
 
 /*
-This file is updated for the new neo-brutalist design system.
-- The subtle `bg-border` is replaced with the high-contrast `bg-foreground`.
-- The thickness is increased to `h-[2px]` or `w-[2px]` for a more substantial, visible line, fitting the raw aesthetic.
+This file is updated for the neo-brutalist design system.
+- The subtle, 1px separator is replaced with a thick, `h-[2px]` or `w-[2px]` solid `bg-black` line.
+- This creates a much stronger visual division, aligning with the bold and raw aesthetic of the new theme.
 */
 "use client";
 
@@ -24,7 +24,7 @@ const Separator = React.forwardRef<
       decorative={decorative}
       orientation={orientation}
       className={cn(
-        "shrink-0 bg-foreground",
+        "shrink-0 bg-black",
         orientation === "horizontal" ? "h-[2px] w-full" : "h-full w-[2px]",
         className
       )}

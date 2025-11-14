@@ -7,75 +7,81 @@
 
 @layer base {
   :root {
-    --background: 240 10% 97%; /* Off-white */
-    --foreground: 0 0% 0%; /* Black */
-    --card: 240 10% 97%;
+    --background: 240 10% 96%; /* off-white */
+    --foreground: 0 0% 0%; /* black */
+
+    --card: 240 10% 96%;
     --card-foreground: 0 0% 0%;
-    --popover: 240 10% 97%;
+
+    --popover: 240 10% 96%;
     --popover-foreground: 0 0% 0%;
+
     --primary: 0 0% 0%;
-    --primary-foreground: 240 10% 97%;
-    --secondary: 300 100% 85%; /* Light Pink */
+    --primary-foreground: 60 100% 97%;
+
+    --secondary: 240 5% 90%;
     --secondary-foreground: 0 0% 0%;
-    --muted: 220 20% 90%; /* Light Gray */
-    --muted-foreground: 0 0% 40%;
-    --accent: 60 100% 50%; /* Yellow */
+
+    --muted: 240 5% 90%;
+    --muted-foreground: 240 4% 46%;
+
+    --accent: 51 91% 56%; /* yellow */
     --accent-foreground: 0 0% 0%;
-    --destructive: 0 100% 50%; /* Red */
-    --destructive-foreground: 240 10% 97%;
+
+    --destructive: 0 84% 60%;
+    --destructive-foreground: 60 100% 97%;
+
     --border: 0 0% 0%;
-    --input: 0 0% 0%;
+    --input: 240 6% 90%;
     --ring: 0 0% 0%;
+
     --radius: 0rem;
-    --chart-1: 220 70% 50%;
-    --chart-2: 160 60% 45%;
-    --chart-3: 30 80% 55%;
-    --chart-4: 280 65% 60%;
-    --chart-5: 340 75% 55%;
   }
 
   .dark {
-    --background: 0 0% 0%; /* Black */
-    --foreground: 240 10% 97%; /* Off-white */
+    /* Keeping dark theme variables for theme-toggle functionality if needed,
+       but default theme is now light neo-brutalist. */
+    --background: 0 0% 0%;
+    --foreground: 240 10% 96%;
+    
     --card: 0 0% 0%;
-    --card-foreground: 240 10% 97%;
+    --card-foreground: 240 10% 96%;
+    
     --popover: 0 0% 0%;
-    --popover-foreground: 240 10% 97%;
-    --primary: 240 10% 97%;
+    --popover-foreground: 240 10% 96%;
+    
+    --primary: 240 10% 96%;
     --primary-foreground: 0 0% 0%;
-    --secondary: 300 100% 85%; /* Light Pink */
-    --secondary-foreground: 0 0% 0%;
-    --muted: 220 5% 20%; /* Dark Gray */
-    --muted-foreground: 240 5% 65%;
-    --accent: 60 100% 50%; /* Yellow */
+
+    --secondary: 240 4% 10%;
+    --secondary-foreground: 240 10% 96%;
+    
+    --muted: 240 4% 10%;
+    --muted-foreground: 240 4% 46%;
+    
+    --accent: 51 91% 56%;
     --accent-foreground: 0 0% 0%;
-    --destructive: 0 100% 50%; /* Red */
-    --destructive-foreground: 240 10% 97%;
-    --border: 240 10% 97%;
-    --input: 240 10% 97%;
-    --ring: 240 10% 97%;
-    --chart-1: 220 70% 60%;
-    --chart-2: 160 60% 55%;
-    --chart-3: 30 80% 65%;
-    --chart-4: 280 65% 70%;
-    --chart-5: 340 75% 65%;
+
+    --destructive: 0 72% 51%;
+    --destructive-foreground: 60 100% 97%;
+
+    --border: 240 10% 96%;
+    --input: 240 4% 10%;
+    --ring: 240 10% 96%;
   }
 }
+
 
 @layer base {
   * {
-    @apply border-border;
+    @apply border-black;
   }
   body {
     @apply bg-background text-foreground;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
   }
   html {
     font-family: 'Space Mono', monospace;
-  }
-}
-
-@layer utilities {
-  .text-balance {
-    text-wrap: balance;
   }
 }

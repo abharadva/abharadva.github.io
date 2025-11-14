@@ -13,12 +13,12 @@ type ProjectCardProps = PropsWithChildren & {
 export default function ProjectCard({ children, project }: ProjectCardProps) {
   return (
     <Card
-      className="group flex h-full flex-col overflow-hidden transition-all duration-200 hover:shadow-none active:translate-x-1 active:translate-y-1 hover:border-accent"
+      className="group flex h-full flex-col overflow-hidden transition-all duration-200 hover:-translate-y-1 hover:shadow-[8px_8px_0_#000]"
       key={project.id}
     >
-      <CardHeader>
+      <CardHeader className="border-b-2">
         <div className="flex items-start justify-between">
-          <CardTitle className="transition-colors group-hover:text-accent uppercase">
+          <CardTitle className="transition-colors group-hover:text-blue-600">
             {project.name.replaceAll("-", " ")}
           </CardTitle>
           {project.html_url && (
@@ -28,7 +28,7 @@ export default function ProjectCard({ children, project }: ProjectCardProps) {
               target="_blank"
               title="View on GitHub"
               aria-label={`View ${project.name} on GitHub`}
-              className="text-muted-foreground opacity-0 transition-opacity group-hover:opacity-100"
+              className="text-neutral-500 opacity-0 transition-opacity group-hover:opacity-100"
               onClick={(e) => e.stopPropagation()} // Prevents link wrapper from firing if it exists
             >
               <ArrowUpRight className="size-5" />
@@ -41,14 +41,14 @@ export default function ProjectCard({ children, project }: ProjectCardProps) {
           )}
         </CardDescription>
       </CardHeader>
-      <CardContent className="flex-grow">
+      <CardContent className="flex-grow pt-6">
          {children}
       </CardContent>
       {(project.language || (project.topics && project.topics.length > 0)) && (
-        <CardFooter>
+        <CardFooter className="border-t-2">
           <div className="flex shrink flex-wrap gap-1.5">
             {project.language && (
-              <Badge variant="secondary">{project.language}</Badge>
+              <Badge>{project.language}</Badge>
             )}
             {project.topics &&
               project.topics.slice(0, 3).map((topic: string) => (

@@ -1,10 +1,10 @@
 
 /*
-This file is updated for the new neo-brutalist design system.
-- The modern, clean dialog style is replaced with `border-2`, `rounded-none`, and a hard `shadow-[...]`.
-- The `bg-black/80` overlay is kept for a standard modal backdrop.
-- The component now uses theme variables for high-contrast colors (`background`, `border`).
-- Font styles are updated to match the new brutalist theme (e.g., `font-bold` and `uppercase` for the title).
+This file has been updated for the neo-brutalist design system.
+- The modern dialog style is replaced with `border-2`, `rounded-none`, and `shadow-[...]` for a hard-edged look.
+- The `bg-black/80` overlay is kept as it is a common pattern that fits.
+- Font styles have been made bolder to match the brutalist aesthetic.
+- Buttons will automatically adopt the new brutalist style from the `button` component.
 */
 "use client";
 
@@ -42,7 +42,7 @@ const AlertDialogContent = React.forwardRef<
     <AlertDialogPrimitive.Content
       ref={ref}
       className={cn(
-        "fixed left-[50%] top-[50%] z-50 grid w-full max-w-lg translate-x-[-50%] translate-y-[-50%] gap-4 rounded-none border-2 border-foreground bg-background p-6 shadow-[8px_8px_0px_#000] duration-200 data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 data-[state=closed]:slide-out-to-left-1/2 data-[state=closed]:slide-out-to-top-[48%] data-[state=open]:slide-in-from-left-1/2 data-[state=open]:slide-in-from-top-[48%] dark:shadow-[8px_8px_0px_#FFF]",
+        "fixed left-[50%] top-[50%] z-50 grid w-full max-w-lg translate-x-[-50%] translate-y-[-50%] gap-4 border-2 border-black bg-white p-6 shadow-[8px_8px_0_#000] duration-200 data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 data-[state=closed]:slide-out-to-left-1/2 data-[state=closed]:slide-out-to-top-[48%] data-[state=open]:slide-in-from-left-1/2 data-[state=open]:slide-in-from-top-[48%] rounded-none",
         className
       )}
       {...props}
@@ -67,7 +67,7 @@ const AlertDialogFooter = ({
   ...props
 }: React.HTMLAttributes<HTMLDivElement>) => (
   <div
-    className={cn("flex flex-col-reverse gap-2 sm:flex-row sm:justify-end sm:space-x-2", className)}
+    className={cn("flex flex-col-reverse gap-2 sm:flex-row sm:justify-end", className)}
     {...props}
   />
 );
@@ -91,7 +91,7 @@ const AlertDialogDescription = React.forwardRef<
 >(({ className, ...props }, ref) => (
   <AlertDialogPrimitive.Description
     ref={ref}
-    className={cn("text-sm text-muted-foreground", className)}
+    className={cn("text-sm text-neutral-600", className)}
     {...props}
   />
 ));

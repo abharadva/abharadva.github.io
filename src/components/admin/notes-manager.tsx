@@ -98,19 +98,19 @@ export default function NotesManager() {
     <div className="space-y-6">
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <h2 className="text-2xl font-black uppercase">Personal Notes</h2>
-          <p className="text-muted-foreground">A space for your thoughts and reminders.</p>
+          <h2 className="text-2xl font-bold">Personal Notes</h2>
+          <p className="text-neutral-600">A space for your thoughts and reminders.</p>
         </div>
         <Button onClick={handleCreateNote}><Plus className="mr-2 size-4" />Create New Note</Button>
       </div>
 
       {isLoading && <div className="flex items-center justify-center p-8"><Loader2 className="h-6 w-6 animate-spin" /><span className="ml-2">Loading notes...</span></div>}
-      {error && <div className="rounded-none border-2 border-destructive bg-destructive/10 p-4 font-bold text-destructive">{error}</div>}
+      {error && <div className="rounded-none border-2 border-destructive bg-red-100 p-4 font-bold text-destructive">{error}</div>}
 
       {!isLoading && notes.length === 0 ? (
-        <div className="rounded-none border-2 border-dashed border-foreground py-12 text-center">
+        <div className="rounded-none border-2 border-dashed border-black py-12 text-center">
           <h3 className="text-lg font-bold">No notes yet.</h3>
-          <p className="text-muted-foreground">Click "Create New Note" to start.</p>
+          <p className="text-neutral-500">Click "Create New Note" to start.</p>
         </div>
       ) : (
         <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
@@ -124,28 +124,28 @@ export default function NotesManager() {
                 exit={{ opacity: 0, scale: 0.9 }}
                 transition={{ duration: 0.2 }}
               >
-                <Card className={`flex flex-col h-full ${note.is_pinned ? "border-accent bg-accent/5" : "bg-card"}`}>
-                  <CardHeader>
+                <Card className={`flex flex-col h-full ${note.is_pinned ? "border-yellow-400 bg-yellow-50" : "bg-white"}`}>
+                  <CardHeader className="border-b-2">
                     {note.title && <CardTitle className="truncate">{note.title}</CardTitle>}
                   </CardHeader>
-                  <CardContent className="flex-grow">
-                    <p className="line-clamp-4 text-sm text-muted-foreground">{note.content || <span className="italic">No content.</span>}</p>
+                  <CardContent className="flex-grow pt-6">
+                    <p className="line-clamp-4 text-sm text-neutral-700">{note.content || <span className="italic">No content.</span>}</p>
                   </CardContent>
-                  <CardFooter className="flex-col items-start gap-3 p-3">
+                  <CardFooter className="flex-col items-start gap-3 border-t-2 p-3">
                     {note.tags && note.tags.length > 0 && (
                       <div className="flex flex-wrap gap-1">
                         {note.tags.map(tag => <Badge key={tag} variant="secondary">{tag}</Badge>)}
                       </div>
                     )}
                     <div className="flex w-full items-center justify-between gap-2">
-                      <p className="text-xs text-muted-foreground">
+                      <p className="text-xs text-neutral-500">
                           Updated: {new Date(note.updated_at || "").toLocaleDateString()}
                       </p>
                       <div className="flex items-center gap-1">
-                          <Button variant="ghost" size="icon" className="size-8" onClick={() => handleTogglePin(note)} title={note.is_pinned ? "Unpin" : "Pin"}>{note.is_pinned ? <PinOff className="size-4 text-accent"/> : <Pin className="size-4"/>}</Button>
+                          <Button variant="ghost" size="icon" className="size-8" onClick={() => handleTogglePin(note)} title={note.is_pinned ? "Unpin" : "Pin"}>{note.is_pinned ? <PinOff className="size-4 text-yellow-500"/> : <Pin className="size-4"/>}</Button>
                           <Button variant="ghost" size="icon" className="size-8" onClick={() => handleEditNote(note)} title="Edit"><Edit className="size-4"/></Button>
                           <AlertDialog>
-                            <AlertDialogTrigger asChild><Button variant="ghost" size="icon" className="size-8 hover:bg-destructive/10 hover:text-destructive" title="Delete"><Trash2 className="size-4"/></Button></AlertDialogTrigger>
+                            <AlertDialogTrigger asChild><Button variant="ghost" size="icon" className="size-8 text-neutral-500 hover:bg-red-100 hover:text-destructive" title="Delete"><Trash2 className="size-4"/></Button></AlertDialogTrigger>
                             <AlertDialogContent><AlertDialogHeader><AlertDialogTitle>Delete Note?</AlertDialogTitle><AlertDialogDescription>This will permanently delete "{note.title || 'this note'}".</AlertDialogDescription></AlertDialogHeader><AlertDialogFooter><AlertDialogCancel>Cancel</AlertDialogCancel><AlertDialogAction onClick={() => handleDeleteNote(note.id)}>Delete</AlertDialogAction></AlertDialogFooter></AlertDialogContent>
                           </AlertDialog>
                       </div>

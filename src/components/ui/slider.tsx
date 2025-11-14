@@ -1,11 +1,10 @@
-
 /*
-This file is updated to implement neo-brutalist styling.
-- The modern styles are replaced with a `border-2`, `rounded-none`, and a stark track.
-- `SliderPrimitive.Track` is now styled with `rounded-none` and a thick border.
-- The `SliderPrimitive.Range` (filled part) uses the high-contrast `primary` color.
-- `SliderPrimitive.Thumb` is restyled to be a square handle with a thick border.
-- Hover and active effects are removed in favor of a raw, functional appearance.
+This file is updated to remove the neo-brutalist styling.
+- The `border-2`, `rounded-none`, and `shadow-[...]` styles are removed from the track and thumb.
+- The `SliderPrimitive.Track` is now styled with `rounded-full` and uses the `secondary` background color.
+- The `SliderPrimitive.Range` (the filled part of the track) uses the `primary` color.
+- The `SliderPrimitive.Thumb` is restyled to be a clean, circular handle. It uses the theme's `ring` color for its focus state.
+- The hover and active effects are simplified to be more subtle.
 */
 "use client";
 
@@ -26,10 +25,10 @@ const Slider = React.forwardRef<
     )}
     {...props}
   >
-    <SliderPrimitive.Track className="relative h-2 w-full grow overflow-hidden rounded-none border-2 border-foreground bg-background">
+    <SliderPrimitive.Track className="relative h-2 w-full grow overflow-hidden rounded-full bg-secondary">
       <SliderPrimitive.Range className="absolute h-full bg-primary" />
     </SliderPrimitive.Track>
-    <SliderPrimitive.Thumb className="block h-5 w-5 rounded-none border-2 border-primary bg-background ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50" />
+    <SliderPrimitive.Thumb className="block h-5 w-5 rounded-full border-2 border-primary bg-background ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50" />
   </SliderPrimitive.Root>
 ));
 Slider.displayName = SliderPrimitive.Root.displayName;

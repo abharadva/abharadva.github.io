@@ -1,9 +1,9 @@
 
 /*
-This file is completely redesigned to implement the neo-brutalist style.
-- The component now uses `rounded-none`, `border-2`, and a hard `shadow-[...]`.
-- The `CardHeader` and `CardFooter` now have a thick `border-b-2` or `border-t-2` separating them from the content.
-- Font weights and colors are updated for a high-contrast, stark look.
+This file is completely redesigned to implement a neo-brutalist style.
+- Soft corners, subtle borders, and gentle shadows are replaced with `rounded-none`, `border-2 border-black`, and a hard `shadow-[6px_6px_0_#000]`.
+- The `CardHeader` and `CardFooter` are given a thick border to separate them from the content, reinforcing the blocky aesthetic.
+- Font styles are made bolder (`font-bold`) to match the new design's personality.
 */
 import * as React from "react";
 
@@ -16,7 +16,7 @@ const Card = React.forwardRef<
   <div
     ref={ref}
     className={cn(
-      "rounded-none border-2 border-foreground bg-card text-card-foreground shadow-[4px_4px_0px_#000] dark:shadow-[4px_4px_0px_#FFF]",
+      "rounded-none border-2 border-black bg-white text-black shadow-[6px_6px_0_#000]",
       className
     )}
     {...props}
@@ -30,7 +30,7 @@ const CardHeader = React.forwardRef<
 >(({ className, ...props }, ref) => (
   <div
     ref={ref}
-    className={cn("flex flex-col space-y-1.5 border-b-2 border-foreground p-6", className)}
+    className={cn("flex flex-col space-y-1.5 p-6", className)}
     {...props}
   />
 ));
@@ -59,7 +59,7 @@ const CardDescription = React.forwardRef<
 >(({ className, ...props }, ref) => (
   <p
     ref={ref}
-    className={cn("text-sm text-muted-foreground", className)}
+    className={cn("text-sm text-neutral-600", className)}
     {...props}
   />
 ));
@@ -69,7 +69,7 @@ const CardContent = React.forwardRef<
   HTMLDivElement,
   React.HTMLAttributes<HTMLDivElement>
 >(({ className, ...props }, ref) => (
-  <div ref={ref} className={cn("p-6", className)} {...props} />
+  <div ref={ref} className={cn("p-6 pt-0", className)} {...props} />
 ));
 CardContent.displayName = "CardContent";
 
@@ -79,7 +79,7 @@ const CardFooter = React.forwardRef<
 >(({ className, ...props }, ref) => (
   <div
     ref={ref}
-    className={cn("flex items-center border-t-2 border-foreground p-6", className)}
+    className={cn("flex items-center p-6 pt-0", className)}
     {...props}
   />
 ));

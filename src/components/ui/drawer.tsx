@@ -1,10 +1,10 @@
 
 /*
-This file is updated to implement neo-brutalist styling.
-- `DrawerContent` component's modern styles are replaced with a `border-t-2`, `rounded-t-none`, and a hard `shadow-[...]` for a raw, functional panel effect.
-- The drag handle (`div`) is now styled using the theme's `foreground` color for a stark, visible appearance.
-- `DrawerHeader` and `DrawerFooter` now use a thick theme-based border for separation.
-- Font styles for `DrawerTitle` and `DrawerDescription` are updated for theme consistency.
+This file is updated to apply neo-brutalist styling.
+- `DrawerContent` now has a thick `border-t-2` and removes any rounded corners for a sharp look.
+- The drag handle is styled to be a more prominent black bar.
+- `DrawerHeader` and `DrawerFooter` use a thick border for separation.
+- Font styles for titles and descriptions are made bolder to align with the theme.
 */
 "use client";
 
@@ -51,12 +51,12 @@ const DrawerContent = React.forwardRef<
     <DrawerPrimitive.Content
       ref={ref}
       className={cn(
-        "fixed inset-x-0 bottom-0 z-50 mt-24 flex h-auto flex-col rounded-t-none border-t-2 border-foreground bg-background",
+        "fixed inset-x-0 bottom-0 z-50 mt-24 flex h-auto flex-col rounded-t-none border-t-2 border-black bg-white",
         className
       )}
       {...props}
     >
-      <div className="mx-auto mt-4 h-2 w-[100px] rounded-full bg-foreground" />
+      <div className="mx-auto mt-4 h-2 w-[100px] rounded-full bg-black" />
       {children}
     </DrawerPrimitive.Content>
   </DrawerPortal>
@@ -68,7 +68,7 @@ const DrawerHeader = ({
   ...props
 }: React.HTMLAttributes<HTMLDivElement>) => (
   <div
-    className={cn("grid gap-1.5 p-4 text-center sm:text-left", className)}
+    className={cn("grid gap-1.5 p-4 text-center sm:text-left border-b-2 border-black", className)}
     {...props}
   />
 );
@@ -79,7 +79,7 @@ const DrawerFooter = ({
   ...props
 }: React.HTMLAttributes<HTMLDivElement>) => (
   <div
-    className={cn("mt-auto flex flex-col gap-2 p-4", className)}
+    className={cn("mt-auto flex flex-col gap-2 p-4 border-t-2 border-black", className)}
     {...props}
   />
 );
@@ -106,7 +106,7 @@ const DrawerDescription = React.forwardRef<
 >(({ className, ...props }, ref) => (
   <DrawerPrimitive.Description
     ref={ref}
-    className={cn("text-sm text-muted-foreground", className)}
+    className={cn("text-sm text-neutral-600", className)}
     {...props}
   />
 ));

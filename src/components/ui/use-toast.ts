@@ -1,6 +1,6 @@
 
 /*
-This file contains the logic for the Shadcn/UI toast system and has no direct styling. The comment has been updated for consistency with the redesign project. No functional changes are needed. The visual appearance is controlled by the `toast.tsx` component.
+This file contains the logic for the Shadcn/UI toast system and has no direct styling. The comment is updated for consistency. The visual appearance is controlled by the `toast.tsx` component, which has already been updated for the neo-brutalist theme.
 */
 "use client";
 

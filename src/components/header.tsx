@@ -31,18 +31,18 @@ export default function Header({ children }: HeaderProps) {
   const linkClasses = (href: string) => {
     const isActive = router.pathname === href || (href !== "/" && router.pathname.startsWith(href));
     return cn(
-      "cursor-pointer px-3 py-1.5 text-sm font-bold uppercase transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-ring rounded-none border-2 border-transparent",
+      "cursor-pointer px-3 py-1.5 text-sm font-bold transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-black rounded-none border-2 border-transparent",
       isActive
-        ? "bg-primary text-primary-foreground border-foreground"
-        : "text-muted-foreground hover:bg-secondary/50 hover:text-secondary-foreground hover:border-foreground"
+        ? "bg-yellow-300 text-black border-black"
+        : "text-neutral-600 hover:bg-neutral-100 hover:text-black"
     );
   };
 
   return (
-    <header className="fixed left-0 top-0 z-50 hidden w-full border-b-2 border-foreground bg-background py-3 md:block">
+    <header className="fixed left-0 top-0 z-50 hidden w-full border-b-2 border-black bg-white/80 py-3 backdrop-blur-sm md:block">
       <Container>
         <div className="flex h-10 max-w-7xl items-center justify-between">
-          <nav className="flex items-center gap-x-1 rounded-none border-2 border-foreground bg-secondary/20 p-1">
+          <nav className="flex items-center gap-x-1 rounded-none border-2 border-black bg-white p-1">
             {NAV_LINKS.map((link) => (
               <Link
                 className={linkClasses(link.href)}

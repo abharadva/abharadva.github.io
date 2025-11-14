@@ -1,10 +1,11 @@
+
 /*
-This file is updated for the new neo-brutalist design system.
-- All minimalist styles are replaced with the stark, high-contrast theme.
-- The layout is structured into clear, numbered steps with bold, monospaced typography.
-- The QR code is presented in a sharp-edged, bordered container.
-- The manual entry key section is redesigned for raw usability with hard borders.
-- Replaced UI kit components with their redesigned neo-brutalist versions (`Input`, `Button`, `InputOTP`).
+This file is updated for the new neo-brutalist design.
+- The minimalist layout is replaced with a bold, high-contrast aesthetic featuring hard shadows and thick borders.
+- The step-by-step instructions are styled with a strong, blocky feel.
+- The QR code and manual entry sections are presented in containers with pronounced borders and backgrounds.
+- All soft UI elements (`rounded-lg`, subtle colors) are replaced with sharp corners (`rounded-none`) and a stark color palette.
+- Components now use the 'Space Mono' font.
 */
 "use client";
 
@@ -115,9 +116,9 @@ export default function SupabaseMFASetup() {
   };
 
   const stepVariants = {
-    initial: { opacity: 0 },
-    animate: { opacity: 1 },
-    exit: { opacity: 0 },
+    initial: { opacity: 0, y: 20 },
+    animate: { opacity: 1, y: 0 },
+    exit: { opacity: 0, y: -20 },
   };
 
   if (isLoadingState && !qrCodeUrl && !error) {
@@ -128,9 +129,9 @@ export default function SupabaseMFASetup() {
         initial="initial"
         animate="animate"
         exit="exit"
-        className="flex min-h-screen items-center justify-center bg-background font-sans"
+        className="flex min-h-screen items-center justify-center bg-background"
       >
-        <Loader2 className="size-8 animate-spin text-muted-foreground" />
+        <Loader2 className="size-8 animate-spin text-neutral-500" />
       </motion.div>
     );
   }
@@ -142,17 +143,17 @@ export default function SupabaseMFASetup() {
       initial="initial"
       animate="animate"
       exit="exit"
-      className="flex min-h-screen items-center justify-center bg-background px-4 py-12 font-sans"
+      className="flex min-h-screen items-center justify-center bg-background px-4 py-12 font-mono"
     >
-      <div className="w-full max-w-lg space-y-8 rounded-none border-2 border-foreground bg-card p-8 shadow-[8px_8px_0px_#000] dark:shadow-[8px_8px_0px_#FFF]">
+      <div className="w-full max-w-lg space-y-8 rounded-none border-2 border-black bg-white p-8 shadow-[8px_8px_0_#000]">
         <div className="text-center">
-          <div className="mx-auto mb-4 flex size-12 items-center justify-center rounded-none border-2 border-foreground bg-secondary">
-            <Smartphone className="size-6 text-foreground" />
+          <div className="mx-auto mb-4 flex size-12 items-center justify-center rounded-none border-2 border-black bg-yellow-300">
+            <Smartphone className="size-6 text-black" />
           </div>
-          <h2 className="text-3xl font-black uppercase text-foreground">
-            Set Up Two-Factor Auth
+          <h2 className="text-3xl font-bold text-black">
+            Set Up Two-Factor Authentication
           </h2>
-          <p className="mt-2 text-muted-foreground">
+          <p className="mt-2 text-neutral-600">
             Secure your admin account with an authenticator app.
           </p>
         </div>
@@ -163,7 +164,7 @@ export default function SupabaseMFASetup() {
               initial={{ opacity: 0, height: 0 }}
               animate={{ opacity: 1, height: "auto" }}
               exit={{ opacity: 0, height: 0 }}
-              className="my-4 rounded-none border-2 border-destructive bg-destructive/10 p-3"
+              className="my-4 rounded-none border-2 border-destructive bg-red-100 p-3"
             >
               <p className="text-sm font-bold text-destructive">{error}</p>
               {error.includes("MFA is already set up") && (
@@ -181,15 +182,16 @@ export default function SupabaseMFASetup() {
 
         {factorId && (
           <div className="space-y-8">
-            <div className="space-y-4">
-              <h3 className="text-lg font-bold uppercase text-foreground">
-                <span className="mr-2 text-accent">1.</span> Scan QR Code
+            <div className="space-y-4 rounded-none border-2 border-black bg-neutral-50 p-4">
+              <h3 className="text-lg font-bold text-black">
+                <span className="mr-2 rounded-sm bg-yellow-300 px-2 py-1 text-black">1</span> Scan QR Code
               </h3>
-              <p className="text-sm text-muted-foreground">
-                Open your authenticator app and scan this code.
+              <p className="text-sm text-neutral-600">
+                Open your authenticator app (e.g., Google Authenticator, Authy)
+                and scan this QR code.
               </p>
               {qrCodeUrl ? (
-                <div className="flex justify-center rounded-none border-2 border-foreground bg-white p-2">
+                <div className="flex justify-center rounded-none border-2 border-black p-2">
                   <img
                     src={qrCodeUrl}
                     alt="QR Code for MFA setup"
@@ -197,39 +199,27 @@ export default function SupabaseMFASetup() {
                   />
                 </div>
               ) : (
-                <div className="flex h-48 items-center justify-center rounded-none bg-secondary">
-                  <Loader2 className="animate-spin text-muted-foreground" />
+                <div className="flex h-48 items-center justify-center rounded-none bg-neutral-200">
+                  <Loader2 className="animate-spin text-neutral-500" />
                 </div>
               )}
             </div>
 
-            <div className="space-y-4">
-              <h3 className="text-lg font-bold uppercase text-foreground">
-                <span className="mr-2 text-accent">2.</span> Manual Entry
+            <div className="space-y-4 rounded-none border-2 border-black bg-neutral-50 p-4">
+              <h3 className="text-lg font-bold text-black">
+                <span className="mr-2 rounded-sm bg-yellow-300 px-2 py-1 text-black">2</span> Manual Entry
               </h3>
-              <p className="text-sm text-muted-foreground">
-                If you can't scan, enter this key into your app.
+              <p className="text-sm text-neutral-600">
+                If you can't scan, enter this secret key into your app.
               </p>
-              <div className="flex items-center gap-2 rounded-none border-2 border-foreground bg-secondary p-3">
-                <code className="flex-1 break-all font-sans text-sm tracking-wider text-foreground">
+              <div className="flex items-center gap-2 rounded-none border-2 border-black bg-white p-3">
+                <code className="flex-1 break-all text-sm tracking-wider text-black">
                   {showSecret ? manualEntryKey.match(/.{1,4}/g)?.join(" ") : "•••• •••• •••• ••••"}
                 </code>
-                <Button
-                  type="button"
-                  variant="ghost"
-                  size="icon"
-                  onClick={() => setShowSecret(!showSecret)}
-                  aria-label={showSecret ? "Hide secret key" : "Show secret key"}
-                >
+                <Button type="button" variant="ghost" size="icon" onClick={() => setShowSecret(!showSecret)}>
                   {showSecret ? <EyeOff className="size-4" /> : <Eye className="size-4" />}
                 </Button>
-                <Button
-                  type="button"
-                  variant="ghost"
-                  size="icon"
-                  onClick={(e) => copySecret(e.currentTarget)}
-                  aria-label="Copy secret key"
-                >
+                <Button type="button" variant="ghost" size="icon" onClick={(e) => copySecret(e.currentTarget)}>
                   <Copy className="size-4" />
                 </Button>
               </div>
@@ -237,12 +227,12 @@ export default function SupabaseMFASetup() {
 
             <div className="space-y-4">
               <form onSubmit={handleVerify} className="space-y-6">
-                <div>
-                  <h3 className="text-lg font-bold uppercase text-foreground">
-                    <span className="mr-2 text-accent">3.</span> Verify Code
+                <div className="rounded-none border-2 border-black bg-neutral-50 p-4">
+                  <h3 className="text-lg font-bold text-black">
+                    <span className="mr-2 rounded-sm bg-yellow-300 px-2 py-1 text-black">3</span> Verify Code
                   </h3>
-                  <label htmlFor="totpCode" className="mt-2 block text-sm text-muted-foreground">
-                    Enter the 6-digit code to complete setup.
+                  <label htmlFor="totpCode" className="mt-2 block text-sm text-neutral-600">
+                    Enter the 6-digit code from your app to complete setup.
                   </label>
                   <div className="mt-2">
                     <InputOTP maxLength={6} value={otp} onChange={(value) => setOtp(value)}>
@@ -264,7 +254,7 @@ export default function SupabaseMFASetup() {
                       initial={{ opacity: 0, height: 0 }}
                       animate={{ opacity: 1, height: "auto" }}
                       exit={{ opacity: 0, height: 0 }}
-                      className="rounded-none border-2 border-destructive bg-destructive/10 p-3"
+                      className="rounded-none border-2 border-destructive bg-red-100 p-3"
                     >
                       <p className="text-sm font-bold text-destructive">{error}</p>
                     </motion.div>
@@ -272,11 +262,7 @@ export default function SupabaseMFASetup() {
                 </AnimatePresence>
 
                 <div className="flex flex-col gap-3 sm:flex-row-reverse">
-                  <Button
-                    type="submit"
-                    disabled={isLoadingState || otp.length !== 6}
-                    className="flex-1"
-                  >
+                  <Button type="submit" disabled={isLoadingState || otp.length !== 6} className="flex-1">
                     {isLoadingState ? <Loader2 className="mr-2 size-4 animate-spin" /> : null}
                     Verify & Complete
                   </Button>

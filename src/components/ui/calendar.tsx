@@ -1,11 +1,11 @@
 
 /*
-This file is updated for the new neo-brutalist design.
-- The main component now features a `border-2`, `rounded-none`, and hard `shadow-[...]`.
-- Day selection colors are updated to use the theme's high-contrast `primary` and `accent` colors.
-- The "today" highlight is changed to use a stark `accent` color with a border.
-- All rounded corners on days, rows, etc., are removed (`rounded-none`).
-- Font styles are updated to use theme defaults (`font-bold`).
+This file is updated for the neo-brutalist design.
+- The component container has a `border-2 border-black` and `rounded-none`.
+- All sub-elements like days and navigation buttons are styled with sharp corners (`rounded-none`).
+- Day selection colors are changed to use a solid, high-contrast color (yellow) for a bold look.
+- The "today" highlight uses a simple border to stand out.
+- Fonts are updated to match the new monospaced theme.
 */
 "use client";
 
@@ -27,7 +27,7 @@ function Calendar({
   return (
     <DayPicker
       showOutsideDays={showOutsideDays}
-      className={cn("p-3 rounded-none border-2 border-foreground bg-background shadow-[4px_4px_0px_#000] dark:shadow-[4px_4px_0px_#FFF]", className)}
+      className={cn("p-3 border-2 border-black rounded-none bg-white", className)}
       classNames={{
         months: "flex flex-col sm:flex-row space-y-4 sm:space-x-4 sm:space-y-0",
         month: "space-y-4",
@@ -42,22 +42,22 @@ function Calendar({
         nav_button_next: "absolute right-1",
         table: "w-full border-collapse space-y-1",
         head_row: "flex",
-        head_cell: "text-muted-foreground rounded-none w-9 font-bold text-[0.8rem]",
+        head_cell: "text-neutral-500 rounded-none w-9 font-normal text-[0.8rem]",
         row: "flex w-full mt-2",
-        cell: "h-9 w-9 text-center text-sm p-0 relative [&:has([aria-selected].day-range-end)]:rounded-none [&:has([aria-selected].day-outside)]:bg-accent/50 [&:has([aria-selected])]:bg-accent first:[&:has([aria-selected])]:rounded-none last:[&:has([aria-selected])]:rounded-none focus-within:relative focus-within:z-20",
+        cell: "h-9 w-9 text-center text-sm p-0 relative focus-within:relative focus-within:z-20",
         day: cn(
           buttonVariants({ variant: "ghost" }),
-          "h-9 w-9 p-0 font-normal aria-selected:opacity-100"
+          "h-9 w-9 p-0 font-normal rounded-none"
         ),
-        day_range_end: "day-range-end",
+        day_range_end: "",
         day_selected:
-          "bg-primary text-primary-foreground hover:bg-primary hover:text-primary-foreground focus:bg-primary focus:text-primary-foreground",
-        day_today: "bg-accent text-accent-foreground border-2 border-foreground",
+          "bg-yellow-300 text-black hover:bg-yellow-400 focus:bg-yellow-400 rounded-none",
+        day_today: "bg-white text-black border-2 border-black rounded-none",
         day_outside:
-          "day-outside text-muted-foreground opacity-50 aria-selected:bg-accent/50 aria-selected:text-muted-foreground aria-selected:opacity-30",
-        day_disabled: "text-muted-foreground opacity-50",
+          "text-neutral-400 opacity-50",
+        day_disabled: "text-neutral-300 opacity-50",
         day_range_middle:
-          "aria-selected:bg-accent aria-selected:text-accent-foreground",
+          "aria-selected:bg-neutral-100 rounded-none",
         day_hidden: "invisible",
         ...classNames,
       }}

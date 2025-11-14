@@ -1,10 +1,10 @@
 
 /*
-This file is updated to implement the neo-brutalist aesthetic.
-- The `cva` for `toggleVariants` is overhauled. `border-2`, `rounded-none`, and a hard `shadow-[...]` are added.
-- The component is now a stark, functional toggle button.
-- The pressed state (`data-[state=on]`) now uses the theme's high-contrast `accent` color.
-- The `outline` variant is updated to include the thick border.
+This file is updated for the neo-brutalist style.
+- The `toggleVariants` cva is overhauled. Modern styles are replaced with `border-2`, `rounded-none`, and `shadow-[...]`.
+- The pressed state (`data-[state=on]`) now uses a solid, high-contrast color (yellow) for clear feedback.
+- The outline variant is updated to match the new bold design language.
+- The font is made bold to fit the theme.
 */
 "use client";
 
@@ -15,13 +15,13 @@ import { cva, type VariantProps } from "class-variance-authority";
 import { cn } from "@/lib/utils";
 
 const toggleVariants = cva(
-  "inline-flex items-center justify-center rounded-none border-2 border-transparent text-sm font-bold ring-offset-background transition-colors hover:bg-muted hover:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 data-[state=on]:bg-accent data-[state=on]:text-accent-foreground",
+  "inline-flex items-center justify-center rounded-none border-2 border-black text-sm font-bold ring-offset-background transition-colors hover:bg-neutral-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-black focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 data-[state=on]:bg-yellow-300 data-[state=on]:text-black",
   {
     variants: {
       variant: {
-        default: "bg-transparent",
+        default: "bg-transparent text-black",
         outline:
-          "border-input bg-transparent hover:bg-accent hover:text-accent-foreground",
+          "bg-transparent hover:bg-neutral-100",
       },
       size: {
         default: "h-10 px-3",

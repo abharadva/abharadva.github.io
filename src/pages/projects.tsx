@@ -1,9 +1,10 @@
+
 /*
-This file is updated for the new design system.
-- The `Layout` component provides the page structure.
-- All specific styling and presentation are now handled by the `ProjectsComponent`, which will be updated next.
-- The `` class is removed, as `font-sans` is the new global default.
-- Head tags and metadata remain unchanged.
+This file is updated for the neo-brutalist design system.
+- The `Layout` provides the page structure.
+- Styling is now fully handled by the `ProjectsComponent`, which has been updated with a raw, blocky aesthetic.
+- `font-mono` is inherited from the global styles.
+- Head tags and metadata are unchanged.
 */
 import Layout from "@/components/layout";
 import ProjectsComponent from "@/components/projects";

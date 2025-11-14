@@ -9,11 +9,12 @@ This repository contains the source code for my personal portfolio and blog, com
 
 ### Public-Facing Site
 
-- **Neo-Brutalist Theme:** A stark, functional design with high contrast, hard shadows, thick borders, and monospaced typography, built with Tailwind CSS and shadcn/ui.
+- **Neo-Brutalist Theme:** A high-contrast, raw design with thick borders, hard shadows, and a monospaced font, built with Tailwind CSS and shadcn/ui.
+- **Kinetic Typography:** Engaging animated headings on the homepage for a dynamic first impression.
 - **Fully Responsive:** Optimized for all devices, from mobile phones to desktops.
-- **Dynamic Content Sections:** "Work Experience," "Tech Stack," and "Tools" sections are all dynamically populated from the CMS and styled with the brutalist theme.
+- **Dynamic Content Sections:** All content sections like "Work Experience," "Tech Stack," and "Tools" are dynamically populated from the CMS.
 - **Full-Featured Blog:**
-  - Raw, readable article layout using Tailwind Prose.
+  - Utilitarian, readable article layout with styled code blocks.
   - Server-side rendering (SSR) for fast loads and SEO.
   - View counter for posts.
 
@@ -26,7 +27,7 @@ This repository contains the source code for my personal portfolio and blog, com
   - At-a-glance statistics: Monthly earnings/expenses, task progress, total notes, and blog views.
   - Quick access to recently updated blog posts and pinned notes.
 - **Content Management System (CMS):**
-  - Manage all public-facing portfolio sections ("Experience," "Projects," "Services," etc.).
+  - Manage all public-facing portfolio sections.
   - Drag-and-drop reordering for sections.
   - CRUD (Create, Read, Update, Delete) functionality for all portfolio items.
 - **Blog Manager:**
@@ -49,7 +50,7 @@ This repository contains the source code for my personal portfolio and blog, com
 - **Framework:** [Next.js](https://nextjs.org/) (React)
 - **Backend & Database:** [Supabase](https://supabase.com/) (PostgreSQL, Auth, Storage)
 - **Styling:** [Tailwind CSS](https://tailwindcss.com/)
-- **UI Components:** [shadcn/ui](https://ui.shadcn.com/) (built on Radix UI), restyled for neo-brutalism.
+- **UI Components:** [shadcn/ui](https://ui.shadcn.com/) (built on Radix UI), heavily customized for neo-brutalism.
 - **Animation:** [Framer Motion](https://www.framer.com/motion/)
 - **Forms:** [React Hook Form](https://react-hook-form.com/) with [Zod](https://zod.dev/) for validation
 - **Markdown:** [ReactMarkdown](https://github.com/remarkjs/react-markdown)
@@ -65,7 +66,7 @@ This repository contains the source code for my personal portfolio and blog, com
 ├── src/
 │   ├── components/
 │   │   ├── admin/      # Admin panel components (managers, editors, auth)
-│   │   ├── ui/         # Reusable shadcn/ui components (neo-brutalist theme)
+│   │   ├── ui/         # Reusable shadcn/ui components
 │   │   └── ...         # Public-facing components (header, footer, hero, etc.)
 │   ├── hooks/          # Custom React hooks (use-toast, use-mobile)
 │   ├── lib/            # Utility functions, API helpers, config

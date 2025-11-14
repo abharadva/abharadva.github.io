@@ -338,7 +338,7 @@ const uiFormSchemaInstance = z.object({
   notifications: z.boolean().default(false).optional(),
 });
 const uiChartConfigInstance = {
-  views: { label: "Views", color: "hsl(var(--chart-1))" },
+  views: { label: "Views", color: "#2563eb" },
 } satisfies ChartConfig;
 const uiChartDataInstance = [
   { month: "Jan", views: 186 },
@@ -362,7 +362,7 @@ export default function UiDocumentationPage() {
   });
   function handleFormSubmit(values: z.infer<typeof uiFormSchemaInstance>) {
     sonnerToast.success("Form Data:", {
-      description: <pre className="mt-2 w-[340px] rounded-none bg-slate-950 p-4"><code className="text-white">{JSON.stringify(values, null, 2)}</code></pre>
+      description: <pre className="mt-2 w-[340px] rounded-md bg-slate-950 p-4"><code className="text-white">{JSON.stringify(values, null, 2)}</code></pre>
     });
   }
 
@@ -404,9 +404,9 @@ export default function UiDocumentationPage() {
   return (
     <Layout>
       <div className="flex min-h-screen flex-col md:flex-row">
-        <aside className="w-full shrink-0 border-b-2 bg-card p-3 md:sticky md:top-20 md:h-[calc(100vh-5rem)] md:w-64 md:border-b-0 md:border-r-2 md:border-foreground">
+        <aside className="w-full shrink-0 border-b-2 border-black bg-white p-3 md:sticky md:top-20 md:h-[calc(100vh-5rem)] md:w-64 md:border-b-0 md:border-r-2">
           <ScrollArea className="h-full pr-4">
-            <h2 className="mb-2 px-2 text-lg font-bold tracking-tight uppercase">Components</h2>
+            <h2 className="mb-2 px-2 text-lg font-bold tracking-tight">Components</h2>
             <nav>
               <ul className="space-y-1">
                 {componentSectionsList.map((section) => (
@@ -428,15 +428,15 @@ export default function UiDocumentationPage() {
 
         <main ref={mainContentAreaRef} className="w-full overflow-y-auto p-4 sm:p-6 md:p-8 lg:p-10">
           <header className="mb-10 text-center md:text-left">
-            <h1 className="border-b-2 border-foreground pb-3 text-4xl font-black uppercase tracking-tighter sm:text-5xl">UI Kit</h1>
-            <p className="mt-2 text-lg text-muted-foreground">A showcase of the redesigned component library.</p>
+            <h1 className="border-b-2 border-black pb-3 text-4xl font-bold tracking-tighter sm:text-5xl">UI Kit</h1>
+            <p className="mt-2 text-lg text-neutral-600">A showcase of the neo-brutalist component library.</p>
           </header>
           
           <div className="space-y-16">
-            <Card id="button"><CardHeader><CardTitle>Button</CardTitle><CardDescription>Displays a button or a link.</CardDescription></CardHeader><CardContent className="flex flex-wrap gap-4"><Button>Default</Button><Button variant="destructive">Destructive</Button><Button variant="outline">Outline</Button><Button variant="secondary">Secondary</Button><Button variant="ghost">Ghost</Button><Button variant="link">Link</Button></CardContent></Card>
-            <Card id="card"><CardHeader><CardTitle>Card</CardTitle><CardDescription>A container for content.</CardDescription></CardHeader><CardContent><Card className="w-[350px]"><CardHeader><CardTitle>Project</CardTitle><CardDescription>Deploy your project.</CardDescription></CardHeader><CardContent><p>Card content goes here.</p></CardContent><CardFooter><Button>Deploy</Button></CardFooter></Card></CardContent></Card>
-            <Card id="input"><CardHeader><CardTitle>Input</CardTitle><CardDescription>A text input field.</CardDescription></CardHeader><CardContent><Input type="email" placeholder="Email" className="max-w-sm"/></CardContent></Card>
-            <Card id="accordion"><CardHeader><CardTitle>Accordion</CardTitle><CardDescription>A vertically stacked set of interactive headings.</CardDescription></CardHeader><CardContent><Accordion type="single" collapsible className="w-full max-w-md"><AccordionItem value="item-1"><AccordionTrigger>Section 1</AccordionTrigger><AccordionContent>Content for section 1.</AccordionContent></AccordionItem></Accordion></CardContent></Card>
+            <Card id="button"><CardHeader className="border-b-2"><CardTitle>Button</CardTitle><CardDescription>Displays a button or a link.</CardDescription></CardHeader><CardContent className="flex flex-wrap gap-4 pt-6"><Button>Default</Button><Button variant="destructive">Destructive</Button><Button variant="outline">Outline</Button><Button variant="secondary">Secondary</Button><Button variant="ghost">Ghost</Button><Button variant="link">Link</Button></CardContent></Card>
+            <Card id="card"><CardHeader className="border-b-2"><CardTitle>Card</CardTitle><CardDescription>A container for content.</CardDescription></CardHeader><CardContent className="pt-6"><Card className="w-[350px]"><CardHeader className="border-b-2"><CardTitle>Project</CardTitle><CardDescription>Deploy your project.</CardDescription></CardHeader><CardContent className="pt-6"><p>Card content goes here.</p></CardContent><CardFooter className="border-t-2"><Button>Deploy</Button></CardFooter></Card></CardContent></Card>
+            <Card id="input"><CardHeader className="border-b-2"><CardTitle>Input</CardTitle><CardDescription>A text input field.</CardDescription></CardHeader><CardContent className="pt-6"><Input type="email" placeholder="Email" className="max-w-sm"/></CardContent></Card>
+            <Card id="accordion"><CardHeader className="border-b-2"><CardTitle>Accordion</CardTitle><CardDescription>A vertically stacked set of interactive headings.</CardDescription></CardHeader><CardContent className="pt-6"><Accordion type="single" collapsible className="w-full max-w-md"><AccordionItem value="item-1"><AccordionTrigger>Section 1</AccordionTrigger><AccordionContent>Content for section 1.</AccordionContent></AccordionItem><AccordionItem value="item-2"><AccordionTrigger>Section 2</AccordionTrigger><AccordionContent>Content for section 2.</AccordionContent></AccordionItem></Accordion></CardContent></Card>
           </div>
         </main>
       </div>

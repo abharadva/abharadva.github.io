@@ -127,10 +127,10 @@ export default function AdminDashboardPage() {
   };
 
   const pageVariants = {
-    initial: { opacity: 0 },
-    animate: { opacity: 1 },
-    exit: { opacity: 0 },
-    transition: { duration: 0.1 },
+    initial: { opacity: 0, y: 10 },
+    animate: { opacity: 1, y: 0 },
+    exit: { opacity: 0, y: -10 },
+    transition: { duration: 0.2 },
   };
 
   if (isLoading || !session) {
@@ -144,9 +144,9 @@ export default function AdminDashboardPage() {
           variants={pageVariants}
           className="flex min-h-screen items-center justify-center bg-background"
         >
-          <div className="flex flex-col items-center gap-4 text-muted-foreground">
+          <div className="flex flex-col items-center gap-4 text-neutral-500">
             <Loader2 className="h-8 w-8 animate-spin" />
-            <p className="font-bold">Loading Dashboard...</p>
+            <p className="font-medium">Loading Dashboard...</p>
           </div>
         </motion.div>
       </Layout>

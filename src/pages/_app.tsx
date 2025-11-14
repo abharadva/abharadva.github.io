@@ -18,23 +18,28 @@ export default function App({ Component, pageProps }: AppProps) {
   const pageVariants = {
     initial: {
       opacity: 0,
+      y: 5,
     },
     animate: {
       opacity: 1,
+      y: 0,
       transition: {
-        duration: 0.1,
+        duration: 0.3,
+        ease: "easeInOut",
       },
     },
     exit: {
       opacity: 0,
+      y: -5,
       transition: {
-        duration: 0.1,
+        duration: 0.2,
+        ease: "easeInOut",
       },
     },
   };
 
   return (
-    <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
+    <ThemeProvider attribute="class" defaultTheme="light" enableSystem={false}>
       <AnimatePresence
         mode="wait"
         initial={false}

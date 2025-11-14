@@ -1,11 +1,9 @@
-
 /*
 This file is heavily redesigned to implement the neo-brutalist aesthetic.
-- A `border-2`, `rounded-none`, and hard `shadow-[...]` are added to the base styles.
-- A `transition-all` is added to support hover and active effects.
-- An active state `active:translate-x-[2px] active:translate-y-[2px]` moves the button into its shadow for a physical feel.
-- The `variant` styles are updated for a high-contrast color palette.
-- The `ghost` and `link` variants are simplified to remove the border and shadow for specific use cases.
+- A `border-2`, `rounded-none`, and a hard `shadow` are added to the base styles.
+- Interactive hover and active states are created with `transform` and `box-shadow` changes for a tactile, "pressable" feel.
+- Variants are updated to use the new high-contrast color palette (e.g., solid colors, no gradients or soft effects).
+- `ghost` and `link` variants are styled to be simple but fit within the raw aesthetic.
 */
 import * as React from "react";
 import { Slot } from "@radix-ui/react-slot";
@@ -14,19 +12,19 @@ import { cva, type VariantProps } from "class-variance-authority";
 import { cn } from "@/lib/utils";
 
 const buttonVariants = cva(
-  "inline-flex items-center justify-center whitespace-nowrap rounded-none border-2 border-foreground text-sm font-bold ring-offset-background transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 shadow-[2px_2px_0px_#000] hover:shadow-none active:translate-x-[2px] active:translate-y-[2px] dark:shadow-[2px_2px_0px_#FFF]",
+  "inline-flex items-center justify-center whitespace-nowrap rounded-none border-2 border-black text-sm font-bold ring-offset-background transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-black focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 shadow-[4px_4px_0_#000] hover:-translate-x-0.5 hover:-translate-y-0.5 hover:shadow-[6px_6px_0_#000] active:translate-x-0 active:translate-y-0 active:shadow-[2px_2px_0_#000]",
   {
     variants: {
       variant: {
-        default: "bg-primary text-primary-foreground hover:bg-primary/90",
+        default: "bg-black text-white hover:bg-neutral-800",
         destructive:
-          "bg-destructive text-destructive-foreground hover:bg-destructive/90 border-destructive-foreground",
+          "bg-destructive text-white hover:bg-red-700 shadow-[4px_4px_0_theme(colors.destructive)] hover:shadow-[6px_6px_0_theme(colors.destructive)] active:shadow-[2px_2px_0_theme(colors.destructive)]",
         outline:
-          "bg-background hover:bg-accent hover:text-accent-foreground",
+          "bg-transparent text-black hover:bg-neutral-100",
         secondary:
-          "bg-secondary text-secondary-foreground hover:bg-secondary/80",
-        ghost: "border-0 shadow-none hover:bg-accent hover:text-accent-foreground active:translate-x-0 active:translate-y-0",
-        link: "text-primary underline-offset-4 hover:underline border-0 shadow-none active:translate-x-0 active:translate-y-0",
+          "bg-neutral-200 text-black hover:bg-neutral-300",
+        ghost: "shadow-none border-0 hover:bg-neutral-200 active:shadow-none active:transform-none",
+        link: "text-black underline-offset-4 hover:underline shadow-none border-0 active:shadow-none active:transform-none",
       },
       size: {
         default: "h-10 px-4 py-2",

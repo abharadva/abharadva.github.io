@@ -19,11 +19,11 @@ return (
   animate={{ opacity: 1, y: 0 }}
   transition={{ duration: 0.5 }}
 >
-<p className="text-4xl text-muted-foreground sm:text-5xl">Heya, I'm</p>
-<h1 className="font-black text-foreground">
+<p className="text-4xl text-neutral-600 sm:text-5xl">Heya, I'm</p>
+<h1 className="font-bold text-black">
 Akshay Bharadva
 </h1>
-<p className="mt-1 text-3xl font-bold text-accent sm:text-4xl md:text-5xl">
+<p className="mt-1 text-3xl font-bold text-black sm:text-4xl md:text-5xl bg-yellow-300 px-2 py-1">
 Fullstack Developer.
 </p>
 </motion.div>
@@ -62,7 +62,7 @@ Fullstack Developer.
     </motion.div>
 
     {children && (
-      <div className="mt-4 max-w-2xl px-4 text-lg text-muted-foreground">
+      <div className="mt-4 max-w-2xl px-4 text-lg text-neutral-600">
         {children}
       </div>
     )}

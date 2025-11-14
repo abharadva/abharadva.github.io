@@ -50,9 +50,9 @@ const SubTaskList = ({ task, onUpdate }: { task: Task, onUpdate: () => void }) =
   const progress = totalCount > 0 ? (completedCount / totalCount) * 100 : 0;
 
   return (
-    <div className="mt-3 space-y-2 pt-3 border-t-2 border-foreground">
+    <div className="mt-3 space-y-2 pt-3 border-t-2 border-dashed border-neutral-300">
       {totalCount > 0 && (
-        <div className="flex items-center gap-2 text-xs text-muted-foreground">
+        <div className="flex items-center gap-2 text-xs text-neutral-500">
           <Progress value={progress} className="h-1.5" />
           <span>{completedCount}/{totalCount}</span>
         </div>
@@ -60,8 +60,8 @@ const SubTaskList = ({ task, onUpdate }: { task: Task, onUpdate: () => void }) =
       {task.sub_tasks?.map(subTask => (
         <div key={subTask.id} className="group flex items-center gap-2">
           <Checkbox id={`subtask-${subTask.id}`} checked={subTask.is_completed} onCheckedChange={() => handleToggleSubTask(subTask)} className="size-4" />
-          <label htmlFor={`subtask-${subTask.id}`} className={`flex-grow text-sm ${subTask.is_completed ? 'line-through text-muted-foreground' : 'text-foreground'}`}>{subTask.title}</label>
-          <button onClick={() => handleDeleteSubTask(subTask.id)} className="opacity-0 group-hover:opacity-100 text-muted-foreground hover:text-destructive"><Trash2 className="size-3.5" /></button>
+          <label htmlFor={`subtask-${subTask.id}`} className={`flex-grow text-sm ${subTask.is_completed ? 'line-through text-neutral-500' : 'text-black'}`}>{subTask.title}</label>
+          <button onClick={() => handleDeleteSubTask(subTask.id)} className="opacity-0 group-hover:opacity-100 text-neutral-400 hover:text-destructive"><Trash2 className="size-3.5" /></button>
         </div>
       ))}
       <form onSubmit={handleAddSubTask} className="flex items-center gap-2">
@@ -74,9 +74,9 @@ const SubTaskList = ({ task, onUpdate }: { task: Task, onUpdate: () => void }) =
 
 const TaskCard = ({ task, onEdit, onDelete, onDragStart, onUpdate }: { task: Task, onEdit: () => void, onDelete: () => void, onDragStart: (e: DragEvent<HTMLDivElement>) => void, onUpdate: () => void }) => {
   const priorityClasses: Record<Priority, string> = {
-    low: "bg-blue-300 text-blue-900",
-    medium: "bg-yellow-300 text-yellow-900",
-    high: "bg-red-300 text-red-900",
+    low: "bg-blue-100 text-blue-800",
+    medium: "bg-yellow-100 text-yellow-800",
+    high: "bg-red-100 text-red-800",
   };
 
   return (
@@ -84,10 +84,10 @@ const TaskCard = ({ task, onEdit, onDelete, onDragStart, onUpdate }: { task: Tas
       <Card
         draggable="true"
         onDragStart={onDragStart}
-        className="group cursor-grab active:cursor-grabbing hover:border-accent"
+        className="group cursor-grab active:cursor-grabbing hover:shadow-[4px_4px_0_#000]"
       >
-        <CardContent className="p-3">
-          <p className="font-bold text-foreground break-words">{task.title}</p>
+        <CardContent className="border-t-0 p-3">
+          <p className="font-semibold text-black break-words">{task.title}</p>
           {(task.sub_tasks && task.sub_tasks.length > 0) ? <SubTaskList task={task} onUpdate={onUpdate} /> : null}
           {(!task.sub_tasks || task.sub_tasks.length === 0) &&
             <div className="mt-2 opacity-0 group-hover:opacity-100 transition-opacity">
@@ -96,12 +96,12 @@ const TaskCard = ({ task, onEdit, onDelete, onDragStart, onUpdate }: { task: Tas
           }
           <div className="mt-3 flex flex-wrap items-center justify-between gap-2">
             <div className="flex items-center gap-2">
-              {task.due_date && <span className="text-xs text-muted-foreground">{new Date(task.due_date + 'T00:00:00').toLocaleDateString(undefined, { month: 'short', day: 'numeric'})}</span>}
-              <span className={`px-1.5 py-0.5 text-[10px] font-black rounded-none border-2 border-foreground ${priorityClasses[task.priority || 'medium']}`}>{task.priority}</span>
+              {task.due_date && <span className="text-xs text-neutral-500">{new Date(task.due_date + 'T00:00:00').toLocaleDateString(undefined, { month: 'short', day: 'numeric'})}</span>}
+              <span className={`px-1.5 py-0.5 text-[10px] font-bold rounded-sm border border-black ${priorityClasses[task.priority || 'medium']}`}>{task.priority}</span>
             </div>
             <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
               <Button variant="ghost" size="icon" className="size-7" onClick={onEdit}><Edit className="size-3.5" /></Button>
-              <Button variant="ghost" size="icon" className="size-7 hover:bg-destructive/10 hover:text-destructive" onClick={onDelete}><Trash2 className="size-3.5" /></Button>
+              <Button variant="ghost" size="icon" className="size-7 text-neutral-500 hover:bg-red-100 hover:text-destructive" onClick={onDelete}><Trash2 className="size-3.5" /></Button>
             </div>
           </div>
         </CardContent>
@@ -179,7 +179,7 @@ export default function TaskManager() {
   return (
     <div className="space-y-6">
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-        <div><h2 className="text-2xl font-black uppercase">Task Board</h2><p className="text-muted-foreground">Drag and drop tasks to change their status.</p></div>
+        <div><h2 className="text-2xl font-bold">Task Board</h2><p className="text-neutral-600">Drag and drop tasks to change their status.</p></div>
         <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}><DialogTrigger asChild><Button onClick={() => handleOpenDialog()}><Plus className="mr-2 size-4"/>Add Task</Button></DialogTrigger>
           <DialogContent>
             <DialogHeader><DialogTitle>{editingTask ? "Edit Task" : "Add New Task"}</DialogTitle></DialogHeader>
@@ -196,12 +196,12 @@ export default function TaskManager() {
       </div>
 
       {isLoading && <div className="flex items-center justify-center p-8"><Loader2 className="h-6 w-6 animate-spin" /><span className="ml-2">Loading tasks...</span></div>}
-      {error && <p className="font-bold text-destructive">{error}</p>}
+      {error && <p className="font-medium text-destructive">{error}</p>}
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         {KANBAN_COLUMNS.map(column => (
-          <div key={column.id} onDragOver={(e) => handleDragOver(e, column.id)} onDragLeave={handleDragLeave} onDrop={(e) => handleDrop(e, column.id)} className={cn("rounded-none border-2 border-foreground bg-muted/50 p-3 transition-colors", dragOverColumn === column.id && "bg-accent/20")}>
-            <h3 className="mb-4 flex items-center gap-2 border-b-2 border-foreground pb-2 text-lg font-bold"><span className={cn("h-2 w-2 rounded-full", column.color)}/>{column.title} <span className="text-sm font-normal text-muted-foreground">({tasks.filter(t => t.status === column.id).length})</span></h3>
+          <div key={column.id} onDragOver={(e) => handleDragOver(e, column.id)} onDragLeave={handleDragLeave} onDrop={(e) => handleDrop(e, column.id)} className={cn("rounded-none bg-neutral-100 p-3 border-2 border-black transition-colors", dragOverColumn === column.id && "bg-yellow-200")}>
+            <h3 className="mb-4 flex items-center gap-2 border-b-2 border-black pb-2 text-lg font-bold"><span className={cn("h-2 w-2 rounded-full", column.color)}/>{column.title} <span className="text-sm font-normal text-neutral-500">({tasks.filter(t => t.status === column.id).length})</span></h3>
             <div className="space-y-3 min-h-[200px]">
               <AnimatePresence>
                 {tasks.filter(t => t.status === column.id).map(task => (

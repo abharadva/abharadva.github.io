@@ -138,14 +138,14 @@ export default function BlogManager({ startInCreateMode, onActionHandled }: Blog
     <div className="space-y-6">
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <h2 className="text-2xl font-black uppercase">Blog Posts</h2>
-          <p className="text-muted-foreground">Manage your blog content</p>
+          <h2 className="text-2xl font-bold">Blog Posts</h2>
+          <p className="text-neutral-600">Manage your blog content</p>
         </div>
         <Button onClick={handleCreatePost}><Plus className="mr-2 size-4" /> Create New Post</Button>
       </div>
 
       <Card>
-        <CardContent className="flex flex-col gap-4 p-4 md:flex-row md:p-6">
+        <CardContent className="flex flex-col gap-4 border-t-0 p-4 md:flex-row md:p-6">
           <div className="flex-1">
             <Input
               type="text"
@@ -169,13 +169,13 @@ export default function BlogManager({ startInCreateMode, onActionHandled }: Blog
 
       {isLoading && <div className="flex items-center justify-center p-8"><Loader2 className="h-6 w-6 animate-spin" /><span className="ml-2">Fetching posts...</span></div>}
       
-      {!isLoading && error && <div className="rounded-none border-2 border-destructive bg-destructive/10 p-4 font-bold text-destructive">{error}</div>}
+      {!isLoading && error && <div className="rounded-none border-2 border-destructive bg-red-100 p-4 font-bold text-destructive">{error}</div>}
       
       {!isLoading && !error && posts.length === 0 ? (
-        <div className="rounded-none border-2 border-dashed border-foreground py-12 text-center">
-          <BookText className="mx-auto mb-4 size-12 text-muted-foreground" />
+        <div className="rounded-none border-2 border-dashed border-black py-12 text-center">
+          <BookText className="mx-auto mb-4 size-12 text-neutral-400" />
           <h3 className="mb-2 text-lg font-bold">No posts found</h3>
-          <p className="text-muted-foreground">Try adjusting your filters or create a new post.</p>
+          <p className="text-neutral-500">Try adjusting your filters or create a new post.</p>
         </div>
       ) : (
         <div className="space-y-4">
@@ -189,15 +189,15 @@ export default function BlogManager({ startInCreateMode, onActionHandled }: Blog
                 exit={{ opacity: 0 }}
                 transition={{ duration: 0.2 }}
               >
-                <Card className="hover:border-accent">
-                  <CardContent className="flex flex-col gap-4 p-4 md:flex-row md:items-start md:justify-between md:p-6">
+                <Card>
+                  <CardContent className="flex flex-col gap-4 border-t-0 p-4 md:flex-row md:items-start md:justify-between md:p-6">
                     <div className="min-w-0 flex-1 md:mr-4">
                       <div className="mb-2 flex items-center gap-3">
                         <h3 className="truncate text-lg font-bold" title={post.title}>{post.title}</h3>
                         <Badge variant={post.published ? "default" : "secondary"}>{post.published ? "Published" : "Draft"}</Badge>
                       </div>
-                      <p className="mb-3 line-clamp-2 text-sm text-muted-foreground">{post.excerpt || <span className="italic">No excerpt.</span>}</p>
-                      <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-muted-foreground">
+                      <p className="mb-3 line-clamp-2 text-sm text-neutral-600">{post.excerpt || <span className="italic">No excerpt.</span>}</p>
+                      <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-neutral-500">
                         {post.created_at && <span>Created: {new Date(post.created_at).toLocaleDateString()}</span>}
                         <span>Slug: /{post.slug}</span>
                         <span>Views: {post.views || 0}</span>

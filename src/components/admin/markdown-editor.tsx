@@ -19,35 +19,29 @@ const markdownToHtml = (markdown: string): string => {
     }
     const sanitizedMarkdown = DOMPurify.sanitize(markdown);
 
-    // This is a very simplified parser, not intended to replace robust libraries
-    // It's designed for basic previews and might not handle complex nesting perfectly.
-    // For production-grade previews, `react-markdown` is still recommended.
     let html = ' ' + sanitizedMarkdown;
     html = html
-        .replace(/\n/g, '\n<br>') // Preserve line breaks for easier paragraph splitting later
-        .replace(/```([\s\S]*?)```/g, (_match, p1) => `<pre class='bg-muted text-muted-foreground p-3 my-3 rounded-none border-2 border-foreground overflow-x-auto font-sans text-sm'><code class='font-sans'>${p1.replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/\n<br>/g, '\n')}</code></pre>`)
-        .replace(/`([^`]+)`/g, "<code class='bg-muted text-muted-foreground px-1 py-0.5 font-sans text-sm rounded-none'>$1</code>")
-        .replace(/^# (.*$)/gim, "<h1>$1</h1>")
-        .replace(/^## (.*$)/gim, "<h2>$1</h2>")
-        .replace(/^### (.*$)/gim, "<h3>$1</h3>")
-        .replace(/\!\[([^\]]*)\]\(([^)]+)\)/g, '<img src="$2" alt="$1" loading="lazy" class="max-w-full h-auto my-3 rounded-none border-2 border-foreground" />')
-        .replace(/\[([^\]]+)\]\(([^)]+)\)/g, '<a href="$2" target="_blank" rel="noopener noreferrer">$1</a>')
+        .replace(/\n/g, '\n<br>')
+        .replace(/```([\s\S]*?)```/g, (_match, p1) => `<pre class='bg-black text-white p-3 my-3 rounded-none overflow-x-auto'><code class='font-mono'>${p1.replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/\n<br>/g, '\n')}</code></pre>`)
+        .replace(/`([^`]+)`/g, "<code class='bg-neutral-200 text-black px-1 py-0.5 font-mono text-sm'>$1</code>")
+        .replace(/^# (.*$)/gim, "<h1 class='font-bold text-3xl'>$1</h1>")
+        .replace(/^## (.*$)/gim, "<h2 class='font-bold text-2xl'>$1</h2>")
+        .replace(/^### (.*$)/gim, "<h3 class='font-bold text-xl'>$1</h3>")
+        .replace(/\!\[([^\]]*)\]\(([^)]+)\)/g, '<img src="$2" alt="$1" loading="lazy" class="max-w-full h-auto my-3 rounded-none border-2 border-black" />')
+        .replace(/\[([^\]]+)\]\(([^)]+)\)/g, '<a href="$2" target="_blank" rel="noopener noreferrer" class="text-blue-600 underline">$1</a>')
         .replace(/\*\*(.*?)\*\*|__(.*?)__/gim, "<strong>$1$2</strong>")
         .replace(/\*(.*?)\*|_(.*?)_/gim, "<em>$1$2</em>")
-        .replace(/^\> (.*$)/gim, "<blockquote>$1</blockquote>")
-        .replace(/^\s*([-*+]) (.*)/gm, "<ul><li>$2</li></ul>") // Very basic list support
-        .replace(/^\s*(\d+\.) (.*)/gm, "<ol><li>$2</li></ol>")
-        .replace(/<\/ul>(\n<br>)*<ul>/g, '') // Consolidate adjacent lists
+        .replace(/^\> (.*$)/gim, "<blockquote class='border-l-4 border-black pl-4'>$1</blockquote>")
+        .replace(/^\s*([-*+]) (.*)/gm, "<ul class='list-disc pl-5'><li>$2</li></ul>")
+        .replace(/^\s*(\d+\.) (.*)/gm, "<ol class='list-decimal pl-5'><li>$2</li></ol>")
+        .replace(/<\/ul>(\n<br>)*<ul>/g, '')
         .replace(/<\/ol>(\n<br>)*<ol>/g, '');
 
-    // Convert consecutive <br> tags into paragraphs
     html = html.split(/(<br>\s*){2,}/).map(p => p.trim() ? `<p>${p.replace(/^(<br>\s*)+|(<br>\s*)+$/g, '')}</p>` : '').join('');
-    // Cleanup paragraphs around block elements
     html = html.replace(/<p>(<(pre|blockquote|ul|ol|h[1-3]))/g, '$1').replace(/(<\/(pre|blockquote|ul|ol|h[1-3])>)<\/p>/g, '$1');
 
-    return `<div class='prose prose-sm dark:prose-invert max-w-none'>${html}</div>`;
+    return `<div class='prose max-w-none'>${html}</div>`;
 };
-
 
 export default function MarkdownEditor({
   value,
@@ -105,8 +99,8 @@ export default function MarkdownEditor({
   ];
 
   return (
-    <div className="overflow-hidden rounded-none border-2 border-foreground bg-card">
-      <div className="flex flex-col items-stretch gap-2 border-b-2 border-foreground bg-muted/50 p-2 sm:flex-row sm:items-center sm:justify-between">
+    <div className="overflow-hidden rounded-none border-2 border-black bg-white">
+      <div className="flex flex-col items-stretch gap-2 border-b-2 border-black bg-neutral-100 p-2 sm:flex-row sm:items-center sm:justify-between">
         <div className="flex flex-wrap items-center gap-1">
           {toolbarButtons.map((button) => (
             <Button
@@ -123,13 +117,13 @@ export default function MarkdownEditor({
           ))}
         </div>
 
-        <div className="flex self-end rounded-none border-2 border-foreground bg-background p-0.5 sm:self-center">
+        <div className="flex self-end rounded-none border-2 border-black bg-white p-0.5 sm:self-center">
           <Button
             type="button"
             variant={activeTab === 'write' ? 'secondary' : 'ghost'}
             size="sm"
             onClick={() => setActiveTab("write")}
-            className="flex-1"
+            className="flex-1 rounded-none"
           >
             Write
           </Button>
@@ -138,7 +132,7 @@ export default function MarkdownEditor({
             variant={activeTab === 'preview' ? 'secondary' : 'ghost'}
             size="sm"
             onClick={() => setActiveTab("preview")}
-            className="flex-1"
+            className="flex-1 rounded-none"
           >
             Preview
           </Button>
@@ -153,18 +147,18 @@ export default function MarkdownEditor({
             value={value}
             onChange={(e) => onChange(e.target.value)}
             placeholder={placeholder}
-            className="h-full w-full resize-none rounded-b-md border-none bg-card p-4 font-sans text-sm text-foreground focus:outline-none"
+            className="h-full w-full resize-none rounded-b-md border-none bg-white p-4 text-sm text-black focus:outline-none"
             spellCheck="false"
           />
         ) : (
           <div
-            className="h-full overflow-auto bg-card p-4 text-foreground"
+            className="h-full overflow-auto bg-white p-4 text-black"
             dangerouslySetInnerHTML={{ __html: renderedHtml }}
           />
         )}
       </div>
 
-      <div className="border-t-2 border-foreground bg-muted/50 px-4 py-1.5 text-xs text-muted-foreground">
+      <div className="border-t-2 border-black bg-neutral-100 px-4 py-1.5 text-xs text-neutral-500">
         <div className="flex items-center justify-between">
           <span>Markdown supported</span>
           <span>{value.length} characters</span>

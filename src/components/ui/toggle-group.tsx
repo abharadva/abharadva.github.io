@@ -1,9 +1,8 @@
 
 /*
-This file is updated for the new neo-brutalist design system.
-- The modern styles are replaced with `border-2`, `rounded-none`, and a distinct container style for the root `ToggleGroup`.
-- The group is now styled as a raw, functional unit with a thick border.
-- `ToggleGroupItem` is updated to use the neo-brutalist `toggleVariants`. The active (`data-[state=on]`) state now uses a high-contrast `primary` theme color.
+This file is updated for the neo-brutalist design.
+- The `ToggleGroup` container is styled to be a blocky element with a thick `border-2` and `rounded-none`.
+- The `ToggleGroupItem` inherits from the new brutalist `toggleVariants`, and its active state (`data-[state=on]`) is styled with a high-contrast yellow background to make it stand out clearly.
 */
 "use client";
 
@@ -28,7 +27,7 @@ const ToggleGroup = React.forwardRef<
 >(({ className, variant, size, children, ...props }, ref) => (
   <ToggleGroupPrimitive.Root
     ref={ref}
-    className={cn("inline-flex items-center justify-center gap-1 rounded-none border-2 border-foreground bg-muted p-1", className)}
+    className={cn("inline-flex items-center justify-center gap-1 rounded-none border-2 border-black bg-white p-1", className)}
     {...props}
   >
     <ToggleGroupContext.Provider value={{ variant, size }}>
@@ -53,7 +52,7 @@ const ToggleGroupItem = React.forwardRef<
           variant: context.variant || variant,
           size: context.size || size,
         }),
-        "data-[state=on]:bg-foreground data-[state=on]:text-background shadow-none",
+        "data-[state=on]:bg-yellow-300 data-[state=on]:text-black",
         className
       )}
       {...props}

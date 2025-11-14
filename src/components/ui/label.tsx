@@ -1,8 +1,9 @@
+
 /*
-This file is updated for the new neo-brutalist design system.
-- The `font-medium` class is changed to `font-bold` for a stronger, more assertive look.
-- The base styles are kept minimal to allow for flexibility, with boldness being the key change.
-- The color is inherited from `foreground` for high contrast.
+This file is updated for the neo-brutalist design.
+- The font is changed to `font-bold` to give labels more emphasis and a blockier feel.
+- Base styling now includes `block` and `mb-1` for a standard top-aligned label layout.
+- The color is changed to `text-black` to fit the high-contrast theme.
 */
 "use client";
 
@@ -13,7 +14,7 @@ import { cva, type VariantProps } from "class-variance-authority";
 import { cn } from "@/lib/utils";
 
 const labelVariants = cva(
-  "text-sm font-bold leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+  "mb-1 block text-sm font-bold leading-none text-black peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
 );
 
 const Label = React.forwardRef<

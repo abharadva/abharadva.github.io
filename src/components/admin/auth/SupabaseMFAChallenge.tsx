@@ -1,10 +1,11 @@
+
 /*
-This file is updated for the new neo-brutalist design system.
-- All minimalist styles are replaced with the stark, high-contrast theme.
-- The OTP input now uses the redesigned `InputOTP` component with sharp edges and a clear focus state.
-- The countdown timer is styled to be bold and functional.
-- The loading state uses a simple spinner within the redesigned `Button`.
-- Replaced the previous `Button` with the neo-brutalist version from the UI kit.
+This file is updated to adopt the neo-brutalist aesthetic.
+- The minimalist dark theme is replaced with a high-contrast style: off-white background, black text, and thick borders.
+- The `InputOTP` component is restyled with sharp corners and heavy borders to match the new design language.
+- The countdown timer styling is made bolder.
+- The main container now features a hard shadow and thick border.
+- All components now use the 'Space Mono' font.
 */
 "use client";
 
@@ -110,9 +111,9 @@ export default function SupabaseMFAChallenge() {
   };
 
   const stepVariants = {
-    initial: { opacity: 0 },
-    animate: { opacity: 1 },
-    exit: { opacity: 0 },
+    initial: { opacity: 0, y: 20 },
+    animate: { opacity: 1, y: 0 },
+    exit: { opacity: 0, y: -20 },
   };
 
   if (isLoadingState && !error && !factorId) {
@@ -125,7 +126,7 @@ export default function SupabaseMFAChallenge() {
         exit="exit"
         className="flex min-h-screen items-center justify-center bg-background"
       >
-        <Loader2 className="size-8 animate-spin text-muted-foreground" />
+        <Loader2 className="size-8 animate-spin text-neutral-500" />
       </motion.div>
     );
   }
@@ -137,19 +138,19 @@ export default function SupabaseMFAChallenge() {
       initial="initial"
       animate="animate"
       exit="exit"
-      transition={{ duration: 0.1 }}
-      className="flex min-h-screen items-center justify-center bg-background px-4 font-sans"
+      transition={{ duration: 0.3 }}
+      className="flex min-h-screen items-center justify-center bg-background px-4 font-mono"
     >
-      <div className="w-full max-w-sm space-y-8 rounded-none border-2 border-foreground bg-card p-8 shadow-[8px_8px_0px_#000] dark:shadow-[8px_8px_0px_#FFF]">
+      <div className="w-full max-w-sm space-y-8 rounded-none border-2 border-black bg-white p-8 shadow-[8px_8px_0_#000]">
         <div className="text-center">
-          <div className="mx-auto mb-4 flex size-12 items-center justify-center rounded-none border-2 border-foreground bg-secondary">
-            <KeyRound className="size-6 text-foreground" />
+          <div className="mx-auto mb-4 flex size-12 items-center justify-center rounded-none border-2 border-black bg-yellow-300">
+            <KeyRound className="size-6 text-black" />
           </div>
-          <h2 className="text-3xl font-black uppercase text-foreground">
-            Two-Factor Auth
+          <h2 className="text-3xl font-bold text-black">
+            Two-Factor Authentication
           </h2>
-          <p className="mt-2 text-muted-foreground">
-            Enter the code from your authenticator app.
+          <p className="mt-2 text-neutral-600">
+            Enter the code from your authenticator app
           </p>
         </div>
 
@@ -174,11 +175,11 @@ export default function SupabaseMFAChallenge() {
               </InputOTPGroup>
             </InputOTP>
             <div
-              className="absolute -bottom-6 left-1/2 -translate-x-1/2 text-center text-xs text-muted-foreground"
+              className="absolute -bottom-6 left-1/2 -translate-x-1/2 text-center text-xs text-neutral-500"
               aria-hidden="true"
             >
               Code resets in{" "}
-              <span className="font-sans font-bold text-foreground">
+              <span className="font-bold text-black">
                 {remainingTime}s
               </span>
             </div>
@@ -190,7 +191,7 @@ export default function SupabaseMFAChallenge() {
                 initial={{ opacity: 0, height: 0 }}
                 animate={{ opacity: 1, height: "auto" }}
                 exit={{ opacity: 0, height: 0 }}
-                className="rounded-none border-2 border-destructive bg-destructive/10 p-3"
+                className="rounded-none border-2 border-destructive bg-red-100 p-3"
               >
                 <p className="text-sm font-bold text-destructive">{error}</p>
               </motion.div>
@@ -216,7 +217,7 @@ export default function SupabaseMFAChallenge() {
             <Button
               type="button"
               variant="link"
-              className="text-sm text-muted-foreground"
+              className="text-sm"
               onClick={async () => {
                 setIsLoadingState(true);
                 await supabase.auth.signOut();

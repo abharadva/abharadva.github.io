@@ -59,7 +59,7 @@ export default function Layout({ children }: LayoutProps) {
         <meta name="twitter:description" content={DEFAULT_OG_DESCRIPTION} />
         <meta name="twitter:image" content={DEFAULT_OG_IMAGE} />
       </Head>
-      <div className="flex min-h-screen flex-col justify-between font-sans selection:bg-yellow-300 selection:text-black">
+      <div className="flex min-h-screen flex-col justify-between font-mono selection:bg-yellow-300 selection:text-black">
         <Header />
         <MobileHeader />
         <main className="mt-16 w-full grow md:mt-20">

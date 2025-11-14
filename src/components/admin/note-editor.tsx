@@ -56,12 +56,12 @@ export default function NoteEditor({ note, onSave, onCancel }: NoteEditorProps) 
       className="mx-auto max-w-4xl"
     >
       <Card>
-        <CardHeader>
-          <CardTitle className="uppercase">
+        <CardHeader className="border-b-2">
+          <CardTitle>
             {note?.id ? "Edit Note" : "Create New Note"}
           </CardTitle>
         </CardHeader>
-        <CardContent>
+        <CardContent className="pt-6">
           <form onSubmit={handleSubmit} className="space-y-6">
             <div className="space-y-2">
               <Label htmlFor="title">Title (Optional)</Label>
@@ -91,7 +91,7 @@ export default function NoteEditor({ note, onSave, onCancel }: NoteEditorProps) 
                 placeholder="idea, to-do, reminder"
               />
             </div>
-            <div className="flex justify-end gap-3 border-t-2 border-foreground pt-4">
+            <div className="flex justify-end gap-3 border-t-2 border-black pt-4">
               <Button type="button" variant="outline" onClick={onCancel} disabled={isSaving}>Cancel</Button>
               <Button type="submit" disabled={isSaving}>
                 {isSaving && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}

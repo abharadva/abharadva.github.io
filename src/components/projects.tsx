@@ -64,7 +64,7 @@ export default function Projects({ children }: ProjectsProps) {
   return (
     <section className="my-8 py-16">
       <motion.h2 
-        className="mb-12 border-b-2 border-foreground pb-4 text-3xl font-black uppercase text-foreground"
+        className="mb-12 border-b-2 border-black pb-4 text-3xl font-bold text-black"
         initial={{ opacity: 0, y: -20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5 }}
@@ -74,8 +74,8 @@ export default function Projects({ children }: ProjectsProps) {
       
       {loading && (
         <div className="py-10 text-center">
-          <Loader2 className="mx-auto h-12 w-12 animate-spin text-primary" />
-          <p className="mt-4 text-lg font-bold text-muted-foreground">
+          <Loader2 className="mx-auto h-12 w-12 animate-spin text-black" />
+          <p className="mt-4 text-lg font-medium text-neutral-600">
             Loading Projects from GitHub...
           </p>
         </div>
@@ -90,10 +90,10 @@ export default function Projects({ children }: ProjectsProps) {
       )}
 
       {!loading && !error && projects.length === 0 && (
-         <div className="rounded-none border-2 border-dashed border-foreground py-16 text-center">
-          <Github className="mx-auto mb-4 size-12 text-muted-foreground" />
+         <div className="rounded-none border-2 border-dashed border-black py-16 text-center">
+          <Github className="mx-auto mb-4 size-12 text-neutral-400" />
           <h3 className="mb-2 text-lg font-bold">No Public Projects Found</h3>
-          <p className="text-muted-foreground">
+          <p className="text-neutral-600">
             I might be working on something new, or they are private.
           </p>
         </div>
@@ -117,7 +117,7 @@ export default function Projects({ children }: ProjectsProps) {
             <Button asChild variant="outline" size="lg" className="text-md group">
               <a href={`https://github.com/${GITHUB_USERNAME}?tab=repositories`} target="_blank" rel="noopener noreferrer">
                 More on GitHub 
-                <ArrowUpRight className="ml-1.5 size-4 transition-transform group-hover:-translate-y-0.5 group-hover:translate-x-0.5" />
+                <ArrowUpRight className="ml-1.5 size-4" />
               </a>
             </Button>
           </div>

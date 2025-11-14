@@ -1,11 +1,10 @@
-
 /*
-This file is heavily updated to implement the neo-brutalist aesthetic.
-- The main table container now has a thick `border-2` and `rounded-none`.
-- `TableHeader` is restyled with a high-contrast `foreground` background and `background` text.
-- `TableRow` has a thick `border-b-2`, and the hover state is a stark `accent` color.
-- All subtle borders are replaced with thick, high-contrast ones.
-- Font styles are updated to be bold for a raw, utilitarian typographic hierarchy.
+This file is heavily updated for a neo-brutalist aesthetic.
+- The main table container now has a thick `border-2` and `shadow`.
+- `TableHeader` is given a distinct look with a solid background and thick bottom border.
+- `TableRow` hover effects are made starker, and borders between rows are more pronounced.
+- All subtle styles are replaced with `border-2`, `rounded-none`, and high-contrast colors.
+- Font styles are made bolder for a more impactful typographic hierarchy.
 */
 import * as React from "react";
 
@@ -15,10 +14,10 @@ const Table = React.forwardRef<
   HTMLTableElement,
   React.HTMLAttributes<HTMLTableElement>
 >(({ className, ...props }, ref) => (
-  <div className="relative w-full overflow-auto rounded-none border-2 border-foreground">
+  <div className="relative w-full overflow-auto rounded-none border-2 border-black shadow-[6px_6px_0_#000]">
     <table
       ref={ref}
-      className={cn("w-full caption-bottom text-sm", className)}
+      className={cn("w-full caption-bottom text-sm bg-white", className)}
       {...props}
     />
   </div>
@@ -29,7 +28,7 @@ const TableHeader = React.forwardRef<
   HTMLTableSectionElement,
   React.HTMLAttributes<HTMLTableSectionElement>
 >(({ className, ...props }, ref) => (
-  <thead ref={ref} className={cn("[&_tr]:border-b-2", className)} {...props} />
+  <thead ref={ref} className={cn("[&_tr]:border-b-2 [&_tr]:border-black", className)} {...props} />
 ));
 TableHeader.displayName = "TableHeader";
 
@@ -52,7 +51,7 @@ const TableFooter = React.forwardRef<
   <tfoot
     ref={ref}
     className={cn(
-      "border-t-2 border-foreground bg-muted/50 font-bold [&>tr]:last:border-b-0",
+      "border-t-2 border-black bg-neutral-100 font-bold [&>tr]:last:border-b-0",
       className
     )}
     {...props}
@@ -67,7 +66,7 @@ const TableRow = React.forwardRef<
   <tr
     ref={ref}
     className={cn(
-      "border-b-2 border-foreground transition-colors hover:bg-accent/50 data-[state=selected]:bg-muted",
+      "border-b-2 border-black transition-colors hover:bg-neutral-100 data-[state=selected]:bg-neutral-200",
       className
     )}
     {...props}
@@ -82,7 +81,7 @@ const TableHead = React.forwardRef<
   <th
     ref={ref}
     className={cn(
-      "h-12 px-4 text-left align-middle font-bold text-muted-foreground [&:has([role=checkbox])]:pr-0",
+      "h-12 px-4 text-left align-middle font-bold text-black bg-neutral-100 [&:has([role=checkbox])]:pr-0",
       className
     )}
     {...props}
@@ -108,7 +107,7 @@ const TableCaption = React.forwardRef<
 >(({ className, ...props }, ref) => (
   <caption
     ref={ref}
-    className={cn("mt-4 text-sm text-muted-foreground", className)}
+    className={cn("mt-4 text-sm text-neutral-600", className)}
     {...props}
   />
 ));

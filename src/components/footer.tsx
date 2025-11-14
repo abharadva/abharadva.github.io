@@ -6,7 +6,7 @@ export default function Footer() {
   const currentYear = new Date().getFullYear();
 
   return (
-    <footer className="w-full border-t-2 border-foreground py-16 text-sm text-muted-foreground md:py-20">
+    <footer className="w-full border-t-2 border-black py-16 text-sm text-neutral-600 md:py-20">
       <div className="mx-auto flex flex-col items-center justify-between gap-8 md:flex-row">
         <p className="text-center font-bold md:text-left">
           &copy; {currentYear} Akshay Bharadva. <br />
@@ -19,7 +19,7 @@ export default function Footer() {
             rel="noopener noreferrer"
             target="_blank"
             aria-label="GitHub Profile"
-            className="text-muted-foreground transition-colors hover:text-accent"
+            className="text-neutral-600 transition-colors hover:text-black"
           >
             <Github className="size-6" />
           </a>
@@ -28,14 +28,14 @@ export default function Footer() {
             rel="noopener noreferrer"
             target="_blank"
             aria-label="LinkedIn Profile"
-            className="text-muted-foreground transition-colors hover:text-accent"
+            className="text-neutral-600 transition-colors hover:text-black"
           >
             <Linkedin className="size-6" />
           </a>
           <a
             href="mailto:akshaybharadva19@gmail.com"
             aria-label="Email Akshay"
-            className="text-muted-foreground transition-colors hover:text-accent"
+            className="text-neutral-600 transition-colors hover:text-black"
           >
             <Mail className="size-6" />
           </a>

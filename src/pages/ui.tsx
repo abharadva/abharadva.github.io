@@ -130,11 +130,11 @@ const ComponentDisplay: React.FC<{
   children: React.ReactNode;
 }> = ({ id, title, description, children }) => (
   <Card id={id} className="scroll-mt-24">
-    <CardHeader>
+    <CardHeader className="border-b-2">
       <CardTitle>{title}</CardTitle>
       <CardDescription>{description}</CardDescription>
     </CardHeader>
-    <CardContent className="space-y-6">
+    <CardContent className="space-y-6 pt-6">
       <div className="flex flex-wrap items-start gap-4">{children}</div>
     </CardContent>
   </Card>
@@ -179,9 +179,9 @@ export default function UiPage() {
   return (
     <Layout>
       <div className="flex min-h-screen flex-col md:flex-row">
-        <aside className="w-full shrink-0 border-b-2 bg-card p-3 md:sticky md:top-20 md:h-[calc(100vh-5rem)] md:w-64 md:border-b-0 md:border-r-2 md:border-foreground">
+        <aside className="w-full shrink-0 border-b-2 border-black bg-white p-3 md:sticky md:top-20 md:h-[calc(100vh-5rem)] md:w-64 md:border-b-0 md:border-r-2">
           <ScrollArea className="h-full pr-4">
-            <h2 className="mb-2 px-2 text-lg font-bold tracking-tight uppercase">Components</h2>
+            <h2 className="mb-2 px-2 text-lg font-bold tracking-tight">Components</h2>
             <nav>
               <ul className="space-y-1">
                 {componentSectionsList.map((section) => (
@@ -203,8 +203,8 @@ export default function UiPage() {
 
         <main className="w-full overflow-y-auto p-4 sm:p-6 md:p-8 lg:p-10">
           <header className="mb-10 text-center md:text-left">
-            <h1 className="border-b-2 border-foreground pb-3 text-4xl font-black uppercase tracking-tighter sm:text-5xl">UI Kit</h1>
-            <p className="mt-2 text-lg text-muted-foreground">A showcase of the redesigned component library.</p>
+            <h1 className="border-b-2 border-black pb-3 text-4xl font-bold tracking-tighter sm:text-5xl">UI Kit</h1>
+            <p className="mt-2 text-lg text-neutral-600">A showcase of the neo-brutalist component library.</p>
           </header>
           <div className="space-y-16">
             <ComponentDisplay id="button" title="Button" description="Various styles and sizes for buttons.">
@@ -217,14 +217,14 @@ export default function UiPage() {
             </ComponentDisplay>
             <ComponentDisplay id="card" title="Card" description="A container for grouping content.">
               <Card className="w-[350px]">
-                <CardHeader><CardTitle>Card Title</CardTitle><CardDescription>Card Description</CardDescription></CardHeader>
-                <CardContent><p>This is the main content area of the card.</p></CardContent>
-                <CardFooter><Button>Deploy</Button></CardFooter>
+                <CardHeader className="border-b-2"><CardTitle>Card Title</CardTitle><CardDescription>Card Description</CardDescription></CardHeader>
+                <CardContent className="pt-6"><p>This is the main content area of the card.</p></CardContent>
+                <CardFooter className="border-t-2"><Button>Deploy</Button></CardFooter>
               </Card>
             </ComponentDisplay>
             <ComponentDisplay id="alert" title="Alert" description="Displays a prominent message.">
                 <Alert><Terminal className="h-4 w-4" /><AlertTitle>Heads up!</AlertTitle><AlertDescription>This is a default alert.</AlertDescription></Alert>
-                <Alert variant="destructive"><Terminal className="h-4 w-4" /><AlertTitle>Error!</AlertTitle><AlertDescription>This is a destructive alert.</AlertDescription></Alert>
+                <Alert variant="destructive"><XCircle className="h-4 w-4" /><AlertTitle>Error!</AlertTitle><AlertDescription>This is a destructive alert.</AlertDescription></Alert>
             </ComponentDisplay>
           </div>
         </main>

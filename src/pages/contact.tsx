@@ -1,3 +1,4 @@
+
 import Layout from "@/components/layout";
 import Head from "next/head";
 import { config as appConfig } from "@/lib/config";
@@ -5,7 +6,7 @@ import { supabase } from "@/supabase/client";
 import type { PortfolioSection } from "@/types";
 import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
-import { Check, Mail, Github, Linkedin } from "lucide-react";
+import { Check, Mail, Github, Linkedin, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 export default function ContactPage() {
@@ -52,15 +53,15 @@ export default function ContactPage() {
         <meta property="og:url" content={pageUrl} />
         <link rel="canonical" href={pageUrl} />
       </Head>
-      <main className="mx-auto max-w-5xl px-4 py-16 font-sans md:py-24">
+      <main className="mx-auto max-w-5xl px-4 py-16 md:py-24">
         <motion.header 
           initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5 }}
           className="mb-16 text-center"
         >
-          <h1 className="text-5xl font-black text-foreground md:text-6xl">Get In Touch</h1>
-          <p className="mx-auto mt-4 max-w-2xl text-xl text-muted-foreground">
+          <h1 className="text-5xl font-bold text-black md:text-6xl">Get In Touch</h1>
+          <p className="mx-auto mt-4 max-w-2xl text-xl text-neutral-600">
             Have a project in mind or just want to say hello? I'd love to hear from you.
           </p>
           <div className="mt-8 flex justify-center gap-4">
@@ -69,10 +70,10 @@ export default function ContactPage() {
                       <Mail className="mr-2 size-5" /> Email Me
                   </a>
               </Button>
-              <Button asChild variant="secondary" size="icon" aria-label="GitHub">
+              <Button asChild variant="outline" size="icon" aria-label="GitHub">
                   <a href="https://github.com/akshay-bharadva" target="_blank" rel="noopener noreferrer"><Github /></a>
               </Button>
-              <Button asChild variant="secondary" size="icon" aria-label="LinkedIn">
+              <Button asChild variant="outline" size="icon" aria-label="LinkedIn">
                   <a href="https://www.linkedin.com/in/akshay-bharadva/" target="_blank" rel="noopener noreferrer"><Linkedin /></a>
               </Button>
           </div>
@@ -80,9 +81,9 @@ export default function ContactPage() {
 
         {(isLoading || (!isLoading && serviceSection?.portfolio_items && serviceSection.portfolio_items.length > 0)) && (
           <motion.div className="mt-24">
-              <h2 className="mb-10 text-center text-4xl font-bold text-muted-foreground">What I Can Do For You</h2>
+              <h2 className="mb-10 text-center text-4xl font-bold text-neutral-500">What I Can Do For You</h2>
               {isLoading && (
-                 <div className="flex justify-center"><div className="mb-4 w-10 h-10 animate-spin rounded-full border-4 border-accent border-l-transparent"></div></div>
+                 <div className="flex justify-center"><Loader2 className="h-8 w-8 animate-spin text-black" /></div>
               )}
               {!isLoading && serviceSection?.portfolio_items && (
                 <motion.div 
@@ -95,15 +96,15 @@ export default function ContactPage() {
                     <motion.div 
                       key={service.id}
                       variants={itemVariants}
-                      className="flex h-full flex-col rounded-lg border bg-card text-card-foreground shadow-sm p-8 transition-transform duration-200 hover:-translate-y-1"
+                      className="flex h-full flex-col rounded-none border-2 border-black bg-white p-8 text-black shadow-[6px_6px_0_#000] transition-transform duration-200 hover:-translate-y-1 hover:shadow-[8px_8px_0_#000]"
                     >
-                      <h3 className="mb-3 text-2xl font-bold text-foreground">{service.title}</h3>
-                      <p className="mb-6 flex-grow text-muted-foreground">{service.subtitle}</p>
+                      <h3 className="mb-3 text-2xl font-bold text-black">{service.title}</h3>
+                      <p className="mb-6 flex-grow text-neutral-600">{service.subtitle}</p>
                       {service.tags && (
                         <ul className="mb-8 space-y-3">
                           {service.tags.map(tag => (
-                            <li key={tag} className="flex items-start text-muted-foreground">
-                              <Check className="mr-3 mt-1 size-4 shrink-0 text-accent" />
+                            <li key={tag} className="flex items-start text-neutral-700">
+                              <Check className="mr-3 mt-1 size-4 shrink-0 text-black" />
                               <span>{tag}</span>
                             </li>
                           ))}

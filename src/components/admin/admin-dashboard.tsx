@@ -1,12 +1,13 @@
+
 /*
-This file is completely redesigned for the neo-brutalist theme.
-- The clean, minimalist layout is replaced with a raw, functional one using hard shadows and thick borders.
-- The `Card` component for stats now has the neo-brutalist style applied.
-- The `Tabs` component is replaced with a series of bordered buttons for a more utilitarian navigation feel.
-- The custom `StatCard` is removed and replaced with the redesigned `Card` component for a consistent look.
-- The header is stark, and the "MFA Enabled" badge uses the redesigned, sharp-edged `Badge` component.
-- The logout button now uses the redesigned `Button` component with its hard shadow and destructive variant.
-- All components now use the 'Space Mono' font via the global `font-sans` class.
+This file has been completely restyled to adopt the neo-brutalist aesthetic.
+- All modern, subtle styles (`rounded-lg`, `shadow-sm`, theme variables) have been replaced with hard shadows, thick borders, and a high-contrast palette.
+- The layout is simplified, using bold `Card` components with hard shadows for stats.
+- The `Tabs` component has been replaced with simple, bordered buttons for a rawer feel.
+- A custom `StatCard` component is introduced to encapsulate the brutalist card style.
+- The header is made bolder with a thick bottom border. "MFA Enabled" uses a custom, bordered badge.
+- The logout button now uses the redesigned `Button` component with its new destructive variant style.
+- The font is switched to 'Space Mono' via the global `font-mono` class.
 */
 "use client";
 
@@ -102,35 +103,37 @@ export default function AdminDashboard({
     icon?: JSX.Element;
     className?: string;
   }> = ({ title, value, icon, className }) => (
-    <Card className={className}>
-      <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-        <CardTitle className="text-sm font-bold uppercase text-muted-foreground">
-          {title}
-        </CardTitle>
-        {icon && <div className="text-muted-foreground">{icon}</div>}
-      </CardHeader>
-      <CardContent>
-        <div className="text-2xl font-bold">{value}</div>
-      </CardContent>
-    </Card>
+    <div className={className}>
+      <div className="h-full rounded-none border-2 border-black bg-white p-4">
+        <div className="flex flex-row items-center justify-between space-y-0 pb-2">
+          <h3 className="text-sm font-bold text-neutral-600 uppercase">
+            {title}
+          </h3>
+          {icon && <div className="text-neutral-500">{icon}</div>}
+        </div>
+        <div>
+          <div className="text-2xl font-bold">{value}</div>
+        </div>
+      </div>
+    </div>
   );
 
   return (
-    <div className="min-h-screen bg-background font-sans">
-      <header className="sticky top-0 z-10 border-b-2 border-foreground bg-background">
+    <div className="min-h-screen bg-background font-mono">
+      <header className="sticky top-0 z-10 border-b-2 border-black bg-white">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <div className="flex h-16 items-center justify-between">
-            <h1 className="text-xl font-black uppercase text-foreground sm:text-2xl">
-              Admin
+            <h1 className="text-xl font-bold text-black sm:text-2xl">
+              ADMIN
             </h1>
             <div className="flex items-center gap-4">
               {isMfaEnabled && (
-                <Badge variant="secondary" className="border-2 border-foreground">
+                <Badge>
                   <Lock className="mr-1.5 size-3" /> MFA Enabled
                 </Badge>
               )}
               <Button variant="destructive" size="sm" onClick={onLogout}>
-                <LogOut className="mr-1.5 size-4" /> Logout
+                <LogOut className="mr-1.5 size-4" /> LOGOUT
               </Button>
             </div>
           </div>
@@ -138,10 +141,10 @@ export default function AdminDashboard({
       </header>
 
       <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
-        <div className="mb-8 border-b-2 border-foreground pb-4">
+        <div className="mb-8">
           <div>
-            <h2 className="text-3xl font-black uppercase tracking-tight">Dashboard</h2>
-            <p className="text-muted-foreground">
+            <h2 className="text-3xl font-bold tracking-tight">Dashboard</h2>
+            <p className="text-neutral-600">
               Manage your portfolio and content.
             </p>
           </div>
@@ -154,7 +157,7 @@ export default function AdminDashboard({
             {tabs.map((tab) => (
               <Button
                 key={tab.id}
-                variant={activeTab === tab.id ? "default" : "outline"}
+                variant={activeTab === tab.id ? "secondary" : "ghost"}
                 className="justify-start gap-2"
                 onClick={() => {
                   setActiveTab(tab.id as ActiveTab);
@@ -206,11 +209,11 @@ export default function AdminDashboard({
                 key="dashboard-overview"
                 initial={{ opacity: 0, y: 10 }}
                 animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.1 }}
+                transition={{ duration: 0.3 }}
                 className="space-y-8"
               >
                 <div>
-                  <h3 className="mb-4 text-xl font-bold uppercase">This Month's Summary</h3>
+                  <h3 className="mb-4 text-xl font-bold">This Month's Summary</h3>
                   <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
                     {!dashboardData.stats ? (
                       Array.from({ length: 3 }).map((_, i) => <Skeleton key={i} className="h-28 w-full" />)
@@ -225,7 +228,7 @@ export default function AdminDashboard({
                 </div>
 
                 <div>
-                  <h3 className="mb-4 text-xl font-bold uppercase">At a Glance</h3>
+                  <h3 className="mb-4 text-xl font-bold">At a Glance</h3>
                   <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
                     {!dashboardData.stats ? (
                       Array.from({ length: 4 }).map((_, i) => <Skeleton key={i} className="h-28 w-full" />)
@@ -242,13 +245,13 @@ export default function AdminDashboard({
 
                 {dashboardData.pinnedNotes.length > 0 && (
                   <div>
-                    <h3 className="mb-3 text-xl font-bold uppercase">Pinned Notes</h3>
+                    <h3 className="mb-3 text-xl font-bold">Pinned Notes</h3>
                     <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
                       {dashboardData.pinnedNotes.map((note) => (
                         <Card key={note.id}>
                           <CardHeader><CardTitle className="truncate text-base">{note.title || "Untitled Note"}</CardTitle></CardHeader>
                           <CardContent>
-                            <p className="line-clamp-3 text-sm text-muted-foreground">{note.content}</p>
+                            <p className="line-clamp-3 text-sm text-neutral-600">{note.content}</p>
                             <Button size="sm" variant="secondary" className="mt-4 text-xs" onClick={() => setActiveTab("notes")}>Go to Note</Button>
                           </CardContent>
                         </Card>
@@ -259,14 +262,14 @@ export default function AdminDashboard({
 
                 {dashboardData.recentPosts.length > 0 && (
                   <div>
-                    <h3 className="mb-3 text-xl font-bold uppercase">Recently Updated Blog Posts</h3>
+                    <h3 className="mb-3 text-xl font-bold">Recently Updated Blog Posts</h3>
                     <Card>
-                      <CardContent className="p-4 space-y-3">
+                      <CardContent className="space-y-3 p-4">
                         {dashboardData.recentPosts.map((post) => (
-                          <div key={post.id} className="flex flex-col items-start gap-2 rounded-none p-3 hover:bg-secondary sm:flex-row sm:items-center sm:justify-between">
+                          <div key={post.id} className="flex flex-col items-start gap-2 rounded-none bg-white p-3 sm:flex-row sm:items-center sm:justify-between hover:bg-neutral-50 border-y-2 border-transparent hover:border-black">
                             <div>
-                              <button onClick={() => setActiveTab("blogs")} className="text-left font-bold text-foreground hover:bg-accent hover:text-accent-foreground">{post.title}</button>
-                              <p className="text-xs text-muted-foreground">Updated: {new Date(post.updated_at || "").toLocaleDateString()}</p>
+                              <button onClick={() => setActiveTab("blogs")} className="text-left font-semibold text-black hover:text-blue-600 hover:underline">{post.title}</button>
+                              <p className="text-xs text-neutral-500">Updated: {new Date(post.updated_at || "").toLocaleDateString()}</p>
                             </div>
                             <div className="flex w-full shrink-0 space-x-2 sm:w-auto">
                               <Button asChild variant="ghost" size="sm" className="flex-1">
@@ -290,8 +293,8 @@ export default function AdminDashboard({
                 key={activeTab}
                 initial={{ opacity: 0, y: 10 }}
                 animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.1 }}
-                className="rounded-none border-2 border-foreground bg-card p-4 sm:p-6"
+                transition={{ duration: 0.2 }}
+                className="rounded-none border-2 border-black bg-white p-4 sm:p-6"
               >
                 {activeTab === "blogs" && <BlogManager startInCreateMode={initialAction === "createBlogPost"} onActionHandled={handleActionCompleted} />}
                 {activeTab === "content" && <ContentManager />}

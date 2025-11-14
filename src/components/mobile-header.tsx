@@ -1,10 +1,10 @@
 
 /*
-This file replaces the previous `bottom-menu.tsx` and is styled for the neo-brutalist theme.
-- The `Sheet` component is used for the slide-out menu, which inherits the neo-brutalist styling (hard borders, shadows).
-- Navigation links are styled with sharp corners and high-contrast active/hover states.
-- A theme toggle button is included in the mobile menu for consistency.
-- The design is functional and raw, with clear visual hierarchy.
+This file replaces the previous `bottom-menu.tsx` and applies the neo-brutalist style to a top-fixed mobile header.
+- The `Sheet` component is used for the slide-out menu, inheriting the new raw, bordered style.
+- The header has a thick `border-b-2`.
+- Navigation links inside the sheet are styled to be blocky and high-contrast, matching the theme's aesthetic.
+- The theme toggle button is included for consistency with the desktop header.
 */
 "use client";
 
@@ -14,7 +14,8 @@ import { useRouter } from "next/router";
 import { useTheme } from "next-themes";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger, SheetClose } from "@/components/ui/sheet";
 import { Button } from "@/components/ui/button";
-import { Menu, Sun, Moon, X, Home, AppWindow, Code, BookOpen, User, Send, LucideIcon } from "lucide-react";
+import { Menu, Sun, Moon, X, Home, AppWindow, Code, BookOpen, User, Send } from "lucide-react";
+import type { Icon as LucideIcon } from "lucide-react";
 
 type NavLink = {
   href: string;
@@ -37,10 +38,10 @@ export default function MobileHeader() {
   const [isOpen, setIsOpen] = useState(false);
 
   return (
-    <header className="fixed top-0 z-50 w-full border-b-2 border-foreground bg-background py-3 md:hidden">
+    <header className="fixed top-0 z-50 w-full border-b-2 border-black bg-white/80 py-3 backdrop-blur-sm md:hidden">
       <div className="mx-auto flex items-center justify-between px-4">
-        <Link href="/" className="text-xl font-black tracking-tight" onClick={() => setIsOpen(false)}>
-          AB.
+        <Link href="/" className="text-xl font-bold tracking-tight" onClick={() => setIsOpen(false)}>
+          A.B.
         </Link>
 
         <Sheet open={isOpen} onOpenChange={setIsOpen}>
@@ -54,7 +55,6 @@ export default function MobileHeader() {
             <SheetHeader>
               <SheetTitle>Navigation</SheetTitle>
                <SheetClose>
-                <X className="size-5" />
                 <span className="sr-only">Close</span>
               </SheetClose>
             </SheetHeader>
@@ -69,8 +69,8 @@ export default function MobileHeader() {
                       onClick={() => setIsOpen(false)}
                       className={`-mx-3 flex items-center gap-3 rounded-none border-2 border-transparent px-3 py-2 text-lg font-bold transition-colors ${
                         isActive
-                          ? "bg-primary text-primary-foreground border-foreground"
-                          : "text-muted-foreground hover:bg-secondary hover:text-secondary-foreground"
+                          ? "bg-yellow-300 text-black border-black"
+                          : "text-neutral-600 hover:bg-neutral-100 hover:text-black"
                       }`}
                     >
                       <link.icon className="size-5" />

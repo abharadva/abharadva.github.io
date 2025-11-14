@@ -1,11 +1,10 @@
 
 /*
-This component has been rewritten to provide a flexible header layout while adopting the neo-brutalist style.
-- `SheetContent` is styled with a thick `border`, `rounded-none`, and a hard `shadow-[...]`.
-- The `SheetHeader` is now a `flex` container with `justify-between` and `items-center` and has a thick border bottom.
-- This allows you to place a `SheetTitle` on the left and a `SheetClose` on the right.
-- You must now add the `SheetClose` button manually inside the header or content for it to be visible.
-- All styles are updated for a raw, high-contrast, and functional appearance.
+This component has been updated for the neo-brutalist theme and to provide a more flexible header layout.
+- `SheetContent` is styled with `border-2`, `rounded-none`, and `shadow-[...]`.
+- The default `SheetClose` button has been REMOVED from the `SheetContent`. You must now add it manually to your implementation.
+- `SheetHeader` is now a `flex` container with `justify-between`, allowing you to place titles and close buttons freely.
+- All styles have been updated to match the raw, high-contrast neo-brutalist aesthetic.
 */
 "use client";
 
@@ -27,7 +26,7 @@ const SheetClose = React.forwardRef<
   <SheetPrimitive.Close
     ref={ref}
     className={cn(
-      "rounded-none border-2 border-transparent p-1 opacity-70 ring-offset-background transition-opacity hover:opacity-100 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:pointer-events-none data-[state=open]:bg-secondary hover:border-foreground",
+      "rounded-none opacity-70 ring-offset-background transition-opacity hover:opacity-100 focus:outline-none focus:ring-2 focus:ring-black focus:ring-offset-2 disabled:pointer-events-none p-1 border-2 border-transparent hover:border-black",
       className
     )}
     {...props}
@@ -56,16 +55,16 @@ const SheetOverlay = React.forwardRef<
 SheetOverlay.displayName = SheetPrimitive.Overlay.displayName;
 
 const sheetVariants = cva(
-  "fixed z-50 gap-4 bg-background p-6 shadow-[8px_8px_0px_#000] transition ease-in-out data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:duration-300 data-[state=open]:duration-500 dark:shadow-[8px_8px_0px_#FFF]",
+  "fixed z-50 gap-4 bg-white p-6 shadow-lg transition ease-in-out data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:duration-300 data-[state=open]:duration-500 rounded-none border-2 border-black",
   {
     variants: {
       side: {
-        top: "inset-x-0 top-0 border-b-2 border-foreground data-[state=closed]:slide-out-to-top data-[state=open]:slide-in-from-top",
+        top: "inset-x-0 top-0 border-b-2 data-[state=closed]:slide-out-to-top data-[state=open]:slide-in-from-top",
         bottom:
-          "inset-x-0 bottom-0 border-t-2 border-foreground data-[state=closed]:slide-out-to-bottom data-[state=open]:slide-in-from-bottom",
-        left: "inset-y-0 left-0 h-full w-3/4 border-r-2 border-foreground data-[state=closed]:slide-out-to-left data-[state=open]:slide-in-from-left sm:max-w-sm",
+          "inset-x-0 bottom-0 border-t-2 data-[state=closed]:slide-out-to-bottom data-[state=open]:slide-in-from-bottom",
+        left: "inset-y-0 left-0 h-full w-3/4 border-r-2 data-[state=closed]:slide-out-to-left data-[state=open]:slide-in-from-left sm:max-w-sm",
         right:
-          "inset-y-0 right-0 h-full w-3/4 border-l-2 border-foreground data-[state=closed]:slide-out-to-right data-[state=open]:slide-in-from-right sm:max-w-sm",
+          "inset-y-0 right-0 h-full w-3/4 border-l-2 data-[state=closed]:slide-out-to-right data-[state=open]:slide-in-from-right sm:max-w-sm",
       },
     },
     defaultVariants: {
@@ -102,7 +101,7 @@ const SheetHeader = ({
 }: React.HTMLAttributes<HTMLDivElement>) => (
   <div
     className={cn(
-      "flex items-center justify-between border-b-2 border-foreground pb-4 text-left",
+      "flex items-center justify-between space-y-2 border-b-2 border-black pb-4",
       className
     )}
     {...props}
@@ -116,7 +115,7 @@ const SheetFooter = ({
 }: React.HTMLAttributes<HTMLDivElement>) => (
   <div
     className={cn(
-      "flex flex-col-reverse border-t-2 border-foreground pt-4 sm:flex-row sm:justify-end sm:space-x-2",
+      "mt-auto flex flex-col-reverse sm:flex-row sm:justify-end sm:space-x-2 border-t-2 border-black pt-4",
       className
     )}
     {...props}
@@ -130,7 +129,7 @@ const SheetTitle = React.forwardRef<
 >(({ className, ...props }, ref) => (
   <SheetPrimitive.Title
     ref={ref}
-    className={cn("text-lg font-bold text-foreground", className)}
+    className={cn("text-lg font-bold text-black", className)}
     {...props}
   />
 ));
@@ -142,7 +141,7 @@ const SheetDescription = React.forwardRef<
 >(({ className, ...props }, ref) => (
   <SheetPrimitive.Description
     ref={ref}
-    className={cn("text-sm text-muted-foreground", className)}
+    className={cn("text-sm text-neutral-600", className)}
     {...props}
   />
 ));

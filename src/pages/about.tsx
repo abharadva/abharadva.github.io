@@ -1,12 +1,13 @@
 
 /*
-This file is updated to align with the new neo-brutalist design system.
-- The page structure is made more direct and stark.
-- A neo-brutalist `Avatar` and bold, uppercase typography introduce the page.
-- The bio text is presented in a stark, functional manner.
-- The `Technology` and `Tools` sections are retained for content and inherit the new brutalist styles from their respective components.
+This file is updated to align with the new neo-brutalist design.
+- The page structure is updated to use the bold, blocky `Me` component for the introduction.
+- The `Hero` component presents the main bio text in a container with a hard shadow and thick border.
+- `Technology` and `Tools` components are retained for content, with their styling updated in their respective files to match the new aesthetic.
 */
 import Layout from "@/components/layout";
+import Me from "@/components/me";
+import Hero from "@/components/hero";
 import Technology from "@/components/technology";
 import Tools from "@/components/tools";
 import Head from "next/head";
@@ -35,44 +36,13 @@ export default function AboutPage() {
       </Head>
 
       <main className="py-12 md:py-16">
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5 }}
-          className="mx-auto max-w-3xl text-center"
-        >
-          <Avatar className="mx-auto h-24 w-24">
-            <AvatarImage
-              src={"https://avatars.githubusercontent.com/u/52954931?v=4"}
-              alt="Akshay Bharadva"
-            />
-            <AvatarFallback>AB</AvatarFallback>
-          </Avatar>
-          <h1 className="mt-6 text-4xl font-black uppercase tracking-tighter text-foreground sm:text-5xl">
-            About Me
-          </h1>
-          <p className="mt-4 text-lg font-bold text-muted-foreground">
-            Full-stack developer, open-source enthusiast, and lifelong learner.
-          </p>
-        </motion.div>
-
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.1, duration: 0.5 }}
-          className="prose prose-lg dark:prose-invert mx-auto mt-12 max-w-3xl"
-        >
-          <p>
-            Hey there! I'm a full-stack developer and life-long learner from India,
-            currently living in ON, Canada. I enjoy learning new technologies
-            and collaborating with other developers to make products a reality.
-          </p>
-          <p>
-            I also enjoy open-source; despite having a full-time job, I devote
-            time to exploring open-source projects and studying their tech stack
-            and coding conventions.
-          </p>
-        </motion.div>
+        <Me>
+            <h1 className="mt-6 text-4xl font-bold tracking-tighter text-black sm:text-5xl text-center">
+                About Me
+            </h1>
+        </Me>
+        
+        <Hero />
 
         <div className="mx-auto mt-16 max-w-5xl">
           <Technology />

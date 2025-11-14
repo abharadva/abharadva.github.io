@@ -7,23 +7,19 @@ import { motion } from "framer-motion";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import Link from "next/link";
-import { ArrowUpRight, Calendar, Link as LinkIcon } from "lucide-react";
+import { ArrowUpRight, Calendar } from "lucide-react";
 import { Card, CardContent, CardFooter, CardHeader } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
 import { supabase } from "@/supabase/client";
 import { cn } from "@/lib/utils";
 
-// --- NEW VERSATILE CARD DESIGN ---
 const ShowcaseItemCard: React.FC<{ item: PortfolioItem }> = ({ item }) => {
-  // Determine if this is likely an "experience" type item based on if it has dates in subtitle
   const isTimelineItem = item.subtitle && /\d{4}/.test(item.subtitle);
 
   return (
-    <Card className="group relative flex h-full flex-col overflow-hidden border bg-card/50 text-card-foreground transition-all duration-300 hover:-translate-y-1 hover:shadow-lg hover:bg-card/80">
-      {/* Optional Image Header */}
+    <Card className="group relative flex h-full flex-col overflow-hidden text-black transition-all duration-300 hover:-translate-y-1 hover:shadow-[8px_8px_0_#000]">
       {item.image_url && (
-        <div className="relative aspect-[16/9] w-full overflow-hidden border-b bg-muted">
+        <div className="relative aspect-[16/9] w-full overflow-hidden border-b-2 border-black bg-neutral-100">
           <img 
             src={item.image_url} 
             alt={item.title} 
@@ -32,47 +28,41 @@ const ShowcaseItemCard: React.FC<{ item: PortfolioItem }> = ({ item }) => {
           />
         </div>
       )}
-
-      <CardHeader className="pb-3">
+      <CardHeader className="pb-3 border-b-2">
         <div className="flex items-start justify-between gap-4">
           <div className="space-y-1.5">
             <h3 className="text-xl font-bold leading-tight tracking-tight">{item.title}</h3>
             {item.subtitle && (
-              <div className={cn("flex items-center text-sm text-muted-foreground", isTimelineItem && "font-mono text-xs uppercase tracking-wider")}>
+              <div className={cn("flex items-center text-sm text-neutral-600", isTimelineItem && "text-xs uppercase tracking-wider")}>
                 {isTimelineItem && <Calendar className="mr-1.5 size-3.5" />}
                 {item.subtitle}
               </div>
             )}
           </div>
-          {/* Link icon indicator if a link exists */}
           {item.link_url && (
-             <div className="rounded-full bg-secondary/50 p-2 text-secondary-foreground opacity-0 transition-opacity group-hover:opacity-100">
+             <div className="rounded-none border-2 border-black bg-white p-2 text-black opacity-0 transition-opacity group-hover:opacity-100">
                 <ArrowUpRight className="size-4" />
              </div>
           )}
         </div>
       </CardHeader>
-
-      <CardContent className="flex-grow pb-4">
+      <CardContent className="flex-grow pt-6 pb-4">
         {item.description && (
-          <div className="prose prose-sm dark:prose-invert text-muted-foreground line-clamp-4">
-             {/* line-clamp-4 keeps cards uniform height-ish. Remove if you want full text. */}
+          <div className="prose-sm prose text-neutral-700 line-clamp-4">
             <ReactMarkdown remarkPlugins={[remarkGfm]}>{item.description}</ReactMarkdown>
           </div>
         )}
       </CardContent>
-
-      <CardFooter className="flex flex-col items-start gap-4 border-t pt-4 bg-muted/20">
+      <CardFooter className="flex-col items-start gap-4 border-t-2 border-black bg-neutral-50 pt-4">
         {item.tags && item.tags.length > 0 && (
           <div className="flex flex-wrap gap-1.5">
             {item.tags.map((tag) => (
-              <Badge key={tag} variant="secondary" className="font-mono text-[10px] uppercase rounded-sm px-1.5 py-0.5">
+              <Badge key={tag} variant="secondary" className="text-[10px] uppercase">
                 {tag}
               </Badge>
             ))}
           </div>
         )}
-        {/* The whole card acts as a link if a URL exists, using this invisible overlay */}
         {item.link_url && (
           <Link href={item.link_url} target="_blank" rel="noopener noreferrer" className="absolute inset-0 z-10">
             <span className="sr-only">View {item.title}</span>
@@ -83,7 +73,6 @@ const ShowcaseItemCard: React.FC<{ item: PortfolioItem }> = ({ item }) => {
   );
 };
 
-// --- DATA FETCHING (UNCHANGED) ---
 export const getStaticProps: GetStaticProps<{ sections: PortfolioSection[] }> = async () => {
   const { data, error } = await supabase
     .from("portfolio_sections")
@@ -99,15 +88,8 @@ export const getStaticProps: GetStaticProps<{ sections: PortfolioSection[] }> = 
 export default function ShowcasePage({ sections }: InferGetStaticPropsType<typeof getStaticProps>) {
   const { site: siteConfig } = appConfig;
 
-  // Animation variants
-  const fadeInUp = {
-    hidden: { opacity: 0, y: 30 },
-    visible: { opacity: 1, y: 0, transition: { duration: 0.6, ease: [0.22, 1, 0.36, 1] } }
-  };
-  const staggerContainer = {
-    hidden: { opacity: 0 },
-    visible: { opacity: 1, transition: { staggerChildren: 0.1 } }
-  };
+  const fadeInUp = { hidden: { opacity: 0, y: 30 }, visible: { opacity: 1, y: 0, transition: { duration: 0.6, ease: [0.22, 1, 0.36, 1] } } };
+  const staggerContainer = { hidden: { opacity: 0 }, visible: { opacity: 1, transition: { staggerChildren: 0.1 } } };
 
   return (
     <Layout>
@@ -115,16 +97,15 @@ export default function ShowcasePage({ sections }: InferGetStaticPropsType<typeo
         <title>{`Showcase | ${siteConfig.title}`}</title>
         <meta name="description" content="A curated collection of my work, skills, and professional journey." />
       </Head>
-
       <main className="py-16 md:py-24">
         <motion.header 
            initial="hidden" animate="visible" variants={fadeInUp}
            className="container mx-auto mb-24 max-w-4xl px-4 text-center"
         >
-          <h1 className="text-5xl font-black tracking-tighter md:text-7xl">
+          <h1 className="text-5xl font-bold tracking-tighter md:text-7xl">
             Showcase.
           </h1>
-          <p className="mx-auto mt-6 max-w-2xl text-xl text-muted-foreground font-light leading-relaxed">
+          <p className="mx-auto mt-6 max-w-2xl text-xl text-neutral-600 font-normal leading-relaxed">
             A deep dive into my professional journey, featured projects, and technical expertise.
           </p>
         </motion.header>
@@ -138,18 +119,16 @@ export default function ShowcasePage({ sections }: InferGetStaticPropsType<typeo
               viewport={{ once: true, margin: "-100px" }}
               variants={staggerContainer}
             >
-              {/* --- Modern Section Header --- */}
-              <motion.div variants={fadeInUp} className="mb-12 flex items-baseline gap-4 border-b pb-4">
-                 <span className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-primary/5 text-lg font-bold text-primary font-mono">
+              <motion.div variants={fadeInUp} className="mb-12 flex items-baseline gap-4 border-b-2 border-black pb-4">
+                 <span className="flex h-12 w-12 shrink-0 items-center justify-center rounded-none border-2 border-black bg-yellow-300 text-lg font-bold text-black">
                     {String(index + 1).padStart(2, '0')}
                  </span>
                 <h2 className="text-4xl font-bold tracking-tight">{section.title}</h2>
               </motion.div>
 
-              {/* --- Content Area --- */}
               {section.type === "markdown" && section.content && (
                 <motion.div variants={fadeInUp}>
-                  <div className="prose dark:prose-invert max-w-3xl rounded-xl border bg-card/30 p-8 md:p-10 shadow-sm backdrop-blur-sm">
+                  <div className="prose max-w-3xl rounded-none border-2 border-black bg-white p-8 shadow-[8px_8px_0_#000] md:p-10">
                      <ReactMarkdown remarkPlugins={[remarkGfm]}>{section.content}</ReactMarkdown>
                   </div>
                 </motion.div>
@@ -172,7 +151,7 @@ export default function ShowcasePage({ sections }: InferGetStaticPropsType<typeo
         </div>
         
         {sections.length === 0 && (
-          <div className="py-20 text-center text-muted-foreground">
+          <div className="py-20 text-center text-neutral-500">
             No content found. Time to add some in the admin panel!
           </div>
         )}

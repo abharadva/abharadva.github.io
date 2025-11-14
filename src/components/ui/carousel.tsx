@@ -1,9 +1,9 @@
 
 /*
-This file is updated for the new neo-brutalist design system.
-- The main container is styled with a `border-2`, `rounded-none`, and a hard `shadow-[...]`.
-- The previous and next navigation buttons are updated to use the redesigned `Button` component, inheriting its neo-brutalist style.
-- The positioning of the navigation buttons is adjusted for a functional, raw placement outside the main container.
+This file is updated for the new neo-brutalist design.
+- The subtle, modern style of the navigation buttons is replaced with the newly designed brutalist `Button` component, featuring hard shadows and thick borders.
+- The `rounded-full` shape of the buttons is replaced with `rounded-none` to match the sharp aesthetic.
+- The overall container is now styled with a `border-2 border-black`, making it a distinct, blocky element.
 */
 "use client";
 
@@ -144,7 +144,7 @@ const Carousel = React.forwardRef<
         <div
           ref={ref}
           onKeyDownCapture={handleKeyDown}
-          className={cn("relative rounded-none border-2 border-foreground bg-background p-4 shadow-[4px_4px_0px_#000] dark:shadow-[4px_4px_0px_#FFF]", className)}
+          className={cn("relative rounded-none border-2 border-black p-4", className)}
           role="region"
           aria-roledescription="carousel"
           {...props}
@@ -215,8 +215,8 @@ const CarouselPrevious = React.forwardRef<
       className={cn(
         "absolute h-8 w-8",
         orientation === "horizontal"
-          ? "-left-16 top-1/2 -translate-y-1/2"
-          : "-top-16 left-1/2 -translate-x-1/2 rotate-90",
+          ? "-left-12 top-1/2 -translate-y-1/2"
+          : "-top-12 left-1/2 -translate-x-1/2 rotate-90",
         className
       )}
       disabled={!canScrollPrev}
@@ -244,8 +244,8 @@ const CarouselNext = React.forwardRef<
       className={cn(
         "absolute h-8 w-8",
         orientation === "horizontal"
-          ? "-right-16 top-1/2 -translate-y-1/2"
-          : "-bottom-16 left-1/2 -translate-x-1/2 rotate-90",
+          ? "-right-12 top-1/2 -translate-y-1/2"
+          : "-bottom-12 left-1/2 -translate-x-1/2 rotate-90",
         className
       )}
       disabled={!canScrollNext}

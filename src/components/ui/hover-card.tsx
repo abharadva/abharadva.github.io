@@ -1,8 +1,8 @@
+
 /*
-This file is updated for the new neo-brutalist design system.
-- The modern styles are replaced with `border-2`, `rounded-none`, and a hard `shadow-[...]` on `HoverCardContent`.
-- The hover card panel now has a raw, functional appearance, consistent with other popover-like components.
-- The animation properties are kept for a smooth user experience but are now faster to feel more responsive.
+This file has been updated for the neo-brutalist design.
+- `HoverCardContent` is now styled with a thick `border-2`, sharp `rounded-none`, and a hard `shadow-[...]` to match the aesthetic of other popover elements.
+- The animations are retained but the visual appearance is now raw and blocky.
 */
 "use client";
 
@@ -24,7 +24,7 @@ const HoverCardContent = React.forwardRef<
     align={align}
     sideOffset={sideOffset}
     className={cn(
-      "z-50 w-64 rounded-none border-2 border-foreground bg-popover p-4 text-popover-foreground shadow-[4px_4px_0px_#000] outline-none data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 data-[side=bottom]:slide-in-from-top-2 data-[side=left]:slide-in-from-right-2 data-[side=right]:slide-in-from-left-2 data-[side=top]:slide-in-from-bottom-2 dark:shadow-[4px_4px_0px_#FFF]",
+      "z-50 w-64 rounded-none border-2 border-black bg-white p-4 text-black shadow-[8px_8px_0_#000] outline-none data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 data-[side=bottom]:slide-in-from-top-2 data-[side=left]:slide-in-from-right-2 data-[side=right]:slide-in-from-left-2 data-[side=top]:slide-in-from-bottom-2",
       className
     )}
     {...props}

@@ -1,9 +1,10 @@
 
 /*
-This file is updated to adopt the new neo-brutalist design system.
-- Standard border-radius is replaced with `rounded-none`.
-- The subtle single-pixel border is replaced with a `border-2`.
-- The `destructive` variant is updated to use a high-contrast border and text color for a starker appearance.
+This file is updated for the neo-brutalist design system.
+- Standard rounded corners are replaced with `rounded-none`.
+- Subtle borders are replaced with a `border-2` style.
+- The `destructive` variant is made more impactful with a high-contrast background and border.
+- The shadow is defined using a hard-edged `shadow-[4px_4px_0_#000]` for a distinct brutalist feel.
 */
 import * as React from "react";
 import { cva, type VariantProps } from "class-variance-authority";
@@ -11,13 +12,13 @@ import { cva, type VariantProps } from "class-variance-authority";
 import { cn } from "@/lib/utils";
 
 const alertVariants = cva(
-  "relative w-full rounded-none border-2 p-4 [&>svg~*]:pl-7 [&>svg+div]:translate-y-[-3px] [&>svg]:absolute [&>svg]:left-4 [&>svg]:top-4 [&>svg]:text-foreground",
+  "relative w-full rounded-none border-2 p-4 [&>svg~*]:pl-7 [&>svg+div]:translate-y-[-3px] [&>svg]:absolute [&>svg]:left-4 [&>svg]:top-4 [&>svg]:text-black shadow-[4px_4px_0_#000]",
   {
     variants: {
       variant: {
-        default: "border-foreground bg-background text-foreground",
+        default: "border-black bg-white text-black",
         destructive:
-          "border-destructive text-destructive dark:border-destructive [&>svg]:text-destructive",
+          "border-destructive bg-red-100 text-destructive shadow-[4px_4px_0_theme(colors.destructive)] [&>svg]:text-destructive",
       },
     },
     defaultVariants: {

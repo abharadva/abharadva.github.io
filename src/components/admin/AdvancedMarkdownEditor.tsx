@@ -41,13 +41,13 @@ export default function AdvancedMarkdownEditor({
   return (
     <div
       className={cn(
-        "rounded-none border-2 border-foreground bg-card",
+        "rounded-none border-2 border-black bg-white",
         isFullScreen && "fixed inset-0 z-50 flex flex-col",
       )}
     >
-      <div className="flex flex-col items-stretch gap-2 border-b-2 border-foreground bg-muted/50 p-2 sm:flex-row sm:items-center sm:justify-between">
-        <span className="text-xs font-bold uppercase text-muted-foreground">
-          Markdown Editor
+      <div className="flex flex-col items-stretch gap-2 border-b-2 border-black bg-neutral-100 p-2 sm:flex-row sm:items-center sm:justify-between">
+        <span className="text-xs font-bold text-neutral-500">
+          MARKDOWN EDITOR
         </span>
         <div className="flex w-full items-center justify-end gap-2 sm:w-auto">
           <Button
