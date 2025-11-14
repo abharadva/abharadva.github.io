@@ -4,7 +4,7 @@ import { config as appConfig } from "@/lib/config";
 import type { PortfolioSection, PortfolioItem } from "@/types";
 import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
-import MarkdownPreview from "@uiw/react-markdown-preview";
+import ReactMarkdown from "react-markdown";
 
 import Link from "next/link";
 import { ArrowUpRight, Calendar, Loader2, AlertTriangle } from "lucide-react";
@@ -53,7 +53,7 @@ const ShowcaseItemCard: React.FC<{ item: PortfolioItem }> = ({ item }) => {
       <CardContent className="flex-grow pb-4">
         {item.description && (
           <div className="prose prose-sm dark:prose-invert text-muted-foreground line-clamp-4">
-            <MarkdownPreview source={item.description} style={{ backgroundColor: 'transparent' }} />
+            <ReactMarkdown>{item.description}</ReactMarkdown>
           </div>
         )}
       </CardContent>
@@ -172,7 +172,7 @@ export default function ShowcasePage() {
               {section.type === "markdown" && section.content && (
                 <motion.div variants={fadeInUp}>
                   <div className="prose dark:prose-invert max-w-3xl rounded-xl border bg-card/30 p-8 md:p-10 shadow-sm backdrop-blur-sm">
-                     <MarkdownPreview source={section.content} style={{ backgroundColor: 'transparent' }} />
+                     <ReactMarkdown>{section.content}</ReactMarkdown>
                   </div>
                 </motion.div>
               )}

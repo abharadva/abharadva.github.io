@@ -3,7 +3,6 @@ import { useEffect, useState } from "react";
 import { supabase } from "@/supabase/client";
 import type { BlogPost } from "@/types";
 import Head from "next/head";
-import dynamic from "next/dynamic";
 import Link from "next/link";
 import { motion } from "framer-motion";
 import Layout from "@/components/layout";
@@ -14,13 +13,12 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
-import Image from "next/image";
 
-
-const MarkdownPreview = dynamic(
-  () => import("@uiw/react-markdown-preview"),
-  { ssr: false }
-);
+import ReactMarkdown from "react-markdown";
+import remarkGfm from "remark-gfm";
+import rehypeRaw from "rehype-raw";
+import { Prism as SyntaxHighlighter } from "react-syntax-highlighter";
+import { materialDark } from "react-syntax-highlighter/dist/cjs/styles/prism";
 
 const PostHeader = ({ post }: { post: BlogPost }) => (
   <header className="mb-8">
@@ -68,25 +66,32 @@ const AuthorInfo = ({
 
 const PostContent = ({ content }: { content: string }) => {
   return (
-    <div className="wmde-markdown-var">
-      <div data-color-mode="light" className="dark:hidden">
-        <MarkdownPreview source={content} style={{ 
-            whiteSpace: 'pre-wrap',
-            backgroundColor: 'transparent',
-            color: 'inherit',
-            fontFamily: 'inherit'
-          }}
-          />
-      </div>
-      <div data-color-mode="dark" className="hidden dark:block">
-        <MarkdownPreview source={content} style={{ 
-            whiteSpace: 'pre-wrap',
-            backgroundColor: 'transparent',
-            color: 'inherit',
-            fontFamily: 'inherit'
-          }}
-          />
-      </div>
+    <div className="prose prose-lg dark:prose-invert max-w-none">
+      <ReactMarkdown
+        remarkPlugins={[remarkGfm]}
+        rehypePlugins={[rehypeRaw]}
+        components={{
+          code({ node, inline, className, children, ...props }) {
+            const match = /language-(\w+)/.exec(className || "");
+            return !inline && match ? (
+              <SyntaxHighlighter
+                style={materialDark}
+                language={match[1]}
+                PreTag="div"
+                {...props}
+              >
+                {String(children).replace(/\n$/, "")}
+              </SyntaxHighlighter>
+            ) : (
+              <code className={className} {...props}>
+                {children}
+              </code>
+            );
+          },
+        }}
+      >
+        {content}
+      </ReactMarkdown>
     </div>
   );
 };

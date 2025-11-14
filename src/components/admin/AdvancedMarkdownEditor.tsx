@@ -1,13 +1,14 @@
 import React, { useState, useEffect } from 'react';
-import dynamic from 'next/dynamic';
 import { Expand, Shrink, ImageIcon } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
-
-const MDEditor = dynamic(
-  () => import('@uiw/react-md-editor').then((mod) => mod.default),
-  { ssr: false }
-);
+import { ResizableHandle, ResizablePanel, ResizablePanelGroup } from '@/components/ui/resizable';
+import { ScrollArea } from '@/components/ui/scroll-area';
+import ReactMarkdown from 'react-markdown';
+import remarkGfm from 'remark-gfm';
+import rehypeRaw from 'rehype-raw';
+import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
+import { materialDark } from 'react-syntax-highlighter/dist/cjs/styles/prism';
 
 interface AdvancedMarkdownEditorProps {
   value: string;
@@ -44,16 +45,14 @@ export default function AdvancedMarkdownEditor({
     };
   }, [isFullScreen]);
 
-  const editorHeight = isFullScreen ? 'calc(100vh - 60px)' : minHeight;
-
   return (
     <div
       className={cn(
-        'rounded-lg border bg-card',
+        'relative rounded-lg border bg-card',
         isFullScreen && 'fixed inset-0 z-50 flex flex-col bg-background'
       )}
+      style={{ height: isFullScreen ? '100vh' : 'auto' }}
     >
-      {/* Toolbar */}
       <div className="flex flex-col items-stretch gap-2 border-b bg-secondary/50 p-2 sm:flex-row sm:items-center sm:justify-between">
         <span className="font-mono text-xs font-semibold uppercase text-muted-foreground">
           Markdown Editor
@@ -87,38 +86,49 @@ export default function AdvancedMarkdownEditor({
           </Button>
         </div>
       </div>
-
-      {/* Editor Container */}
-      <div className={cn('relative', isFullScreen && 'flex-grow overflow-hidden')}>
-        <div data-color-mode="light" className="dark:hidden">
-          <MDEditor
+      <ResizablePanelGroup direction="horizontal" className="flex-grow" style={{ minHeight }}>
+        <ResizablePanel defaultSize={50}>
+          <textarea
             value={value}
-            onChange={(val) => onChange(val || '')}
-            height={editorHeight}
-            textareaProps={{
-              placeholder: 'Write your amazing blog post here...',
-            }}
-            preview="edit"
-            hideToolbar={false}
-            enableScroll={true}
-            visibleDragbar={false}
+            onChange={(e) => onChange(e.target.value)}
+            placeholder="Write your amazing blog post here..."
+            className="h-full w-full resize-none rounded-bl-lg border-none bg-card p-4 font-mono text-sm text-card-foreground focus:outline-none"
+            spellCheck="false"
           />
-        </div>
-        <div data-color-mode="dark" className="hidden dark:block">
-          <MDEditor
-            value={value}
-            onChange={(val) => onChange(val || '')}
-            height={editorHeight}
-            textareaProps={{
-              placeholder: 'Write your amazing blog post here...',
-            }}
-            preview="edit"
-            hideToolbar={false}
-            enableScroll={true}
-            visibleDragbar={false}
-          />
-        </div>
-      </div>
+        </ResizablePanel>
+        <ResizableHandle withHandle />
+        <ResizablePanel defaultSize={50}>
+          <ScrollArea className="h-full">
+            <div className="prose dark:prose-invert max-w-none p-4">
+              <ReactMarkdown
+                remarkPlugins={[remarkGfm]}
+                rehypePlugins={[rehypeRaw]}
+                components={{
+                  code({ node, inline, className, children, ...props }) {
+                    const match = /language-(\w+)/.exec(className || '');
+                    return !inline && match ? (
+                      <SyntaxHighlighter
+                        style={materialDark}
+                        language={match[1]}
+                        PreTag="div"
+                        {...props}
+                      >
+                        {String(children).replace(/\n$/, '')}
+                      </SyntaxHighlighter>
+                    ) : (
+                      <code className={className} {...props}>
+                        {children}
+                      </code>
+                    );
+                  },
+                }}
+              >
+                {value}
+              </ReactMarkdown>
+            </div>
+          </ScrollArea>
+        </ResizablePanel>
+      </ResizablePanelGroup>
     </div>
   );
 }
