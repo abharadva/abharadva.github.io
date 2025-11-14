@@ -65,7 +65,7 @@ export default function AdvancedMarkdownEditor({
             variant="ghost"
             size="sm"
           >
-            <imgIcon className="mr-2 size-4" />
+            <ImageIcon className="mr-2 size-4" />
             Upload Image
           </Button>
           <Button
