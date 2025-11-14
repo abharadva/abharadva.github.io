@@ -119,7 +119,7 @@ export default function BlogIndexPage() {
                   <Card className="overflow-hidden transition-all duration-300 hover:border-accent hover:shadow-lg md:flex">
                     {post.cover_image_url && (
                       <div className="md:w-1/3 overflow-hidden">
-                        <Image
+                        <img
                           src={post.cover_image_url}
                           alt={`Cover image for ${post.title}`}
                           className="h-48 w-full object-cover transition-transform duration-500 group-hover:scale-105 md:h-full"

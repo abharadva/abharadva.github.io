@@ -1,5 +1,7 @@
 
 import "@/styles/globals.css";
+import "@uiw/react-md-editor/markdown-editor.css";
+import "@uiw/react-markdown-preview/markdown.css";
 import type { AppProps } from "next/app";
 import localFont from "next/font/local";
 import { motion, AnimatePresence } from "framer-motion";

@@ -4,8 +4,8 @@ import { config as appConfig } from "@/lib/config";
 import type { PortfolioSection, PortfolioItem } from "@/types";
 import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
-import ReactMarkdown from "react-markdown";
-import remarkGfm from "remark-gfm";
+import MarkdownPreview from "@uiw/react-markdown-preview";
+
 import Link from "next/link";
 import { ArrowUpRight, Calendar, Loader2, AlertTriangle } from "lucide-react";
 import { Card, CardContent, CardFooter, CardHeader } from "@/components/ui/card";
@@ -22,7 +22,7 @@ const ShowcaseItemCard: React.FC<{ item: PortfolioItem }> = ({ item }) => {
     <Card className="group relative flex h-full flex-col overflow-hidden bg-card/50 transition-all duration-300 hover:-translate-y-1 hover:border-primary/50 hover:shadow-lg hover:shadow-primary/10">
       {item.image_url && (
         <div className="relative aspect-[16/9] w-full overflow-hidden border-b bg-muted">
-          <Image 
+          <img 
             src={item.image_url} 
             alt={item.title} 
             className="h-full w-full object-cover object-center transition-transform duration-500 group-hover:scale-105" 
@@ -53,7 +53,7 @@ const ShowcaseItemCard: React.FC<{ item: PortfolioItem }> = ({ item }) => {
       <CardContent className="flex-grow pb-4">
         {item.description && (
           <div className="prose prose-sm dark:prose-invert text-muted-foreground line-clamp-4">
-            <ReactMarkdown remarkPlugins={[remarkGfm]}>{item.description}</ReactMarkdown>
+            <MarkdownPreview source={item.description} style={{ backgroundColor: 'transparent' }} />
           </div>
         )}
       </CardContent>
@@ -172,7 +172,7 @@ export default function ShowcasePage() {
               {section.type === "markdown" && section.content && (
                 <motion.div variants={fadeInUp}>
                   <div className="prose dark:prose-invert max-w-3xl rounded-xl border bg-card/30 p-8 md:p-10 shadow-sm backdrop-blur-sm">
-                     <ReactMarkdown remarkPlugins={[remarkGfm]}>{section.content}</ReactMarkdown>
+                     <MarkdownPreview source={section.content} style={{ backgroundColor: 'transparent' }} />
                   </div>
                 </motion.div>
               )}

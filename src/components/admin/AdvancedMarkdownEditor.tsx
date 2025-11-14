@@ -1,9 +1,13 @@
+import React, { useState, useEffect } from 'react';
+import dynamic from 'next/dynamic';
+import { Expand, Shrink, ImageIcon } from 'lucide-react';
+import { cn } from '@/lib/utils';
+import { Button } from '@/components/ui/button';
 
-import React, { useState, useEffect } from "react";
-import MarkdownEditor from "@/components/admin/markdown-editor";
-import { Expand, Shrink, Image as ImageIcon } from "lucide-react";
-import { cn } from "@/lib/utils";
-import { Button } from "../ui/button";
+const MDEditor = dynamic(
+  () => import('@uiw/react-md-editor').then((mod) => mod.default),
+  { ssr: false }
+);
 
 interface AdvancedMarkdownEditorProps {
   value: string;
@@ -16,35 +20,40 @@ export default function AdvancedMarkdownEditor({
   value,
   onChange,
   onImageUploadRequest,
-  minHeight = "300px",
+  minHeight = '400px',
 }: AdvancedMarkdownEditorProps) {
   const [isFullScreen, setIsFullScreen] = useState(false);
 
   useEffect(() => {
     const handleKeyDown = (event: KeyboardEvent) => {
-      if (event.key === "Escape") {
+      if (event.key === 'Escape' && isFullScreen) {
         setIsFullScreen(false);
       }
     };
+
     if (isFullScreen) {
-      window.addEventListener("keydown", handleKeyDown);
-      document.body.style.overflow = "hidden";
+      document.body.style.overflow = 'hidden';
+      window.addEventListener('keydown', handleKeyDown);
     } else {
-      document.body.style.overflow = "";
+      document.body.style.overflow = '';
     }
+
     return () => {
-      window.removeEventListener("keydown", handleKeyDown);
-      document.body.style.overflow = "";
+      window.removeEventListener('keydown', handleKeyDown);
+      document.body.style.overflow = '';
     };
   }, [isFullScreen]);
+
+  const editorHeight = isFullScreen ? 'calc(100vh - 60px)' : minHeight;
 
   return (
     <div
       className={cn(
-        "rounded-lg border bg-card",
-        isFullScreen && "fixed inset-0 z-50 flex flex-col",
+        'rounded-lg border bg-card',
+        isFullScreen && 'fixed inset-0 z-50 flex flex-col bg-background'
       )}
     >
+      {/* Toolbar */}
       <div className="flex flex-col items-stretch gap-2 border-b bg-secondary/50 p-2 sm:flex-row sm:items-center sm:justify-between">
         <span className="font-mono text-xs font-semibold uppercase text-muted-foreground">
           Markdown Editor
@@ -56,13 +65,13 @@ export default function AdvancedMarkdownEditor({
             variant="ghost"
             size="sm"
           >
-            <ImageIcon className="mr-2 size-4" />
+            <imgIcon className="mr-2 size-4" />
             Upload Image
           </Button>
           <Button
             type="button"
             onClick={() => setIsFullScreen(!isFullScreen)}
-            title={isFullScreen ? "Exit Fullscreen" : "Enter Fullscreen"}
+            title={isFullScreen ? 'Exit Fullscreen (Esc)' : 'Enter Fullscreen'}
             variant="ghost"
             size="icon"
             className="h-8 w-8"
@@ -73,18 +82,42 @@ export default function AdvancedMarkdownEditor({
               <Expand className="size-4" />
             )}
             <span className="sr-only">
-              {isFullScreen ? "Exit Fullscreen" : "Enter Fullscreen"}
+              {isFullScreen ? 'Exit Fullscreen' : 'Enter Fullscreen'}
             </span>
           </Button>
         </div>
       </div>
-      <div className={cn("relative", isFullScreen && "flex-grow")}>
-        <MarkdownEditor
-          value={value}
-          onChange={onChange}
-          placeholder="Write your amazing blog post here..."
-          height={isFullScreen ? "100%" : minHeight}
-        />
+
+      {/* Editor Container */}
+      <div className={cn('relative', isFullScreen && 'flex-grow overflow-hidden')}>
+        <div data-color-mode="light" className="dark:hidden">
+          <MDEditor
+            value={value}
+            onChange={(val) => onChange(val || '')}
+            height={editorHeight}
+            textareaProps={{
+              placeholder: 'Write your amazing blog post here...',
+            }}
+            preview="edit"
+            hideToolbar={false}
+            enableScroll={true}
+            visibleDragbar={false}
+          />
+        </div>
+        <div data-color-mode="dark" className="hidden dark:block">
+          <MDEditor
+            value={value}
+            onChange={(val) => onChange(val || '')}
+            height={editorHeight}
+            textareaProps={{
+              placeholder: 'Write your amazing blog post here...',
+            }}
+            preview="edit"
+            hideToolbar={false}
+            enableScroll={true}
+            visibleDragbar={false}
+          />
+        </div>
       </div>
     </div>
   );
