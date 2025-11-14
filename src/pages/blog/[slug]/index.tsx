@@ -82,7 +82,7 @@ const PostContent = ({ content }: { content: string }) => {
       </div>
       <div data-color-mode="dark" className="hidden dark:block">
         <MarkdownPreview source={content} style={{ 
-            // whiteSpace: 'pre-wrap',
+            whiteSpace: 'pre-wrap',
             backgroundColor: 'transparent',
             color: 'inherit',
             fontFamily: 'inherit'
@@ -267,7 +267,6 @@ export default function BlogPostPage() {
                   width={1200}
                   height={630}
                   className="my-8 h-auto w-full rounded-lg border object-cover"
-                  priority
                 />
               )}
               <Separator className="my-8" />
