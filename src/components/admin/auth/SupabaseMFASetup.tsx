@@ -144,7 +144,7 @@ export default function SupabaseMFASetup() {
       exit="exit"
       className="flex min-h-screen items-center justify-center bg-background px-4 py-12"
     >
-      <div className="w-full max-w-lg space-y-8 rounded-lg border border-border bg-card p-8 shadow-sm">
+      <div className="w-full max-w-lg space-y-8 rounded-lg border border-border bg-card p-8">
         <div className="text-center">
           <div className="mx-auto mb-4 flex size-12 items-center justify-center rounded-full bg-secondary">
             <Smartphone className="size-6 text-foreground" />

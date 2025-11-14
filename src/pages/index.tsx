@@ -18,32 +18,42 @@ import { useEffect } from "react";
 export default function HomePage() {
   const { site: siteConfig } = appConfig;
 
-  useEffect(() => {
+ useEffect(() => {
+    // WARNING: This approach exposes your Discord webhook URL to the public.
+    // It is highly recommended to use a serverless function proxy instead for a production site.
     const webhookUrl = process.env.NEXT_PUBLIC_VISIT_NOTIFIER_URL || "";
 
-    if (process.env.NODE_ENV === "production" && webhookUrl) {
+    // Only run this in production and if the URL is set
+    // if (process.env.NODE_ENV === "production" && webhookUrl && typeof window !== "undefined") {
+    if (true) {
+      // Use session storage to ensure this only runs once per browser session
       if (!sessionStorage.getItem("visitNotified")) {
         const userAgent = navigator.userAgent || "Unknown";
         const referrer = document.referrer || "Direct visit";
 
         const embed = {
           title: "🚀 New Portfolio Visitor!",
-          color: 3447003, // A nice blue color
-          description: `Someone just landed on the portfolio.`,
+          color: 15844367,
+          description: "Notification sent directly from client-side (insecure method).",
           fields: [
-            { name: "🔗 Referrer", value: `\`${referrer}\``, inline: false },
-            { name: "🖥️ User Agent", value: `\`\`\`${userAgent}\`\`\`` },
+            {
+              name: "🔗 Referrer",
+              value: `\`${referrer}\``,
+              inline: false,
+            },
+            {
+              name: "🖥️ User Agent",
+              value: `\`\`\`${userAgent}\`\`\``,
+            },
           ],
           timestamp: new Date().toISOString(),
-          footer: { text: "Visit Notification" }
         };
 
         fetch(webhookUrl, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
-            username: "Portfolio Bot",
-            avatar_url: "https://i.imgur.com/4M34hi2.png",
+            username: "Portfolio Bot (Client)",
             embeds: [embed],
           }),
         })

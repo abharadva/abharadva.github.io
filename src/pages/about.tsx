@@ -62,7 +62,7 @@ export default function AboutPage() {
           className="prose prose-lg dark:prose-invert mx-auto mt-12 max-w-3xl"
         >
           <p>
-            Hey there! I'm a full-stack developer and life-long learner from India,
+            Bonjour! I'm a full-stack developer and life-long learner from India,
             currently living in ON, Canada. I enjoy learning new technologies
             and collaborating with other developers to make products a reality.
           </p>

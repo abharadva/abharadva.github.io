@@ -14,7 +14,8 @@ const SITE_URL =
 const DEFAULT_OG_TITLE = "Akshay Bharadva - Fullstack Developer";
 const DEFAULT_OG_DESCRIPTION =
   "Portfolio and Blog of Akshay Bharadva, showcasing projects and thoughts on web development.";
-const DEFAULT_OG_IMAGE = `${SITE_URL}/default-og-image.png`;
+const DEFAULT_OG_IMAGE = `${SITE_URL}/default-og-image.png`; // Ensure this image exists in /public
+
 
 export default function Layout({ children }: LayoutProps) {
  return (

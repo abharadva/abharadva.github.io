@@ -239,12 +239,11 @@ USING (auth.uid() = user_id)
 WITH CHECK (auth.uid() = user_id);
 ```
 
-#### Finance Tables
+#### `transactions` Table
 
 ```sql
 -- Custom ENUM type for transaction type.
 CREATE TYPE transaction_type AS ENUM ('earning', 'expense');
-CREATE TYPE transaction_frequency AS ENUM ('daily', 'weekly', 'bi-weekly', 'monthly', 'yearly');
 
 -- Table for financial transactions.
 CREATE TABLE transactions (
@@ -256,52 +255,22 @@ CREATE TABLE transactions (
   type transaction_type NOT NULL,
   category TEXT,
   created_at TIMESTAMPTZ DEFAULT now(),
-  updated_at TIMESTAMPTZ DEFAULT now(),
-  recurring_transaction_id UUID REFERENCES recurring_transactions(id) ON DELETE SET NULL
-);
-
--- Table for recurring transactions rules.
-CREATE TABLE recurring_transactions (
-  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-  user_id UUID REFERENCES auth.users(id) ON DELETE CASCADE DEFAULT auth.uid(),
-  description TEXT NOT NULL,
-  amount NUMERIC(10, 2) NOT NULL,
-  type transaction_type NOT NULL,
-  category TEXT,
-  frequency transaction_frequency NOT NULL,
-  start_date DATE NOT NULL,
-  end_date DATE,
-  occurrence_day INT,
-  last_processed_date DATE,
-  created_at TIMESTAMPTZ DEFAULT now(),
   updated_at TIMESTAMPTZ DEFAULT now()
 );
 
--- Table for financial goals.
-CREATE TABLE financial_goals (
-  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-  user_id UUID REFERENCES auth.users(id) ON DELETE CASCADE DEFAULT auth.uid(),
-  name TEXT NOT NULL,
-  description TEXT,
-  target_amount NUMERIC(12, 2) NOT NULL,
-  current_amount NUMERIC(12, 2) NOT NULL DEFAULT 0,
-  target_date DATE,
-  created_at TIMESTAMPTZ DEFAULT now(),
-  updated_at TIMESTAMPTZ DEFAULT now()
-);
-
--- Enable RLS and setup triggers for all finance tables
+-- Enable RLS
 ALTER TABLE transactions ENABLE ROW LEVEL SECURITY;
-CREATE POLICY "Admin can manage their own transactions" ON transactions FOR ALL USING (auth.uid() = user_id) WITH CHECK (auth.uid() = user_id);
-CREATE TRIGGER update_transactions_updated_at BEFORE UPDATE ON transactions FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
 
-ALTER TABLE recurring_transactions ENABLE ROW LEVEL SECURITY;
-CREATE POLICY "Admin can manage their own recurring transactions" ON recurring_transactions FOR ALL USING (auth.uid() = user_id) WITH CHECK (auth.uid() = user_id);
-CREATE TRIGGER update_recurring_transactions_updated_at BEFORE UPDATE ON recurring_transactions FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
+-- RLS Policy: Admin can only access their own transactions.
+CREATE POLICY "Admin can manage their own transactions"
+ON transactions FOR ALL
+USING (auth.uid() = user_id)
+WITH CHECK (auth.uid() = user_id);
 
-ALTER TABLE financial_goals ENABLE ROW LEVEL SECURITY;
-CREATE POLICY "Admin can manage their own financial goals" ON financial_goals FOR ALL USING (auth.uid() = user_id) WITH CHECK (auth.uid() = user_id);
-CREATE TRIGGER update_financial_goals_updated_at BEFORE UPDATE ON financial_goals FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
+-- Trigger for 'updated_at' timestamp.
+CREATE TRIGGER update_transactions_updated_at
+BEFORE UPDATE ON transactions
+FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
 ```
 
 ---
@@ -367,10 +336,117 @@ WITH CHECK ( bucket_id = 'blog-assets' AND auth.role() = 'authenticated' );
 -- Admin can update their own files.
 CREATE POLICY "Admin can update files in blog-assets"
 ON storage.objects FOR UPDATE
-USING ( bucket_id = 'blog-assets' AND auth.uid() = owner );
+USING ( bucket_id = 'blog-assets' AND auth.role() = 'authenticated' );
 
 -- Admin can delete their own files.
 CREATE POLICY "Admin can delete files in blog-assets"
 ON storage.objects FOR DELETE
-USING ( bucket_id = 'blog-assets' AND auth.uid() = owner );
+USING ( bucket_id = 'blog-assets' AND auth.role() = 'authenticated' );
 ```
+
+-- ========= FINANCE V2 SCHEMA UPGRADE =========
+
+-- Drop types if they exist, to ensure a clean run
+DROP TYPE IF EXISTS transaction_frequency;
+
+-- Step 1: Create new ENUM types for recurring transactions
+CREATE TYPE transaction_frequency AS ENUM ('daily', 'weekly', 'monthly', 'yearly');
+
+-- Step 2: Create the 'recurring_transactions' table
+CREATE TABLE IF NOT EXISTS recurring_transactions (
+id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+user_id UUID REFERENCES auth.users(id) ON DELETE CASCADE DEFAULT auth.uid(),
+description TEXT NOT NULL,
+amount NUMERIC(10, 2) NOT NULL,
+type transaction_type NOT NULL, -- Reuses the type from the transactions table
+category TEXT,
+frequency transaction_frequency NOT NULL,
+start_date DATE NOT NULL,
+end_date DATE, -- Optional: for subscriptions that have an end date
+created_at TIMESTAMPTZ DEFAULT now(),
+updated_at TIMESTAMPTZ DEFAULT now()
+);
+
+-- Step 3: Set up RLS and Triggers for 'recurring_transactions'
+ALTER TABLE recurring_transactions ENABLE ROW LEVEL SECURITY;
+
+-- Drop policy if it exists to avoid errors on re-run
+DROP POLICY IF EXISTS "Admin can manage their own recurring transactions" ON recurring_transactions;
+
+CREATE POLICY "Admin can manage their own recurring transactions"
+ON recurring_transactions FOR ALL
+USING (auth.uid() = user_id)
+WITH CHECK (auth.uid() = user_id);
+
+-- Drop trigger if it exists
+DROP TRIGGER IF EXISTS update_recurring_transactions_updated_at ON recurring_transactions;
+
+CREATE TRIGGER update_recurring_transactions_updated_at
+BEFORE UPDATE ON recurring_transactions
+FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
+
+-- Step 4: Create the 'financial_goals' table
+CREATE TABLE IF NOT EXISTS financial_goals (
+id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+user_id UUID REFERENCES auth.users(id) ON DELETE CASCADE DEFAULT auth.uid(),
+name TEXT NOT NULL,
+description TEXT,
+target_amount NUMERIC(12, 2) NOT NULL,
+current_amount NUMERIC(12, 2) NOT NULL DEFAULT 0,
+target_date DATE,
+created_at TIMESTAMPTZ DEFAULT now(),
+updated_at TIMESTAMPTZ DEFAULT now()
+);
+
+-- Step 5: Set up RLS and Triggers for 'financial_goals'
+ALTER TABLE financial_goals ENABLE ROW LEVEL SECURITY;
+
+DROP POLICY IF EXISTS "Admin can manage their own financial goals" ON financial_goals;
+
+CREATE POLICY "Admin can manage their own financial goals"
+ON financial_goals FOR ALL
+USING (auth.uid() = user_id)
+WITH CHECK (auth.uid() = user_id);
+
+DROP TRIGGER IF EXISTS update_financial_goals_updated_at ON financial_goals;
+
+CREATE TRIGGER update_financial_goals_updated_at
+BEFORE UPDATE ON financial_goals
+FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
+
+-- Step 6: Add the foreign key column to the EXISTING 'transactions' table
+-- This links a transaction to a recurring rule, if it was generated from one.
+ALTER TABLE transactions
+ADD COLUMN IF NOT EXISTS recurring_transaction_id UUID REFERENCES recurring_transactions(id) ON DELETE SET NULL;
+
+-- ========= END OF SCRIPT =========
+
+-- Adds a column to track the last time a recurring rule was processed for automation.
+ALTER TABLE recurring_transactions
+ADD COLUMN IF NOT EXISTS last_processed_date DATE;
+
+-- ========= FINANCE V3 SCHEMA UPGRADE (Precise Scheduling) =========
+
+-- Step 1: We must drop the existing frequency type to add a new value.
+-- This is a standard procedure in PostgreSQL for altering ENUM types.
+ALTER TYPE transaction_frequency RENAME TO transaction_frequency_old;
+
+-- Step 2: Create the NEW frequency type with 'bi-weekly' included.
+CREATE TYPE transaction_frequency AS ENUM ('daily', 'weekly', 'bi-weekly', 'monthly', 'yearly');
+
+-- Step 3: Update the recurring_transactions table to use the new type.
+ALTER TABLE recurring_transactions 
+ALTER COLUMN frequency TYPE transaction_frequency 
+USING frequency::text::transaction_frequency;
+
+-- Step 4: Drop the old type now that it's no longer in use.
+DROP TYPE transaction_frequency_old;
+
+-- Step 5: Add the new column to store the specific day/date of the occurrence.
+-- For weekly/bi-weekly, this is day of week (0=Sun, 1=Mon, ..., 6=Sat).
+-- For monthly, this is date of month (1-31).
+-- For daily/yearly, this is NULL as it's not needed.
+ALTER TABLE recurring_transactions
+ADD COLUMN IF NOT EXISTS occurrence_day INT;
+
+-- ========= END OF SCRIPT =========

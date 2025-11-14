@@ -83,8 +83,8 @@ export default function SupabaseMFAChallenge() {
     return () => clearInterval(timer);
   }, []);
 
-  const handleVerify = async (e: React.FormEvent | string) => {
-    if (typeof e !== 'string') e.preventDefault();
+  const handleVerify = async (e: React.FormEvent) => {
+    e.preventDefault();
     if (!factorId) {
       setError("MFA factor ID is missing. Please try logging in again.");
       return;
@@ -92,11 +92,9 @@ export default function SupabaseMFAChallenge() {
     setIsLoadingState(true);
     setError("");
 
-    const codeToVerify = typeof e === 'string' ? e : otp;
-    
     const { error: verifyError } = await supabase.auth.mfa.challengeAndVerify({
       factorId: factorId,
-      code: codeToVerify,
+      code: otp,
     });
 
     setIsLoadingState(false);
@@ -140,7 +138,7 @@ export default function SupabaseMFAChallenge() {
       transition={{ duration: 0.3 }}
       className="flex min-h-screen items-center justify-center bg-background px-4"
     >
-      <div className="w-full max-w-sm space-y-8 rounded-lg border border-border bg-card p-8 shadow-sm">
+      <div className="w-full max-w-sm space-y-8 rounded-lg border border-border bg-card p-8">
         <div className="text-center">
           <div className="mx-auto mb-4 flex size-12 items-center justify-center rounded-full bg-secondary">
             <KeyRound className="size-6 text-foreground" />

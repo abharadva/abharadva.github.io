@@ -44,7 +44,7 @@ const CodeBlock = ({ className, children }: { className?: string, children: Reac
       <div className="flex items-center justify-between px-4 py-1.5 text-xs">
         <span className="font-sans text-muted-foreground">{lang}</span>
         <Button variant="ghost" size="icon" className="h-7 w-7 text-muted-foreground" onClick={handleCopy}>
-          {isCopied ? <Check className="size-4 text-primary" /> : <Copy className="size-4" />}
+          {isCopied ? <Check className="size-4 text-accent" /> : <Copy className="size-4" />}
         </Button>
       </div>
       <SyntaxHighlighter
@@ -160,7 +160,7 @@ export default function BlogPostPage() {
         try { await supabase.rpc("increment_blog_post_view", { post_id_to_increment: post.id }); }
         catch (rpcError) { console.error("Failed to increment view count", rpcError); }
       };
-      const timeoutId = setTimeout(incrementViewCount, 3000);
+      const timeoutId = setTimeout(incrementViewCount, 3000); // Increased delay
       return () => clearTimeout(timeoutId);
     }
   }, [post?.id]);

@@ -4,7 +4,7 @@ import Layout from "@/components/layout";
 export default function AdminMFAChallengePage() {
   return (
     <Layout>
-      <div>
+      <div className="">
         <SupabaseMFAChallenge />
       </div>
     </Layout>

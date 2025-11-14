@@ -23,7 +23,7 @@ const calculateReadTime = (content: string = ""): number => {
   const wordsPerMinute = 225;
   const textLength = content.split(/\s+/).filter(Boolean).length;
   const time = Math.ceil(textLength / wordsPerMinute);
-  return Math.max(1, time);
+  return Math.max(1, time); // Ensure read time is at least 1 minute
 };
 
 export default function BlogIndexPage() {
@@ -129,7 +129,7 @@ export default function BlogIndexPage() {
                     <div className="flex flex-col p-6 md:w-2/3">
                       <div className="flex-grow">
                          {post.tags && post.tags[0] && <Badge variant="outline" className="mb-2">{post.tags[0]}</Badge>}
-                        <h2 className="mb-2 text-2xl font-bold tracking-tight text-foreground transition-colors group-hover:text-primary">
+                        <h2 className="mb-2 text-2xl font-bold tracking-tight text-foreground transition-colors group-hover:text-accent">
                           {post.title}
                         </h2>
                         <p className="mb-4 leading-relaxed text-muted-foreground line-clamp-2">

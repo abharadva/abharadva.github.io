@@ -72,6 +72,8 @@ export interface GitHubRepo {
   owner: GitHubRepoOwner;
 }
 
+// --- NEW TYPES ---
+
 export interface Note {
   id: string;
   user_id?: string;
@@ -101,7 +103,7 @@ export interface Task {
   priority?: "low" | "medium" | "high";
   created_at?: string;
   updated_at?: string;
-  sub_tasks?: SubTask[];
+  sub_tasks?: SubTask[]; // This line should be present
 }
 
 export interface Transaction {

@@ -3,7 +3,6 @@ import { useRouter } from "next/router";
 import { supabase } from "@/supabase/client";
 import { motion } from "framer-motion";
 import Layout from "@/components/layout";
-import { Loader2 } from "lucide-react";
 
 export default function AdminIndexPage() {
   const router = useRouter();
@@ -84,11 +83,11 @@ export default function AdminIndexPage() {
         animate="animate"
         exit="exit"
         variants={pageVariants}
-        className="flex min-h-screen items-center justify-center bg-background"
+        className="flex min-h-screen items-center justify-center bg-indigo-100 "
       >
-        <div className="flex flex-col items-center gap-4 text-muted-foreground">
-          <Loader2 className="h-8 w-8 animate-spin" />
-          <p className="font-medium">Loading Admin Area...</p>
+        <div className="rounded-none border-2 border-black bg-white p-8 text-center">
+          <div className="mx-auto mb-4 size-12 animate-spin rounded-none border-y-4 border-indigo-600"></div>
+          <p className="font-semibold text-gray-700">Loading Admin Area...</p>
         </div>
       </motion.div>
     </Layout>

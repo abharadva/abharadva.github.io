@@ -1,3 +1,11 @@
+/*
+This file is updated to remove all neo-brutalist styling.
+- The `Menubar` root component's `border-2`, `rounded-none`, and `shadow-[...]` are replaced with a simpler, modern style.
+- The `MenubarTrigger` is restyled to have a subtle background on hover/open, removing the hard borders.
+- The `MenubarContent` panels are updated to use `rounded-md`, a subtle theme `border`, `bg-popover`, and a standard `shadow-md`.
+- Item hover/focus states are updated to use the theme's `accent` color.
+- Font styles and separator colors are updated to align with the new theme variables.
+*/
 "use client";
 
 import * as React from "react";

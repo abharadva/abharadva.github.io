@@ -101,8 +101,9 @@ export default function AdminDashboard({
     value: string | number;
     icon?: JSX.Element;
     className?: string;
-  }> = ({ title, value, icon, className }) => (
-    <Card className={className}>
+    bgColor?: string
+  }> = ({ title, value, icon, className, bgColor = "bg-white" }) => (
+    <Card className={`${className}  ${bgColor}`}>
       <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
         <CardTitle className="text-sm font-medium text-muted-foreground">
           {title}
@@ -216,9 +217,9 @@ export default function AdminDashboard({
                       Array.from({ length: 3 }).map((_, i) => <Skeleton key={i} className="h-28 w-full" />)
                     ) : (
                       <>
-                        <StatCard title="Monthly Earnings" value={dashboardData.stats.monthlyEarnings.toLocaleString("en-US", { style: "currency", currency: "USD" })} icon={<TrendingUp className="size-4 text-green-500" />} />
-                        <StatCard title="Monthly Expenses" value={dashboardData.stats.monthlyExpenses.toLocaleString("en-US", { style: "currency", currency: "USD" })} icon={<TrendingDown className="size-4 text-red-500" />} />
-                        <StatCard title="Monthly Net" value={dashboardData.stats.monthlyNet.toLocaleString("en-US", { style: "currency", currency: "USD" })} icon={<Banknote className="size-4" />} />
+                        <StatCard title="Monthly Earnings" value={dashboardData.stats.monthlyEarnings.toLocaleString("en-US", { style: "currency", currency: "USD" })} icon={<TrendingUp className="size-4" />} bgColor="bg-green-100" />
+                        <StatCard title="Monthly Expenses" value={dashboardData.stats.monthlyExpenses.toLocaleString("en-US", { style: "currency", currency: "USD" })} icon={<TrendingDown className="size-4" />} bgColor="bg-red-100" />
+                        <StatCard title="Monthly Net" value={dashboardData.stats.monthlyNet.toLocaleString("en-US", { style: "currency", currency: "USD" })} icon={<Banknote className="size-4" />} bgColor={dashboardData.stats.monthlyNet >= 0 ? "bg-blue-100" : "bg-orange-100"} />
                       </>
                     )}
                   </div>
@@ -231,10 +232,10 @@ export default function AdminDashboard({
                       Array.from({ length: 4 }).map((_, i) => <Skeleton key={i} className="h-28 w-full" />)
                     ) : (
                       <>
-                        <StatCard title="Pending Tasks" value={dashboardData.stats.pendingTasks} icon={<ListTodo className="size-4" />}  />
-                        <StatCard title="Tasks Done (Week)" value={dashboardData.stats.tasksCompletedThisWeek} icon={<CheckCircle className="size-4" />} />
-                        <StatCard title="Total Notes" value={dashboardData.stats.totalNotes} icon={<StickyNote className="size-4" />} />
-                        <StatCard title="Total Blog Views" value={dashboardData.stats.totalBlogViews.toLocaleString()} icon={<Eye className="size-4" />} />
+                        <StatCard title="Pending Tasks" value={dashboardData.stats.pendingTasks} icon={<ListTodo className="size-4" />} bgColor="bg-purple-100"  />
+                        <StatCard title="Tasks Done (Week)" value={dashboardData.stats.tasksCompletedThisWeek} icon={<CheckCircle className="size-4" />} bgColor="bg-green-100" />
+                        <StatCard title="Total Notes" value={dashboardData.stats.totalNotes} icon={<StickyNote className="size-4" />} bgColor="bg-orange-100" />
+                        <StatCard title="Total Blog Views" value={dashboardData.stats.totalBlogViews} icon={<Eye className="size-4" />} bgColor="bg-yellow-100" />
                       </>
                     )}
                   </div>
@@ -265,7 +266,7 @@ export default function AdminDashboard({
                         {dashboardData.recentPosts.map((post) => (
                           <div key={post.id} className="flex flex-col items-start gap-2 rounded-lg p-3 hover:bg-secondary sm:flex-row sm:items-center sm:justify-between">
                             <div>
-                              <button onClick={() => setActiveTab("blogs")} className="text-left font-semibold text-foreground hover:text-primary hover:underline">{post.title}</button>
+                              <button onClick={() => setActiveTab("blogs")} className="text-left font-semibold text-foreground hover:text-accent hover:underline">{post.title}</button>
                               <p className="text-xs text-muted-foreground">Updated: {new Date(post.updated_at || "").toLocaleDateString()}</p>
                             </div>
                             <div className="flex w-full shrink-0 space-x-2 sm:w-auto">
