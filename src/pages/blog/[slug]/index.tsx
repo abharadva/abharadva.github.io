@@ -17,12 +17,10 @@ import { Separator } from "@/components/ui/separator";
 import Image from "next/image";
 
 
-// const MDPreview = dynamic(
-//   () => import("@uiw/react-markdown-preview"),
-//   { ssr: false }
-// );
-
-import MarkdownPreview from "@uiw/react-markdown-preview";
+const MarkdownPreview = dynamic(
+  () => import("@uiw/react-markdown-preview"),
+  { ssr: false }
+);
 
 const PostHeader = ({ post }: { post: BlogPost }) => (
   <header className="mb-8">
