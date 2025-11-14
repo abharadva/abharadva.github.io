@@ -14,8 +14,7 @@ permissions:
   pages: write
   id-token: write
 
-# Allow only one concurrent deployment, skipping runs queued between the run in-progress and latest queued.
-# However, do NOT cancel in-progress runs as we want to allow these production deployments to complete.
+# Allow only one concurrent deployment
 concurrency:
   group: "pages"
   cancel-in-progress: false
@@ -71,8 +70,9 @@ jobs:
           NEXT_PUBLIC_SITE_URL: ${{ secrets.NEXT_PUBLIC_SITE_URL }}
           NEXT_PUBLIC_VISIT_NOTIFIER_URL: ${{ secrets.NEXT_PUBLIC_VISIT_NOTIFIER_URL }}
         run: ${{ steps.detect-package-manager.outputs.runner }} next build
-      - name: Static HTML export with Next.js
-        run: ${{ steps.detect-package-manager.outputs.runner }} next export
+
+      # The "next export" step has been removed. `next build` with `output: 'export'` handles everything.
+
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
         with:
