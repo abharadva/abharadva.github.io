@@ -1,9 +1,10 @@
+
 /*
-This file is updated to match the new minimalist design.
-- The link color is changed from a hardcoded indigo to the theme's `accent` color for consistency.
-- The current page (`BreadcrumbPage`) now uses the standard `foreground` color.
-- The separator color is updated to `muted-foreground`.
-- Font weights are adjusted for a cleaner, more modern typographic hierarchy.
+This file is updated to match the new neo-brutalist design.
+- The link color is changed to use the theme's `accent` color for a high-contrast hover effect.
+- The current page (`BreadcrumbPage`) now uses a bold `font-bold` style.
+- The separator color is updated to `foreground` for higher visibility.
+- Font weights are adjusted for a bolder, more raw typographic hierarchy.
 */
 import * as React from "react";
 import { Slot } from "@radix-ui/react-slot";
@@ -57,7 +58,7 @@ const BreadcrumbLink = React.forwardRef<
   return (
     <Comp
       ref={ref}
-      className={cn("transition-colors hover:text-foreground", className)}
+      className={cn("font-bold transition-colors hover:text-accent", className)}
       {...props}
     />
   );
@@ -73,7 +74,7 @@ const BreadcrumbPage = React.forwardRef<
     role="link"
     aria-disabled="true"
     aria-current="page"
-    className={cn("font-normal text-foreground", className)}
+    className={cn("font-bold text-foreground", className)}
     {...props}
   />
 ));
@@ -87,7 +88,7 @@ const BreadcrumbSeparator = ({
   <li
     role="presentation"
     aria-hidden="true"
-    className={cn("[&>svg]:size-3.5", className)}
+    className={cn("[&>svg]:size-3.5 text-foreground", className)}
     {...props}
   >
     {children ?? <ChevronRight />}

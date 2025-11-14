@@ -1,9 +1,10 @@
+
 /*
-This file is updated to align with the new kinetic typography design system.
-- The page structure is simplified, removing the need for a separate `Me` component.
-- An `Avatar` and typographic heading now introduce the page directly.
-- The `Hero` component, which contained text, is replaced by a more direct `motion.div` for a clean presentation of the bio.
-- The `Technology` and `Tools` sections are retained for content but will be restyled in their respective component files.
+This file is updated to align with the new neo-brutalist design system.
+- The page structure is made more direct and stark.
+- A neo-brutalist `Avatar` and bold, uppercase typography introduce the page.
+- The bio text is presented in a stark, functional manner.
+- The `Technology` and `Tools` sections are retained for content and inherit the new brutalist styles from their respective components.
 */
 import Layout from "@/components/layout";
 import Technology from "@/components/technology";
@@ -40,17 +41,17 @@ export default function AboutPage() {
           transition={{ duration: 0.5 }}
           className="mx-auto max-w-3xl text-center"
         >
-          <Avatar className="mx-auto h-24 w-24 border-2 border-border">
+          <Avatar className="mx-auto h-24 w-24">
             <AvatarImage
               src={"https://avatars.githubusercontent.com/u/52954931?v=4"}
               alt="Akshay Bharadva"
             />
             <AvatarFallback>AB</AvatarFallback>
           </Avatar>
-          <h1 className="mt-6 text-4xl font-black tracking-tighter text-foreground sm:text-5xl">
+          <h1 className="mt-6 text-4xl font-black uppercase tracking-tighter text-foreground sm:text-5xl">
             About Me
           </h1>
-          <p className="mt-4 text-lg text-muted-foreground">
+          <p className="mt-4 text-lg font-bold text-muted-foreground">
             Full-stack developer, open-source enthusiast, and lifelong learner.
           </p>
         </motion.div>
@@ -62,7 +63,7 @@ export default function AboutPage() {
           className="prose prose-lg dark:prose-invert mx-auto mt-12 max-w-3xl"
         >
           <p>
-            Bonjour! I'm a full-stack developer and life-long learner from India,
+            Hey there! I'm a full-stack developer and life-long learner from India,
             currently living in ON, Canada. I enjoy learning new technologies
             and collaborating with other developers to make products a reality.
           </p>

@@ -1,10 +1,10 @@
+
 /*
-This file is updated for the new kinetic typography design.
-- The neo-brutalist `rounded-none`, `border-2`, and `shadow-[...]` are removed.
-- The component is restyled to be a modern, soft-cornered badge.
-- Variants are updated to use theme-aware colors for background and text, ensuring they adapt to light/dark modes.
-- The `font-bold` is changed to `font-semibold` for a slightly softer look.
-- The `default` variant is removed as `secondary` now serves as the primary neutral badge style.
+This file is updated for the new neo-brutalist design.
+- The modern, soft-cornered badge is replaced with a `rounded-none` and `border-2` style.
+- Variants are updated to use high-contrast theme colors for background and text.
+- The `font-semibold` is changed to `font-bold` for a stronger look.
+- All variants now include a border for a consistent, chunky appearance.
 */
 import * as React from "react";
 import { cva, type VariantProps } from "class-variance-authority";
@@ -12,16 +12,16 @@ import { cva, type VariantProps } from "class-variance-authority";
 import { cn } from "@/lib/utils";
 
 const badgeVariants = cva(
-  "inline-flex items-center rounded-md border px-2.5 py-0.5 text-xs font-semibold transition-colors focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2",
+  "inline-flex items-center rounded-none border-2 border-foreground px-2.5 py-0.5 text-xs font-bold transition-colors focus:outline-none focus:ring-2 focus:ring-ring",
   {
     variants: {
       variant: {
         default:
-          "border-transparent bg-primary text-primary-foreground hover:bg-primary/80",
+          "bg-primary text-primary-foreground",
         secondary:
-          "border-transparent bg-secondary text-secondary-foreground hover:bg-secondary/80",
+          "bg-secondary text-secondary-foreground",
         destructive:
-          "border-transparent bg-destructive text-destructive-foreground hover:bg-destructive/80",
+          "border-destructive bg-destructive text-destructive-foreground",
         outline: "text-foreground",
       },
     },

@@ -1,7 +1,8 @@
+
 /*
-This file is updated to reflect the new font choice for the kinetic typography theme.
-- The preconnect link for Google Fonts is updated. The previous font `Space Mono` is removed.
-- `suppressHydrationWarning` is added to the <html> tag, which is a recommended practice when using next-themes to avoid class name mismatch errors between server and client.
+This file is updated to reflect the new font choice for the neo-brutalist theme.
+- The preconnect link for Google Fonts is updated for 'Space Mono'.
+- `suppressHydrationWarning` is added to the <html> tag, a recommended practice when using next-themes.
 - Body class is simplified, as font styles are now handled in globals.css and tailwind.config.js.
 */
 import { Html, Head, Main, NextScript } from "next/document";
@@ -16,7 +17,7 @@ export default function Document() {
           href="https://fonts.gstatic.com"
           crossOrigin="anonymous"
         />
-        {/* The new 'Inter' font is imported directly in globals.css */}
+        {/* The new 'Space Mono' font is imported directly in globals.css */}
       </Head>
       <body className="bg-background text-foreground antialiased">
         <Main />

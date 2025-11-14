@@ -1,14 +1,17 @@
+
 import Link from "next/link";
 import { PropsWithChildren, useState, useEffect } from "react";
-import { BsArrowUpRight } from "react-icons/bs";
+import { ArrowUpRight, Github, AlertTriangle, Loader2 } from "lucide-react";
 import ProjectCard from "./project-card";
 import { Button } from "@/components/ui/button";
 import type { GitHubRepo } from "@/types";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { motion } from "framer-motion";
 
 type ProjectsProps = PropsWithChildren;
 
-const GITHUB_USERNAME = `akshay-bharadva`; // Use a constant for username
-const GITHUB_REPOS_URL = `https://api.github.com/users/${GITHUB_USERNAME}/repos?sort=updated&per_page=9&type=owner`; // Fetch only owner repos
+const GITHUB_USERNAME = `akshay-bharadva`;
+const GITHUB_REPOS_URL = `https://api.github.com/users/${GITHUB_USERNAME}/repos?sort=updated&per_page=9&type=owner`;
 
 export default function Projects({ children }: ProjectsProps) {
   const [projects, setProjects] = useState<GitHubRepo[]>([]);
@@ -25,27 +28,15 @@ export default function Projects({ children }: ProjectsProps) {
             .json()
             .catch(() => ({ message: response.statusText }));
           throw new Error(
-            `GitHub API request failed: ${response.status} - ${errorData.message || "Unknown error"}`,
+            `GitHub API Error: ${response.status} - ${errorData.message || "Unknown error"}`,
           );
         }
         return response.json();
       })
       .then((data: GitHubRepo[]) => {
         const filteredProjects = data
-          .filter(
-            (p) =>
-              !p.private &&
-              p.language &&
-              !p.fork &&
-              !p.archived &&
-              p.name !== GITHUB_USERNAME,
-          )
-          .sort(
-            (a, b) =>
-              (b.stargazers_count || 0) - (a.stargazers_count || 0) ||
-              new Date(b.updated_at).getTime() -
-              new Date(a.updated_at).getTime(),
-          );
+          .filter(p => !p.private && !p.fork && !p.archived && p.name !== GITHUB_USERNAME)
+          .sort((a, b) => (b.stargazers_count || 0) - (a.stargazers_count || 0) || new Date(b.updated_at).getTime() - new Date(a.updated_at).getTime());
         setProjects(filteredProjects.slice(0, 9));
       })
       .catch((err) => {
@@ -57,62 +48,83 @@ export default function Projects({ children }: ProjectsProps) {
       });
   }, []);
 
+  const containerVariants = {
+    hidden: { opacity: 0 },
+    visible: {
+      opacity: 1,
+      transition: { staggerChildren: 0.1 }
+    }
+  };
+
+  const itemVariants = {
+    hidden: { y: 20, opacity: 0 },
+    visible: { y: 0, opacity: 1, transition: { duration: 0.5 } }
+  };
+
   return (
-    <section className="my-8 ">
-      <h2 className="mb-8 border-b-4 border-black pb-3 text-3xl font-black text-black">
+    <section className="my-8 py-16">
+      <motion.h2 
+        className="mb-12 border-b-2 border-foreground pb-4 text-3xl font-black uppercase text-foreground"
+        initial={{ opacity: 0, y: -20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5 }}
+      >
         Projects
-      </h2>
+      </motion.h2>
+      
       {loading && (
         <div className="py-10 text-center">
-          <div className="mx-auto inline-block size-12 animate-spin rounded-none border-y-4 border-black"></div>
-          <p className="mt-4 text-lg font-bold text-black">
+          <Loader2 className="mx-auto h-12 w-12 animate-spin text-primary" />
+          <p className="mt-4 text-lg font-bold text-muted-foreground">
             Loading Projects from GitHub...
           </p>
         </div>
       )}
+
       {error && !loading && (
-        <div className="rounded-none border-2 border-red-500 bg-red-100 p-4 font-semibold text-red-700 shadow-[3px_3px_0_#B91C1C]">
-          Error: {error}
-        </div>
+        <Alert variant="destructive">
+          <AlertTriangle className="h-4 w-4" />
+          <AlertTitle>Error Fetching Projects</AlertTitle>
+          <AlertDescription>{error}</AlertDescription>
+        </Alert>
       )}
+
       {!loading && !error && projects.length === 0 && (
-        <div className="rounded-none border-2 border-black bg-yellow-100 p-8 py-16 text-center shadow-[6px_6px_0_#000]">
-          <div className="mx-auto max-w-md">
-            <div className="mx-auto mb-6 flex size-24 items-center justify-center rounded-none border-2 border-black bg-black text-5xl font-black text-yellow-300">
-              ?
-            </div>
-            <h3 className="mb-2 text-2xl font-bold text-black">
-              NO PUBLIC PROJECTS FOUND.
-            </h3>
-            <p className="font-medium text-gray-700">
-              I might be working on something new, or they are private. Check
-              GitHub for more!
-            </p>
-          </div>
+         <div className="rounded-none border-2 border-dashed border-foreground py-16 text-center">
+          <Github className="mx-auto mb-4 size-12 text-muted-foreground" />
+          <h3 className="mb-2 text-lg font-bold">No Public Projects Found</h3>
+          <p className="text-muted-foreground">
+            I might be working on something new, or they are private.
+          </p>
         </div>
       )}
+
       {!loading && !error && projects.length > 0 && (
         <>
-          <div className="mb-10 grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
+          <motion.div 
+            className="mb-10 grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3"
+            variants={containerVariants}
+            initial="hidden"
+            animate="visible"
+          >
             {projects.map((project) => (
-              <ProjectCard key={project.id} project={project} />
+              <motion.div key={project.id} variants={itemVariants}>
+                 <ProjectCard project={project} />
+              </motion.div>
             ))}
-          </div>
+          </motion.div>
           <div className="text-center">
-            <Link href={
-              `https://github.com/${GITHUB_USERNAME}?tab=repositories`
-
-            } passHref legacyBehavior>
-              <Button asChild variant="outline" size="lg" className="text-md group">
-                <a>More on GitHub <BsArrowUpRight className="ml-1.5 inline transition-transform group-hover:-translate-y-0.5 group-hover:translate-x-0.5" />
-                </a>
-              </Button>
-            </Link>
+            <Button asChild variant="outline" size="lg" className="text-md group">
+              <a href={`https://github.com/${GITHUB_USERNAME}?tab=repositories`} target="_blank" rel="noopener noreferrer">
+                More on GitHub 
+                <ArrowUpRight className="ml-1.5 size-4 transition-transform group-hover:-translate-y-0.5 group-hover:translate-x-0.5" />
+              </a>
+            </Button>
           </div>
         </>
-      )
-      }
+      )}
+      
       {children && <div className="mt-8">{children}</div>}
-    </section >
+    </section>
   );
 }

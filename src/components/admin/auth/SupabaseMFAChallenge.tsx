@@ -1,10 +1,10 @@
 /*
-This file is updated for the new kinetic typography design system.
-- All neo-brutalist styles are replaced with the minimalist dark theme.
-- The OTP input is now using the redesigned `InputOTP` component for a modern look.
-- The countdown timer is styled to be less obtrusive and more integrated.
-- The loading state is simplified with a single spinner icon.
-- Replaced custom button with the redesigned `Button` from the UI kit.
+This file is updated for the new neo-brutalist design system.
+- All minimalist styles are replaced with the stark, high-contrast theme.
+- The OTP input now uses the redesigned `InputOTP` component with sharp edges and a clear focus state.
+- The countdown timer is styled to be bold and functional.
+- The loading state uses a simple spinner within the redesigned `Button`.
+- Replaced the previous `Button` with the neo-brutalist version from the UI kit.
 */
 "use client";
 
@@ -83,8 +83,8 @@ export default function SupabaseMFAChallenge() {
     return () => clearInterval(timer);
   }, []);
 
-  const handleVerify = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const handleVerify = async (e: React.FormEvent | string) => {
+    if (typeof e !== 'string') e.preventDefault();
     if (!factorId) {
       setError("MFA factor ID is missing. Please try logging in again.");
       return;
@@ -92,9 +92,11 @@ export default function SupabaseMFAChallenge() {
     setIsLoadingState(true);
     setError("");
 
+    const codeToVerify = typeof e === 'string' ? e : otp;
+    
     const { error: verifyError } = await supabase.auth.mfa.challengeAndVerify({
       factorId: factorId,
-      code: otp,
+      code: codeToVerify,
     });
 
     setIsLoadingState(false);
@@ -108,9 +110,9 @@ export default function SupabaseMFAChallenge() {
   };
 
   const stepVariants = {
-    initial: { opacity: 0, y: 20 },
-    animate: { opacity: 1, y: 0 },
-    exit: { opacity: 0, y: -20 },
+    initial: { opacity: 0 },
+    animate: { opacity: 1 },
+    exit: { opacity: 0 },
   };
 
   if (isLoadingState && !error && !factorId) {
@@ -135,19 +137,19 @@ export default function SupabaseMFAChallenge() {
       initial="initial"
       animate="animate"
       exit="exit"
-      transition={{ duration: 0.3 }}
-      className="flex min-h-screen items-center justify-center bg-background px-4"
+      transition={{ duration: 0.1 }}
+      className="flex min-h-screen items-center justify-center bg-background px-4 font-sans"
     >
-      <div className="w-full max-w-sm space-y-8 rounded-lg border border-border bg-card p-8">
+      <div className="w-full max-w-sm space-y-8 rounded-none border-2 border-foreground bg-card p-8 shadow-[8px_8px_0px_#000] dark:shadow-[8px_8px_0px_#FFF]">
         <div className="text-center">
-          <div className="mx-auto mb-4 flex size-12 items-center justify-center rounded-full bg-secondary">
+          <div className="mx-auto mb-4 flex size-12 items-center justify-center rounded-none border-2 border-foreground bg-secondary">
             <KeyRound className="size-6 text-foreground" />
           </div>
-          <h2 className="text-3xl font-black text-foreground">
-            Two-Factor Authentication
+          <h2 className="text-3xl font-black uppercase text-foreground">
+            Two-Factor Auth
           </h2>
           <p className="mt-2 text-muted-foreground">
-            Enter the code from your authenticator app
+            Enter the code from your authenticator app.
           </p>
         </div>
 
@@ -176,7 +178,7 @@ export default function SupabaseMFAChallenge() {
               aria-hidden="true"
             >
               Code resets in{" "}
-              <span className="font-mono font-bold text-foreground">
+              <span className="font-sans font-bold text-foreground">
                 {remainingTime}s
               </span>
             </div>
@@ -188,9 +190,9 @@ export default function SupabaseMFAChallenge() {
                 initial={{ opacity: 0, height: 0 }}
                 animate={{ opacity: 1, height: "auto" }}
                 exit={{ opacity: 0, height: 0 }}
-                className="rounded-md border border-destructive/50 bg-destructive/10 p-3"
+                className="rounded-none border-2 border-destructive bg-destructive/10 p-3"
               >
-                <p className="text-sm font-medium text-destructive">{error}</p>
+                <p className="text-sm font-bold text-destructive">{error}</p>
               </motion.div>
             )}
           </AnimatePresence>

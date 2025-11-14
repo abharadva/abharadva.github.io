@@ -1,9 +1,9 @@
+
 /*
-This file is updated to adopt the new design system.
-- The `rounded-none` and `shadow-[...]` classes are removed.
-- Components are now styled with a standard border-radius defined by the theme.
-- The `border-2` is reduced to a standard single-pixel border.
-- The `destructive` variant is updated to use theme-aware colors for background and text, improving consistency.
+This file is updated to adopt the new neo-brutalist design system.
+- Standard border-radius is replaced with `rounded-none`.
+- The subtle single-pixel border is replaced with a `border-2`.
+- The `destructive` variant is updated to use a high-contrast border and text color for a starker appearance.
 */
 import * as React from "react";
 import { cva, type VariantProps } from "class-variance-authority";
@@ -11,13 +11,13 @@ import { cva, type VariantProps } from "class-variance-authority";
 import { cn } from "@/lib/utils";
 
 const alertVariants = cva(
-  "relative w-full rounded-lg border p-4 [&>svg~*]:pl-7 [&>svg+div]:translate-y-[-3px] [&>svg]:absolute [&>svg]:left-4 [&>svg]:top-4 [&>svg]:text-foreground",
+  "relative w-full rounded-none border-2 p-4 [&>svg~*]:pl-7 [&>svg+div]:translate-y-[-3px] [&>svg]:absolute [&>svg]:left-4 [&>svg]:top-4 [&>svg]:text-foreground",
   {
     variants: {
       variant: {
-        default: "bg-background text-foreground",
+        default: "border-foreground bg-background text-foreground",
         destructive:
-          "border-destructive/50 text-destructive dark:border-destructive [&>svg]:text-destructive",
+          "border-destructive text-destructive dark:border-destructive [&>svg]:text-destructive",
       },
     },
     defaultVariants: {
@@ -45,7 +45,7 @@ const AlertTitle = React.forwardRef<
 >(({ className, ...props }, ref) => (
   <h5
     ref={ref}
-    className={cn("mb-1 font-medium leading-none tracking-tight", className)}
+    className={cn("mb-1 font-bold leading-none tracking-tight", className)}
     {...props}
   />
 ));

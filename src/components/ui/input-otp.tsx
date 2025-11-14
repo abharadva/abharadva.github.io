@@ -1,9 +1,9 @@
 /*
-This file is updated to remove the neo-brutalist styling.
-- The hard `border-2` and `rounded-none` styles on `InputOTPSlot` are replaced with a modern input field aesthetic.
-- Each slot now has a standard border and `rounded-md`.
-- The active state (`isActive`) is updated to use the theme's `ring` color for focus, creating a consistent look with other input components.
-- The separator is simplified to be a subtle dot.
+This file is updated to implement neo-brutalist styling.
+- The modern input aesthetic is replaced with `border-2` and `rounded-none` styles on `InputOTPSlot`.
+- Each slot now has a thick, high-contrast border.
+- The active state (`isActive`) is updated to use a high-contrast `ring` or a change in border color for a stark focus indicator.
+- The separator is a simple, bold dot.
 */
 "use client";
 
@@ -48,7 +48,7 @@ const InputOTPSlot = React.forwardRef<
     <div
       ref={ref}
       className={cn(
-        "relative flex h-10 w-10 items-center justify-center border-y border-r border-input text-sm transition-all first:border-l first:rounded-l-md last:rounded-r-md",
+        "relative flex h-10 w-10 items-center justify-center border-2 border-input text-sm transition-all rounded-none",
         isActive && "z-10 ring-2 ring-ring ring-offset-background",
         className
       )}

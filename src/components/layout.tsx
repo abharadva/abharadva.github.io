@@ -1,3 +1,4 @@
+
 import Head from "next/head";
 import { PropsWithChildren } from "react";
 import Container from "./container";
@@ -14,8 +15,7 @@ const SITE_URL =
 const DEFAULT_OG_TITLE = "Akshay Bharadva - Fullstack Developer";
 const DEFAULT_OG_DESCRIPTION =
   "Portfolio and Blog of Akshay Bharadva, showcasing projects and thoughts on web development.";
-const DEFAULT_OG_IMAGE = `${SITE_URL}/default-og-image.png`; // Ensure this image exists in /public
-
+const DEFAULT_OG_IMAGE = `${SITE_URL}/default-og-image.png`;
 
 export default function Layout({ children }: LayoutProps) {
  return (
@@ -59,7 +59,7 @@ export default function Layout({ children }: LayoutProps) {
         <meta name="twitter:description" content={DEFAULT_OG_DESCRIPTION} />
         <meta name="twitter:image" content={DEFAULT_OG_IMAGE} />
       </Head>
-      <div className="flex min-h-screen flex-col justify-between font-sans selection:bg-accent selection:text-accent-foreground">
+      <div className="flex min-h-screen flex-col justify-between font-sans selection:bg-yellow-300 selection:text-black">
         <Header />
         <MobileHeader />
         <main className="mt-16 w-full grow md:mt-20">

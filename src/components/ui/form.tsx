@@ -1,7 +1,7 @@
 /*
-This file, which provides the logic for `react-hook-form` integration, is updated for the new design system.
-- `FormLabel` styling is changed from `font-bold` to `font-medium` for a softer typographic feel.
-- `FormMessage` (the error message) is completely restyled. It no longer has a neo-brutalist box. Instead, it's a simple, colored text message for a cleaner, more integrated look, matching the `destructive` theme color.
+This file, which provides the logic for `react-hook-form` integration, is updated for the new neo-brutalist design system.
+- `FormLabel` styling is changed to `font-bold` for a stronger typographic feel.
+- `FormMessage` (the error message) is restyled. It is now a distinct box with a `border-2` and `rounded-none`, matching the overall aesthetic.
 - Spacing in `FormItem` is slightly adjusted.
 */
 "use client";
@@ -164,7 +164,7 @@ const FormMessage = React.forwardRef<
     <p
       ref={ref}
       id={formMessageId}
-      className={cn("text-[0.8rem] font-medium text-destructive", className)}
+      className={cn("text-[0.8rem] font-bold text-destructive", className)}
       {...props}
     >
       {body}

@@ -1,3 +1,4 @@
+
 "use client";
 import { useState, useEffect, FormEvent } from "react";
 import type { Transaction } from "@/types";
@@ -104,13 +105,11 @@ export default function TransactionForm({
       </div>
       <div>
         <Label htmlFor="category">Category</Label>
-        {/* --- NEW: Input with datalist for suggestions --- */}
         <Input
           id="category"
           value={category}
           onChange={(e) => setCategory(e.target.value)}
           placeholder="e.g., Work, Food, Bills"
-          list="category-suggestions"
         />
       </div>
       <div>
@@ -131,7 +130,7 @@ export default function TransactionForm({
         </RadioGroup>
       </div>
 
-      {error && <p className="text-sm font-semibold text-red-600">{error}</p>}
+      {error && <p className="text-sm text-destructive">{error}</p>}
 
       <div className="flex justify-end pt-4">
         <Button type="submit">

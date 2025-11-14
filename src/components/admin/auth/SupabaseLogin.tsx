@@ -1,10 +1,10 @@
 /*
-This file is updated to align with the new kinetic typography design system.
-- Removed all neo-brutalist styles (hard shadows, thick borders, `rounded-none`).
-- The entire component now uses a clean, centered layout on a dark background.
-- Switched to the new 'Inter' font via the `font-sans` class (inherited).
-- Replaced custom inputs and buttons with the redesigned `Input` and `Button` components from the UI kit for a consistent look and feel.
-- The color palette is updated to use the new theme variables. The icon and overall aesthetic are now minimalist and modern.
+This file is updated to align with the new neo-brutalist design system.
+- All minimalist styles are replaced with hard shadows, thick borders, and `rounded-none`.
+- The layout is functional, using high-contrast colors.
+- Switched to the 'Space Mono' font via the `font-sans` class for a raw, technical feel.
+- Replaced UI kit components with their redesigned neo-brutalist versions (`Input`, `Button`).
+- The color palette is stark and high-contrast. The icon is contained in a sharp-edged, bordered container.
 */
 "use client";
 
@@ -95,9 +95,9 @@ export default function SupabaseLogin() {
   };
 
   const pageVariants = {
-    initial: { opacity: 0, y: 20 },
-    animate: { opacity: 1, y: 0 },
-    exit: { opacity: 0, y: -20 },
+    initial: { opacity: 0 },
+    animate: { opacity: 1 },
+    exit: { opacity: 0 },
   };
 
   return (
@@ -107,17 +107,17 @@ export default function SupabaseLogin() {
       animate="animate"
       exit="exit"
       variants={pageVariants}
-      transition={{ duration: 0.3 }}
-      className="flex min-h-screen items-center justify-center bg-background px-4"
+      transition={{ duration: 0.1 }}
+      className="flex min-h-screen items-center justify-center bg-background px-4 font-sans"
     >
-      <div className="w-full max-w-sm space-y-8 rounded-lg border border-border bg-card p-8">
+      <div className="w-full max-w-sm space-y-8 rounded-none border-2 border-foreground bg-card p-8 shadow-[8px_8px_0px_#000] dark:shadow-[8px_8px_0px_#FFF]">
         <div className="text-center">
-          <div className="mx-auto mb-4 flex size-12 items-center justify-center rounded-full bg-secondary">
+          <div className="mx-auto mb-4 flex size-12 items-center justify-center rounded-none border-2 border-foreground bg-secondary">
             <Lock className="size-6 text-foreground" />
           </div>
-          <h2 className="text-3xl font-black text-foreground">Admin Access</h2>
+          <h2 className="text-3xl font-black uppercase text-foreground">Admin Access</h2>
           <p className="mt-2 text-muted-foreground">
-            Sign in to manage your portfolio.
+            Enter credentials to continue.
           </p>
         </div>
 
@@ -155,9 +155,9 @@ export default function SupabaseLogin() {
                 initial={{ opacity: 0, height: 0 }}
                 animate={{ opacity: 1, height: "auto" }}
                 exit={{ opacity: 0, height: 0 }}
-                className="rounded-md border border-destructive/50 bg-destructive/10 p-3"
+                className="rounded-none border-2 border-destructive bg-destructive/10 p-3"
               >
-                <p className="text-sm font-medium text-destructive">{error}</p>
+                <p className="text-sm font-bold text-destructive">{error}</p>
               </motion.div>
             )}
           </AnimatePresence>

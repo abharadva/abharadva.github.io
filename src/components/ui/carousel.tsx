@@ -1,8 +1,9 @@
+
 /*
-This file is updated for the new kinetic typography design system.
-- The heavy neo-brutalist styles (`border-2`, `rounded-none`, `shadow-[...]`) on the main container are replaced with a simpler, cleaner look. The component is now borderless by default.
-- The previous and next navigation buttons are updated to use the redesigned `Button` component with the `outline` variant, making them more subtle.
-- The absolute positioning of the navigation buttons is adjusted for a more modern placement, partially overlapping the content area.
+This file is updated for the new neo-brutalist design system.
+- The main container is styled with a `border-2`, `rounded-none`, and a hard `shadow-[...]`.
+- The previous and next navigation buttons are updated to use the redesigned `Button` component, inheriting its neo-brutalist style.
+- The positioning of the navigation buttons is adjusted for a functional, raw placement outside the main container.
 */
 "use client";
 
@@ -143,7 +144,7 @@ const Carousel = React.forwardRef<
         <div
           ref={ref}
           onKeyDownCapture={handleKeyDown}
-          className={cn("relative", className)}
+          className={cn("relative rounded-none border-2 border-foreground bg-background p-4 shadow-[4px_4px_0px_#000] dark:shadow-[4px_4px_0px_#FFF]", className)}
           role="region"
           aria-roledescription="carousel"
           {...props}
@@ -212,10 +213,10 @@ const CarouselPrevious = React.forwardRef<
       variant={variant}
       size={size}
       className={cn(
-        "absolute h-8 w-8 rounded-full",
+        "absolute h-8 w-8",
         orientation === "horizontal"
-          ? "-left-12 top-1/2 -translate-y-1/2"
-          : "-top-12 left-1/2 -translate-x-1/2 rotate-90",
+          ? "-left-16 top-1/2 -translate-y-1/2"
+          : "-top-16 left-1/2 -translate-x-1/2 rotate-90",
         className
       )}
       disabled={!canScrollPrev}
@@ -241,10 +242,10 @@ const CarouselNext = React.forwardRef<
       variant={variant}
       size={size}
       className={cn(
-        "absolute h-8 w-8 rounded-full",
+        "absolute h-8 w-8",
         orientation === "horizontal"
-          ? "-right-12 top-1/2 -translate-y-1/2"
-          : "-bottom-12 left-1/2 -translate-x-1/2 rotate-90",
+          ? "-right-16 top-1/2 -translate-y-1/2"
+          : "-bottom-16 left-1/2 -translate-x-1/2 rotate-90",
         className
       )}
       disabled={!canScrollNext}

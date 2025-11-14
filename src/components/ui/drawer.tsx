@@ -1,8 +1,9 @@
+
 /*
-This file is updated to remove neo-brutalist styling.
-- The `DrawerContent` component's `border-t-2`, `rounded-t-none`, and `shadow-[...]` are replaced with a single `border-t` and a standard shadow, creating a modern, floating panel effect.
-- The drag handle (`div` with `bg-black`) is now styled using the theme's `muted` color for a more subtle appearance.
-- The `DrawerHeader` and `DrawerFooter` now use a subtle theme-based border for separation.
+This file is updated to implement neo-brutalist styling.
+- `DrawerContent` component's modern styles are replaced with a `border-t-2`, `rounded-t-none`, and a hard `shadow-[...]` for a raw, functional panel effect.
+- The drag handle (`div`) is now styled using the theme's `foreground` color for a stark, visible appearance.
+- `DrawerHeader` and `DrawerFooter` now use a thick theme-based border for separation.
 - Font styles for `DrawerTitle` and `DrawerDescription` are updated for theme consistency.
 */
 "use client";
@@ -50,12 +51,12 @@ const DrawerContent = React.forwardRef<
     <DrawerPrimitive.Content
       ref={ref}
       className={cn(
-        "fixed inset-x-0 bottom-0 z-50 mt-24 flex h-auto flex-col rounded-t-lg border-t bg-background",
+        "fixed inset-x-0 bottom-0 z-50 mt-24 flex h-auto flex-col rounded-t-none border-t-2 border-foreground bg-background",
         className
       )}
       {...props}
     >
-      <div className="mx-auto mt-4 h-2 w-[100px] rounded-full bg-muted" />
+      <div className="mx-auto mt-4 h-2 w-[100px] rounded-full bg-foreground" />
       {children}
     </DrawerPrimitive.Content>
   </DrawerPortal>
@@ -91,7 +92,7 @@ const DrawerTitle = React.forwardRef<
   <DrawerPrimitive.Title
     ref={ref}
     className={cn(
-      "text-lg font-semibold leading-none tracking-tight",
+      "text-lg font-bold leading-none tracking-tight",
       className
     )}
     {...props}

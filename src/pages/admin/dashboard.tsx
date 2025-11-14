@@ -1,3 +1,4 @@
+
 import { useEffect, useState } from "react";
 import { useRouter } from "next/router";
 import { supabase, Session } from "@/supabase/client";
@@ -5,22 +6,23 @@ import AdminDashboardComponent from "@/components/admin/admin-dashboard";
 import { motion } from "framer-motion";
 import Layout from "@/components/layout";
 import type { BlogPost, Note } from "@/types";
+import { Loader2 } from "lucide-react";
 
 export interface DashboardData {
   stats: {
     totalPosts: number;
     portfolioSections: number;
     portfolioItems: number;
-    pendingTasks: number; // New
-    totalNotes: number;   // New
-    monthlyEarnings: number; // New
-    monthlyExpenses: number; // New
-    monthlyNet: number; // New
+    pendingTasks: number;
+    totalNotes: number;
+    monthlyEarnings: number;
+    monthlyExpenses: number;
+    monthlyNet: number;
     totalBlogViews: number;
     tasksCompletedThisWeek: number;
   } | null;
   recentPosts: Pick<BlogPost, "id" | "title" | "updated_at" | "slug">[];
-  pinnedNotes: Pick<Note, 'id' | 'title' | 'content'>[]; // New
+  pinnedNotes: Pick<Note, 'id' | 'title' | 'content'>[];
 }
 
 export default function AdminDashboardPage() {
@@ -43,29 +45,21 @@ export default function AdminDashboardPage() {
 
       const { data: aalData, error: aalError } = await supabase.auth.mfa.getAuthenticatorAssuranceLevel();
       if (aalError || aalData?.currentLevel !== 'aal2') {
-        router.replace("/admin/login"); // Simplified redirect logic
+        router.replace("/admin/login");
         return;
       }
       setIsLoading(false);
 
-      // Fetch dashboard data
       try {
         const now = new Date();
         const firstDayOfMonth = new Date(now.getFullYear(), now.getMonth(), 1).toISOString();
         const startOfWeek = new Date(now.setDate(now.getDate() - now.getDay())).toISOString();
 
         const [
-          { count: totalPosts, error: tpError },
-          { count: portfolioSections, error: psError },
-          { count: portfolioItems, error: piError },
-          { data: recentPostsData, error: rpError },
-          { count: pendingTasksCount, error: ptError },
-          { count: totalNotesCount, error: tnError },
-          { data: pinnedNotesData, error: pnError },
-          { data: monthlyTransactionsData, error: mtError },
-          // New Queries for enhanced stats
-          { data: totalViewsData, error: tvError },
-          { count: tasksCompletedCount, error: tcError },
+          { count: totalPosts }, { count: portfolioSections }, { count: portfolioItems },
+          { data: recentPostsData }, { count: pendingTasksCount }, { count: totalNotesCount },
+          { data: pinnedNotesData }, { data: monthlyTransactionsData }, { data: totalViewsData },
+          { count: tasksCompletedCount },
         ] = await Promise.all([
           supabase.from("blog_posts").select("*", { count: "exact", head: true }),
           supabase.from("portfolio_sections").select("*", { count: "exact", head: true }),
@@ -75,16 +69,9 @@ export default function AdminDashboardPage() {
           supabase.from("notes").select("*", { count: "exact", head: true }),
           supabase.from("notes").select("id, title, content").eq("is_pinned", true).limit(5),
           supabase.from("transactions").select("type, amount").gte('date', firstDayOfMonth),
-          // New Queries execution
           supabase.rpc('get_total_blog_views'),
           supabase.from("tasks").select("*", { count: "exact", head: true }).eq("status", "done").gte("updated_at", startOfWeek),
         ]);
-
-        const errors = [tpError, psError, piError, rpError, ptError, tnError, pnError, mtError, tvError, tcError].filter(Boolean);
-        if (errors.length > 0) {
-          console.error("Dashboard data fetching errors:", errors);
-          throw new Error("Failed to fetch some dashboard data.");
-        }
 
         let monthlyEarnings = 0;
         let monthlyExpenses = 0;
@@ -105,7 +92,7 @@ export default function AdminDashboardPage() {
             monthlyEarnings,
             monthlyExpenses,
             monthlyNet: monthlyEarnings - monthlyExpenses,
-            totalBlogViews: totalViewsData || 0,
+            totalBlogViews: (totalViewsData as any) || 0,
             tasksCompletedThisWeek: tasksCompletedCount || 0,
           },
           recentPosts: recentPostsData || [],
@@ -140,10 +127,10 @@ export default function AdminDashboardPage() {
   };
 
   const pageVariants = {
-    initial: { opacity: 0, y: 10 },
-    animate: { opacity: 1, y: 0 },
-    exit: { opacity: 0, y: -10 },
-    transition: { duration: 0.2 },
+    initial: { opacity: 0 },
+    animate: { opacity: 1 },
+    exit: { opacity: 0 },
+    transition: { duration: 0.1 },
   };
 
   if (isLoading || !session) {
@@ -155,11 +142,11 @@ export default function AdminDashboardPage() {
           animate="animate"
           exit="exit"
           variants={pageVariants}
-          className="flex min-h-screen items-center justify-center bg-indigo-100 "
+          className="flex min-h-screen items-center justify-center bg-background"
         >
-          <div className="rounded-none border-2 border-black bg-white p-8 text-center">
-            <div className="mx-auto mb-4 size-12 animate-spin rounded-none border-y-4 border-indigo-600"></div>
-            <p className="font-semibold text-gray-700">Loading Dashboard...</p>
+          <div className="flex flex-col items-center gap-4 text-muted-foreground">
+            <Loader2 className="h-8 w-8 animate-spin" />
+            <p className="font-bold">Loading Dashboard...</p>
           </div>
         </motion.div>
       </Layout>
@@ -174,7 +161,6 @@ export default function AdminDashboardPage() {
         animate="animate"
         exit="exit"
         variants={pageVariants}
-        className=""
       >
         <AdminDashboardComponent onLogout={handleLogout} dashboardData={dashboardData} />
       </motion.div>

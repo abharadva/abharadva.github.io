@@ -1,9 +1,10 @@
+
 /*
-This file is updated for the new design system.
-- The `rounded-none`, `border-2`, and neo-brutalist border color styles are removed.
-- The component now uses a standard `rounded-sm` and a subtle `border`.
-- The checked state color is now tied to the theme's `primary` color for consistency.
-- Focus rings are updated to use the theme's `ring` color.
+This file is updated for the new neo-brutalist design system.
+- The `rounded-sm` style is replaced with `rounded-none`.
+- The subtle `border` is replaced with a `border-2`.
+- The checked state color is tied to the theme's high-contrast `primary` color.
+- Focus rings are updated for high contrast.
 */
 "use client";
 
@@ -20,7 +21,7 @@ const Checkbox = React.forwardRef<
   <CheckboxPrimitive.Root
     ref={ref}
     className={cn(
-      "peer h-4 w-4 shrink-0 rounded-sm border border-primary ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 data-[state=checked]:bg-primary data-[state=checked]:text-primary-foreground",
+      "peer h-4 w-4 shrink-0 rounded-none border-2 border-primary ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 data-[state=checked]:bg-primary data-[state=checked]:text-primary-foreground",
       className
     )}
     {...props}

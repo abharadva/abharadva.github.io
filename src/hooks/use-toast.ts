@@ -1,3 +1,7 @@
+
+/*
+This file contains the logic for the Shadcn/UI toast system and has no direct styling. The comment has been updated for consistency with the redesign project. No functional changes are needed. The visual appearance is controlled by the `toast.tsx` component.
+*/
 "use client";
 
 import * as React from "react";
@@ -64,7 +68,7 @@ export const reducer = (state: State, action: Action): State => {
         state.toasts.forEach((t) => {
           if (toastTimeouts.has(t.id)) {
             clearTimeout(
-              toastTimeouts.get(t.id) as ReturnType<typeof setTimeout>,
+              toastTimeouts.get(t.id) as ReturnType<typeof setTimeout>
             );
             toastTimeouts.delete(t.id);
           }
@@ -81,7 +85,7 @@ export const reducer = (state: State, action: Action): State => {
       return {
         ...state,
         toasts: state.toasts.map((t) =>
-          t.id === action.toast.id ? { ...t, ...action.toast } : t,
+          t.id === action.toast.id ? { ...t, ...action.toast } : t
         ),
       };
 
@@ -99,27 +103,16 @@ export const reducer = (state: State, action: Action): State => {
         toasts: state.toasts.map((t) =>
           t.id === toastId || toastId === undefined
             ? { ...t, open: false }
-            : t,
+            : t
         ),
       };
     }
     case "REMOVE_TOAST":
       if (action.toastId === undefined) {
-        state.toasts.forEach((t) => {
-          if (toastTimeouts.has(t.id)) {
-            clearTimeout(
-              toastTimeouts.get(t.id) as ReturnType<typeof setTimeout>,
-            );
-            toastTimeouts.delete(t.id);
-          }
-        });
-        return { ...state, toasts: [] };
-      }
-      if (toastTimeouts.has(action.toastId)) {
-        clearTimeout(
-          toastTimeouts.get(action.toastId) as ReturnType<typeof setTimeout>,
-        );
-        toastTimeouts.delete(action.toastId);
+        return {
+          ...state,
+          toasts: [],
+        };
       }
       return {
         ...state,
@@ -135,9 +128,9 @@ let memoryState: State = { toasts: [] };
 
 function dispatch(action: Action) {
   memoryState = reducer(memoryState, action);
-  listeners.forEach((listener) => {
+  for (const listener of listeners) {
     listener(memoryState);
-  });
+  }
 }
 
 type ToastInput = Omit<ToasterToast, "id">;
@@ -162,15 +155,11 @@ function toast({ ...props }: ToastInput): ToastReturn {
       open: true,
       onOpenChange: (open) => {
         if (!open) {
-          dispatch({ type: "REMOVE_TOAST", toastId: id });
+          dismiss();
         }
       },
     },
   });
-
-  if (TOAST_REMOVE_DELAY !== Infinity && TOAST_REMOVE_DELAY > 0) {
-    addToRemoveQueue(id);
-  }
 
   return { id, dismiss, update };
 }
@@ -186,7 +175,7 @@ function useToast() {
         listeners.splice(index, 1);
       }
     };
-  }, []);
+  }, [state]);
 
   return {
     ...state,

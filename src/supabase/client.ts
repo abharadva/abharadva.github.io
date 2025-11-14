@@ -1,3 +1,4 @@
+
 import { createClient, Session, User, SupabaseClientOptions } from "@supabase/supabase-js";
 import { config } from "@/lib/config";
 

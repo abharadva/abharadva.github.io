@@ -1,3 +1,4 @@
+
 "use client";
 
 import type React from "react";
@@ -5,6 +6,8 @@ import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { Loader2, CheckCircle, XCircle } from "lucide-react";
 
 export default function Newsletter() {
   const [email, setEmail] = useState("");
@@ -21,6 +24,7 @@ export default function Newsletter() {
     setMessage("");
 
     try {
+      // Simulate API call
       await new Promise((resolve) => setTimeout(resolve, 1500));
 
       setStatus("success");
@@ -30,8 +34,6 @@ export default function Newsletter() {
       setStatus("error");
       setMessage(err.message || "An error occurred. Please try again later.");
     }
-
-
   };
 
   return (
@@ -39,12 +41,11 @@ export default function Newsletter() {
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay: 0.4, duration: 0.5 }}
-      className="mb-12 rounded-none border-2 border-black bg-yellow-100 p-6  shadow-[6px_6px_0px_#000]"
+      className="mb-12 rounded-none border-2 border-foreground bg-card p-6 shadow-[8px_8px_0px_#000] dark:shadow-[8px_8px_0px_#FFF]"
     >
-      <h2 className="mb-2 text-2xl font-black text-black">JOIN THE LIST</h2>
-      <p className="mb-4 font-medium text-gray-800">
-        Project updates, cool links, and maybe some bad jokes. Straight to your
-        inbox. No spam, ever.
+      <h2 className="mb-2 text-2xl font-black uppercase text-foreground">Join The List</h2>
+      <p className="mb-4 text-muted-foreground">
+        Project updates, cool links, and maybe some bad jokes. No spam.
       </p>
 
       <form
@@ -65,26 +66,27 @@ export default function Newsletter() {
           type="submit"
           disabled={status === "loading" || !email.trim()}
           className="h-11 px-6 text-base"
-          variant="default"
         >
+          {status === "loading" && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
           {status === "loading" ? "Subscribing..." : "Subscribe"}
         </Button>
       </form>
 
       <AnimatePresence>
         {message && (
-          <motion.p
-            initial={{ opacity: 0, height: 0, marginTop: 0 }}
-            animate={{ opacity: 1, height: "auto", marginTop: "0.75rem" }}
-            exit={{ opacity: 0, height: 0, marginTop: 0 }}
+          <motion.div
+            initial={{ opacity: 0, height: 0, }}
+            animate={{ opacity: 1, height: "auto", }}
+            exit={{ opacity: 0, height: 0, }}
             transition={{ duration: 0.3 }}
-            className={`rounded-none border-2 p-2 text-sm font-bold
-          ${status === "success" ? "border-green-600 bg-green-100 text-green-700" : ""}
-          ${status === "error" ? "border-red-600 bg-red-100 text-red-700" : ""}`}
-            role={status === "error" ? "alert" : "status"}
           >
-            {message}
-          </motion.p>
+            <Alert variant={status === "error" ? "destructive" : "default"}>
+              {status === 'success' && <CheckCircle className="h-4 w-4" />}
+              {status === 'error' && <XCircle className="h-4 w-4" />}
+              <AlertTitle>{status === 'success' ? 'Success!' : 'Oops!'}</AlertTitle>
+              <AlertDescription>{message}</AlertDescription>
+            </Alert>
+          </motion.div>
         )}
       </AnimatePresence>
     </motion.section>

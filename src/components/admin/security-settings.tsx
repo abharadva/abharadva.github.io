@@ -1,3 +1,4 @@
+
 "use client";
 import type React from "react";
 import { useState, useEffect, FormEvent } from "react";
@@ -8,11 +9,10 @@ import { useRouter } from "next/router";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
-
-const buttonPrimaryClass =
-  "bg-indigo-600 hover:bg-indigo-700 text-white py-2 px-3 rounded-none font-bold border-2 border-black shadow-[3px_3px_0px_#000] hover:translate-x-[1px] hover:translate-y-[1px] hover:shadow-[1.5px_1.5px_0px_#000] active:translate-x-[2px] active:translate-y-[2px] active:shadow-none disabled:opacity-70 disabled:cursor-not-allowed transition-all duration-150 ";
-const buttonDangerClass =
-  "bg-red-500 hover:bg-red-600 text-white py-2 px-3 rounded-none font-bold border-2 border-black shadow-[3px_3px_0px_#000] hover:translate-x-[1px] hover:translate-y-[1px] hover:shadow-[1.5px_1.5px_0px_#000] active:translate-x-[2px] active:translate-y-[2px] active:shadow-none disabled:opacity-70 disabled:cursor-not-allowed transition-all duration-150 ";
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { Loader2, ShieldCheck, ShieldAlert, KeyRound } from "lucide-react";
 
 export default function SecuritySettings() {
   const [factors, setFactors] = useState<Factor[]>([]);
@@ -108,147 +108,108 @@ export default function SecuritySettings() {
     <motion.div
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
-      className="mx-auto max-w-4xl "
+      className="mx-auto max-w-4xl"
     >
-      <div className="rounded-none border-2 border-black bg-white">
-        <div className="border-b-2 border-black bg-gray-100 px-6 py-4">
-          <h2 className="text-xl font-bold text-black">Security Settings</h2>
-          <p className="mt-1 text-sm text-gray-700">
-            Manage your account security and two-factor authentication
-          </p>
-        </div>
+      <div className="space-y-8">
+        <header>
+            <h2 className="text-2xl font-black uppercase">Security Settings</h2>
+            <p className="text-muted-foreground">Manage your account security and two-factor authentication.</p>
+        </header>
 
-        <div className="space-y-8 p-4 sm:p-6">
-          {success && (
-            <div className="rounded-none border-2 border-green-500 bg-green-100 p-4">
-              <p className="text-sm font-semibold text-green-700">{success}</p>
-            </div>
-          )}
-          {error && (
-            <div className="rounded-none border-2 border-red-500 bg-red-100 p-4">
-              <p className="text-sm font-semibold text-red-700">{error}</p>
-            </div>
-          )}
+        {success && <Alert><ShieldCheck className="h-4 w-4" /><AlertTitle>Success</AlertTitle><AlertDescription>{success}</AlertDescription></Alert>}
+        {error && <Alert variant="destructive"><ShieldAlert className="h-4 w-4" /><AlertTitle>Error</AlertTitle><AlertDescription>{error}</AlertDescription></Alert>}
+        
+        <Card>
+          <CardHeader>
+            <CardTitle>Two-Factor Authentication (TOTP)</CardTitle>
+            <CardDescription>
+              {mfaEnabled
+                ? "MFA is currently active on your account."
+                : factors.length > 0
+                  ? "You have MFA factors registered but not verified."
+                  : "Add an extra layer of security."}
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <Badge variant={mfaEnabled ? "default" : "secondary"}>
+                {mfaEnabled ? <ShieldCheck className="mr-2 h-4 w-4" /> : <ShieldAlert className="mr-2 h-4 w-4" />}
+                {mfaEnabled ? "AAL2 Active" : factors.length > 0 ? "Factors Registered" : "Not Setup"}
+            </Badge>
 
-          <div className="rounded-none border-2 border-black bg-gray-50 p-4 sm:p-6">
-            <div className="mb-4 flex flex-col items-start gap-3 sm:flex-row sm:items-center sm:justify-between">
-              <div>
-                <h3 className="text-lg font-bold text-black">
-                  Two-Factor Authentication (TOTP)
-                </h3>
-                <p className="text-sm text-gray-700">
-                  {mfaEnabled
-                    ? "MFA is currently active and verified on your account."
-                    : factors.length > 0
-                      ? "You have MFA factors registered, but not all may be fully verified for AAL2."
-                      : "Add an extra layer of security to your account."}
-                </p>
-              </div>
-              <span
-                className={`inline-flex items-center rounded-none border-2 border-black px-2.5 py-0.5  text-xs font-bold ${
-                  mfaEnabled
-                    ? "bg-green-300 text-black"
-                    : "bg-yellow-300 text-black"
-                }`}
-              >
-                {mfaEnabled
-                  ? "AAL2 Active"
-                  : factors.length > 0
-                    ? "Factors Registered"
-                    : "Not Setup"}
-              </span>
-            </div>
-
-            {isLoading && (
-              <p className="text-sm text-gray-700">Loading MFA status...</p>
-            )}
+            {isLoading && <div className="flex items-center text-sm text-muted-foreground"><Loader2 className="mr-2 h-4 w-4 animate-spin" />Loading MFA status...</div>}
 
             {!isLoading && factors.length > 0 && (
-              <div className="space-y-3">
-                <h4 className="text-md font-semibold text-black">
-                  Registered Authenticators:
-                </h4>
+              <div className="space-y-3 pt-2">
+                <h4 className="font-bold text-foreground">Registered Authenticators:</h4>
                 {factors.map((factor) => (
-                  <div
-                    key={factor.id}
-                    className="flex flex-col items-start gap-2 rounded-none border border-gray-400 bg-white p-3 sm:flex-row sm:items-center sm:justify-between"
-                  >
+                  <div key={factor.id} className="flex items-center justify-between rounded-none border-2 border-foreground bg-secondary/50 p-3">
                     <div>
-                      <p className="text-sm font-semibold">
-                        {factor.friendly_name ||
-                          `Authenticator (ID: ...${factor.id.slice(-6)})`}
-                      </p>
-                      <p className="text-xs text-gray-600">
-                        Status: {factor.status}
-                      </p>
+                      <p className="text-sm font-bold">{factor.friendly_name || `Authenticator (ID: ...${factor.id.slice(-6)})`}</p>
+                      <p className="text-xs text-muted-foreground">Status: {factor.status}</p>
                     </div>
-                    <button
-                      onClick={() => handleUnenroll(factor.id)}
-                      className={`${buttonDangerClass} w-full px-2 py-1 text-xs sm:w-auto`}
-                      disabled={isLoading}
-                    >
-                      {isLoading ? "Removing..." : "Remove"}
-                    </button>
+                    <Button onClick={() => handleUnenroll(factor.id)} variant="destructive" size="sm" disabled={isLoading}>
+                      {isLoading ? <Loader2 className="mr-2 h-4 w-4 animate-spin"/> : null} Remove
+                    </Button>
                   </div>
                 ))}
               </div>
             )}
-            {!isLoading && factors.length === 0 && !error && (
-              <p className="text-sm text-gray-700">
-                No MFA methods are currently set up.
-              </p>
+             {!isLoading && factors.length === 0 && !error && (
+              <p className="text-sm text-muted-foreground pt-2">No MFA methods are currently set up.</p>
             )}
+          </CardContent>
+          <CardFooter>
+             <Button onClick={() => router.push("/admin/setup-mfa")} disabled={isLoading}>
+              {factors.length > 0 ? "Add Another Authenticator" : "Set Up MFA Now"}
+            </Button>
+          </CardFooter>
+        </Card>
 
-            {!isLoading && (
-              <button
-                onClick={() => router.push("/admin/setup-mfa")}
-                className={`${buttonPrimaryClass} mt-4`}
-                disabled={isLoading}
-              >
-                {factors.length > 0
-                  ? "Add Another Authenticator"
-                  : "Set Up MFA Now"}
-              </button>
-            )}
-          </div>
-
-          <div className="rounded-none border-2 border-black bg-gray-50 p-4 sm:p-6">
-            <h3 className="mb-4 text-lg font-bold text-black">Change Password</h3>
+        <Card>
+          <CardHeader>
+            <CardTitle>Change Password</CardTitle>
+            <CardDescription>Update your account password. Use a strong, unique password.</CardDescription>
+          </CardHeader>
+          <CardContent>
             <form onSubmit={handlePasswordChange} className="space-y-4 max-w-md">
-              <div>
-                <Label htmlFor="new-password">New Password</Label>
-                <Input id="new-password" type="password" value={newPassword} onChange={e => setNewPassword(e.target.value)} required minLength={6} />
-              </div>
-              <div>
-                <Label htmlFor="confirm-password">Confirm New Password</Label>
-                <Input id="confirm-password" type="password" value={confirmPassword} onChange={e => setConfirmPassword(e.target.value)} required minLength={6} />
-              </div>
-              {passwordError && <p className="text-sm font-semibold text-red-600">{passwordError}</p>}
-              {passwordSuccess && <p className="text-sm font-semibold text-green-600">{passwordSuccess}</p>}
-              <Button type="submit" disabled={isUpdatingPassword || !newPassword || !confirmPassword}>
-                {isUpdatingPassword ? "Updating..." : "Update Password"}
-              </Button>
-            </form>
-          </div>
+                <div className="space-y-2">
+                  <Label htmlFor="new-password">New Password</Label>
+                  <Input id="new-password" type="password" value={newPassword} onChange={e => setNewPassword(e.target.value)} required minLength={6} />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="confirm-password">Confirm New Password</Label>
+                  <Input id="confirm-password" type="password" value={confirmPassword} onChange={e => setConfirmPassword(e.target.value)} required minLength={6} />
+                </div>
+                {passwordError && <p className="text-sm font-bold text-destructive">{passwordError}</p>}
+                {passwordSuccess && <p className="text-sm font-bold text-green-600">{passwordSuccess}</p>}
+                <Button type="submit" disabled={isUpdatingPassword || !newPassword || !confirmPassword}>
+                  {isUpdatingPassword && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                  {isUpdatingPassword ? "Updating..." : "Update Password"}
+                </Button>
+              </form>
+          </CardContent>
+        </Card>
 
-          <div className="rounded-none border-2 border-black bg-gray-50 p-4 sm:p-6">
-            <h3 className="mb-4 text-lg font-bold text-black">Security Tips</h3>
-            <ul className="space-y-2 text-sm text-gray-700">
-              {[
-                "Keep your authenticator app secure and backed up.",
-                "Do not share your password or MFA codes.",
-                "Use a strong, unique password for admin access.",
-                "Log out when you finish managing your site.",
-                "Regularly review active sessions if your auth provider supports it.",
-              ].map((tip) => (
-                <li key={tip} className="flex items-start">
-                  <span className="mr-2 pt-1 font-bold text-indigo-600">•</span>
-                  {tip}
-                </li>
-              ))}
-            </ul>
-          </div>
-        </div>
+        <Card>
+            <CardHeader>
+                <CardTitle>Security Tips</CardTitle>
+            </CardHeader>
+            <CardContent>
+                <ul className="space-y-3 text-sm text-muted-foreground">
+                    {[
+                        "Keep your authenticator app secure and backed up.",
+                        "Do not share your password or MFA codes.",
+                        "Use a strong, unique password for admin access.",
+                        "Log out when you finish managing your site.",
+                    ].map((tip, i) => (
+                        <li key={i} className="flex items-start">
+                        <KeyRound className="mr-3 mt-0.5 size-4 shrink-0 text-accent" />
+                        <span>{tip}</span>
+                        </li>
+                    ))}
+                </ul>
+            </CardContent>
+        </Card>
       </div>
     </motion.div>
   );

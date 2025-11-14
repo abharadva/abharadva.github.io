@@ -1,8 +1,9 @@
+
 /*
-This file is updated to remove the neo-brutalist styling.
-- The `ResizablePanelGroup` now uses `rounded-lg` and a subtle theme `border`, removing the heavy shadow.
-- The `ResizableHandle` is restyled to be more subtle. The hover and drag states now use the theme's `accent` color for a clean, modern look.
-- The handle's grabber icon (`GripVertical`) container is updated with modern styling (`rounded-sm`, subtle border).
+This file is updated to implement neo-brutalist styling.
+- `ResizablePanelGroup` now uses `rounded-none` and a thick `border-2`, removing the subtle shadow.
+- `ResizableHandle` is restyled to be thicker and more prominent. The hover and drag states now use a high-contrast `accent` color.
+- The handle's grabber icon container is updated with `rounded-none` and a `border-2` for a chunkier feel.
 */
 "use client";
 
@@ -44,7 +45,7 @@ const ResizableHandle = ({
     {...props}
   >
     {withHandle && (
-      <div className="z-10 flex h-4 w-3 items-center justify-center rounded-sm border bg-background">
+      <div className="z-10 flex h-4 w-3 items-center justify-center rounded-none border-2 border-foreground bg-background">
         <GripVertical className="h-2.5 w-2.5" />
       </div>
     )}

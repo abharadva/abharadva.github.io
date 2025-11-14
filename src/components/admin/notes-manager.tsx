@@ -1,13 +1,25 @@
+
 "use client";
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import type { Note } from "@/types";
 import NoteEditor from "@/components/admin/note-editor";
 import { supabase } from "@/supabase/client";
-import { Pin, PinOff, Edit, Trash2 } from "lucide-react";
-
-const buttonPrimaryClass =
-  "bg-indigo-600 hover:bg-indigo-700 text-white py-2 px-4 rounded-none font-bold border-2 border-black shadow-[4px_4px_0px_#000] hover:translate-x-[1px] hover:translate-y-[1px] hover:shadow-[2px_2px_0px_#000] active:translate-x-[2px] active:translate-y-[2px] active:shadow-none transition-all duration-150 ";
+import { Pin, PinOff, Edit, Trash2, Plus, Loader2 } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
 
 export default function NotesManager() {
   const [notes, setNotes] = useState<Note[]>([]);
@@ -38,28 +50,14 @@ export default function NotesManager() {
     loadNotes();
   }, []);
 
-  const handleCreateNote = () => {
-    setIsCreating(true);
-    setEditingNote(null);
-  };
-
-  const handleEditNote = (note: Note) => {
-    setEditingNote(note);
-    setIsCreating(false);
-  };
+  const handleCreateNote = () => { setIsCreating(true); setEditingNote(null); };
+  const handleEditNote = (note: Note) => { setEditingNote(note); setIsCreating(false); };
 
   const handleDeleteNote = async (noteId: string) => {
-    if (!confirm("Are you sure you want to delete this note?")) return;
     setIsLoading(true);
-    const { error: deleteError } = await supabase
-      .from("notes")
-      .delete()
-      .eq("id", noteId);
-    if (deleteError) {
-      setError("Failed to delete note: " + deleteError.message);
-    } else {
-      await loadNotes();
-    }
+    const { error: deleteError } = await supabase.from("notes").delete().eq("id", noteId);
+    if (deleteError) { setError("Failed to delete note: " + deleteError.message); }
+    else { await loadNotes(); }
     setIsLoading(false);
   };
 
@@ -68,24 +66,15 @@ export default function NotesManager() {
     setError(null);
     const { id, user_id, created_at, ...dataToSave } = noteData;
 
-    let response;
-    if (isCreating || !editingNote?.id) {
-      response = await supabase.from("notes").insert(dataToSave).select().single();
-    } else {
-      response = await supabase
-        .from("notes")
-        .update(dataToSave)
-        .eq("id", editingNote.id)
-        .select()
-        .single();
-    }
+    const response = isCreating || !editingNote?.id
+      ? await supabase.from("notes").insert(dataToSave).select().single()
+      : await supabase.from("notes").update(dataToSave).eq("id", editingNote.id).select().single();
 
     if (response.error) {
       setError("Failed to save note: " + response.error.message);
       setIsLoading(false);
       return;
     }
-
     setIsCreating(false);
     setEditingNote(null);
     await loadNotes();
@@ -93,45 +82,35 @@ export default function NotesManager() {
 
   const handleTogglePin = async (note: Note) => {
     setIsLoading(true);
-    const { error: pinError } = await supabase
-      .from("notes")
-      .update({ is_pinned: !note.is_pinned })
-      .eq("id", note.id);
-    if (pinError) {
-      setError("Failed to update pin status: " + pinError.message);
-    } else {
-      await loadNotes();
-    }
+    const { error: pinError } = await supabase.from("notes").update({ is_pinned: !note.is_pinned }).eq("id", note.id);
+    if (pinError) { setError("Failed to update pin status: " + pinError.message); }
+    else { await loadNotes(); }
     setIsLoading(false);
   };
 
-  const handleCancel = () => {
-    setIsCreating(false);
-    setEditingNote(null);
-    setError(null);
-  };
+  const handleCancel = () => { setIsCreating(false); setEditingNote(null); setError(null); };
   
   if (isCreating || editingNote) {
     return <NoteEditor note={editingNote} onSave={handleSaveNote} onCancel={handleCancel} />;
   }
 
   return (
-    <div className="space-y-6 ">
+    <div className="space-y-6">
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <h2 className="text-2xl font-bold text-black">Personal Notes</h2>
-          <p className="text-gray-700">A space for your thoughts and reminders.</p>
+          <h2 className="text-2xl font-black uppercase">Personal Notes</h2>
+          <p className="text-muted-foreground">A space for your thoughts and reminders.</p>
         </div>
-        <button onClick={handleCreateNote} className={buttonPrimaryClass}>+ Create New Note</button>
+        <Button onClick={handleCreateNote}><Plus className="mr-2 size-4" />Create New Note</Button>
       </div>
 
-      {isLoading && <p className="font-semibold text-black">Loading notes...</p>}
-      {error && <div className="rounded-none border-2 border-red-500 bg-red-100 p-4 font-semibold text-red-700">{error}</div>}
+      {isLoading && <div className="flex items-center justify-center p-8"><Loader2 className="h-6 w-6 animate-spin" /><span className="ml-2">Loading notes...</span></div>}
+      {error && <div className="rounded-none border-2 border-destructive bg-destructive/10 p-4 font-bold text-destructive">{error}</div>}
 
       {!isLoading && notes.length === 0 ? (
-        <div className="rounded-none border-2 border-dashed border-black bg-white py-12 text-center">
-          <h3 className="text-lg font-bold text-black">No notes yet.</h3>
-          <p className="text-gray-600">Click "Create New Note" to start.</p>
+        <div className="rounded-none border-2 border-dashed border-foreground py-12 text-center">
+          <h3 className="text-lg font-bold">No notes yet.</h3>
+          <p className="text-muted-foreground">Click "Create New Note" to start.</p>
         </div>
       ) : (
         <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
@@ -144,29 +123,35 @@ export default function NotesManager() {
                 animate={{ opacity: 1, scale: 1 }}
                 exit={{ opacity: 0, scale: 0.9 }}
                 transition={{ duration: 0.2 }}
-                className={`flex flex-col rounded-none border-2 border-black bg-white shadow-[4px_4px_0px_#000] ${note.is_pinned ? "bg-yellow-100" : "bg-white"}`}
               >
-                <div className="flex-grow p-4">
-                  {note.title && <h3 className="mb-2 text-lg font-bold text-black truncate">{note.title}</h3>}
-                  <p className="line-clamp-4 text-sm text-gray-700">{note.content || <span className="italic">No content.</span>}</p>
-                </div>
-                <div className="border-t-2 border-black p-3">
-                  {note.tags && note.tags.length > 0 && (
-                     <div className="mb-3 flex flex-wrap gap-1">
-                        {note.tags.map(tag => <span key={tag} className="inline-block rounded-none border border-black bg-gray-200 px-2 py-0.5 text-xs font-semibold text-black">{tag}</span>)}
-                     </div>
-                  )}
-                   <div className="flex items-center justify-between gap-2">
-                    <div className="text-xs text-gray-500">
-                        Updated: {new Date(note.updated_at || "").toLocaleDateString()}
+                <Card className={`flex flex-col h-full ${note.is_pinned ? "border-accent bg-accent/5" : "bg-card"}`}>
+                  <CardHeader>
+                    {note.title && <CardTitle className="truncate">{note.title}</CardTitle>}
+                  </CardHeader>
+                  <CardContent className="flex-grow">
+                    <p className="line-clamp-4 text-sm text-muted-foreground">{note.content || <span className="italic">No content.</span>}</p>
+                  </CardContent>
+                  <CardFooter className="flex-col items-start gap-3 p-3">
+                    {note.tags && note.tags.length > 0 && (
+                      <div className="flex flex-wrap gap-1">
+                        {note.tags.map(tag => <Badge key={tag} variant="secondary">{tag}</Badge>)}
+                      </div>
+                    )}
+                    <div className="flex w-full items-center justify-between gap-2">
+                      <p className="text-xs text-muted-foreground">
+                          Updated: {new Date(note.updated_at || "").toLocaleDateString()}
+                      </p>
+                      <div className="flex items-center gap-1">
+                          <Button variant="ghost" size="icon" className="size-8" onClick={() => handleTogglePin(note)} title={note.is_pinned ? "Unpin" : "Pin"}>{note.is_pinned ? <PinOff className="size-4 text-accent"/> : <Pin className="size-4"/>}</Button>
+                          <Button variant="ghost" size="icon" className="size-8" onClick={() => handleEditNote(note)} title="Edit"><Edit className="size-4"/></Button>
+                          <AlertDialog>
+                            <AlertDialogTrigger asChild><Button variant="ghost" size="icon" className="size-8 hover:bg-destructive/10 hover:text-destructive" title="Delete"><Trash2 className="size-4"/></Button></AlertDialogTrigger>
+                            <AlertDialogContent><AlertDialogHeader><AlertDialogTitle>Delete Note?</AlertDialogTitle><AlertDialogDescription>This will permanently delete "{note.title || 'this note'}".</AlertDialogDescription></AlertDialogHeader><AlertDialogFooter><AlertDialogCancel>Cancel</AlertDialogCancel><AlertDialogAction onClick={() => handleDeleteNote(note.id)}>Delete</AlertDialogAction></AlertDialogFooter></AlertDialogContent>
+                          </AlertDialog>
+                      </div>
                     </div>
-                    <div className="flex items-center gap-1">
-                        <button onClick={() => handleTogglePin(note)} className="p-1.5 text-gray-600 hover:text-black hover:bg-yellow-200 border-2 border-transparent hover:border-black rounded-none" title={note.is_pinned ? "Unpin" : "Pin"}>{note.is_pinned ? <PinOff className="size-4"/> : <Pin className="size-4"/>}</button>
-                        <button onClick={() => handleEditNote(note)} className="p-1.5 text-gray-600 hover:text-black hover:bg-blue-200 border-2 border-transparent hover:border-black rounded-none" title="Edit"><Edit className="size-4"/></button>
-                        <button onClick={() => handleDeleteNote(note.id)} className="p-1.5 text-gray-600 hover:text-white hover:bg-red-500 border-2 border-transparent hover:border-black rounded-none" title="Delete"><Trash2 className="size-4"/></button>
-                    </div>
-                   </div>
-                </div>
+                  </CardFooter>
+                </Card>
               </motion.div>
             ))}
           </AnimatePresence>

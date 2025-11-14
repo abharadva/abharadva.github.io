@@ -1,8 +1,9 @@
+
 /*
-This file is updated for the new kinetic typography design system.
-- The neo-brutalist `border-2`, `rounded-none`, and `shadow-[...]` styles are removed from `PopoverContent`.
-- The popover panel now uses `rounded-md`, a subtle theme `border`, `bg-popover`, and a standard `shadow-md` for a modern, clean appearance, consistent with other overlay components like DropdownMenu.
-- The animation properties are kept for a smooth user experience.
+This file is updated for the new neo-brutalist design system.
+- The modern styles are replaced with `border-2`, `rounded-none`, and a hard `shadow-[...]` on `PopoverContent`.
+- The popover panel now has a raw, high-contrast appearance, consistent with other overlay components like DropdownMenu.
+- The animation properties are kept for user experience but are made quicker to feel more direct.
 */
 "use client";
 
@@ -27,7 +28,7 @@ const PopoverContent = React.forwardRef<
       align={align}
       sideOffset={sideOffset}
       className={cn(
-        "z-50 w-72 rounded-md border bg-popover p-4 text-popover-foreground shadow-md outline-none data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 data-[side=bottom]:slide-in-from-top-2 data-[side=left]:slide-in-from-right-2 data-[side=right]:slide-in-from-left-2 data-[side=top]:slide-in-from-bottom-2",
+        "z-50 w-72 rounded-none border-2 border-foreground bg-popover p-4 text-popover-foreground shadow-[4px_4px_0px_#000] outline-none data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 data-[side=bottom]:slide-in-from-top-2 data-[side=left]:slide-in-from-right-2 data-[side=right]:slide-in-from-left-2 data-[side=top]:slide-in-from-bottom-2 dark:shadow-[4px_4px_0px_#FFF]",
         className
       )}
       {...props}

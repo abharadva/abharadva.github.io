@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useState, useEffect, FormEvent, DragEvent } from "react";
@@ -13,7 +14,18 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Label } from "@/components/ui/label";
 import { ResizableHandle, ResizablePanel, ResizablePanelGroup } from "@/components/ui/resizable";
 import { cn } from "@/lib/utils";
-import { ScrollArea } from "../ui/scroll-area";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
 
 // Reusable component to edit a selected section
 const SectionEditor = ({
@@ -22,7 +34,6 @@ const SectionEditor = ({
   onDeleteSection,
   onSaveItem,
   onDeleteItem,
-  onRefresh,
   isLoading
 }: {
   section: PortfolioSection;
@@ -30,7 +41,6 @@ const SectionEditor = ({
   onDeleteSection: (id: string) => void;
   onSaveItem: (data: Partial<PortfolioItem>, sectionId: string) => void;
   onDeleteItem: (id: string) => void;
-  onRefresh: () => void;
   isLoading: boolean;
 }) => {
   const [isEditingSection, setIsEditingSection] = useState(false);
@@ -42,20 +52,23 @@ const SectionEditor = ({
       <Card>
         <CardHeader className="flex-row items-center justify-between">
           <div>
-            <CardTitle>{section.title}</CardTitle>
+            <CardTitle className="uppercase">{section.title}</CardTitle>
             <CardDescription>Type: {section.type} | Order: {section.display_order}</CardDescription>
           </div>
           <div className="flex gap-2">
             <Button variant="outline" size="sm" onClick={() => setIsEditingSection(!isEditingSection)}>
               <Edit className="mr-2 size-4" /> {isEditingSection ? 'Cancel' : 'Edit Section'}
             </Button>
-            <Button variant="destructive" size="sm" onClick={() => onDeleteSection(section.id)}><Trash2 className="mr-2 size-4" /> Delete Section</Button>
+            <AlertDialog>
+              <AlertDialogTrigger asChild><Button variant="destructive" size="sm"><Trash2 className="mr-2 size-4" /> Delete Section</Button></AlertDialogTrigger>
+              <AlertDialogContent><AlertDialogHeader><AlertDialogTitle>Delete Section?</AlertDialogTitle><AlertDialogDescription>This will permanently delete "{section.title}" and all of its content. This action is irreversible.</AlertDialogDescription></AlertDialogHeader><AlertDialogFooter><AlertDialogCancel>Cancel</AlertDialogCancel><AlertDialogAction onClick={() => onDeleteSection(section.id)}>Confirm Delete</AlertDialogAction></AlertDialogFooter></AlertDialogContent>
+            </AlertDialog>
           </div>
         </CardHeader>
         <CardContent>
           {isEditingSection && (
-            <div className="mb-6 rounded-md border bg-secondary/20 p-4">
-              <h4 className="mb-3 text-lg font-semibold">Editing Section Details</h4>
+            <div className="mb-6 rounded-none border-2 border-foreground bg-secondary/20 p-4">
+              <h4 className="mb-3 text-lg font-bold">Editing Section Details</h4>
               <form
                 onSubmit={(e) => { e.preventDefault(); const formData = new FormData(e.currentTarget); onSaveSection({ id: section.id, title: formData.get("title") as string, type: formData.get("type") as any }); setIsEditingSection(false); }}
                 className="space-y-4"
@@ -77,16 +90,19 @@ const SectionEditor = ({
 
           {section.type === 'list_items' && (
              <div className="space-y-4">
-               <h4 className="font-semibold text-foreground">Items in this Section</h4>
+               <h4 className="font-bold text-foreground">Items in this Section</h4>
                {section.portfolio_items?.map(item => (
-                 <div key={item.id} className="rounded-md border p-3 flex justify-between items-start">
+                 <div key={item.id} className="rounded-none border-2 border-foreground p-3 flex justify-between items-start">
                     <div>
-                      <p className="font-medium">{item.title}</p>
+                      <p className="font-bold">{item.title}</p>
                       <p className="text-sm text-muted-foreground">{item.subtitle}</p>
                     </div>
                     <div className="flex gap-1">
                       <Button variant="ghost" size="icon" className="size-8" onClick={() => { setEditingItem(item); setIsCreatingItem(false); }}><Edit className="size-4"/></Button>
-                      <Button variant="ghost" size="icon" className="size-8 hover:bg-destructive/10 hover:text-destructive" onClick={() => onDeleteItem(item.id)}><Trash2 className="size-4"/></Button>
+                      <AlertDialog>
+                         <AlertDialogTrigger asChild><Button variant="ghost" size="icon" className="size-8 hover:bg-destructive/10 hover:text-destructive"><Trash2 className="size-4"/></Button></AlertDialogTrigger>
+                         <AlertDialogContent><AlertDialogHeader><AlertDialogTitle>Delete Item?</AlertDialogTitle><AlertDialogDescription>This will permanently delete the item titled "{item.title}".</AlertDialogDescription></AlertDialogHeader><AlertDialogFooter><AlertDialogCancel>Cancel</AlertDialogCancel><AlertDialogAction onClick={() => onDeleteItem(item.id)}>Delete</AlertDialogAction></AlertDialogFooter></AlertDialogContent>
+                      </AlertDialog>
                     </div>
                  </div>
                ))}
@@ -95,13 +111,14 @@ const SectionEditor = ({
           )}
 
           {(isCreatingItem || editingItem) && (
-            <div className="mt-6 rounded-md border bg-secondary/20 p-4">
-                <h4 className="mb-3 text-lg font-semibold">{editingItem ? `Editing: ${editingItem.title}` : 'Create New Item'}</h4>
+            <div className="mt-6 rounded-none border-2 border-foreground bg-secondary/20 p-4">
+                <h4 className="mb-3 text-lg font-bold">{editingItem ? `Editing: ${editingItem.title}` : 'Create New Item'}</h4>
                 <form
                     onSubmit={(e) => {
                         e.preventDefault();
                         const formData = new FormData(e.currentTarget);
                         const data: Partial<PortfolioItem> = {
+                            id: editingItem?.id,
                             title: formData.get("item_title") as string,
                             subtitle: (formData.get("item_subtitle") as string) || null,
                             description: (formData.get("item_description") as string) || null,
@@ -115,7 +132,7 @@ const SectionEditor = ({
                 >
                     <Input name="item_title" placeholder="Title" defaultValue={editingItem?.title || ""} required />
                     <Input name="item_subtitle" placeholder="Subtitle" defaultValue={editingItem?.subtitle || ""} />
-                    <Textarea name="item_description" placeholder="Description" defaultValue={editingItem?.description || ""} rows={3}/>
+                    <Textarea name="item_description" placeholder="Description (Markdown supported)" defaultValue={editingItem?.description || ""} rows={3}/>
                     <Input name="item_tags" placeholder="Tags (comma,separated)" defaultValue={editingItem?.tags?.join(', ') || ""}/>
                     <div className="flex gap-2 pt-2">
                         <Button type="submit">Save Item</Button>
@@ -138,7 +155,6 @@ export default function ContentManager() {
   const [selectedSectionId, setSelectedSectionId] = useState<string | null>(null);
   const [isCreating, setIsCreating] = useState(false);
   const [draggedSectionId, setDraggedSectionId] = useState<string | null>(null);
-  const [editingItem, setEditingItem] = useState<PortfolioItem | null>(null);
 
   const fetchPortfolioContent = async () => {
     setIsLoading(true);
@@ -171,7 +187,7 @@ export default function ContentManager() {
   const handleSaveSection = async (data: Partial<PortfolioSection>) => {
     setIsLoading(true);
     const response = data.id 
-      ? await supabase.from("portfolio_sections").update(data).eq("id", data.id)
+      ? await supabase.from("portfolio_sections").update({ title: data.title, type: data.type }).eq("id", data.id).select().single()
       : await supabase.from("portfolio_sections").insert(data).select().single();
     if (response.error) setError(response.error.message);
     else { setIsCreating(false); if (response.data) setSelectedSectionId(response.data.id); await fetchPortfolioContent(); }
@@ -179,23 +195,21 @@ export default function ContentManager() {
   };
 
   const handleDeleteSection = async (id: string) => {
-    if (!confirm("Delete this section and ALL its items? This is irreversible.")) return;
     await supabase.from("portfolio_sections").delete().eq("id", id);
     setSelectedSectionId(null);
     await fetchPortfolioContent();
   };
   
   const handleSaveItem = async (itemData: Partial<PortfolioItem>, sectionId: string) => {
-    const dataToSave = { ...itemData, section_id: sectionId };
-    const response = editingItem?.id
-      ? await supabase.from("portfolio_items").update(dataToSave).eq("id", editingItem.id)
+    const { id, ...dataToSave } = { ...itemData, section_id: sectionId };
+    const response = id
+      ? await supabase.from("portfolio_items").update(dataToSave).eq("id", id)
       : await supabase.from("portfolio_items").insert(dataToSave);
     if (response.error) setError(response.error.message);
     else await fetchPortfolioContent();
   };
 
   const handleDeleteItem = async (itemId: string) => {
-    if (!confirm("Delete this item? This is irreversible.")) return;
     await supabase.from("portfolio_items").delete().eq("id", itemId);
     await fetchPortfolioContent();
   };
@@ -203,7 +217,7 @@ export default function ContentManager() {
   const selectedSection = sections.find(s => s.id === selectedSectionId);
 
   return (
-    <ResizablePanelGroup direction="horizontal" className="h-[calc(100vh-10rem)] rounded-lg border">
+    <ResizablePanelGroup direction="horizontal" className="h-[calc(100vh-12rem)] rounded-none border-2 border-foreground">
       <ResizablePanel defaultSize={25} minSize={20} maxSize={30}>
         <div className="flex h-full flex-col p-2">
           <Button onClick={() => { setIsCreating(true); setSelectedSectionId(null); }} className="mb-2">
@@ -238,7 +252,7 @@ export default function ContentManager() {
         <ScrollArea className="h-full px-4 py-2">
           {isCreating && (
             <Card className="m-1">
-              <CardHeader><CardTitle>Create a New Section</CardTitle></CardHeader>
+              <CardHeader><CardTitle className="uppercase">Create a New Section</CardTitle></CardHeader>
               <CardContent>
                 <form onSubmit={(e) => { e.preventDefault(); const formData = new FormData(e.currentTarget); handleSaveSection({ title: formData.get("title") as string, type: formData.get("type") as any }); }} className="space-y-4">
                   <div><Label htmlFor="new-title">Section Title</Label><Input id="new-title" name="title" required /></div>
@@ -256,7 +270,6 @@ export default function ContentManager() {
               onDeleteSection={handleDeleteSection}
               onSaveItem={handleSaveItem}
               onDeleteItem={handleDeleteItem}
-              onRefresh={fetchPortfolioContent}
               isLoading={isLoading}
             />
           )}

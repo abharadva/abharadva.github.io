@@ -1,7 +1,9 @@
+
 import React, { useState, useEffect } from "react";
 import MarkdownEditor from "@/components/admin/markdown-editor";
-import { Expand, Shrink } from "lucide-react";
+import { Expand, Shrink, Image as ImageIcon } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { Button } from "@/components/ui/button";
 
 interface AdvancedMarkdownEditorProps {
   value: string;
@@ -39,37 +41,41 @@ export default function AdvancedMarkdownEditor({
   return (
     <div
       className={cn(
-        "rounded-none border-2 border-black  bg-white",
+        "rounded-none border-2 border-foreground bg-card",
         isFullScreen && "fixed inset-0 z-50 flex flex-col",
       )}
     >
-      <div className="flex flex-col items-stretch gap-2 border-b-2 border-black bg-gray-100 p-2 sm:flex-row sm:items-center sm:justify-between">
-        <span className="text-xs font-semibold text-black">
+      <div className="flex flex-col items-stretch gap-2 border-b-2 border-foreground bg-muted/50 p-2 sm:flex-row sm:items-center sm:justify-between">
+        <span className="text-xs font-bold uppercase text-muted-foreground">
           Markdown Editor
         </span>
         <div className="flex w-full items-center justify-end gap-2 sm:w-auto">
-          <button
+          <Button
             type="button"
+            variant="secondary"
+            size="sm"
             onClick={onImageUploadRequest}
-            className="w-full flex-1 rounded-none border-2 border-black bg-blue-500 px-3 py-1  text-xs text-white shadow-[2px_2px_0px_#000] transition-all hover:bg-blue-600 active:translate-x-px active:translate-y-px active:shadow-none sm:w-auto sm:flex-initial"
           >
-            Upload Image to Content
-          </button>
-          <button
+            <ImageIcon className="mr-2 size-4" />
+            Upload Image
+          </Button>
+          <Button
             type="button"
+            variant="outline"
+            size="icon"
             onClick={() => setIsFullScreen(!isFullScreen)}
             title={isFullScreen ? "Exit Fullscreen" : "Enter Fullscreen"}
-            className="rounded-none border-2 border-black bg-gray-300 p-1.5 text-black shadow-[2px_2px_0px_#000] transition-all hover:bg-gray-400 active:translate-x-px active:translate-y-px active:shadow-none"
+            className="h-9 w-9"
           >
             {isFullScreen ? (
-              <Shrink className="size-3.5" />
+              <Shrink className="size-4" />
             ) : (
-              <Expand className="size-3.5" />
+              <Expand className="size-4" />
             )}
             <span className="sr-only">
               {isFullScreen ? "Exit Fullscreen" : "Enter Fullscreen"}
             </span>
-          </button>
+          </Button>
         </div>
       </div>
       <div className={cn("relative", isFullScreen && "flex-grow")}>

@@ -1,8 +1,8 @@
+
 /*
-This file is updated for the new design system.
-- The hardcoded `bg-black` and `h-[2px]/w-[2px]` styles are removed.
-- The separator now uses the theme's `bg-border` color for a more subtle look.
-- The thickness is reduced to a standard `h-px` or `w-px`, which is more conventional for modern UIs.
+This file is updated for the new neo-brutalist design system.
+- The subtle `bg-border` is replaced with the high-contrast `bg-foreground`.
+- The thickness is increased to `h-[2px]` or `w-[2px]` for a more substantial, visible line, fitting the raw aesthetic.
 */
 "use client";
 
@@ -24,8 +24,8 @@ const Separator = React.forwardRef<
       decorative={decorative}
       orientation={orientation}
       className={cn(
-        "shrink-0 bg-border",
-        orientation === "horizontal" ? "h-[1px] w-full" : "h-full w-[1px]",
+        "shrink-0 bg-foreground",
+        orientation === "horizontal" ? "h-[2px] w-full" : "h-full w-[2px]",
         className
       )}
       {...props}

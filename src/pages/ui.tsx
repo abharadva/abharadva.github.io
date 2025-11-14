@@ -1,3 +1,4 @@
+
 import Layout from "@/components/layout";
 import React, { useState, useEffect, useRef } from "react";
 import Link from "next/link";
@@ -44,7 +45,7 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 import { Progress } from "@/components/ui/progress";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { ResizableHandle, ResizablePanel, ResizablePanelGroup } from "@/components/ui/resizable";
-import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
+import { ScrollArea } from "@/components/ui/scroll-area";
 import { Select, SelectContent, SelectGroup, SelectItem, SelectLabel, SelectSeparator, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Separator } from "@/components/ui/separator";
 import { Sheet, SheetClose, SheetContent, SheetDescription, SheetFooter, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
@@ -122,102 +123,112 @@ const componentSectionsList: ComponentSectionItem[] = [
   { id: "tooltip", name: "Tooltip", icon: <MessageSquare className="mr-2 size-4" /> },
 ];
 
-const CodeBlock: React.FC<{ code: string; language?: string; title?: string; }> = ({ code, language = "tsx", title }) => (
-  <div className="my-6 rounded-none border-2 border-black bg-[#2d2d2d] shadow-[4px_4px_0_#000]">
-    {title && <div className="border-b-2 border-black bg-black px-3 py-1.5 font-mono text-sm font-bold text-yellow-300">{title}</div>}
-    <SyntaxHighlighter language={language} style={materialDark} customStyle={{ margin: 0, borderRadius: 0, padding: "1rem", background: "transparent", fontSize: "0.8rem" }} showLineNumbers={code.trim().split("\n").length > 2} lineNumberStyle={{ color: "#666", fontSize: "0.75em", marginRight: "1em", userSelect: "none" }} wrapLines={true} wrapLongLines={true}>{code.trim()}</SyntaxHighlighter>
-  </div>
+const ComponentDisplay: React.FC<{
+  id: string;
+  title: string;
+  description: string;
+  children: React.ReactNode;
+}> = ({ id, title, description, children }) => (
+  <Card id={id} className="scroll-mt-24">
+    <CardHeader>
+      <CardTitle>{title}</CardTitle>
+      <CardDescription>{description}</CardDescription>
+    </CardHeader>
+    <CardContent className="space-y-6">
+      <div className="flex flex-wrap items-start gap-4">{children}</div>
+    </CardContent>
+  </Card>
 );
 
-const ComponentDocSection: React.FC<{ id: string; title: string; description: string; children: React.ReactNode; className?: string; }> = ({ id, title, description, children, className }) => (
-  <section id={id} className={cn("mb-16 scroll-mt-24 rounded-none border-2 border-black bg-white px-6 py-8 shadow-[8px_8px_0px_#000]", className)}>
-    <header className="mb-6 border-b-4 border-black pb-4"><h2 className="text-3xl font-black text-black sm:text-4xl">{title}</h2><p className="mt-1.5 text-md font-semibold text-gray-700">{description}</p></header>
-    <div className="space-y-10">{children}</div>
-  </section>
-);
-
-const VariationDisplay: React.FC<{ id?: string; title: string; description?: string; children: React.ReactNode; className?: string; }> = ({ id, title, description, children, className }) => (
-  <div id={id} className={cn("mt-6 scroll-mt-24 rounded-none border-2 border-gray-400 bg-gray-50 p-4 shadow-[3px_3px_0px_#aaa]", className)}>
-    <h3 className="mb-1 border-b-2 border-gray-300 pb-1.5 text-xl font-black text-black">{title}</h3>
-    {description && <p className="my-2 text-sm font-medium text-gray-600">{description}</p>}
-    <div className="mt-4 flex flex-wrap items-center gap-4 space-y-4 md:items-start">{children}</div>
-  </div>
-);
-
-const PropsTable: React.FC<{ data: Array<{ prop: string; type: string; default?: string; description: string; }>; }> = ({ data }) => (
-  <div className="mt-6 overflow-x-auto"><h4 className="mb-2 text-lg font-bold text-black">Key Props</h4>
-    <Table className="border-2 border-black shadow-[2px_2px_0_#000]">
-      <TableHeader><TableRow><TableHead className="w-[150px]">Prop</TableHead><TableHead className="w-[150px]">Type</TableHead><TableHead className="w-[120px]">Default</TableHead><TableHead>Description</TableHead></TableRow></TableHeader>
-      <TableBody>{data.map((row) => (<TableRow key={row.prop}><TableCell className="font-mono text-sm font-semibold">{row.prop}</TableCell><TableCell className="font-mono text-xs text-indigo-700">{row.type}</TableCell><TableCell className="font-mono text-xs">{row.default || "–"}</TableCell><TableCell className="text-sm">{row.description}</TableCell></TableRow>))}</TableBody>
-    </Table>
-  </div>
-);
-
-const uiFormSchemaInstance = z.object({ username: z.string().min(2, "Min 2 chars").max(50), email: z.string().email(), framework: z.string().min(1, "Required"), notifications: z.boolean().default(false).optional(), });
-const uiChartConfigInstance = { views: { label: "Views", color: "hsl(var(--chart-1))" } } satisfies ChartConfig;
-const uiChartDataInstance = [{ month: "Jan", views: 186 }, { month: "Feb", views: 305 }, { month: "Mar", views: 237 },];
-
-export default function UiDocumentationPage() {
-  const [date, setDate] = useState<Date | undefined>(new Date());
-  const [progressValue, setProgressValue] = useState(13);
-  const [sliderVal, setSliderVal] = useState([50]);
-  const [cmdDialog, setCmdDialog] = useState(false);
-  const [otp, setOtp] = useState("");
-  const mainContentAreaRef = useRef<HTMLDivElement>(null);
+export default function UiPage() {
   const [activeSidebarSection, setActiveSidebarSection] = useState<string | null>(componentSectionsList[0]?.id || null);
-
-  const { toast: shadcnUIToastFn } = useShadcnToast();
-  const formHook = useForm<z.infer<typeof uiFormSchemaInstance>>({ resolver: zodResolver(uiFormSchemaInstance), defaultValues: { username: "", email: "", notifications: false }, });
-  function handleFormSubmit(values: z.infer<typeof uiFormSchemaInstance>) { sonnerToast.success("Form Data:", { description: (<CodeBlock code={JSON.stringify(values, null, 2)} language="json" />), }); }
-
-  useEffect(() => {
-    const timer = setTimeout(() => setProgressValue(77), 500);
-    const observer = new IntersectionObserver((entries) => { for (const entry of entries) { if (entry.isIntersecting) { const sectionId = entry.target.id; const mainComponent = componentSectionsList.find((comp) => comp.id === sectionId || comp.variations?.some((v) => v.id === sectionId)); if (mainComponent) { setActiveSidebarSection(mainComponent.id); } break; } } }, { rootMargin: "-20% 0px -70% 0px", threshold: 0.01 });
-    componentSectionsList.forEach((section) => { const mainEl = document.getElementById(section.id); if (mainEl) observer.observe(mainEl); section.variations?.forEach((variation) => { const variationEl = document.getElementById(variation.id); if (variationEl) observer.observe(variationEl); }); });
-    return () => { clearTimeout(timer); componentSectionsList.forEach((section) => { const mainEl = document.getElementById(section.id); if (mainEl) observer.unobserve(mainEl); section.variations?.forEach((variation) => { const variationEl = document.getElementById(variation.id); if (variationEl) observer.unobserve(variationEl); }); }); };
-  }, []);
-
+  
   const scrollToSectionHandler = (id: string) => {
     const element = document.getElementById(id);
-    if (element && mainContentAreaRef.current) {
-      const headerHeight = parseInt(getComputedStyle(document.documentElement).getPropertyValue("--header-height") || "80");
-      const elementPosition = element.offsetTop;
-      const offsetPosition = elementPosition - headerHeight - 24;
-      mainContentAreaRef.current.scrollTo({ top: offsetPosition, behavior: "smooth" });
-      const mainComponentId = componentSectionsList.find((comp) => comp.id === id || comp.variations?.some((v) => v.id === id))?.id;
-      if (mainComponentId) setActiveSidebarSection(mainComponentId);
+    if (element) {
+      element.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      setActiveSidebarSection(id);
     }
   };
 
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            setActiveSidebarSection(entry.target.id);
+          }
+        });
+      },
+      { rootMargin: "-20% 0px -70% 0px", threshold: 0.1 },
+    );
+
+    componentSectionsList.forEach((section) => {
+      const el = document.getElementById(section.id);
+      if (el) observer.observe(el);
+    });
+
+    return () => {
+      componentSectionsList.forEach((section) => {
+        const el = document.getElementById(section.id);
+        if (el) observer.unobserve(el);
+      });
+    };
+  }, []);
+
   return (
     <Layout>
-      <style jsx global>{`:root { --header-height: 80px; } @media (min-width: 768px) { :root { --header-height: 100px; } } html { scroll-behavior: smooth; }`}</style>
-      <div className="flex min-h-[calc(100vh-var(--header-height))] flex-col bg-gray-100  md:flex-row">
-        <aside className="w-full overflow-y-auto border-b-2 border-black bg-yellow-100 p-3 shadow-[3px_0px_0px_#000_inset] md:sticky md:top-[var(--header-height)] md:h-[calc(100vh-var(--header-height))] md:w-[30%] md:max-w-xs md:border-b-0 md:border-r-4">
-          <h2 className="mb-2 border-b-2 border-black pb-1.5 text-lg font-black text-black">COMPONENTS</h2>
-          <nav><ul className="space-y-0">{componentSectionsList.map((section) => (<li key={section.id}><button onClick={() => scrollToSectionHandler(section.id)} className={cn("flex items-center w-full text-left px-2.5 py-1.5 rounded-none text-sm font-bold transition-all duration-100 border-2 border-transparent -ml-px -mt-px", activeSidebarSection === section.id ? "bg-black text-white border-black shadow-[1.5px_1.5px_0px_#fff_inset]" : "text-black hover:bg-yellow-300 hover:border-black hover:shadow-[1.5px_1.5px_0px_#000]")}>{section.icon} {section.name}</button>{section.variations && activeSidebarSection === section.id && (<ul className="mb-0.5 ml-3 mt-0 space-y-0 border-l-2 border-gray-500 bg-yellow-50 py-1 pl-4 shadow-[inset_2px_0px_0px_#eab308]">{section.variations.map((variation) => (<li key={variation.id}><button onClick={() => scrollToSectionHandler(variation.id)} className="flex w-full items-center rounded-none px-2 py-0.5 text-left text-xs font-semibold text-gray-700 transition-colors duration-100 hover:bg-yellow-200 hover:text-black"><span className="mr-2 text-gray-500">-</span>{variation.name}</button></li>))}</ul>)}</li>))}</ul></nav>
+      <div className="flex min-h-screen flex-col md:flex-row">
+        <aside className="w-full shrink-0 border-b-2 bg-card p-3 md:sticky md:top-20 md:h-[calc(100vh-5rem)] md:w-64 md:border-b-0 md:border-r-2 md:border-foreground">
+          <ScrollArea className="h-full pr-4">
+            <h2 className="mb-2 px-2 text-lg font-bold tracking-tight uppercase">Components</h2>
+            <nav>
+              <ul className="space-y-1">
+                {componentSectionsList.map((section) => (
+                  <li key={section.id}>
+                    <Button
+                      variant={activeSidebarSection === section.id ? "secondary" : "ghost"}
+                      size="sm"
+                      onClick={() => scrollToSectionHandler(section.id)}
+                      className="w-full justify-start"
+                    >
+                      {section.icon} {section.name}
+                    </Button>
+                  </li>
+                ))}
+              </ul>
+            </nav>
+          </ScrollArea>
         </aside>
 
-        <main ref={mainContentAreaRef} className="w-full overflow-y-auto p-4 sm:p-6 md:w-[70%] md:p-8 lg:p-10">
-          <header className="mb-10 text-center md:text-left"><h1 className="border-b-4 border-black pb-3 text-4xl font-black text-black sm:text-5xl">UI Kit Docs</h1><p className="mt-2 text-lg font-semibold text-gray-700">Neo-Brutalist Component Library</p></header>
-          {/* Component Sections Rendered Here */}
-          <ComponentDocSection id="accordion" title="Accordion" description="A vertically stacked set of interactive headings that each reveal a section of content.">
-             <VariationDisplay id="accordion-basic" title="Basic Usage">
-                 <Accordion type="single" collapsible className="w-full max-w-md"><AccordionItem value="item-1"><AccordionTrigger>Is it accessible?</AccordionTrigger><AccordionContent>Yes. It adheres to the WAI-ARIA design pattern.</AccordionContent></AccordionItem><AccordionItem value="item-2"><AccordionTrigger>Is it styled?</AccordionTrigger><AccordionContent>Yes. It comes with default styles that matches the other components' aesthetic.</AccordionContent></AccordionItem></Accordion>
-             </VariationDisplay>
-          </ComponentDocSection>
-           <ComponentDocSection id="alertDialog" title="Alert Dialog" description="A modal dialog that interrupts the user with important content and expects a response.">
-             <VariationDisplay id="alertDialog-confirm" title="Confirmation Dialog">
-                <AlertDialog><AlertDialogTrigger asChild><Button variant="destructive">Delete Account</Button></AlertDialogTrigger><AlertDialogContent><AlertDialogHeader><AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle><AlertDialogDescription>This action cannot be undone. This will permanently delete your account.</AlertDialogDescription></AlertDialogHeader><AlertDialogFooter><AlertDialogCancel>Cancel</AlertDialogCancel><AlertDialogAction onClick={() => sonnerToast.error("Account Deletion Confirmed (Demo)")}>Yes, delete</AlertDialogAction></AlertDialogFooter></AlertDialogContent></AlertDialog>
-             </VariationDisplay>
-          </ComponentDocSection>
+        <main className="w-full overflow-y-auto p-4 sm:p-6 md:p-8 lg:p-10">
+          <header className="mb-10 text-center md:text-left">
+            <h1 className="border-b-2 border-foreground pb-3 text-4xl font-black uppercase tracking-tighter sm:text-5xl">UI Kit</h1>
+            <p className="mt-2 text-lg text-muted-foreground">A showcase of the redesigned component library.</p>
+          </header>
+          <div className="space-y-16">
+            <ComponentDisplay id="button" title="Button" description="Various styles and sizes for buttons.">
+              <Button>Default</Button>
+              <Button variant="destructive">Destructive</Button>
+              <Button variant="outline">Outline</Button>
+              <Button variant="secondary">Secondary</Button>
+              <Button variant="ghost">Ghost</Button>
+              <Button variant="link">Link</Button>
+            </ComponentDisplay>
+            <ComponentDisplay id="card" title="Card" description="A container for grouping content.">
+              <Card className="w-[350px]">
+                <CardHeader><CardTitle>Card Title</CardTitle><CardDescription>Card Description</CardDescription></CardHeader>
+                <CardContent><p>This is the main content area of the card.</p></CardContent>
+                <CardFooter><Button>Deploy</Button></CardFooter>
+              </Card>
+            </ComponentDisplay>
+            <ComponentDisplay id="alert" title="Alert" description="Displays a prominent message.">
+                <Alert><Terminal className="h-4 w-4" /><AlertTitle>Heads up!</AlertTitle><AlertDescription>This is a default alert.</AlertDescription></Alert>
+                <Alert variant="destructive"><Terminal className="h-4 w-4" /><AlertTitle>Error!</AlertTitle><AlertDescription>This is a destructive alert.</AlertDescription></Alert>
+            </ComponentDisplay>
+          </div>
         </main>
       </div>
     </Layout>
   );
 }
-
-const ListItemUi = React.forwardRef<React.ElementRef<"a">, React.ComponentPropsWithoutRef<"a">>(({ className, title, children, ...props }, ref) => {
-  return (<li><NavigationMenuLink asChild><a ref={ref} className={cn("block select-none space-y-1 rounded-none border-2 border-transparent p-3 leading-none no-underline outline-none transition-colors hover:bg-yellow-100 hover:text-black hover:border-black focus:shadow-md focus:border-black shadow-[2px_2px_0px_transparent] hover:shadow-[2px_2px_0px_#000]", className)} {...props}><div className="text-sm font-bold leading-none text-black">{title}</div><p className="line-clamp-2 text-sm leading-snug text-gray-600">{children}</p></a></NavigationMenuLink></li>);
-});
-ListItemUi.displayName = "ListItemUi";

@@ -1,7 +1,10 @@
+
 import Link from "next/link";
 import { PropsWithChildren } from "react";
-import { BsArrowUpRight } from "react-icons/bs";
+import { ArrowUpRight } from "lucide-react";
 import type { GitHubRepo } from "@/types";
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
 
 type ProjectCardProps = PropsWithChildren & {
   project: GitHubRepo;
@@ -9,56 +12,56 @@ type ProjectCardProps = PropsWithChildren & {
 
 export default function ProjectCard({ children, project }: ProjectCardProps) {
   return (
-    <div
-      className="group flex h-full flex-col overflow-hidden rounded-none border-2 border-black bg-card  shadow-[6px_6px_0px_#000] transition-all duration-150 hover:-translate-x-1 hover:-translate-y-1 hover:shadow-[8px_8px_0px_#4f46e5] active:translate-x-0 active:translate-y-0 active:shadow-[2px_2px_0px_#4f46e5]"
+    <Card
+      className="group flex h-full flex-col overflow-hidden transition-all duration-200 hover:shadow-none active:translate-x-1 active:translate-y-1 hover:border-accent"
       key={project.id}
     >
-      <div className="grow p-5">
-        <h3 className="mb-2 flex items-start justify-between text-xl font-bold capitalize text-black transition-colors group-hover:text-indigo-700">
-          <span className="mr-2">{project.name.replaceAll("-", " ")}</span>
+      <CardHeader>
+        <div className="flex items-start justify-between">
+          <CardTitle className="transition-colors group-hover:text-accent uppercase">
+            {project.name.replaceAll("-", " ")}
+          </CardTitle>
           {project.html_url && (
-            <Link
-              className="-m-1 shrink-0 cursor-pointer rounded-none border-2 border-transparent p-1 text-black hover:border-black hover:bg-yellow-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 group-hover:text-indigo-700"
+            <a
               href={project.html_url}
               rel="noopener noreferrer nofollow"
               target="_blank"
               title="View on GitHub"
               aria-label={`View ${project.name} on GitHub`}
-
+              className="text-muted-foreground opacity-0 transition-opacity group-hover:opacity-100"
+              onClick={(e) => e.stopPropagation()} // Prevents link wrapper from firing if it exists
             >
-              <BsArrowUpRight className="inline-block size-5 transition-transform group-hover:rotate-[15deg]" />
-            </Link>
+              <ArrowUpRight className="size-5" />
+            </a>
           )}
-        </h3>
-        <p className="mb-3 line-clamp-3 text-ellipsis text-sm font-medium leading-relaxed text-gray-700 transition-all duration-200 hover:text-gray-900">
+        </div>
+        <CardDescription className="line-clamp-3 pt-1">
           {project.description || (
-            <span className="italic text-gray-500">
-              No description provided for this project.
-            </span>
+            <span className="italic">No description provided.</span>
           )}
-        </p>
-        {children && <div className="mt-2">{children}</div>}
-      </div>
+        </CardDescription>
+      </CardHeader>
+      <CardContent className="flex-grow">
+         {children}
+      </CardContent>
       {(project.language || (project.topics && project.topics.length > 0)) && (
-        <div className="border-t-2 border-black bg-gray-50 p-4">
+        <CardFooter>
           <div className="flex shrink flex-wrap gap-1.5">
             {project.language && (
-              <small className="flex-inline rounded-none border border-black bg-yellow-300 px-2 py-0.5 text-xs font-bold text-black shadow-[1px_1px_0px_#000]">
-                {project.language}
-              </small>
+              <Badge variant="secondary">{project.language}</Badge>
             )}
             {project.topics &&
               project.topics.slice(0, 3).map((topic: string) => (
-                <small
-                  key={topic}
-                  className="flex-inline rounded-none border border-black bg-gray-200 px-2 py-0.5 text-xs font-bold text-black shadow-[1px_1px_0px_#000]"
-                >
-                  {topic}
-                </small>
+                <Badge key={topic} variant="outline">{topic}</Badge>
               ))}
           </div>
-        </div>
+        </CardFooter>
       )}
-    </div>
+      {project.html_url && (
+         <Link href={project.html_url} target="_blank" rel="noopener noreferrer" className="absolute inset-0 z-0">
+            <span className="sr-only">View project: {project.name}</span>
+         </Link>
+      )}
+    </Card>
   );
 }

@@ -1,9 +1,10 @@
+
 /*
-This file is updated to remove the neo-brutalist styling.
-- The `SwitchPrimitives.Root` is restyled to be a modern, pill-shaped switch. The `border-2`, `rounded-none`, and `shadow-[...]` are removed.
-- The checked state color is now tied to the theme's `primary` color.
-- The `SwitchPrimitives.Thumb` is now a simple, clean circle that animates its position.
-- Focus rings are updated to use the theme's `ring` color for consistency.
+This file is updated to implement neo-brutalist styling.
+- `SwitchPrimitives.Root` is restyled to be a rectangular switch with a `border-2` and `rounded-none`.
+- The checked state color is now a high-contrast `primary` color.
+- `SwitchPrimitives.Thumb` is now a simple, sharp-cornered square that animates its position, removing the soft shadow.
+- Focus rings are updated for high contrast.
 */
 "use client";
 
@@ -18,7 +19,7 @@ const Switch = React.forwardRef<
 >(({ className, ...props }, ref) => (
   <SwitchPrimitives.Root
     className={cn(
-      "peer inline-flex h-6 w-11 shrink-0 cursor-pointer items-center rounded-full border-2 border-transparent transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background disabled:cursor-not-allowed disabled:opacity-50 data-[state=checked]:bg-primary data-[state=unchecked]:bg-input",
+      "peer inline-flex h-6 w-11 shrink-0 cursor-pointer items-center rounded-none border-2 border-foreground transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background disabled:cursor-not-allowed disabled:opacity-50 data-[state=checked]:bg-primary data-[state=unchecked]:bg-input",
       className
     )}
     {...props}
@@ -26,7 +27,7 @@ const Switch = React.forwardRef<
   >
     <SwitchPrimitives.Thumb
       className={cn(
-        "pointer-events-none block h-5 w-5 rounded-full bg-background shadow-lg ring-0 transition-transform data-[state=checked]:translate-x-5 data-[state=unchecked]:translate-x-0"
+        "pointer-events-none block h-5 w-5 rounded-none bg-background shadow-none ring-0 transition-transform data-[state=checked]:translate-x-5 data-[state=unchecked]:translate-x-0"
       )}
     />
   </SwitchPrimitives.Root>

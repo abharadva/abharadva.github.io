@@ -1,8 +1,9 @@
+
 /*
-This file is updated for the new design system.
-- The neo-brutalist `border-2`, `rounded-none`, and `bg-white` styles on the root `ScrollArea` component are replaced with a simpler, borderless look that blends with its container.
-- The `ScrollBar` is restyled to be more modern and subtle. The track color is removed (transparent), and the thumb color is updated to use the theme's `border` color.
-- The thick borders on the scrollbar track are removed.
+This file is updated for the new neo-brutalist design system.
+- The root `ScrollArea` component is now styled with a `border-2`, `rounded-none`, and a hard `shadow-[...]` for a distinct container look.
+- The `ScrollBar` is restyled to be thicker and more prominent, with a visible border on the track.
+- The thumb color is updated to use the theme's `foreground` color for high contrast.
 */
 "use client";
 
@@ -17,10 +18,10 @@ const ScrollArea = React.forwardRef<
 >(({ className, children, ...props }, ref) => (
   <ScrollAreaPrimitive.Root
     ref={ref}
-    className={cn("relative overflow-hidden", className)}
+    className={cn("relative overflow-hidden rounded-none border-2 border-foreground bg-white shadow-[4px_4px_0px_#000] dark:shadow-[4px_4px_0px_#FFF]", className)}
     {...props}
   >
-    <ScrollAreaPrimitive.Viewport className="h-full w-full rounded-[inherit]">
+    <ScrollAreaPrimitive.Viewport className="h-full w-full rounded-none">
       {children}
     </ScrollAreaPrimitive.Viewport>
     <ScrollBar />
@@ -39,14 +40,14 @@ const ScrollBar = React.forwardRef<
     className={cn(
       "flex touch-none select-none transition-colors",
       orientation === "vertical" &&
-        "h-full w-2.5 border-l border-l-transparent p-[1px]",
+        "h-full w-4 border-l-2 border-foreground p-[2px]",
       orientation === "horizontal" &&
-        "h-2.5 flex-col border-t border-t-transparent p-[1px]",
+        "h-4 flex-col border-t-2 border-foreground p-[2px]",
       className
     )}
     {...props}
   >
-    <ScrollAreaPrimitive.ScrollAreaThumb className="relative flex-1 rounded-full bg-border" />
+    <ScrollAreaPrimitive.ScrollAreaThumb className="relative flex-1 rounded-none border-2 border-foreground bg-background" />
   </ScrollAreaPrimitive.ScrollAreaScrollbar>
 ));
 ScrollBar.displayName = ScrollAreaPrimitive.ScrollAreaScrollbar.displayName;

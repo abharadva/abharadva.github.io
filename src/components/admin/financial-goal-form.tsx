@@ -1,3 +1,4 @@
+
 "use client";
 import { useState, useEffect, FormEvent } from "react";
 import type { FinancialGoal } from "@/types";
@@ -53,7 +54,7 @@ export default function FinancialGoalForm({ goal, onSuccess }: FinancialGoalForm
             <div><Label htmlFor="target_amount">Target Amount *</Label><Input id="target_amount" name="target_amount" type="number" step="100" value={formData.target_amount} onChange={handleChange} required /></div>
             <div><Label htmlFor="target_date">Target Date</Label><Input id="target_date" name="target_date" type="date" value={formData.target_date} onChange={handleChange} /></div>
         </div>
-      {error && <p className="text-sm font-semibold text-red-600">{error}</p>}
+      {error && <p className="text-sm text-destructive">{error}</p>}
       <div className="flex justify-end pt-4"><Button type="submit">{goal?.id ? "Save Changes" : "Create Goal"}</Button></div>
     </form>
   );

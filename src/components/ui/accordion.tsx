@@ -1,9 +1,9 @@
 /*
-This file is updated to align with the new kinetic typography design system.
-- The `border-b-2 border-black` styling is replaced with a subtle `border-b` using the theme's border color.
-- Focus rings are updated to use the theme's `ring` color.
-- The font is updated to inherit `font-sans` (Inter), and weights are adjusted for a cleaner look.
-- The hover underline effect is retained for affordance but within the new minimalist aesthetic.
+This file is updated to align with the new neo-brutalist design system.
+- The subtle `border-b` is replaced with a `border-b-2 border-foreground` for a starker separation.
+- Focus rings are updated to use a high-contrast style.
+- The font is updated to inherit `font-sans` (Space Mono), and weights are adjusted for a bold look.
+- The hover underline effect is retained for affordance but within the new bold aesthetic.
 */
 "use client";
 
@@ -21,7 +21,7 @@ const AccordionItem = React.forwardRef<
 >(({ className, ...props }, ref) => (
   <AccordionPrimitive.Item
     ref={ref}
-    className={cn("border-b", className)}
+    className={cn("border-b-2 border-foreground", className)}
     {...props}
   />
 ));
@@ -35,7 +35,7 @@ const AccordionTrigger = React.forwardRef<
     <AccordionPrimitive.Trigger
       ref={ref}
       className={cn(
-        "flex flex-1 items-center justify-between py-4 font-medium transition-all hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 [&[data-state=open]>svg]:rotate-180",
+        "flex flex-1 items-center justify-between py-4 font-bold transition-all hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring [&[data-state=open]>svg]:rotate-180",
         className
       )}
       {...props}

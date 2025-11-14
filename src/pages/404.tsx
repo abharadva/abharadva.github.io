@@ -1,3 +1,4 @@
+
 import Layout from "@/components/layout";
 import NotFoundComponent from "@/components/not-found";
 

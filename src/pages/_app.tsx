@@ -1,7 +1,8 @@
+
 import "@/styles/globals.css";
 import type { AppProps } from "next/app";
 import localFont from "next/font/local";
-import { motion, AnimatePresence } from "framer-motion"; // motion is needed now
+import { motion, AnimatePresence } from "framer-motion";
 import { useRouter } from "next/router";
 import { ThemeProvider } from "@/components/theme-provider";
 
@@ -14,41 +15,34 @@ const tahuFont = localFont({
 export default function App({ Component, pageProps }: AppProps) {
   const router = useRouter();
 
-  // Define the animation variants
   const pageVariants = {
     initial: {
       opacity: 0,
-      y: 5, // Start slightly below
     },
     animate: {
       opacity: 1,
-      y: 0, // Animate to original position
       transition: {
-        duration: 0.3,
-        ease: "easeInOut",
+        duration: 0.1,
       },
     },
     exit: {
       opacity: 0,
-      y: -5, // Exit slightly above
       transition: {
-        duration: 0.2,
-        ease: "easeInOut",
+        duration: 0.1,
       },
     },
   };
 
   return (
-    <ThemeProvider attribute="class" defaultTheme="light" enableSystem={false}>
+    <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
       <AnimatePresence
         mode="wait"
         initial={false}
         onExitComplete={() => window.scrollTo(0, 0)}
       >
-        <main className={`${tahuFont.variable} `}>
-          {/* Wrap the component with motion.div */}
+        <main className={`${tahuFont.variable}`}>
           <motion.div
-            key={router.asPath} // Key is crucial for AnimatePresence to detect page changes
+            key={router.asPath}
             initial="initial"
             animate="animate"
             exit="exit"

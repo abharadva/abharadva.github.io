@@ -1,8 +1,8 @@
 /*
-This file is updated for the new kinetic typography design system.
-- The `font-bold` class is changed to `font-medium` for a cleaner, less heavy look.
-- The `mb-1` and `block` classes are removed from the base styles, making the component more flexible for use in different layouts (e.g., alongside a checkbox). These can be added via `className` where needed.
-- The `text-black` color is replaced with the theme's default text color, which is inherited.
+This file is updated for the new neo-brutalist design system.
+- The `font-medium` class is changed to `font-bold` for a stronger, more assertive look.
+- The base styles are kept minimal to allow for flexibility, with boldness being the key change.
+- The color is inherited from `foreground` for high contrast.
 */
 "use client";
 
@@ -13,7 +13,7 @@ import { cva, type VariantProps } from "class-variance-authority";
 import { cn } from "@/lib/utils";
 
 const labelVariants = cva(
-  "text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+  "text-sm font-bold leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
 );
 
 const Label = React.forwardRef<

@@ -1,9 +1,10 @@
+
 /*
-This file is updated to remove the neo-brutalist styling.
-- The main container's `border-2`, `rounded-none`, and `shadow-[...]` are removed, replaced by a simpler presentation.
-- `PaginationLink` (the buttons) now uses the redesigned `Button` component's variants for a consistent look.
-- The `isActive` state is now styled using the `primary` color for clear visual indication.
-- The `PaginationPrevious` and `PaginationNext` buttons are simplified and now include text that is visible on larger screens.
+This file is updated to implement neo-brutalist styling.
+- The main container is simplified, removing any previous wrapper styling.
+- `PaginationLink` (the buttons) now uses the redesigned `Button` component, inheriting its stark variants.
+- The `isActive` state is now styled using the primary `default` button variant for clear visual indication.
+- `PaginationPrevious` and `PaginationNext` buttons are simplified and use the brutalist `Button` style.
 */
 import * as React from "react";
 import { ChevronLeft, ChevronRight, MoreHorizontal } from "lucide-react";
@@ -56,7 +57,7 @@ const PaginationLink = ({
     aria-current={isActive ? "page" : undefined}
     className={cn(
       buttonVariants({
-        variant: isActive ? "outline" : "ghost",
+        variant: isActive ? "default" : "outline",
         size,
       }),
       className

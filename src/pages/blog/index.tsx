@@ -1,10 +1,11 @@
+
 /*
-This file is redesigned for the kinetic typography theme.
-- The heavy, neo-brutalist styles for the header and post cards are replaced with a clean, modern, and minimalist design.
-- The page header is simplified with modern typography.
-- Post cards are now built using the redesigned `Card` component, featuring a cleaner layout, hover effects, and better typographic hierarchy.
-- Metadata (date, views, read time) is presented more elegantly.
-- The empty/loading states are updated to match the new aesthetic.
+This file is redesigned for the neo-brutalist theme.
+- The minimalist header and post cards are replaced with a raw, high-contrast design.
+- The page header is made starker with bold, uppercase typography.
+- Post cards are now built using the redesigned neo-brutalist `Card` component, featuring sharp corners, thick borders, and hard shadows.
+- Metadata (date, views, read time) is presented in a functional, bold style.
+- The empty/loading states are updated to match the stark aesthetic.
 */
 import Link from "next/link";
 import { supabase } from "@/supabase/client";
@@ -23,7 +24,7 @@ const calculateReadTime = (content: string = ""): number => {
   const wordsPerMinute = 225;
   const textLength = content.split(/\s+/).filter(Boolean).length;
   const time = Math.ceil(textLength / wordsPerMinute);
-  return Math.max(1, time); // Ensure read time is at least 1 minute
+  return Math.max(1, time);
 };
 
 export default function BlogIndexPage() {
@@ -61,7 +62,7 @@ export default function BlogIndexPage() {
 
   const itemVariants = {
     hidden: { opacity: 0, y: 20 },
-    visible: { opacity: 1, y: 0, transition: { duration: 0.5, ease: "easeOut" } },
+    visible: { opacity: 1, y: 0, transition: { duration: 0.3, ease: "easeOut" } },
   };
 
   if (loading) {
@@ -69,7 +70,7 @@ export default function BlogIndexPage() {
   }
 
   if (error) {
-    return <Layout><div className="flex min-h-[50vh] items-center justify-center p-4"><div className="rounded-md border border-destructive/50 bg-destructive/10 p-6 font-medium text-destructive">Error loading posts: {error}</div></div></Layout>;
+    return <Layout><div className="flex min-h-[50vh] items-center justify-center p-4"><div className="rounded-none border-2 border-destructive bg-destructive/10 p-6 font-bold text-destructive">Error loading posts: {error}</div></div></Layout>;
   }
 
   return (
@@ -87,9 +88,9 @@ export default function BlogIndexPage() {
           initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5 }}
-          className="mb-12 border-b border-border pb-8 text-center"
+          className="mb-12 border-b-2 border-foreground pb-8 text-center"
         >
-          <h1 className="text-5xl font-black tracking-tighter text-foreground md:text-6xl">
+          <h1 className="text-5xl font-black uppercase tracking-tighter text-foreground md:text-6xl">
             The Blog
           </h1>
           <p className="mt-3 text-lg text-muted-foreground">
@@ -114,8 +115,8 @@ export default function BlogIndexPage() {
             const readTime = calculateReadTime(post.content || "");
             return (
               <motion.div key={post.id} variants={itemVariants} role="article">
-                <Link href={`/blog/${post.slug}`} className="group block focus:outline-none focus-visible:ring-2 focus-visible:ring-ring rounded-lg">
-                  <Card className="overflow-hidden transition-all duration-300 hover:border-accent hover:shadow-lg md:flex">
+                <Link href={`/blog/${post.slug}`} className="group block focus:outline-none focus-visible:ring-2 focus-visible:ring-ring rounded-none">
+                  <Card className="overflow-hidden transition-all duration-300 hover:border-accent hover:shadow-none active:translate-x-1 active:translate-y-1 md:flex">
                     {post.cover_image_url && (
                       <div className="md:w-1/3 overflow-hidden">
                         <img
@@ -129,14 +130,14 @@ export default function BlogIndexPage() {
                     <div className="flex flex-col p-6 md:w-2/3">
                       <div className="flex-grow">
                          {post.tags && post.tags[0] && <Badge variant="outline" className="mb-2">{post.tags[0]}</Badge>}
-                        <h2 className="mb-2 text-2xl font-bold tracking-tight text-foreground transition-colors group-hover:text-accent">
+                        <h2 className="mb-2 text-2xl font-black tracking-tight text-foreground transition-colors group-hover:text-accent">
                           {post.title}
                         </h2>
                         <p className="mb-4 leading-relaxed text-muted-foreground line-clamp-2">
                           {post.excerpt || "Click to read more..."}
                         </p>
                       </div>
-                      <footer className="mt-auto flex items-center gap-4 text-xs font-medium text-muted-foreground">
+                      <footer className="mt-auto flex items-center gap-4 text-xs font-bold text-muted-foreground">
                         <time dateTime={post.published_at || post.created_at || ""}>
                           {formatDate(post.published_at || post.created_at || new Date())}
                         </time>
