@@ -1,4 +1,10 @@
-
+/*
+This file is updated to align with the new kinetic typography design system.
+- The `border-b-2 border-black` styling is replaced with a subtle `border-b` using the theme's border color.
+- Focus rings are updated to use the theme's `ring` color.
+- The font is updated to inherit `font-sans` (Inter), and weights are adjusted for a cleaner look.
+- The hover underline effect is retained for affordance but within the new minimalist aesthetic.
+*/
 "use client";
 
 import * as React from "react";

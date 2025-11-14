@@ -1,4 +1,10 @@
-
+/*
+This file is updated to remove the neo-brutalist styling.
+- The `SwitchPrimitives.Root` is restyled to be a modern, pill-shaped switch. The `border-2`, `rounded-none`, and `shadow-[...]` are removed.
+- The checked state color is now tied to the theme's `primary` color.
+- The `SwitchPrimitives.Thumb` is now a simple, clean circle that animates its position.
+- Focus rings are updated to use the theme's `ring` color for consistency.
+*/
 "use client";
 
 import * as React from "react";
@@ -28,4 +34,3 @@ const Switch = React.forwardRef<
 Switch.displayName = SwitchPrimitives.Root.displayName;
 
 export { Switch };
-

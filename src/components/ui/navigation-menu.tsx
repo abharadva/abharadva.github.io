@@ -1,7 +1,10 @@
-
-
-"use client";
-
+/*
+This file is updated to remove the neo-brutalist styling.
+- `NavigationMenuList`, `NavigationMenuTrigger`, and `NavigationMenuViewport` have been restyled to be cleaner, using subtle borders, rounded corners, and theme-based colors.
+- The heavy `border-2` and `shadow-[...]` are replaced with modern, softer equivalents.
+- The `navigationMenuTriggerStyle` cva is updated to reflect the new design: a subtle background on hover/open and a clean active state.
+- The indicator (`NavigationMenuIndicator`) is simplified, removing the shadow.
+*/
 import * as React from "react";
 import * as NavigationMenuPrimitive from "@radix-ui/react-navigation-menu";
 import { cva } from "class-variance-authority";

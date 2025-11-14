@@ -1,5 +1,3 @@
-
-
 import { useEffect } from "react";
 import { useRouter } from "next/router";
 import { supabase } from "@/supabase/client";
@@ -12,32 +10,54 @@ export default function AdminIndexPage() {
 
   useEffect(() => {
     const checkAuthStateAndRedirect = async () => {
-      const { data: { session }, error: sessionError } = await supabase.auth.getSession();
+      const {
+        data: { session },
+        error: sessionError,
+      } = await supabase.auth.getSession();
 
-      if (sessionError || !session) {
+      if (sessionError) {
+        console.error("Error fetching session on admin index:", sessionError);
         router.replace("/admin/login");
         return;
       }
 
-      const { data: aalData, error: aalError } = await supabase.auth.mfa.getAuthenticatorAssuranceLevel();
+      if (!session) {
+        router.replace("/admin/login");
+        return;
+      }
+
+      const { data: aalData, error: aalError } =
+        await supabase.auth.mfa.getAuthenticatorAssuranceLevel();
 
       if (aalError) {
+        console.error("Error fetching AAL status on admin index:", aalError);
         router.replace("/admin/login");
         return;
       }
 
       if (aalData?.currentLevel === "aal2") {
         router.replace("/admin/dashboard");
-      } else if (aalData?.currentLevel === "aal1" && aalData?.nextLevel === "aal2") {
+      } else if (
+        aalData?.currentLevel === "aal1" &&
+        aalData?.nextLevel === "aal2"
+      ) {
         router.replace("/admin/mfa-challenge");
       } else {
-        const { data: factorsData, error: factorsError } = await supabase.auth.mfa.listFactors();
+        const { data: factorsData, error: factorsError } =
+          await supabase.auth.mfa.listFactors();
         if (factorsError) {
+          console.error(
+            "Error listing MFA factors on admin index:",
+            factorsError,
+          );
           router.replace("/admin/login");
           return;
         }
 
-        const verifiedFactor = factorsData?.totp?.find((factor) => factor.status === "verified");
+        const verifiedFactor = factorsData?.totp?.find(
+          (factor) => factor.status === "verified",
+        );
+
         if (!verifiedFactor) {
           router.replace("/admin/setup-mfa");
         } else {
@@ -49,11 +69,28 @@ export default function AdminIndexPage() {
     checkAuthStateAndRedirect();
   }, [router]);
 
+  const pageVariants = {
+    initial: { opacity: 0 },
+    animate: { opacity: 1 },
+    exit: { opacity: 0 },
+    transition: { duration: 0.2 },
+  };
+
   return (
     <Layout>
-      <div className="flex min-h-screen items-center justify-center">
-        <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
-      </div>
+      <motion.div
+        key="admin-index-loading"
+        initial="initial"
+        animate="animate"
+        exit="exit"
+        variants={pageVariants}
+        className="flex min-h-screen items-center justify-center bg-background"
+      >
+        <div className="flex flex-col items-center gap-4 text-muted-foreground">
+          <Loader2 className="h-8 w-8 animate-spin" />
+          <p className="font-medium">Loading Admin Area...</p>
+        </div>
+      </motion.div>
     </Layout>
   );
 }

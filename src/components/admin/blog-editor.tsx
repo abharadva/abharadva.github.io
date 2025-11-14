@@ -1,5 +1,3 @@
-
-
 "use client";
 import type React from "react";
 import { useState, useEffect, FormEvent, useRef } from "react";
@@ -8,21 +6,14 @@ import type { BlogPost } from "@/types";
 import AdvancedMarkdownEditor from "@/components/admin/AdvancedMarkdownEditor";
 import { supabase } from "@/supabase/client";
 import imageCompression from "browser-image-compression";
-import { Button } from "../ui/button";
-import { Input } from "../ui/input";
-import { Label } from "../ui/label";
-import { Switch } from "../ui/switch";
-import { Textarea } from "../ui/textarea";
-import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "../ui/card";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import { Button } from "@/components/ui/button";
+import { Label } from "@/components/ui/label";
+import { Switch } from "@/components/ui/switch";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Loader2 } from "lucide-react";
-import { Alert, AlertDescription } from "../ui/alert";
-import Image from "next/image";
-
-interface BlogEditorProps {
-  post: BlogPost | null;
-  onSave: (post: Partial<BlogPost>) => Promise<void>;
-  onCancel: () => void;
-}
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
 const bucketName = process.env.NEXT_PUBLIC_BUCKET_NAME || "blog-assets";
 
@@ -200,22 +191,28 @@ export default function BlogEditor({
       className="mx-auto max-w-6xl"
     >
       <Card>
-        <CardHeader className="flex-row items-center justify-between">
-          <CardTitle>{post?.id ? "Edit Post" : "Create New Post"}</CardTitle>
+        <CardHeader className="flex flex-col items-start gap-3 sm:flex-row sm:items-center sm:justify-between">
+          <CardTitle>
+            {post?.id ? "Edit Post" : "Create New Post"}
+          </CardTitle>
           <div className="flex items-center space-x-2">
             <Switch
-              id="published-status"
+              id="published-switch"
               checked={formData.published}
-              onCheckedChange={(checked) => setFormData((prev) => ({ ...prev, published: checked }))}
+              onCheckedChange={(checked) =>
+                setFormData((prev) => ({ ...prev, published: checked }))
+              }
             />
-            <Label htmlFor="published-status">Published</Label>
+            <Label htmlFor="published-switch" className="font-semibold">
+              Published
+            </Label>
           </div>
         </CardHeader>
-        <form onSubmit={handleSubmit}>
-          <CardContent>
+        <CardContent>
+          <form onSubmit={handleSubmit}>
             <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
               <div className="space-y-6 lg:col-span-2">
-                <div>
+                <div className="space-y-2">
                   <Label htmlFor="title">Title *</Label>
                   <Input
                     id="title"
@@ -223,58 +220,90 @@ export default function BlogEditor({
                     onChange={(e) => handleTitleChange(e.target.value)}
                     className={errors.title ? "border-destructive" : ""}
                   />
-                  {errors.title && <p className="mt-1 text-xs text-destructive">{errors.title}</p>}
+                  {errors.title && <p className="text-sm text-destructive">{errors.title}</p>}
                 </div>
-                <div>
+                <div className="space-y-2">
                   <Label>Content (Markdown) *</Label>
                   <AdvancedMarkdownEditor
                     value={formData.content}
-                    onChange={(newContent) => setFormData((prev) => ({ ...prev, content: newContent }))}
+                    onChange={(newContent) =>
+                      setFormData((prev) => ({ ...prev, content: newContent }))
+                    }
                     onImageUploadRequest={() => fileInputRef.current?.click()}
                     minHeight="400px"
                   />
-                  <input type="file" ref={fileInputRef} onChange={(e) => onFileSelected(e, false)} accept="image/*" className="hidden" id="content_image_file_input" />
-                  {errors.content && <p className="mt-1 text-xs text-destructive">{errors.content}</p>}
-                  {errors.image_upload && <Alert variant="destructive" className="mt-2"><AlertDescription>{errors.image_upload}</AlertDescription></Alert>}
-                  {isUploading && <p className="mt-2 text-sm text-muted-foreground">Uploading image...</p>}
+                  <input
+                    type="file"
+                    ref={fileInputRef}
+                    onChange={(e) => onFileSelected(e, false)}
+                    accept="image/*"
+                    className="hidden"
+                    id="content_image_file_input"
+                  />
+                  {errors.content && <p className="text-sm text-destructive">{errors.content}</p>}
+                  {(errors.image_upload || isUploading) && (
+                    <Alert variant={errors.image_upload ? "destructive" : "default"} className="mt-2">
+                      {isUploading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                      <AlertTitle>{isUploading ? "Uploading..." : "Upload Info"}</AlertTitle>
+                      <AlertDescription>
+                        {errors.image_upload || "Image is being processed and uploaded."}
+                      </AlertDescription>
+                    </Alert>
+                  )}
                 </div>
-                <div>
+                <div className="space-y-2">
                   <Label htmlFor="internal_notes">Internal Notes (Admin only)</Label>
                   <Textarea
                     id="internal_notes"
                     rows={3}
                     value={formData.internal_notes}
-                    onChange={(e) => setFormData((prev) => ({ ...prev, internal_notes: e.target.value }))}
+                    onChange={(e) =>
+                      setFormData((prev) => ({ ...prev, internal_notes: e.target.value }))
+                    }
                   />
                 </div>
               </div>
-
-              <div className="space-y-6 rounded-lg border bg-secondary/30 p-4">
-                <div>
+              <div className="space-y-6 rounded-lg border bg-secondary/20 p-4">
+                <div className="space-y-2">
                   <Label htmlFor="slug">Slug *</Label>
                   <Input
                     id="slug"
                     value={formData.slug}
-                    onChange={(e) => setFormData((prev) => ({ ...prev, slug: e.target.value.toLowerCase().replace(/[^a-z0-9-]/g, "").replace(/\s+/g, "-") }))}
+                    onChange={(e) =>
+                      setFormData((prev) => ({
+                        ...prev,
+                        slug: e.target.value.toLowerCase().replace(/[^a-z0-9-]/g, "").replace(/\s+/g, "-"),
+                      }))
+                    }
                     className={errors.slug ? "border-destructive" : ""}
                   />
-                  {errors.slug && <p className="mt-1 text-xs text-destructive">{errors.slug}</p>}
+                  {errors.slug && <p className="text-sm text-destructive">{errors.slug}</p>}
                 </div>
-                <div>
+                <div className="space-y-2">
                   <Label htmlFor="excerpt">Excerpt (Short summary)</Label>
-                  <Textarea id="excerpt" rows={3} value={formData.excerpt} onChange={(e) => setFormData((prev) => ({ ...prev, excerpt: e.target.value }))} />
+                  <Textarea
+                    id="excerpt"
+                    rows={3}
+                    value={formData.excerpt}
+                    onChange={(e) => setFormData((prev) => ({ ...prev, excerpt: e.target.value }))}
+                  />
                 </div>
-                <div>
+                <div className="space-y-2">
                   <Label htmlFor="tags">Tags (comma-separated)</Label>
-                  <Input id="tags" value={formData.tags} onChange={(e) => setFormData((prev) => ({ ...prev, tags: e.target.value }))} />
+                  <Input
+                    id="tags"
+                    value={formData.tags}
+                    onChange={(e) => setFormData((prev) => ({ ...prev, tags: e.target.value }))}
+                  />
                 </div>
-                <div>
+                <div className="space-y-2">
                   <Label htmlFor="cover_image_url_display">Cover Image</Label>
                   <Input
                     id="cover_image_url_display"
                     value={formData.cover_image_url}
-                    onChange={(e) => setFormData((prev) => ({ ...prev, cover_image_url: e.target.value }))}
-                    className="mb-2"
+                    onChange={(e) =>
+                      setFormData((prev) => ({ ...prev, cover_image_url: e.target.value }))
+                    }
                     placeholder="Paste image URL or upload"
                   />
                   <Input
@@ -284,19 +313,28 @@ export default function BlogEditor({
                     accept="image/*"
                     onChange={(e) => onFileSelected(e, true)}
                   />
-                  {formData.cover_image_url && <Image src={formData.cover_image_url} alt="Cover preview" className="mt-2 max-h-40 w-full rounded-md border object-contain" />}
-                  {errors.cover_image_url && <p className="mt-1 text-xs text-destructive">{errors.cover_image_url}</p>}
+                  {formData.cover_image_url && (
+                    <img
+                      src={formData.cover_image_url}
+                      alt="Cover preview"
+                      className="mt-2 max-h-40 w-full rounded-md border object-contain"
+                    />
+                  )}
+                  {errors.cover_image_url && <p className="text-sm text-destructive">{errors.cover_image_url}</p>}
                 </div>
               </div>
             </div>
-          </CardContent>
-          <CardFooter className="flex justify-end gap-3 border-t pt-6">
-            <Button type="button" variant="outline" onClick={onCancel} disabled={isSaving || isUploading}>Cancel</Button>
-            <Button type="submit" disabled={isSaving || isUploading || !formData.title || !formData.slug || !formData.content}>
-              {isSaving ? <><Loader2 className="mr-2 size-4 animate-spin" /> Saving...</> : isUploading ? <><Loader2 className="mr-2 size-4 animate-spin" /> Processing...</> : post?.id ? "Update Post" : "Create Post"}
-            </Button>
-          </CardFooter>
-        </form>
+            <div className="mt-8 flex flex-col justify-end gap-3 border-t pt-6 sm:flex-row">
+              <Button type="button" variant="outline" onClick={onCancel} disabled={isSaving || isUploading}>
+                Cancel
+              </Button>
+              <Button type="submit" disabled={isSaving || isUploading || !formData.title || !formData.slug || !formData.content}>
+                {isSaving || isUploading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
+                {isSaving ? "Saving..." : isUploading ? "Processing..." : post?.id ? "Update Post" : "Create Post"}
+              </Button>
+            </div>
+          </form>
+        </CardContent>
       </Card>
     </motion.div>
   );

@@ -1,4 +1,11 @@
-
+/*
+This file is updated for the new design system.
+- The neo-brutalist `border-2`, `rounded-none`, and `shadow-[...]` styles are removed from the `Toast` component.
+- The toast now uses `rounded-lg`, a subtle `border`, and a standard `shadow-lg` for a modern, clean notification style.
+- The `destructive` variant is updated to use theme-aware colors.
+- The `ToastAction` button is updated to use the redesigned `Button` component styles.
+- The `ToastClose` button is restyled to be a minimal, clean icon button, consistent with other overlay components.
+*/
 "use client";
 
 import * as React from "react";

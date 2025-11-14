@@ -1,5 +1,11 @@
-
-
+/*
+This file is updated for the new kinetic typography design system.
+- The neo-brutalist `border-2`, `rounded-none`, and `shadow-[...]` styles are removed from `ContextMenuContent` and its sub-content.
+- Components now feature a modern, clean look with subtle borders, rounded corners (`rounded-md`), and a standard shadow, aligning with the theme.
+- Item hover/focus states (`focus:bg-yellow-300`) are updated to use the theme's `accent` color for a consistent interactive feel.
+- Font weights are adjusted to `font-normal` or `font-semibold` as appropriate, moving away from universal `font-bold`.
+- Separators now use the theme's `border` color.
+*/
 "use client";
 
 import * as React from "react";

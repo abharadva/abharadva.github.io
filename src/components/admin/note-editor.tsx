@@ -1,4 +1,3 @@
-
 "use client";
 import React, { useState, useEffect } from "react";
 import { motion } from "framer-motion";
@@ -6,8 +5,9 @@ import type { Note } from "@/types";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "../ui/card";
-import { Label } from "../ui/label";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Label } from "@/components/ui/label";
+import { Loader2 } from "lucide-react";
 
 interface NoteEditorProps {
   note: Note | null;
@@ -54,13 +54,15 @@ export default function NoteEditor({ note, onSave, onCancel }: NoteEditorProps) 
       animate={{ opacity: 1, y: 0 }}
       className="mx-auto max-w-4xl"
     >
-      <form onSubmit={handleSubmit}>
-        <Card>
-          <CardHeader>
-            <CardTitle>{note?.id ? "Edit Note" : "Create New Note"}</CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-6">
-            <div>
+      <Card>
+        <CardHeader>
+          <CardTitle>
+            {note?.id ? "Edit Note" : "Create New Note"}
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <form onSubmit={handleSubmit} className="space-y-6">
+            <div className="space-y-2">
               <Label htmlFor="title">Title (Optional)</Label>
               <Input
                 id="title"
@@ -69,7 +71,7 @@ export default function NoteEditor({ note, onSave, onCancel }: NoteEditorProps) 
                 placeholder="A title for your note"
               />
             </div>
-            <div>
+            <div className="space-y-2">
               <Label htmlFor="content">Content</Label>
               <Textarea
                 id="content"
@@ -79,7 +81,7 @@ export default function NoteEditor({ note, onSave, onCancel }: NoteEditorProps) 
                 rows={10}
               />
             </div>
-            <div>
+            <div className="space-y-2">
               <Label htmlFor="tags">Tags (comma-separated)</Label>
               <Input
                 id="tags"
@@ -88,13 +90,16 @@ export default function NoteEditor({ note, onSave, onCancel }: NoteEditorProps) 
                 placeholder="idea, to-do, reminder"
               />
             </div>
-          </CardContent>
-          <CardFooter className="flex justify-end gap-3">
-            <Button type="button" variant="outline" onClick={onCancel} disabled={isSaving}>Cancel</Button>
-            <Button type="submit" disabled={isSaving}>{isSaving ? "Saving..." : "Save Note"}</Button>
-          </CardFooter>
-        </Card>
-      </form>
+            <div className="flex justify-end gap-3 border-t pt-4">
+              <Button type="button" variant="outline" onClick={onCancel} disabled={isSaving}>Cancel</Button>
+              <Button type="submit" disabled={isSaving}>
+                {isSaving && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                {isSaving ? "Saving..." : "Save Note"}
+              </Button>
+            </div>
+          </form>
+        </CardContent>
+      </Card>
     </motion.div>
   );
 }

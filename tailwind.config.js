@@ -1,4 +1,3 @@
-
 /** @type {import('tailwindcss').Config} */
 module.exports = {
   darkMode: ["class"],
@@ -17,7 +16,6 @@ module.exports = {
     extend: {
       fontFamily: {
         sans: ["Inter", "sans-serif"],
-        mono: ["IBM Plex Mono", "monospace"],
         tahu: ["var(--font-tahu)", "sans-serif"],
       },
       colors: {

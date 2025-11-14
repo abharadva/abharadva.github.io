@@ -1,4 +1,10 @@
-
+/*
+This file is updated for the new design system.
+- The `rounded-none`, `border-2`, and neo-brutalist border color styles are removed.
+- The component now uses a standard `rounded-sm` and a subtle `border`.
+- The checked state color is now tied to the theme's `primary` color for consistency.
+- Focus rings are updated to use the theme's `ring` color.
+*/
 "use client";
 
 import * as React from "react";

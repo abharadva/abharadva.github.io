@@ -1,4 +1,9 @@
-
+/*
+This file is updated to remove the neo-brutalist styling.
+- The `TooltipContent` component's `border-2`, `rounded-none`, and `shadow-[...]` are replaced with a modern tooltip style.
+- It now uses `rounded-md`, a subtle `border`, `bg-popover`, and a standard `shadow-md` for a clean, professional appearance.
+- The font is updated to `font-medium` for better readability.
+*/
 "use client";
 
 import * as React from "react";
@@ -29,4 +34,3 @@ const TooltipContent = React.forwardRef<
 TooltipContent.displayName = TooltipPrimitive.Content.displayName;
 
 export { Tooltip, TooltipTrigger, TooltipContent, TooltipProvider };
-

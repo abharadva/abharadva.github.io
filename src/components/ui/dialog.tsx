@@ -1,4 +1,10 @@
-
+/*
+This file is updated to remove the neo-brutalist aesthetic.
+- The `DialogContent` no longer has a `border-2`, `rounded-none`, or `shadow-[...]`. It now uses a subtle `border`, `rounded-lg`, and a standard `shadow-lg` for a modern modal appearance.
+- The close button is simplified and restyled to be a clean icon button, removing the neo-brutalist border and shadow.
+- The `DialogHeader` and `DialogFooter` now use a subtle border from the theme's color palette for separation.
+- Font styles for `DialogTitle` and `DialogDescription` are updated for consistency with the new theme.
+*/
 "use client";
 
 import * as React from "react";

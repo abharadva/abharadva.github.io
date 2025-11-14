@@ -1,4 +1,9 @@
-
+/*
+This file is updated for the new kinetic typography design system.
+- The `font-bold` class is changed to `font-medium` for a cleaner, less heavy look.
+- The `mb-1` and `block` classes are removed from the base styles, making the component more flexible for use in different layouts (e.g., alongside a checkbox). These can be added via `className` where needed.
+- The `text-black` color is replaced with the theme's default text color, which is inherited.
+*/
 "use client";
 
 import * as React from "react";

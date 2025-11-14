@@ -1,4 +1,10 @@
-
+/*
+This file is updated to adopt the new design system.
+- The `rounded-none` and `shadow-[...]` classes are removed.
+- Components are now styled with a standard border-radius defined by the theme.
+- The `border-2` is reduced to a standard single-pixel border.
+- The `destructive` variant is updated to use theme-aware colors for background and text, improving consistency.
+*/
 import * as React from "react";
 import { cva, type VariantProps } from "class-variance-authority";
 

@@ -1,4 +1,10 @@
-
+/*
+This file is updated for the new design system.
+- The neo-brutalist `border-2`, `rounded-none`, and harsh checked state are removed.
+- `RadioGroupItem` is now styled to be a standard `rounded-full` radio button.
+- The checked state is now indicated by a filled circle using the theme's `primary` color, which is a more conventional and recognizable pattern.
+- Focus rings are updated to use the theme's `ring` color.
+*/
 "use client";
 
 import * as React from "react";

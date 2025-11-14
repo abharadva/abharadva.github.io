@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=IBM+Plex+Mono:wght@400;500;600&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap');
 
 @tailwind base;
 @tailwind components;
@@ -6,47 +6,59 @@
 
 @layer base {
   :root {
-    /* A deep, focused dark theme inspired by code editors and technical diagrams */
-    --background: 220 20% 5%; /* Deepest navy/charcoal */
-    --foreground: 210 20% 90%;
-
-    --card: 220 20% 8%; /* Slightly lighter for cards */
-    --card-foreground: 210 20% 90%;
-
-    --popover: 220 20% 5%;
-    --popover-foreground: 210 20% 90%;
-
-    /* A vibrant, electric blue for primary actions and highlights */
-    --primary: 200 100% 50%; 
-    --primary-foreground: 220 20% 5%;
-
-    --secondary: 220 20% 12%;
-    --secondary-foreground: 210 20% 90%;
-
-    --muted: 220 20% 12%;
-    --muted-foreground: 220 10% 60%;
-
-    /* Accent uses the same electric blue for consistency */
-    --accent: 200 100% 50%; 
-    --accent-foreground: 220 20% 5%;
-    
-    --destructive: 0 84% 60%;
+    --background: 0 0% 100%;
+    --foreground: 222.2 84% 4.9%;
+    --card: 0 0% 100%;
+    --card-foreground: 222.2 84% 4.9%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 222.2 84% 4.9%;
+    --primary: 222.2 47.4% 11.2%;
+    --primary-foreground: 210 40% 98%;
+    --secondary: 210 40% 96.1%;
+    --secondary-foreground: 222.2 47.4% 11.2%;
+    --muted: 210 40% 96.1%;
+    --muted-foreground: 215.4 16.3% 46.9%;
+    --accent: 210 40% 96.1%;
+    --accent-foreground: 222.2 47.4% 11.2%;
+    --destructive: 0 84.2% 60.2%;
     --destructive-foreground: 210 40% 98%;
+    --border: 214.3 31.8% 91.4%;
+    --input: 214.3 31.8% 91.4%;
+    --ring: 222.2 84% 4.9%;
+    --radius: 0.5rem;
+    --chart-1: 220 70% 50%;
+    --chart-2: 160 60% 45%;
+    --chart-3: 30 80% 55%;
+    --chart-4: 280 65% 60%;
+    --chart-5: 340 75% 55%;
+  }
 
-    --border: 220 20% 15%;
-    --input: 220 20% 12%;
-    --ring: 200 100% 50%;
-
-    --radius: 0.375rem; /* Slightly sharper corners */
-
-    --chart-1: 200 80% 60%;
+  .dark {
+    --background: 222.2 84% 4.9%;
+    --foreground: 210 40% 98%;
+    --card: 222.2 84% 4.9%;
+    --card-foreground: 210 40% 98%;
+    --popover: 222.2 84% 4.9%;
+    --popover-foreground: 210 40% 98%;
+    --primary: 210 40% 98%;
+    --primary-foreground: 222.2 47.4% 11.2%;
+    --secondary: 217.2 32.6% 17.5%;
+    --secondary-foreground: 210 40% 98%;
+    --muted: 217.2 32.6% 17.5%;
+    --muted-foreground: 215 20.2% 65.1%;
+    --accent: 217.2 32.6% 17.5%;
+    --accent-foreground: 210 40% 98%;
+    --destructive: 0 62.8% 30.6%;
+    --destructive-foreground: 210 40% 98%;
+    --border: 217.2 32.6% 17.5%;
+    --input: 217.2 32.6% 17.5%;
+    --ring: 212.7 26.8% 83.9%;
+    --chart-1: 220 70% 60%;
     --chart-2: 160 60% 55%;
     --chart-3: 30 80% 65%;
     --chart-4: 280 65% 70%;
     --chart-5: 340 75% 65%;
   }
-
-  /* No light theme needed per design spec, but could be added here */
 }
 
 @layer base {
@@ -58,114 +70,6 @@
   }
   html {
     font-family: 'Inter', sans-serif;
-  }
-
-  /* Headings now use the sharp monospace font for a technical feel */
-  h1, h2, h3, h4, h5, h6 {
-    @apply font-mono font-semibold;
-  }
-
-  /* --- FullCalendar Theming --- */
-  /* This block applies the "Digital Blueprint" theme to the calendar component */
-  .fc {
-    /* General colors */
-    --fc-border-color: hsl(var(--border));
-    --fc-daygrid-event-dot-width: 6px;
-    --fc-list-event-dot-width: 8px;
-    --fc-today-bg-color: hsl(var(--secondary) / 0.5);
-    --fc-page-bg-color: transparent;
-    --fc-neutral-bg-color: transparent;
-
-    /* Toolbar buttons to match shadcn/ui "outline" variant */
-    .fc-button {
-      @apply h-9 rounded-md px-3 text-sm font-medium;
-      @apply border border-input bg-transparent hover:bg-accent hover:text-accent-foreground;
-      @apply focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2;
-    }
-    .fc-button-primary {
-      @apply bg-primary text-primary-foreground hover:bg-primary/90;
-    }
-    .fc-button-primary:disabled {
-      @apply bg-primary/50;
-    }
-    .fc-button-active {
-       @apply bg-accent text-accent-foreground;
-    }
-    
-    /* Toolbar Title (e.g., "October 2024") */
-    .fc-toolbar-title {
-      @apply font-mono text-lg font-bold text-foreground;
-    }
-
-    /* Day Headers (e.g., "Sun", "Mon") */
-    .fc-col-header-cell-cushion {
-      @apply font-mono text-xs uppercase text-muted-foreground;
-    }
-    
-    /* Main grid and borders */
-    .fc-theme-standard .fc-scrollgrid {
-      border-color: hsl(var(--border));
-    }
-
-    /* Day numbers in month view */
-    .fc-daygrid-day-number {
-      @apply text-muted-foreground text-xs;
-    }
-    .fc-day-today .fc-daygrid-day-number {
-      @apply font-bold text-foreground;
-    }
-
-    /* --- EVENT STYLING OVERHAUL --- */
-
-    /* Remove default event background/border - we control it in the render function */
-    .fc-event {
-      background-color: transparent !important;
-      border: none !important;
-      cursor: pointer;
-    }
-
-    /* Add visual feedback for dragging */
-    .fc-event-dragging {
-      @apply shadow-lg shadow-primary/30 opacity-75;
-    }
-
-    /* Style the container for list-item events to add spacing and hover effect */
-    .fc-daygrid-event {
-      @apply rounded-md transition-colors;
-    }
-    .fc-daygrid-event:hover {
-       @apply bg-secondary;
-    }
-    
-    /* Remove default dot provided by FullCalendar for list-items */
-    .fc-daygrid-event-dot {
-      display: none;
-    }
-
-    /* Ensure our custom rendered content fills the event container */
-    .fc-event-main-frame, .fc-event-main {
-      @apply w-full;
-    }
-    
-    /* List view styling */
-    .fc-list-day-text, .fc-list-day-side-text {
-        color: hsl(var(--foreground));
-        font-weight: 600;
-    }
-  }
-}
-
-
-@layer components {
-  /* The new background grid pattern for the "Digital Blueprint" theme */
-  .bg-grid-pattern {
-    background-image: radial-gradient(hsl(var(--foreground)) / 0.1 1px, transparent 1px);
-    background-size: 20px 20px;
-  }
-
-  /* Glassmorphism is replaced by a solid, bordered container for the Blueprint theme */
-  .bg-blueprint-bg {
-    @apply bg-card/80 backdrop-blur-sm border border-border shadow-2xl shadow-black/20;
   }
 }
 

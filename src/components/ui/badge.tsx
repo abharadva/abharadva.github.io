@@ -1,4 +1,11 @@
-
+/*
+This file is updated for the new kinetic typography design.
+- The neo-brutalist `rounded-none`, `border-2`, and `shadow-[...]` are removed.
+- The component is restyled to be a modern, soft-cornered badge.
+- Variants are updated to use theme-aware colors for background and text, ensuring they adapt to light/dark modes.
+- The `font-bold` is changed to `font-semibold` for a slightly softer look.
+- The `default` variant is removed as `secondary` now serves as the primary neutral badge style.
+*/
 import * as React from "react";
 import { cva, type VariantProps } from "class-variance-authority";
 

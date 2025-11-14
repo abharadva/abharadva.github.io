@@ -1,4 +1,9 @@
-
+/*
+This file is updated to remove the neo-brutalist styling.
+- `TabsList` is redesigned to be a clean, contained group of triggers with a `muted` background and rounded corners. The heavy border and shadow are gone.
+- `TabsTrigger` is restyled for a modern look. The active state now uses the `background` color to stand out against the `muted` list background, and it has a subtle shadow for depth.
+- `TabsContent` no longer has a heavy border and shadow, appearing as a clean content area.
+*/
 "use client";
 
 import * as React from "react";
@@ -54,4 +59,3 @@ const TabsContent = React.forwardRef<
 TabsContent.displayName = TabsPrimitive.Content.displayName;
 
 export { Tabs, TabsList, TabsTrigger, TabsContent };
-

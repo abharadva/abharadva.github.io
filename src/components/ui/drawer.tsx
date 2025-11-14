@@ -1,4 +1,10 @@
-
+/*
+This file is updated to remove neo-brutalist styling.
+- The `DrawerContent` component's `border-t-2`, `rounded-t-none`, and `shadow-[...]` are replaced with a single `border-t` and a standard shadow, creating a modern, floating panel effect.
+- The drag handle (`div` with `bg-black`) is now styled using the theme's `muted` color for a more subtle appearance.
+- The `DrawerHeader` and `DrawerFooter` now use a subtle theme-based border for separation.
+- Font styles for `DrawerTitle` and `DrawerDescription` are updated for theme consistency.
+*/
 "use client";
 
 import * as React from "react";

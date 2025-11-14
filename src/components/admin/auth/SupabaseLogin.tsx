@@ -1,4 +1,11 @@
-
+/*
+This file is updated to align with the new kinetic typography design system.
+- Removed all neo-brutalist styles (hard shadows, thick borders, `rounded-none`).
+- The entire component now uses a clean, centered layout on a dark background.
+- Switched to the new 'Inter' font via the `font-sans` class (inherited).
+- Replaced custom inputs and buttons with the redesigned `Input` and `Button` components from the UI kit for a consistent look and feel.
+- The color palette is updated to use the new theme variables. The icon and overall aesthetic are now minimalist and modern.
+*/
 "use client";
 
 import React, { useState, useEffect } from "react";
@@ -101,16 +108,16 @@ export default function SupabaseLogin() {
       exit="exit"
       variants={pageVariants}
       transition={{ duration: 0.3 }}
-      className="flex min-h-screen items-center justify-center bg-grid-pattern px-4"
+      className="flex min-h-screen items-center justify-center bg-background px-4"
     >
-      <div className="w-full max-w-sm space-y-8 rounded-lg bg-blueprint-bg p-8">
+      <div className="w-full max-w-sm space-y-8 rounded-lg border border-border bg-card p-8 shadow-sm">
         <div className="text-center">
           <div className="mx-auto mb-4 flex size-12 items-center justify-center rounded-full bg-secondary">
-            <Lock className="size-6 text-primary" />
+            <Lock className="size-6 text-foreground" />
           </div>
-          <h2 className="font-mono text-3xl font-bold text-foreground">Admin Access</h2>
+          <h2 className="text-3xl font-black text-foreground">Admin Access</h2>
           <p className="mt-2 text-muted-foreground">
-            Authenticate to access the command center.
+            Sign in to manage your portfolio.
           </p>
         </div>
 
@@ -123,7 +130,7 @@ export default function SupabaseLogin() {
               type="email"
               autoComplete="email"
               required
-              placeholder="operator@domain.com"
+              placeholder="you@example.com"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
             />
@@ -136,7 +143,7 @@ export default function SupabaseLogin() {
               type="password"
               autoComplete="current-password"
               required
-              placeholder="Enter access key"
+              placeholder="Enter your password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
             />
@@ -159,10 +166,10 @@ export default function SupabaseLogin() {
             {isLoading ? (
               <>
                 <Loader2 className="mr-2 size-4 animate-spin" />
-                Authenticating...
+                Signing In...
               </>
             ) : (
-              "Authorize"
+              "Sign In"
             )}
           </Button>
         </form>

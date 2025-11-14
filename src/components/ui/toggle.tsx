@@ -1,4 +1,10 @@
-
+/*
+This file is updated to remove the neo-brutalist aesthetic.
+- The `cva` for `toggleVariants` is completely overhauled. The `border-2`, `rounded-none`, `shadow-[...]`, and transform animations are removed.
+- The component is now a clean, modern toggle button.
+- The pressed state (`data-[state=on]`) now uses the theme's `accent` color for a clear, consistent selection style.
+- The `outline` variant is simplified to match the new design language.
+*/
 "use client";
 
 import * as React from "react";

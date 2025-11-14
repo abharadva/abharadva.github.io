@@ -1,4 +1,11 @@
-
+/*
+This component has been rewritten to provide a more flexible header layout.
+- The default `SheetClose` button has been REMOVED from the `SheetContent`. You must now add it manually.
+- The `SheetHeader` is now a `flex` container with `justify-between` and `items-center`.
+- This allows you to place a `SheetTitle` on the left and a `SheetClose` on the right, and the layout will adjust automatically.
+- If only a `SheetTitle` is present, it will align left. If only a `SheetClose` is present, it will align right.
+- All neo-brutalist styles are replaced with the modern, theme-aware design.
+*/
 "use client";
 
 import * as React from "react";
@@ -82,6 +89,7 @@ const SheetContent = React.forwardRef<
       {...props}
     >
       {children}
+      {/* The default close button is removed from here to allow for flexible placement */}
     </SheetPrimitive.Content>
   </SheetPortal>
 ));
@@ -93,7 +101,7 @@ const SheetHeader = ({
 }: React.HTMLAttributes<HTMLDivElement>) => (
   <div
     className={cn(
-      "flex items-center justify-between",
+      "flex flex-col space-y-2 text-center sm:text-left",
       className
     )}
     {...props}

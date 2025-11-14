@@ -1,4 +1,3 @@
-// src/pages/admin/dashboard.tsx
 import { useEffect, useState } from "react";
 import { useRouter } from "next/router";
 import { supabase, Session } from "@/supabase/client";
@@ -20,8 +19,6 @@ export interface DashboardData {
     monthlyNet: number;
     totalBlogViews: number;
     tasksCompletedThisWeek: number;
-    learningHoursThisMonth: number;
-    topicsInProgress: number;
   } | null;
   recentPosts: Pick<BlogPost, "id" | "title" | "updated_at" | "slug">[];
   pinnedNotes: Pick<Note, 'id' | 'title' | 'content'>[];
@@ -58,18 +55,10 @@ export default function AdminDashboardPage() {
         const startOfWeek = new Date(now.setDate(now.getDate() - now.getDay())).toISOString();
 
         const [
-          { count: totalPosts, error: tpError },
-          { count: portfolioSections, error: psError },
-          { count: portfolioItems, error: piError },
-          { data: recentPostsData, error: rpError },
-          { count: pendingTasksCount, error: ptError },
-          { count: totalNotesCount, error: tnError },
-          { data: pinnedNotesData, error: pnError },
-          { data: monthlyTransactionsData, error: mtError },
-          { data: totalViewsData, error: tvError },
-          { count: tasksCompletedCount, error: tcError },
-          { data: learningSessionsData, error: lsError },
-          { count: topicsInProgressCount, error: tipError },
+          { count: totalPosts }, { count: portfolioSections }, { count: portfolioItems },
+          { data: recentPostsData }, { count: pendingTasksCount }, { count: totalNotesCount },
+          { data: pinnedNotesData }, { data: monthlyTransactionsData }, { data: totalViewsData },
+          { count: tasksCompletedCount },
         ] = await Promise.all([
           supabase.from("blog_posts").select("*", { count: "exact", head: true }),
           supabase.from("portfolio_sections").select("*", { count: "exact", head: true }),
@@ -77,19 +66,11 @@ export default function AdminDashboardPage() {
           supabase.from("blog_posts").select("id, title, updated_at, slug").order("updated_at", { ascending: false }).limit(3),
           supabase.from("tasks").select("*", { count: "exact", head: true }).neq("status", "done"),
           supabase.from("notes").select("*", { count: "exact", head: true }),
-          supabase.from("notes").select("id, title, content").eq("is_pinned", true).limit(3),
+          supabase.from("notes").select("id, title, content").eq("is_pinned", true).limit(5),
           supabase.from("transactions").select("type, amount").gte('date', firstDayOfMonth),
           supabase.rpc('get_total_blog_views'),
           supabase.from("tasks").select("*", { count: "exact", head: true }).eq("status", "done").gte("updated_at", startOfWeek),
-          supabase.from("learning_sessions").select("duration_minutes").gte('start_time', firstDayOfMonth),
-          supabase.from("learning_topics").select("*", { count: "exact", head: true }).in('status', ['Learning', 'Practicing']),
         ]);
-
-        const errors = [tpError, psError, piError, rpError, ptError, tnError, pnError, mtError, tvError, tcError, lsError, tipError].filter(Boolean);
-        if (errors.length > 0) {
-          console.error("Dashboard data fetching errors:", errors);
-          throw new Error("Failed to fetch some dashboard data.");
-        }
 
         let monthlyEarnings = 0;
         let monthlyExpenses = 0;
@@ -99,9 +80,6 @@ export default function AdminDashboardPage() {
             else if (t.type === 'expense') monthlyExpenses += t.amount;
           }
         }
-        
-        const totalMinutes = learningSessionsData?.reduce((sum, s) => sum + (s.duration_minutes || 0), 0) || 0;
-        const learningHoursThisMonth = parseFloat((totalMinutes / 60).toFixed(1));
 
         setDashboardData({
           stats: {
@@ -113,10 +91,8 @@ export default function AdminDashboardPage() {
             monthlyEarnings,
             monthlyExpenses,
             monthlyNet: monthlyEarnings - monthlyExpenses,
-            totalBlogViews: totalViewsData || 0,
+            totalBlogViews: (totalViewsData as any) || 0,
             tasksCompletedThisWeek: tasksCompletedCount || 0,
-            learningHoursThisMonth,
-            topicsInProgress: topicsInProgressCount || 0,
           },
           recentPosts: recentPostsData || [],
           pinnedNotes: pinnedNotesData || [],
@@ -125,22 +101,68 @@ export default function AdminDashboardPage() {
         console.error("Error fetching dashboard data:", error);
       }
     };
+
     checkAuthAndAAL();
-    const { data: authListener } = supabase.auth.onAuthStateChange((event, newSession) => { setSession(newSession); if (event === "SIGNED_OUT" || !newSession) { router.replace("/admin/login"); } else if (event === "USER_UPDATED" || event === "TOKEN_REFRESHED" || event === "MFA_CHALLENGE_VERIFIED") { checkAuthAndAAL(); } });
-    return () => { authListener?.subscription?.unsubscribe(); };
+
+    const { data: authListener } = supabase.auth.onAuthStateChange(
+      (event, newSession) => {
+        setSession(newSession);
+        if (event === "SIGNED_OUT" || !newSession) {
+          router.replace("/admin/login");
+        } else if (event === "USER_UPDATED" || event === "TOKEN_REFRESHED" || event === "MFA_CHALLENGE_VERIFIED") {
+          checkAuthAndAAL();
+        }
+      },
+    );
+
+    return () => {
+      authListener?.subscription?.unsubscribe();
+    };
   }, [router]);
 
-  const handleLogout = async () => { setIsLoading(true); await supabase.auth.signOut(); };
-  
-  const pageVariants = { initial: { opacity: 0 }, animate: { opacity: 1 }, exit: { opacity: 0 }, };
+  const handleLogout = async () => {
+    setIsLoading(true);
+    await supabase.auth.signOut();
+  };
+
+  const pageVariants = {
+    initial: { opacity: 0, y: 10 },
+    animate: { opacity: 1, y: 0 },
+    exit: { opacity: 0, y: -10 },
+    transition: { duration: 0.2 },
+  };
 
   if (isLoading || !session) {
-    return (<Layout><div className="flex min-h-screen items-center justify-center"><Loader2 className="h-8 w-8 animate-spin text-muted-foreground" /></div></Layout>);
+    return (
+      <Layout>
+        <motion.div
+          key="dashboard-loading"
+          initial="initial"
+          animate="animate"
+          exit="exit"
+          variants={pageVariants}
+          className="flex min-h-screen items-center justify-center bg-background"
+        >
+          <div className="flex flex-col items-center gap-4 text-muted-foreground">
+            <Loader2 className="h-8 w-8 animate-spin" />
+            <p className="font-medium">Loading Dashboard...</p>
+          </div>
+        </motion.div>
+      </Layout>
+    );
   }
 
   return (
-    <motion.div key="dashboard-content" initial="initial" animate="animate" exit="exit" variants={pageVariants} transition={{ duration: 0.3 }} className="bg-background">
-      <AdminDashboardComponent onLogout={handleLogout} dashboardData={dashboardData} />
-    </motion.div>
+    <Layout>
+      <motion.div
+        key="dashboard-content"
+        initial="initial"
+        animate="animate"
+        exit="exit"
+        variants={pageVariants}
+      >
+        <AdminDashboardComponent onLogout={handleLogout} dashboardData={dashboardData} />
+      </motion.div>
+    </Layout>
   );
 }

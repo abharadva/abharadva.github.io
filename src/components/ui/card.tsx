@@ -1,4 +1,10 @@
-
+/*
+This file is completely redesigned to remove the neo-brutalist style.
+- The `rounded-none`, `border-2`, and `shadow-[...]` classes are removed.
+- The component now uses a standard `border`, `rounded-lg`, and subtle `bg-card` from the theme.
+- The `CardHeader` and `CardFooter` now have a simple border separating them from the content, instead of a thick one.
+- Font weights and colors are updated to use theme variables for a clean, modern look.
+*/
 import * as React from "react";
 
 import { cn } from "@/lib/utils";

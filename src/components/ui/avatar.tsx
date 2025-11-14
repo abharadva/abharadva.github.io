@@ -1,4 +1,9 @@
-
+/*
+This file is updated to match the new kinetic typography design.
+- The neo-brutalist `border-2 border-black` is removed. The component now has a cleaner, borderless look.
+- The `rounded-full` style is retained as it is standard for avatars.
+- The fallback background now uses the theme's `muted` color for better consistency.
+*/
 "use client";
 
 import * as React from "react";

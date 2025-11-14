@@ -1,4 +1,9 @@
-
+/*
+This file is updated for the new kinetic typography design system.
+- The heavy neo-brutalist styles (`border-2`, `rounded-none`, `shadow-[...]`) on the main container are replaced with a simpler, cleaner look. The component is now borderless by default.
+- The previous and next navigation buttons are updated to use the redesigned `Button` component with the `outline` variant, making them more subtle.
+- The absolute positioning of the navigation buttons is adjusted for a more modern placement, partially overlapping the content area.
+*/
 "use client";
 
 import * as React from "react";

@@ -1,4 +1,11 @@
-
+/*
+This file is heavily updated to remove the neo-brutalist aesthetic.
+- The main table container now has a subtle `border` and `rounded-lg` instead of the heavy border and shadow.
+- `TableHeader` is restyled with a `muted` background for a softer look, and the text color is changed to `muted-foreground`.
+- `TableRow` hover state now uses `muted/50` for a subtle highlight.
+- All `border-2` and hardcoded `border-black` styles are replaced with theme-aware, subtle borders.
+- Font styles are updated to be less bold for a cleaner typographic hierarchy.
+*/
 import * as React from "react";
 
 import { cn } from "@/lib/utils";

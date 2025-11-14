@@ -1,4 +1,9 @@
-
+/*
+This file is updated to remove the neo-brutalist styling.
+- The `ResizablePanelGroup` now uses `rounded-lg` and a subtle theme `border`, removing the heavy shadow.
+- The `ResizableHandle` is restyled to be more subtle. The hover and drag states now use the theme's `accent` color for a clean, modern look.
+- The handle's grabber icon (`GripVertical`) container is updated with modern styling (`rounded-sm`, subtle border).
+*/
 "use client";
 
 import { GripVertical } from "lucide-react";
@@ -48,4 +53,3 @@ const ResizableHandle = ({
 ResizableHandle.displayName = "ResizableHandle";
 
 export { ResizablePanelGroup, ResizablePanel, ResizableHandle };
-

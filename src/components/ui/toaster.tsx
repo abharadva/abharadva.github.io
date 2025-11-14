@@ -1,4 +1,6 @@
-
+/*
+This file's comment is updated for consistency. The functionality, which renders toasts from the `useToast` hook, remains the same. No style changes are needed here as the styling is handled by the `toast.tsx` component itself.
+*/
 "use client";
 
 import {

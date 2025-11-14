@@ -4,7 +4,7 @@ import Layout from "@/components/layout";
 export default function AdminMFASetupPage() {
   return (
     <Layout>
-      <div className="">
+      <div>
         <SupabaseMFASetup />
       </div>
     </Layout>

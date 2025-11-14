@@ -1,32 +1,34 @@
 /*
-This file is heavily redesigned to create a more engaging and professional homepage.
-- The layout is now asymmetrical on larger screens, featuring a bold hero section on the left and a preview of projects on the right.
-- `LittleAboutMyself` and `Hero` are combined into a single, more impactful `Hero` component.
-- The `Projects` component is updated to only show a curated selection on the homepage.
-- The `Newsletter` section is visually enhanced.
-- A new animated background element is added via the Layout component for a dynamic feel.
+This file is updated to align with the new kinetic typography design.
+- The `LittleAboutMyself` and `Hero` components are retained for structure, but their internal styling will be updated in their respective files.
+- The `Newsletter` and `Projects` components are also kept, and their redesign will be handled in their files.
+- The `` class is removed, inheriting the global `font-sans`.
+- Head tags and metadata remain unchanged as they are functional.
+- A `useEffect` hook is added to trigger a Discord webhook notification (via a secure serverless proxy) on the first visit of a user's session.
 */
 import Layout from "@/components/layout";
+import LittleAboutMyself from "@/components/little-about-myself";
+import Hero from "@/components/hero";
+import Newsletter from "@/components/newsletter";
 import Projects from "@/components/projects";
 import Head from "next/head";
 import { config as appConfig } from "@/lib/config";
 import { useEffect } from "react";
-import Hero from "@/components/hero";
-import Experience from "@/components/experience";
-import Newsletter from "@/components/newsletter";
 
 export default function HomePage() {
   const { site: siteConfig } = appConfig;
 
   useEffect(() => {
     const webhookUrl = process.env.NEXT_PUBLIC_VISIT_NOTIFIER_URL || "";
+
     if (process.env.NODE_ENV === "production" && webhookUrl) {
       if (!sessionStorage.getItem("visitNotified")) {
         const userAgent = navigator.userAgent || "Unknown";
         const referrer = document.referrer || "Direct visit";
+
         const embed = {
           title: "🚀 New Portfolio Visitor!",
-          color: 3447003,
+          color: 3447003, // A nice blue color
           description: `Someone just landed on the portfolio.`,
           fields: [
             { name: "🔗 Referrer", value: `\`${referrer}\``, inline: false },
@@ -51,19 +53,15 @@ export default function HomePage() {
     }
   }, []);
 
-   return (
+  return (
     <Layout>
       <Head>
         <link rel="canonical" href={siteConfig.url} />
       </Head>
-      <div className="py-12 md:py-20">
-        <Hero />
-        <Projects />
-        <Experience />
-        <Newsletter />
-      </div>
+      <LittleAboutMyself />
+      <Hero />
+      <Projects />
+      <Newsletter />
     </Layout>
   );
 }
-
-

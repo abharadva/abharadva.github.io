@@ -1,4 +1,10 @@
-
+/*
+This file is updated to remove the neo-brutalist styling.
+- The hard `border-2` and `rounded-none` styles on `InputOTPSlot` are replaced with a modern input field aesthetic.
+- Each slot now has a standard border and `rounded-md`.
+- The active state (`isActive`) is updated to use the theme's `ring` color for focus, creating a consistent look with other input components.
+- The separator is simplified to be a subtle dot.
+*/
 "use client";
 
 import * as React from "react";

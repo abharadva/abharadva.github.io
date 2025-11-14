@@ -1,4 +1,9 @@
-
+/*
+This file is updated for the new design system.
+- The neo-brutalist `border-2`, `rounded-none`, and `bg-white` styles on the root `ScrollArea` component are replaced with a simpler, borderless look that blends with its container.
+- The `ScrollBar` is restyled to be more modern and subtle. The track color is removed (transparent), and the thumb color is updated to use the theme's `border` color.
+- The thick borders on the scrollbar track are removed.
+*/
 "use client";
 
 import * as React from "react";

@@ -1,4 +1,10 @@
-
+/*
+This file is updated to remove the neo-brutalist styling.
+- The `SelectTrigger` and `SelectContent` now use `rounded-md`, a subtle theme `border`, and standard shadows, removing the `border-2`, `rounded-none`, and `shadow-[...]`.
+- The focus state on `SelectTrigger` is updated to use the theme's `ring` color.
+- The `SelectItem` hover and selected states now use the theme's `accent` color for consistency.
+- Font styles and separator colors are all updated to align with the new theme variables.
+*/
 "use client";
 
 import * as React from "react";

@@ -26,7 +26,6 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
-import Image from "next/image";
 
 const CodeBlock = ({ className, children }: { className?: string, children: React.ReactNode }) => {
   const [isCopied, setIsCopied] = useState(false);
@@ -45,7 +44,7 @@ const CodeBlock = ({ className, children }: { className?: string, children: Reac
       <div className="flex items-center justify-between px-4 py-1.5 text-xs">
         <span className="font-sans text-muted-foreground">{lang}</span>
         <Button variant="ghost" size="icon" className="h-7 w-7 text-muted-foreground" onClick={handleCopy}>
-          {isCopied ? <Check className="size-4 text-accent" /> : <Copy className="size-4" />}
+          {isCopied ? <Check className="size-4 text-primary" /> : <Copy className="size-4" />}
         </Button>
       </div>
       <SyntaxHighlighter
@@ -63,7 +62,7 @@ const CodeBlock = ({ className, children }: { className?: string, children: Reac
 const markdownComponents: any = {
   code: (props: any) => <CodeBlock {...props} />,
   img: ({ node, ...props }: any) => (
-    <Image {...props} loading="lazy" className="my-8 h-auto max-h-[80vh] w-full rounded-lg border object-contain" alt={props.alt || "Blog image"} />
+    <img {...props} loading="lazy" className="my-8 h-auto max-h-[80vh] w-full rounded-lg border object-contain" alt={props.alt || "Blog image"} />
   ),
 };
 
@@ -161,7 +160,7 @@ export default function BlogPostPage() {
         try { await supabase.rpc("increment_blog_post_view", { post_id_to_increment: post.id }); }
         catch (rpcError) { console.error("Failed to increment view count", rpcError); }
       };
-      const timeoutId = setTimeout(incrementViewCount, 3000); // Increased delay
+      const timeoutId = setTimeout(incrementViewCount, 3000);
       return () => clearTimeout(timeoutId);
     }
   }, [post?.id]);
@@ -193,7 +192,7 @@ export default function BlogPostPage() {
           <div className="grid grid-cols-1 lg:grid-cols-12 lg:gap-x-12">
             <article className="lg:col-span-9">
               <PostHeader post={post} />
-              {post.cover_image_url && <Image src={post.cover_image_url} alt={post.title} className="my-8 w-full h-auto rounded-lg border object-cover" />}
+              {post.cover_image_url && <img src={post.cover_image_url} alt={post.title} className="my-8 w-full h-auto rounded-lg border object-cover" />}
               <Separator className="my-8" />
               {post.content && <PostContent content={post.content} />}
             </article>

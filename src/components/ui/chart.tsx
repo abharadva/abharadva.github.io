@@ -1,4 +1,10 @@
-
+/*
+This file is updated for the new design system.
+- The neo-brutalist styles (`border-2`, `rounded-none`, `shadow-[...]`) on `ChartContainer` are replaced with a modern, clean card-like style using theme variables.
+- The Recharts default styles are overridden more cleanly to use theme colors for grid lines, text, and cursors.
+- The `ChartTooltipContent` is restyled to match the new `Card` and `Popover` aesthetic (rounded corners, subtle border, theme background).
+- The `ChartLegendContent` is simplified, removing the border and background on the indicators for a cleaner look.
+*/
 "use client";
 
 import * as React from "react";

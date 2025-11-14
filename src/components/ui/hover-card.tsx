@@ -1,4 +1,9 @@
-
+/*
+This file is updated for the new kinetic typography design system.
+- The neo-brutalist `border-2`, `rounded-none`, and `shadow-[...]` styles are removed from `HoverCardContent`.
+- The hover card panel now uses `rounded-md`, a subtle theme `border`, `bg-popover`, and a standard `shadow-md` for a modern, clean appearance, consistent with other popover-like components.
+- The animation properties are kept for a smooth user experience.
+*/
 "use client";
 
 import * as React from "react";

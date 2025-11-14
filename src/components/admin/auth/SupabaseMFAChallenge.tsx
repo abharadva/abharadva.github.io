@@ -1,4 +1,11 @@
-
+/*
+This file is updated for the new kinetic typography design system.
+- All neo-brutalist styles are replaced with the minimalist dark theme.
+- The OTP input is now using the redesigned `InputOTP` component for a modern look.
+- The countdown timer is styled to be less obtrusive and more integrated.
+- The loading state is simplified with a single spinner icon.
+- Replaced custom button with the redesigned `Button` from the UI kit.
+*/
 "use client";
 
 import React, { useState, useEffect } from "react";
@@ -116,7 +123,7 @@ export default function SupabaseMFAChallenge() {
         initial="initial"
         animate="animate"
         exit="exit"
-        className="flex min-h-screen items-center justify-center bg-grid-pattern"
+        className="flex min-h-screen items-center justify-center bg-background"
       >
         <Loader2 className="size-8 animate-spin text-muted-foreground" />
       </motion.div>
@@ -131,18 +138,18 @@ export default function SupabaseMFAChallenge() {
       animate="animate"
       exit="exit"
       transition={{ duration: 0.3 }}
-      className="flex min-h-screen items-center justify-center bg-grid-pattern px-4"
+      className="flex min-h-screen items-center justify-center bg-background px-4"
     >
-      <div className="w-full max-w-sm space-y-8 rounded-lg bg-blueprint-bg p-8">
+      <div className="w-full max-w-sm space-y-8 rounded-lg border border-border bg-card p-8 shadow-sm">
         <div className="text-center">
           <div className="mx-auto mb-4 flex size-12 items-center justify-center rounded-full bg-secondary">
-            <KeyRound className="size-6 text-primary" />
+            <KeyRound className="size-6 text-foreground" />
           </div>
-          <h2 className="font-mono text-3xl font-bold text-foreground">
-            Security Challenge
+          <h2 className="text-3xl font-black text-foreground">
+            Two-Factor Authentication
           </h2>
           <p className="mt-2 text-muted-foreground">
-            Enter the code from your authenticator app.
+            Enter the code from your authenticator app
           </p>
         </div>
 

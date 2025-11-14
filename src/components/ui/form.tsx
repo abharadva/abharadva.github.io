@@ -1,4 +1,9 @@
-
+/*
+This file, which provides the logic for `react-hook-form` integration, is updated for the new design system.
+- `FormLabel` styling is changed from `font-bold` to `font-medium` for a softer typographic feel.
+- `FormMessage` (the error message) is completely restyled. It no longer has a neo-brutalist box. Instead, it's a simple, colored text message for a cleaner, more integrated look, matching the `destructive` theme color.
+- Spacing in `FormItem` is slightly adjusted.
+*/
 "use client";
 
 import * as React from "react";

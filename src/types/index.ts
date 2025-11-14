@@ -72,20 +72,6 @@ export interface GitHubRepo {
   owner: GitHubRepoOwner;
 }
 
-// --- NEW TYPES ---
-
-export interface Event {
-  id: string;
-  user_id?: string;
-  title: string;
-  description?: string | null;
-  start_time: string;
-  end_time?: string | null;
-  is_all_day?: boolean;
-  created_at?: string;
-  updated_at?: string;
-}
-
 export interface Note {
   id: string;
   user_id?: string;
@@ -115,7 +101,7 @@ export interface Task {
   priority?: "low" | "medium" | "high";
   created_at?: string;
   updated_at?: string;
-  sub_tasks?: SubTask[]; // This line should be present
+  sub_tasks?: SubTask[];
 }
 
 export interface Transaction {
@@ -157,39 +143,4 @@ export interface FinancialGoal {
   target_date?: string | null;
   created_at?: string;
   updated_at?: string;
-}
-
-export interface LearningSubject {
-  id: string;
-  user_id?: string;
-  name: string;
-  description?: string | null;
-  created_at?: string;
-  updated_at?: string;
-}
-
-export type LearningStatus = 'To Learn' | 'Learning' | 'Practicing' | 'Mastered';
-
-export interface LearningTopic {
-  id: string;
-  user_id?: string;
-  subject_id: string;
-  title: string;
-  status: LearningStatus;
-  core_notes?: string | null;
-  resources?: { name: string; url: string }[] | null;
-  confidence_score?: number | null;
-  created_at?: string;
-  updated_at?: string;
-}
-
-export interface LearningSession {
-  id: string;
-  user_id?: string;
-  topic_id: string;
-  start_time: string;
-  end_time?: string | null;
-  duration_minutes?: number | null;
-  journal_notes?: string | null;
-  created_at?: string;
 }

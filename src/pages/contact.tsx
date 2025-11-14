@@ -1,4 +1,3 @@
-
 import Layout from "@/components/layout";
 import Head from "next/head";
 import { config as appConfig } from "@/lib/config";
@@ -55,7 +54,9 @@ export default function ContactPage() {
       </Head>
       <main className="mx-auto max-w-5xl px-4 py-16 font-sans md:py-24">
         <motion.header 
-          initial="hidden" animate="visible" variants={itemVariants}
+          initial={{ opacity: 0, y: -20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5 }}
           className="mb-16 text-center"
         >
           <h1 className="text-5xl font-black text-foreground md:text-6xl">Get In Touch</h1>
@@ -79,23 +80,22 @@ export default function ContactPage() {
 
         {(isLoading || (!isLoading && serviceSection?.portfolio_items && serviceSection.portfolio_items.length > 0)) && (
           <motion.div className="mt-24">
-              <motion.h2 variants={itemVariants} initial="hidden" whileInView="visible" viewport={{ once: true }} className="mb-10 text-center text-4xl font-bold text-muted-foreground">What I Can Do For You</motion.h2>
+              <h2 className="mb-10 text-center text-4xl font-bold text-muted-foreground">What I Can Do For You</h2>
               {isLoading && (
-                 <div className="flex justify-center"><Loader2 className="size-8 animate-spin text-muted-foreground"/></div>
+                 <div className="flex justify-center"><Loader2 className="h-8 w-8 animate-spin text-primary" /></div>
               )}
               {!isLoading && serviceSection?.portfolio_items && (
                 <motion.div 
                   variants={containerVariants}
                   initial="hidden"
-                  whileInView="visible"
-                  viewport={{ once: true, amount: 0.2 }}
+                  animate="visible"
                   className="grid grid-cols-1 gap-8 md:grid-cols-2 lg:grid-cols-3"
                 >
                   {serviceSection.portfolio_items.map((service) => (
                     <motion.div 
                       key={service.id}
                       variants={itemVariants}
-                      className="flex h-full flex-col rounded-lg bg-blueprint-bg p-8 transition-transform duration-200 hover:-translate-y-1"
+                      className="flex h-full flex-col rounded-lg border bg-card p-8 text-card-foreground shadow-sm transition-transform duration-200 hover:-translate-y-1"
                     >
                       <h3 className="mb-3 text-2xl font-bold text-foreground">{service.title}</h3>
                       <p className="mb-6 flex-grow text-muted-foreground">{service.subtitle}</p>
@@ -119,4 +119,3 @@ export default function ContactPage() {
     </Layout>
   );
 }
-

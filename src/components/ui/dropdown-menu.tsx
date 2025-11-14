@@ -1,4 +1,10 @@
-
+/*
+This file is updated for the new kinetic typography design system.
+- The neo-brutalist `border-2`, `rounded-none`, and `shadow-[...]` styles are removed from `DropdownMenuContent`.
+- The dropdown panels now use `rounded-md`, a subtle theme `border`, `bg-popover`, and a standard `shadow-md` for a modern look.
+- Item hover/focus states are updated to use the theme's `accent` color.
+- Font styles and separator colors are updated to align with the new theme variables.
+*/
 "use client";
 
 import * as React from "react";

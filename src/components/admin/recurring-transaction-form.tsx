@@ -1,6 +1,3 @@
-
-
-
 "use client";
 import { useState, useEffect, FormEvent } from "react";
 import type { RecurringTransaction } from "@/types";
@@ -104,7 +101,7 @@ export default function RecurringTransactionForm({ recurringTransaction, onSucce
             <div><Label htmlFor="start_date">Start Date *</Label><Input id="start_date" name="start_date" type="date" value={formData.start_date} onChange={handleChange} required /></div>
             <div><Label htmlFor="end_date">End Date (Optional)</Label><Input id="end_date" name="end_date" type="date" value={formData.end_date} onChange={handleChange}/></div>
         </div>
-      {error && <p className="text-sm font-semibold text-red-600">{error}</p>}
+      {error && <p className="text-sm text-destructive">{error}</p>}
       <div className="flex justify-end pt-4"><Button type="submit">{recurringTransaction?.id ? "Save Changes" : "Create Rule"}</Button></div>
     </form>
   );

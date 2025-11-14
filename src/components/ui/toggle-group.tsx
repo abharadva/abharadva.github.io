@@ -1,4 +1,9 @@
-
+/*
+This file is updated for the new design system.
+- The neo-brutalist styles (`border-2`, `rounded-none`, `shadow-[...]`) are removed from the root `ToggleGroup` component.
+- The group is now styled as a clean, contained unit with a `muted` background and `rounded-md`.
+- `ToggleGroupItem` is updated to use the modern `toggleVariants`. The active (`data-[state=on]`) state now uses the `primary` theme color for a clear and consistent selection style.
+*/
 "use client";
 
 import * as React from "react";

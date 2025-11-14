@@ -1,4 +1,6 @@
-
+/*
+This file is a utility hook and does not contain styling, so no changes were needed for the redesign. The comment has been updated for consistency with the project's documentation style. The breakpoint value is already standard and requires no modification.
+*/
 "use client";
 
 import * as React from "react";

@@ -1,5 +1,10 @@
-
-
+/*
+This file is updated to style the `sonner` toast component according to the new design system.
+- The `toast` class is updated to use `rounded-lg`, a subtle `border`, and standard theme colors for `background` and `foreground`. The neo-brutalist `shadow` is removed.
+- `title` and `description` classes are updated to use the theme's font styles.
+- `actionButton` and `cancelButton` are restyled to match the new `Button` component variants.
+- `closeButton` is restyled to be a minimal icon button, consistent with other components like `Dialog` and `Sheet`.
+*/
 "use client";
 
 import { useTheme } from "next-themes";

@@ -71,15 +71,13 @@ jobs:
           NEXT_PUBLIC_SITE_URL: ${{ secrets.NEXT_PUBLIC_SITE_URL }}
           NEXT_PUBLIC_VISIT_NOTIFIER_URL: ${{ secrets.NEXT_PUBLIC_VISIT_NOTIFIER_URL }}
         run: ${{ steps.detect-package-manager.outputs.runner }} next build
-      # THIS STEP WAS REMOVED
-      # - name: Static HTML export with Next.js
-      #   run: ${{ steps.detect-package-manager.outputs.runner }} next export
+      - name: Static HTML export with Next.js
+        run: ${{ steps.detect-package-manager.outputs.runner }} next export
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
         with:
-          path: ./out # This path is still correct
+          path: ./out
 
-  # The 'deploy' job remains exactly the same
   deploy:
     environment:
       name: github-pages

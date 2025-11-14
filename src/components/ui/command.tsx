@@ -1,4 +1,11 @@
-
+/*
+This file is updated for the new kinetic typography design system.
+- The neo-brutalist `border-2`, `rounded-none`, and `shadow-[...]` styles are removed from `Command` and `CommandDialog`.
+- Components now feature a modern, clean look with subtle borders, rounded corners, and standard shadows, aligning with the new theme.
+- The borders between input, list, and groups are now subtle `border-b` lines using the theme's border color.
+- Selection and hover states (`data-[selected=true]`, `hover:bg-gray-100`) are updated to use theme-aware colors (`accent`, `secondary`).
+- Font styles are updated to match the new typographic hierarchy.
+*/
 "use client";
 
 import * as React from "react";

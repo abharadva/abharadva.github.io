@@ -1,4 +1,3 @@
-
 import ExperienceComponent from "@/components/experience";
 import Layout from "@/components/layout";
 import Head from "next/head";
