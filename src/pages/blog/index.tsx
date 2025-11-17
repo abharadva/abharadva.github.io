@@ -1,11 +1,3 @@
-/*
-This file is redesigned for the kinetic typography theme.
-- The heavy, neo-brutalist styles for the header and post cards are replaced with a clean, modern, and minimalist design.
-- The page header is simplified with modern typography.
-- Post cards are now built using the redesigned `Card` component, featuring a cleaner layout, hover effects, and better typographic hierarchy.
-- Metadata (date, views, read time) is presented more elegantly.
-- The empty/loading states are updated to match the new aesthetic.
-*/
 import Link from "next/link";
 import { supabase } from "@/supabase/client";
 import type { BlogPost } from "@/types";
@@ -18,7 +10,6 @@ import { formatDate } from "@/lib/utils";
 import { Eye, Clock, Loader2 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Card } from "@/components/ui/card";
-import Image from "next/image";
 
 const calculateReadTime = (content: string = ""): number => {
   const wordsPerMinute = 225;
@@ -115,7 +106,7 @@ export default function BlogIndexPage() {
             const readTime = calculateReadTime(post.content || "");
             return (
               <motion.div key={post.id} variants={itemVariants} role="article">
-                <Link href={`/blog/${post.slug}`} className="group block focus:outline-none focus-visible:ring-2 focus-visible:ring-ring rounded-lg">
+                <Link href={`/blog/view?slug=${post.slug}`} className="group block focus:outline-none focus-visible:ring-2 focus-visible:ring-ring rounded-lg">
                   <Card className="overflow-hidden transition-all duration-300 hover:border-accent hover:shadow-lg md:flex">
                     {post.cover_image_url && (
                       <div className="md:w-1/3 overflow-hidden">
@@ -130,7 +121,7 @@ export default function BlogIndexPage() {
                     <div className="flex flex-col p-6 md:w-2/3">
                       <div className="flex-grow">
                          {post.tags && post.tags[0] && <Badge variant="outline" className="mb-2">{post.tags[0]}</Badge>}
-                        <h2 className="mb-2 text-2xl font-bold tracking-tight text-foreground transition-colors group-hover:text-accent">
+                        <h2 className="mb-2 text-2xl font-bold tracking-tight text-foreground transition-colors group-hover:text-primary">
                           {post.title}
                         </h2>
                         <p className="mb-4 leading-relaxed text-muted-foreground line-clamp-2">
