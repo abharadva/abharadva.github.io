@@ -1,5 +1,6 @@
-import { useRouter } from "next/router";
-import { useEffect, useState } from "react";
+import { GetStaticProps, GetStaticPaths } from 'next';
+import { useRouter } from 'next/router';
+import { useEffect } from "react";
 import { supabase } from "@/supabase/client";
 import type { BlogPost } from "@/types";
 import Head from "next/head";
@@ -18,6 +19,54 @@ import remarkGfm from 'remark-gfm';
 import rehypeRaw from 'rehype-raw';
 import rehypePrism from 'rehype-prism-plus';
 
+// --- Static Data Fetching ---
+
+export const getStaticPaths: GetStaticPaths = async () => {
+  // Fetch all slugs for published posts to pre-render
+  const { data, error } = await supabase
+    .from('blog_posts')
+    .select('slug')
+    .eq('published', true);
+
+  if (error) {
+    console.error("Error fetching slugs for getStaticPaths:", error);
+    return { paths: [], fallback: false };
+  }
+
+  const paths = data.map((post) => ({
+    params: { slug: post.slug },
+  }));
+
+  // fallback: false means any path not returned by getStaticPaths will result in a 404 page.
+  // This is what we want for a fully static export.
+  return { paths, fallback: false }; 
+};
+
+export const getStaticProps: GetStaticProps = async (context) => {
+  const { slug } = context.params as { slug: string };
+
+  const { data, error } = await supabase
+    .from("blog_posts")
+    .select("*")
+    .eq("slug", slug)
+    .eq("published", true)
+    .single();
+
+  if (error || !data) {
+    // This will correctly trigger the 404 page during the build if a post is not found.
+    return { notFound: true }; 
+  }
+
+  return {
+    props: {
+      post: data,
+    },
+    // Optional: If you were using Incremental Static Regeneration (ISR) on a host like Vercel,
+    // you could add a revalidate property here. For GitHub Pages, it's not needed.
+    // revalidate: 60, 
+  };
+};
+
 // --- Reusable Components (Unchanged) ---
 
 const PostHeader = ({ post }: { post: BlogPost }) => (
@@ -31,182 +80,81 @@ const PostHeader = ({ post }: { post: BlogPost }) => (
   </header>
 );
 
-const AuthorInfo = ({
-  author,
-  postDate,
-  views,
-}: {
-  author: string;
-  postDate: string | Date;
-  views: number;
-}) => (
+const AuthorInfo = ({ author, postDate, views }: { author: string; postDate: string | Date; views: number; }) => (
   <div className="flex items-center gap-3">
     <Avatar>
-      <AvatarImage
-        src="https://avatars.githubusercontent.com/u/52954931?v=4"
-        alt={author}
-      />
+      <AvatarImage src="https://avatars.githubusercontent.com/u/52954931?v=4" alt={author} />
       <AvatarFallback>{author.slice(0, 2).toUpperCase()}</AvatarFallback>
     </Avatar>
     <div className="text-sm">
       <p className="font-semibold text-foreground">{author}</p>
       <div className="flex items-center gap-2 text-muted-foreground">
-        <time dateTime={new Date(postDate).toISOString()}>
-          {formatDate(postDate)}
-        </time>
+        <time dateTime={new Date(postDate).toISOString()}>{formatDate(postDate)}</time>
         <span>·</span>
-        <div className="flex items-center gap-1">
-          <Eye className="size-3.5" />
-          <span>{views.toLocaleString()} views</span>
-        </div>
+        <div className="flex items-center gap-1"><Eye className="size-3.5" /><span>{views.toLocaleString()} views</span></div>
       </div>
     </div>
   </div>
 );
 
-const PostContent = ({ content }: { content: string }) => {
-  return (
-    <div className="prose prose-lg dark:prose-invert max-w-none">
-      <ReactMarkdown
-        remarkPlugins={[remarkGfm]}
-        rehypePlugins={[rehypeRaw, rehypePrism]}
-        components={{
-          a: ({ node, ...props }) => <a {...props} target="_blank" rel="noopener noreferrer" />,
-        }}
-      >
-        {content}
-      </ReactMarkdown>
-    </div>
-  );
-};
+const PostContent = ({ content }: { content: string }) => (
+  <div className="prose prose-lg dark:prose-invert max-w-none">
+    <ReactMarkdown remarkPlugins={[remarkGfm]} rehypePlugins={[rehypeRaw, rehypePrism]} components={{ a: ({ node, ...props }) => <a {...props} target="_blank" rel="noopener noreferrer" />, }}>
+      {content}
+    </ReactMarkdown>
+  </div>
+);
 
 const PostTagsSidebar = ({ tags }: { tags: string[] }) => (
   <div>
-    <h3 className="mb-3 text-sm font-semibold uppercase tracking-wider text-muted-foreground">
-      Tags
-    </h3>
+    <h3 className="mb-3 text-sm font-semibold uppercase tracking-wider text-muted-foreground">Tags</h3>
     <div className="flex flex-wrap gap-2">
       {tags.map((tag) => (
         <Badge key={tag} variant="secondary">
-          <Link href={`/blog/tags/${encodeURIComponent(tag.toLowerCase())}`}>
-            {tag}
-          </Link>
+          <Link href={`/blog/tags/${encodeURIComponent(tag.toLowerCase())}`}>{tag}</Link>
         </Badge>
       ))}
     </div>
   </div>
 );
 
-const NotFoundDisplay = () => (
-  <div className="flex min-h-[calc(100vh-10rem)] items-center justify-center p-4">
-    <Head>
-      <title>Post Not Found | Blog</title>
-      <meta name="robots" content="noindex" />
-    </Head>
-    <div className="w-full max-w-md text-center">
-      <h1 className="text-6xl font-black text-foreground">404</h1>
-      <p className="mt-2 text-xl font-medium text-muted-foreground">
-        Post Not Found
-      </p>
-      <p className="mt-4 text-muted-foreground">
-        The blog post you're looking for couldn't be found. It might have been moved or deleted.
-      </p>
-      <Button asChild className="mt-8">
-        <Link href="/blog">Back to Blog</Link>
-      </Button>
-    </div>
-  </div>
-);
-
 // --- Main Page Component ---
 
-export default function BlogPostPage() {
-  const router = useRouter();
-  const { slug } = router.query;
-  const [post, setPost] = useState<BlogPost | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+interface BlogPostPageProps {
+  post: BlogPost; // Now guaranteed to exist if the page is rendered
+}
 
+export default function BlogPostPage({ post }: BlogPostPageProps) {
+  const router = useRouter();
   const { site: siteConfig } = appConfig;
 
-  useEffect(() => {
-    // router.isReady ensures that the router has been hydrated and the query params are available
-    if (router.isReady) {
-      if (slug && typeof slug === "string") {
-        const fetchPostData = async () => {
-          setLoading(true);
-          setError(null);
-          try {
-            const { data, error: fetchError } = await supabase
-              .from("blog_posts")
-              .select("*")
-              .eq("slug", slug)
-              .eq("published", true)
-              .single();
-
-            // PGRST116 means "No rows found" which is a valid 404 case, not an error
-            if (fetchError && fetchError.code !== "PGRST116") {
-              throw new Error(fetchError.message);
-            }
-
-            setPost(data); // Will be null if not found
-          } catch (e: any) {
-            setError(e.message || "An unexpected error occurred");
-            setPost(null);
-          } finally {
-            setLoading(false);
-          }
-        };
-        fetchPostData();
-      } else {
-        // If there's no slug for some reason, stop loading and show 404
-        setLoading(false);
-      }
-    }
-  }, [slug, router.isReady]);
-
-  // View counter logic
+  // View counter logic (runs on client-side after static page loads)
   useEffect(() => {
     if (post?.id && process.env.NODE_ENV === "production") {
       const incrementViewCount = async () => {
         try {
-          await supabase.rpc("increment_blog_post_view", {
-            post_id_to_increment: post.id,
-          });
-        } catch (rpcError) {
-          console.error("Failed to increment view count", rpcError);
-        }
+          await supabase.rpc("increment_blog_post_view", { post_id_to_increment: post.id });
+        } catch (rpcError) { console.error("Failed to increment view count", rpcError); }
       };
+      // Delay to avoid counting quick bounces or crawlers
       const timeoutId = setTimeout(incrementViewCount, 3000);
       return () => clearTimeout(timeoutId);
     }
   }, [post?.id]);
 
-  if (loading || !router.isReady) {
+  // This will show a loading spinner if for some reason the page is being generated on demand (fallback: true),
+  // but with fallback: false, this should not be seen. It's good practice to keep it.
+  if (router.isFallback) {
     return (
       <Layout>
-        <div className="flex min-h-screen items-center justify-center">
-          <Loader2 className="size-8 animate-spin text-muted-foreground" />
-        </div>
+        <div className="flex min-h-screen items-center justify-center"><Loader2 className="size-8 animate-spin text-muted-foreground" /></div>
       </Layout>
     );
   }
 
-  if (error) {
-    // You could create a more specific error component here
-    return <Layout><NotFoundDisplay /></Layout>;
-  }
-
-  if (!post) {
-    return <Layout><NotFoundDisplay /></Layout>;
-  }
-
   // --- Meta Tags ---
   const postUrl = `${siteConfig.url}/blog/${post.slug}/`;
-  const metaDescription =
-    post.excerpt ||
-    post.content?.substring(0, 160).replace(/\n/g, " ") ||
-    post.title;
+  const metaDescription = post.excerpt || post.content?.substring(0, 160).replace(/\n/g, " ") || post.title;
 
   return (
     <Layout>
@@ -237,9 +185,7 @@ export default function BlogPostPage() {
             <aside className="hidden lg:block lg:col-span-3">
               <div className="sticky top-28 space-y-8">
                 <AuthorInfo author={siteConfig.author} postDate={post.published_at || post.created_at || new Date()} views={post.views || 0} />
-                {post.tags && post.tags.length > 0 && (
-                  <PostTagsSidebar tags={post.tags} />
-                )}
+                {post.tags && post.tags.length > 0 && <PostTagsSidebar tags={post.tags} />}
               </div>
             </aside>
           </div>
