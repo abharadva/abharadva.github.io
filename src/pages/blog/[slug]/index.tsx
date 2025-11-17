@@ -13,12 +13,12 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
-import Image from "next/image";
-
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import rehypeRaw from 'rehype-raw';
 import rehypePrism from 'rehype-prism-plus';
+
+// --- Reusable Components (Unchanged) ---
 
 const PostHeader = ({ post }: { post: BlogPost }) => (
   <header className="mb-8">
@@ -109,7 +109,7 @@ const NotFoundDisplay = () => (
         Post Not Found
       </p>
       <p className="mt-4 text-muted-foreground">
-        The page you're looking for doesn't exist or has been moved.
+        The blog post you're looking for couldn't be found. It might have been moved or deleted.
       </p>
       <Button asChild className="mt-8">
         <Link href="/blog">Back to Blog</Link>
@@ -117,6 +117,8 @@ const NotFoundDisplay = () => (
     </div>
   </div>
 );
+
+// --- Main Page Component ---
 
 export default function BlogPostPage() {
   const router = useRouter();
@@ -128,39 +130,42 @@ export default function BlogPostPage() {
   const { site: siteConfig } = appConfig;
 
   useEffect(() => {
-    if (slug && typeof slug === "string") {
-      const fetchPostData = async () => {
-        setLoading(true);
-        setError(null);
-        try {
-          const { data, error: fetchError } = await supabase
-            .from("blog_posts")
-            .select("*")
-            .eq("slug", slug)
-            .eq("published", true)
-            .single();
+    // router.isReady ensures that the router has been hydrated and the query params are available
+    if (router.isReady) {
+      if (slug && typeof slug === "string") {
+        const fetchPostData = async () => {
+          setLoading(true);
+          setError(null);
+          try {
+            const { data, error: fetchError } = await supabase
+              .from("blog_posts")
+              .select("*")
+              .eq("slug", slug)
+              .eq("published", true)
+              .single();
 
-          if (fetchError) {
-            if (fetchError.code === "PGRST116") {
-              setPost(null);
-            } else {
-              setError(fetchError.message);
+            // PGRST116 means "No rows found" which is a valid 404 case, not an error
+            if (fetchError && fetchError.code !== "PGRST116") {
+              throw new Error(fetchError.message);
             }
-          } else {
-            setPost(data);
+
+            setPost(data); // Will be null if not found
+          } catch (e: any) {
+            setError(e.message || "An unexpected error occurred");
+            setPost(null);
+          } finally {
+            setLoading(false);
           }
-        } catch (e: any) {
-          setError(e.message || "An unexpected error occurred");
-        }
+        };
+        fetchPostData();
+      } else {
+        // If there's no slug for some reason, stop loading and show 404
         setLoading(false);
-      };
-      fetchPostData();
-    } else if (router.isReady && !slug) {
-      setLoading(false);
-      setPost(null);
+      }
     }
   }, [slug, router.isReady]);
 
+  // View counter logic
   useEffect(() => {
     if (post?.id && process.env.NODE_ENV === "production") {
       const incrementViewCount = async () => {
@@ -177,7 +182,7 @@ export default function BlogPostPage() {
     }
   }, [post?.id]);
 
-  if (loading) {
+  if (loading || !router.isReady) {
     return (
       <Layout>
         <div className="flex min-h-screen items-center justify-center">
@@ -188,28 +193,15 @@ export default function BlogPostPage() {
   }
 
   if (error) {
-    return (
-      <Layout>
-        <div className="flex min-h-screen items-center justify-center p-4">
-          <div className="rounded-md border border-destructive/50 bg-destructive/10 p-6 font-medium text-destructive">
-            Error: {error}.{" "}
-            <Link href="/blog" className="underline hover:text-foreground">
-              Back to blog
-            </Link>
-          </div>
-        </div>
-      </Layout>
-    );
+    // You could create a more specific error component here
+    return <Layout><NotFoundDisplay /></Layout>;
   }
 
   if (!post) {
-    return (
-      <Layout>
-        <NotFoundDisplay />
-      </Layout>
-    );
+    return <Layout><NotFoundDisplay /></Layout>;
   }
 
+  // --- Meta Tags ---
   const postUrl = `${siteConfig.url}/blog/${post.slug}/`;
   const metaDescription =
     post.excerpt ||
@@ -225,47 +217,26 @@ export default function BlogPostPage() {
         <meta property="og:description" content={metaDescription} />
         <meta property="og:type" content="article" />
         <meta property="og:url" content={postUrl} />
-        <meta
-          property="og:image"
-          content={post.cover_image_url || siteConfig.defaultOgImage}
-        />
+        <meta property="og:image" content={post.cover_image_url || siteConfig.defaultOgImage} />
         <meta name="twitter:card" content="summary_large_image" />
-        <meta
-          name="twitter:image"
-          content={post.cover_image_url || siteConfig.defaultOgImage}
-        />
+        <meta name="twitter:image" content={post.cover_image_url || siteConfig.defaultOgImage} />
         <link rel="canonical" href={postUrl} />
       </Head>
 
       <main className="py-8 md:py-16">
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5 }}
-          className="mx-auto max-w-5xl px-4"
-        >
+        <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }} className="mx-auto max-w-5xl px-4">
           <div className="grid grid-cols-1 lg:grid-cols-12 lg:gap-x-12">
             <article className="lg:col-span-9">
               <PostHeader post={post} />
               {post.cover_image_url && (
-                <img
-                  src={post.cover_image_url}
-                  alt={post.title}
-                  width={1200}
-                  height={630}
-                  className="my-8 h-auto w-full rounded-lg border object-cover"
-                />
+                <img src={post.cover_image_url} alt={post.title} width={1200} height={630} className="my-8 h-auto w-full rounded-lg border object-cover" />
               )}
               <Separator className="my-8" />
               {post.content && <PostContent content={post.content} />}
             </article>
             <aside className="hidden lg:block lg:col-span-3">
               <div className="sticky top-28 space-y-8">
-                <AuthorInfo
-                  author={siteConfig.author}
-                  postDate={post.published_at || post.created_at || new Date()}
-                  views={post.views || 0}
-                />
+                <AuthorInfo author={siteConfig.author} postDate={post.published_at || post.created_at || new Date()} views={post.views || 0} />
                 {post.tags && post.tags.length > 0 && (
                   <PostTagsSidebar tags={post.tags} />
                 )}
