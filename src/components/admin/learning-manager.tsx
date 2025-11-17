@@ -1,4 +1,3 @@
-// src/components/admin/learning-manager.tsx
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
@@ -13,6 +12,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import SubjectForm from "./learning/SubjectForm";
 import TopicForm from "./learning/TopicForm";
 import { toast } from "sonner";
+import { useLearningSession } from "@/context/LearningSessionContext"; // Import the context hook
 
 type DialogState = 
   | { type: 'create-subject' }
@@ -21,20 +21,16 @@ type DialogState =
   | { type: 'edit-topic', data: LearningTopic }
   | null;
 
-interface LearningManagerProps {
-  activeSession: LearningSession | null;
-  elapsedTime: number;
-  onStartSession: (session: LearningSession) => void;
-  onStopSession: () => void;
-}
-
-export default function LearningManager({ activeSession, elapsedTime, onStartSession, onStopSession }: LearningManagerProps) {
+export default function LearningManager() {
   const [subjects, setSubjects] = useState<LearningSubject[]>([]);
   const [topics, setTopics] = useState<LearningTopic[]>([]);
   const [sessions, setSessions] = useState<LearningSession[]>([]);
   const [activeTopic, setActiveTopic] = useState<LearningTopic | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [dialogState, setDialogState] = useState<DialogState>(null);
+  
+  // Get session state from the context instead of props
+  const { activeSession, elapsedTime, startSession, stopSession, cancelSession } = useLearningSession();
 
   const refreshAllStructuralData = useCallback(async () => {
     const [subjectsRes, topicsRes] = await Promise.all([
@@ -97,19 +93,15 @@ export default function LearningManager({ activeSession, elapsedTime, onStartSes
         </div>
         <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
           <aside className="lg:col-span-1">
-            <div className="p-4 rounded-lg border bg-secondary/30 sticky top-28">
+            <div className="p-4 rounded-lg border bg-card/50 sticky top-28">
               <SubjectTopicTree subjects={subjects} topics={topics} activeTopicId={activeTopic?.id} activeSession={activeSession} onSelectTopic={handleSelectTopic} onCreateSubject={() => setDialogState({ type: 'create-subject' })} onEditSubject={(subject) => setDialogState({ type: 'edit-subject', data: subject })} onDeleteSubject={(id) => handleDelete('subject', id)} onCreateTopic={(subjectId) => setDialogState({ type: 'create-topic', subjectId })} onEditTopic={(topic) => setDialogState({ type: 'edit-topic', data: topic })} onDeleteTopic={(id) => handleDelete('topic', id)} />
             </div>
           </aside>
           <main className="lg:col-span-3">
             {activeTopic ? (
               <TopicEditor
-                key={activeTopic.id} // *** THE SECOND FIX IS HERE ***
+                key={activeTopic.id}
                 topic={activeTopic} 
-                activeSession={activeSession} 
-                elapsedTime={elapsedTime} 
-                onStartSession={onStartSession} 
-                onStopSession={onStopSession} 
                 onBack={handleDeselectTopic} 
                 onTopicUpdate={handleOptimisticTopicUpdate} 
                 onSessionEnd={refreshSessions} 

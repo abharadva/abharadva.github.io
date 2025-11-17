@@ -6,7 +6,9 @@ import { ArrowUpRight } from "lucide-react";
 import { motion } from "framer-motion";
 import { Badge } from "@/components/ui/badge";
 
-type ExperienceProps = PropsWithChildren;
+type ExperienceProps = PropsWithChildren<{
+  showTitle?: boolean;
+}>;
 
 interface ExperienceItem {
   orgName: string;
@@ -77,24 +79,26 @@ const MY_EXPERIENCES: ExperienceItem[] = [
   },
 ];
 
-export default function Experience({ children }: ExperienceProps) {
+export default function Experience({ children, showTitle = true }: ExperienceProps) {
   return (
     <section className="my-16 py-16">
-      <motion.div
-        className="relative mb-24 text-center"
-        initial={{ opacity: 0, y: -20 }}
-        whileInView={{ opacity: 1, y: 0 }}
-        viewport={{ once: true }}
-        transition={{ duration: 0.5 }}
-      >
-        <h2 className="text-4xl font-black text-foreground md:text-5xl">
-          Experience
-        </h2>
-        <div className="mx-auto mt-4 h-1.5 w-24 bg-gradient-to-r from-primary to-fuchsia-500" />
-        <span className="absolute -top-8 left-1/2 -translate-x-1/2 text-[6rem] font-black text-foreground/5 -z-1 select-none" aria-hidden="true">
-          CAREER
-        </span>
-      </motion.div>
+      {showTitle && (
+        <motion.div
+          className="relative mb-24 text-center"
+          initial={{ opacity: 0, y: -20 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          transition={{ duration: 0.5 }}
+        >
+          <h2 className="text-4xl font-black text-foreground md:text-5xl">
+            Experience
+          </h2>
+          <div className="mx-auto mt-4 h-1.5 w-24 bg-gradient-to-r from-primary to-fuchsia-500" />
+          <span className="absolute -top-8 left-1/2 -translate-x-1/2 text-[6rem] font-black text-foreground/5 -z-1 select-none" aria-hidden="true">
+            CAREER
+          </span>
+        </motion.div>
+      )}
 
       <div className="relative mx-auto max-w-5xl px-4">
         <div className="absolute left-1/2 top-0 h-full w-0.5 -translate-x-1/2 bg-gradient-to-b from-transparent via-border to-transparent" aria-hidden="true" />
@@ -136,5 +140,6 @@ export default function Experience({ children }: ExperienceProps) {
       </div>
       {children && <div className="mt-16">{children}</div>}
     </section>
+
   );
 }

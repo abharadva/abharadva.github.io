@@ -1,9 +1,8 @@
-// src/components/admin/learning/TopicEditor.tsx
 "use client";
 
 import React, { useState, useEffect } from "react";
 import { supabase } from "@/supabase/client";
-import type { LearningTopic, LearningStatus, LearningSession } from "@/types";
+import type { LearningTopic, LearningStatus } from "@/types";
 import AdvancedMarkdownEditor from "@/components/admin/AdvancedMarkdownEditor";
 import SessionTracker from "./SessionTracker";
 import { Button } from "@/components/ui/button";
@@ -11,20 +10,16 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { toast } from "sonner";
-import { ArrowLeft, Loader2, Link as LinkIcon, Trash2, Plus, Save } from "lucide-react";
+import { ArrowLeft, Loader2, Save, Trash2, Plus } from "lucide-react";
 
 interface TopicEditorProps {
   topic: LearningTopic | null;
-  activeSession: LearningSession | null;
-  elapsedTime: number;
-  onStartSession: (session: LearningSession) => void;
-  onStopSession: () => void;
   onBack: () => void;
   onTopicUpdate: (updatedTopic: LearningTopic) => void;
   onSessionEnd: () => void;
 }
 
-export default function TopicEditor({ topic, activeSession, elapsedTime, onStartSession, onStopSession, onBack, onTopicUpdate, onSessionEnd }: TopicEditorProps) {
+export default function TopicEditor({ topic, onBack, onTopicUpdate, onSessionEnd }: TopicEditorProps) {
   const [coreNotes, setCoreNotes] = useState("");
   const [status, setStatus] = useState<LearningStatus>('To Learn');
   const [resources, setResources] = useState<{ name: string; url: string }[]>([]);
@@ -83,11 +78,11 @@ export default function TopicEditor({ topic, activeSession, elapsedTime, onStart
     <div className="space-y-8">
       <div className="flex items-center justify-between"><Button variant="ghost" size="sm" onClick={onBack}><ArrowLeft className="mr-2 size-4" />Back to Dashboard</Button><div className="flex items-center gap-4"><Label htmlFor="status-select">Status</Label><Select value={status} onValueChange={handleStatusChange}><SelectTrigger id="status-select" className="w-[180px]"><SelectValue /></SelectTrigger><SelectContent><SelectItem value="To Learn">To Learn</SelectItem><SelectItem value="Learning">Learning</SelectItem><SelectItem value="Practicing">Practicing</SelectItem><SelectItem value="Mastered">Mastered</SelectItem></SelectContent></Select></div></div>
       <h2 className="text-3xl font-bold tracking-tight text-foreground">{topic.title}</h2>
-      <SessionTracker topic={topic} activeSession={activeSession} elapsedTime={elapsedTime} onStart={onStartSession} onStop={onStopSession} onSessionEnd={onSessionEnd} />
+      <SessionTracker topic={topic} onSessionEnd={onSessionEnd} />
       
       <div className="space-y-4">
         <h4 className="text-lg font-semibold">Resources</h4>
-        <div className="rounded-lg border bg-secondary/30 p-4">
+        <div className="rounded-lg border bg-card/50 p-4">
           <div className="space-y-3">
             {resources.map((res, index) => (
               <div key={index} className="flex items-center gap-2">
@@ -112,7 +107,7 @@ export default function TopicEditor({ topic, activeSession, elapsedTime, onStart
       <div>
         <Label className="text-lg font-semibold">Core Notes</Label>
         <p className="text-sm text-muted-foreground mb-2">Your permanent knowledge base for this topic. Notes are auto-saved.</p>
-        <AdvancedMarkdownEditor value={coreNotes} onChange={setCoreNotes} onImageUploadRequest={() => alert("Image upload for learning notes coming soon!")} minHeight="500px" />
+        <AdvancedMarkdownEditor value={coreNotes} onChange={setCoreNotes} onImageUploadRequest={() => toast.info("Image upload for learning notes is coming soon!")} minHeight="500px" />
         {isSaving && <p className="mt-2 text-xs text-muted-foreground flex items-center gap-2"><Loader2 className="size-3 animate-spin" />Saving...</p>}
       </div>
     </div>

@@ -1,11 +1,5 @@
-/*
-This file is heavily redesigned to create a more engaging and professional homepage.
-- The layout is now asymmetrical on larger screens, featuring a bold hero section on the left and a preview of projects on the right.
-- `LittleAboutMyself` and `Hero` are combined into a single, more impactful `Hero` component.
-- The `Projects` component is updated to only show a curated selection on the homepage.
-- The `Newsletter` section is visually enhanced.
-- A new animated background element is added via the Layout component for a dynamic feel.
-*/
+
+
 import Layout from "@/components/layout";
 import Projects from "@/components/projects";
 import Head from "next/head";
@@ -27,7 +21,7 @@ export default function HomePage() {
         const embed = {
           title: "🚀 New Portfolio Visitor!",
           color: 3447003,
-          description: `Someone just landed on the portfolio.`,
+          description: "Someone just landed on the portfolio.",
           fields: [
             { name: "🔗 Referrer", value: `\`${referrer}\``, inline: false },
             { name: "🖥️ User Agent", value: `\`\`\`${userAgent}\`\`\`` },
@@ -49,21 +43,21 @@ export default function HomePage() {
           .catch((err) => console.error("Failed to send visit notification:", err));
       }
     }
+
   }, []);
 
-   return (
+  return (
     <Layout>
       <Head>
         <link rel="canonical" href={siteConfig.url} />
       </Head>
       <div className="py-12 md:py-20">
         <Hero />
-        <Projects />
+        <Projects showTitle={false} />
         <Experience />
         <Newsletter />
       </div>
     </Layout>
   );
 }
-
 

@@ -1,5 +1,4 @@
 
-
 import Head from "next/head";
 import { PropsWithChildren, useEffect, useState } from "react";
 import Container from "./container";
@@ -10,14 +9,16 @@ import { Toaster as ShadcnToaster } from "@/components/ui/toaster";
 import MobileHeader from "./mobile-header";
 import { motion } from "framer-motion";
 
-type LayoutProps = PropsWithChildren;
+type LayoutProps = PropsWithChildren & {
+  isAdmin?: boolean;
+};
 
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || "https://akshay-bharadva.github.io";
 const DEFAULT_OG_TITLE = "Akshay Bharadva - Fullstack Developer";
 const DEFAULT_OG_DESCRIPTION = "Portfolio and Blog of Akshay Bharadva, showcasing projects and thoughts on web development.";
 const DEFAULT_OG_IMAGE = `${SITE_URL}/default-og-image.png`;
 
-export default function Layout({ children }: LayoutProps) {
+export default function Layout({ children, isAdmin = false }: LayoutProps) {
   const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
 
   useEffect(() => {
@@ -27,7 +28,24 @@ export default function Layout({ children }: LayoutProps) {
 
     window.addEventListener("mousemove", handleMouseMove);
     return () => window.removeEventListener("mousemove", handleMouseMove);
+
   }, []);
+
+  if (isAdmin) {
+    return (
+      <>
+        <Head>
+          <title>Admin Panel | Akshay Bharadva</title>
+          <meta name="robots" content="noindex, nofollow" />
+        </Head>
+        <div className="font-sans">
+          {children}
+          <SonnerToaster />
+          <ShadcnToaster />
+        </div>
+      </>
+    );
+  }
 
   return (
     <>
@@ -57,7 +75,7 @@ export default function Layout({ children }: LayoutProps) {
         <motion.div
           className="pointer-events-none fixed inset-0 z-[-1] transition duration-300"
           style={{
-            background: `radial-gradient(400px at ${mousePosition.x}px ${mousePosition.y}px, hsl(var(--primary) / 0.15), transparent 80%)`,
+            background: `radial - gradient(400px at ${mousePosition.x}px ${mousePosition.y}px, hsl(var(--primary) / 0.15), transparent 80%)`,
           }}
         />
         <div className="fixed inset-0 z-[-2] h-full w-full bg-background" />
@@ -74,3 +92,4 @@ export default function Layout({ children }: LayoutProps) {
     </>
   );
 }
+

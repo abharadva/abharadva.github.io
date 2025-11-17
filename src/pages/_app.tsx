@@ -5,6 +5,7 @@ import localFont from "next/font/local";
 import { motion, AnimatePresence } from "framer-motion";
 import { useRouter } from "next/router";
 import { ThemeProvider } from "@/components/theme-provider";
+import { LearningSessionProvider } from "@/context/LearningSessionContext"; // Import the provider
 
 const tahuFont = localFont({
   src: "./fonts/Tahu.woff2",
@@ -21,6 +22,8 @@ export default function App({ Component, pageProps }: AppProps) {
     exit: { opacity: 0, y: -5, transition: { duration: 0.2, ease: "easeInOut" } },
   };
 
+  const isAdminPage = router.pathname.startsWith('/admin');
+
   return (
     <ThemeProvider attribute="class" defaultTheme="dark" enableSystem={false}>
       <AnimatePresence
@@ -36,7 +39,13 @@ export default function App({ Component, pageProps }: AppProps) {
             exit="exit"
             variants={pageVariants}
           >
-            <Component {...pageProps} />
+            {isAdminPage ? (
+              <LearningSessionProvider>
+                <Component {...pageProps} />
+              </LearningSessionProvider>
+            ) : (
+              <Component {...pageProps} />
+            )}
           </motion.div>
         </main>
       </AnimatePresence>

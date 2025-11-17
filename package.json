@@ -4,7 +4,7 @@
   "private": true,
   "author": {
     "name": "Akshay Bharadva",
-    "url": "https://akshay-bharadva.github.io"
+    "url": "https://abharadva.github.io"
   },
   "scripts": {
     "dev": "next dev -p 8889",
