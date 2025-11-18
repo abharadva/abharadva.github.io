@@ -8,7 +8,7 @@ import { motion } from "framer-motion";
 import Layout from "@/components/layout";
 import { config as appConfig } from "@/lib/config";
 import { formatDate } from "@/lib/utils";
-import { Eye, Loader2 } from "lucide-react";
+import { Eye, Loader2, Calendar, Clock, Linkedin, ChevronRight } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -18,12 +18,86 @@ import remarkGfm from 'remark-gfm';
 import rehypeRaw from 'rehype-raw';
 import rehypePrism from 'rehype-prism-plus';
 import NotFoundComponent from "@/components/not-found";
+import { BsTwitterX } from "react-icons/bs";
 
-// --- Reusable Components ---
-const PostHeader = ({ post }: { post: BlogPost }) => ( <header className="mb-8"><h1 className="mb-4 text-3xl font-black leading-tight tracking-tighter text-foreground md:text-4xl lg:text-5xl">{post.title}</h1>{post.excerpt && (<p className="text-lg text-muted-foreground md:text-xl">{post.excerpt}</p>)}</header> );
-const AuthorInfo = ({ author, postDate, views }: { author: string; postDate: string | Date; views: number; }) => ( <div className="flex items-center gap-3"><Avatar><AvatarImage src="https://avatars.githubusercontent.com/u/52954931?v=4" alt={author} /><AvatarFallback>{author.slice(0, 2).toUpperCase()}</AvatarFallback></Avatar><div className="text-sm"><p className="font-semibold text-foreground">{author}</p><div className="flex items-center gap-2 text-muted-foreground"><time dateTime={new Date(postDate).toISOString()}>{formatDate(postDate)}</time><span>·</span><div className="flex items-center gap-1"><Eye className="size-3.5" /><span>{views.toLocaleString()} views</span></div></div></div></div> );
-const PostContent = ({ content }: { content: string }) => ( <div className="prose prose-lg dark:prose-invert max-w-none"><ReactMarkdown remarkPlugins={[remarkGfm]} rehypePlugins={[rehypeRaw, rehypePrism]} components={{ a: ({ node, ...props }) => <a {...props} target="_blank" rel="noopener noreferrer" />, }}>{content}</ReactMarkdown></div> );
-const PostTagsSidebar = ({ tags }: { tags: string[] }) => ( <div><h3 className="mb-3 text-sm font-semibold uppercase tracking-wider text-muted-foreground">Tags</h3><div className="flex flex-wrap gap-2">{tags.map((tag) => (<Badge key={tag} variant="secondary"><Link href={`/blog/tags/${encodeURIComponent(tag.toLowerCase())}`}>{tag}</Link></Badge>))}</div></div> );
+// --- Reusable Sub-Components for the Page ---
+
+const PostBreadcrumb = ({ post }: { post: BlogPost }) => (
+  <nav aria-label="breadcrumb">
+    <ol className="flex items-center gap-1.5 text-sm text-muted-foreground">
+      <li>
+        <Link href="/blog" className="hover:text-foreground">Blog</Link>
+      </li>
+      <li>
+        <ChevronRight className="size-4" />
+      </li>
+      <li className="font-medium text-foreground truncate max-w-xs">{post.title}</li>
+    </ol>
+  </nav>
+);
+
+const PostMeta = ({ post, readTime }: { post: BlogPost, readTime: number }) => (
+  <div className="flex items-center gap-4">
+    <Avatar className="size-12">
+      <AvatarImage src="https://avatars.githubusercontent.com/u/52954931?v=4" alt={appConfig.site.author} />
+      <AvatarFallback>{appConfig.site.author.slice(0, 2).toUpperCase()}</AvatarFallback>
+    </Avatar>
+    <div className="text-sm">
+      <p className="font-semibold text-foreground">{appConfig.site.author}</p>
+      <div className="flex flex-wrap items-center gap-x-2 gap-y-1 text-muted-foreground">
+        <time dateTime={new Date(post.published_at || post.created_at || "").toISOString()}>
+          {formatDate(post.published_at || post.created_at || new Date())}
+        </time>
+        <span className="hidden sm:inline">·</span>
+        <span className="flex items-center gap-1.5">
+          <Clock className="size-4" /> {readTime} min read</span>
+        <span className="hidden sm:inline">·</span>
+        <span className="flex items-center gap-1.5">
+          <Eye className="size-4" /> {(post.views || 0).toLocaleString()} views</span>
+      </div>
+    </div>
+  </div>
+);
+
+const PostContent = ({ content }: { content: string }) => (
+  <div className="prose dark:prose-invert max-w-none prose-p:text-foreground/80 prose-headings:text-foreground prose-a:text-primary hover:prose-a:text-primary/80 prose-strong:text-foreground">
+    <ReactMarkdown
+      remarkPlugins={[remarkGfm]}
+      rehypePlugins={[rehypeRaw, rehypePrism]}
+      components={{
+        a: ({ node, ...props }) => <a {...props} target="_blank" rel="noopener noreferrer" />,
+      }}
+    >
+      {content}
+    </ReactMarkdown>
+  </div>
+);
+
+const PostFooter = ({ post, onShareX, onShareLinkedIn }: { post: BlogPost, onShareX: () => void, onShareLinkedIn: () => void }) => (
+  <footer className="mt-12 space-y-8">
+    {post.tags && post.tags.length > 0 && (
+      <div>
+        <h3 className="mb-3 text-lg font-semibold">Tags</h3>
+        <div className="flex flex-wrap gap-2">
+          {post.tags.map((tag) => (
+            <Badge key={tag} variant="secondary">
+              <Link href={`/blog/tags/${encodeURIComponent(tag.toLowerCase())}`}>#{tag}</Link>
+            </Badge>
+          ))}
+        </div>
+      </div>
+    )}
+    <div>
+      <h3 className="mb-3 text-lg font-semibold">Share this article</h3>
+      <div className="flex gap-2">
+        <Button variant="outline" onClick={onShareX}>
+          <BsTwitterX className="mr-2 size-4" /> X</Button>
+        <Button variant="outline" onClick={onShareLinkedIn}>
+          <Linkedin className="mr-2 size-4" /> LinkedIn</Button>
+      </div>
+    </div>
+  </footer>
+);
 
 // --- Main Page Component ---
 export default function BlogPostViewPage() {
@@ -48,38 +122,52 @@ export default function BlogPostViewPage() {
         };
         fetchPostData();
       } else {
-        setPost(null); // No slug in URL, so post is not found
+        setPost(null);
       }
     }
   }, [slug, router.isReady]);
-  
-  // View counter
+
   // View counter
   useEffect(() => {
     if (post?.id && process.env.NODE_ENV === "production") {
-      const timer = setTimeout(async () => { // Make the function async
-        const { error } = await supabase.rpc("increment_blog_post_view", { 
-          post_id_to_increment: post.id 
+      const timer = setTimeout(async () => {
+        const { error } = await supabase.rpc("increment_blog_post_view", {
+          post_id_to_increment: post.id
         });
-
-        if (error) {
-          console.error("Failed to increment view count:", error);
-        }
+        if (error) { console.error("Failed to increment view count:", error); }
       }, 3000);
       return () => clearTimeout(timer);
     }
   }, [post?.id]);
 
   if (post === undefined) {
-    return <Layout><div className="flex min-h-[50vh] items-center justify-center"><Loader2 className="size-8 animate-spin text-muted-foreground" /></div></Layout>;
+    return <Layout>
+      <div className="flex min-h-[50vh] items-center justify-center">
+        <Loader2 className="size-8 animate-spin text-muted-foreground" />
+      </div>
+    </Layout>;
   }
 
   if (post === null) {
-    return <Layout><NotFoundComponent /></Layout>;
+    return <Layout>
+      <NotFoundComponent />
+    </Layout>;
   }
-  
+
   const postUrl = `${siteConfig.url}/blog/view?slug=${post.slug}`;
   const metaDescription = post.excerpt || post.content?.substring(0, 160).replace(/\n/g, " ") || post.title;
+  const readTime = Math.max(1, Math.ceil((post.content?.split(/\s+/).filter(Boolean).length || 0) / 225));
+
+  const shareOnX = () => {
+    const text = encodeURIComponent(`Check out this article: ${post.title}`);
+    const url = encodeURIComponent(postUrl);
+    window.open(`https://x.com/intent/tweet?text=${text}&url=${url}`, '_blank');
+  };
+
+  const shareOnLinkedIn = () => {
+    const url = encodeURIComponent(postUrl);
+    window.open(`https://www.linkedin.com/sharing/share-offsite/?url=${url}`, '_blank');
+  };
 
   return (
     <Layout>
@@ -91,22 +179,38 @@ export default function BlogPostViewPage() {
         <link rel="canonical" href={postUrl} />
       </Head>
       <main className="py-8 md:py-16">
-        <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }} className="mx-auto max-w-5xl px-4">
-          <div className="grid grid-cols-1 lg:grid-cols-12 lg:gap-x-12">
-            <article className="lg:col-span-9">
-              <PostHeader post={post} />
-              {post.cover_image_url && (<img src={post.cover_image_url} alt={post.title} width={1200} height={630} className="my-8 h-auto w-full rounded-lg border object-cover" />)}
-              <Separator className="my-8" />
-              {post.content && <PostContent content={post.content} />}
-            </article>
-            <aside className="hidden lg:block lg:col-span-3">
-              <div className="sticky top-28 space-y-8">
-                <AuthorInfo author={siteConfig.author} postDate={post.published_at || post.created_at || new Date()} views={post.views || 0} />
-                {post.tags && post.tags.length > 0 && <PostTagsSidebar tags={post.tags} />}
-              </div>
-            </aside>
+        <motion.article
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5 }}
+          className="mx-auto max-w-4xl px-4"
+        >
+          <PostBreadcrumb post={post} />
+
+          <h1 className="mt-6 text-4xl font-extrabold leading-tight tracking-tighter text-foreground md:text-5xl lg:text-6xl">
+            {post.title}
+          </h1>
+
+          {post.excerpt && (
+            <p className="mt-4 text-lg text-muted-foreground md:text-xl">{post.excerpt}</p>
+          )}
+
+          <div className="mt-8">
+            <PostMeta post={post} readTime={readTime} />
           </div>
-        </motion.div>
+
+          {post.cover_image_url && (
+            <img src={post.cover_image_url} alt={post.title} width={1200} height={630} className="my-8 h-auto w-full rounded-lg border object-cover" />
+          )}
+
+          <div className="mt-8">
+            {post.content && <PostContent content={post.content} />}
+          </div>
+
+          <Separator className="my-12" />
+
+          <PostFooter post={post} onShareX={shareOnX} onShareLinkedIn={shareOnLinkedIn} />
+        </motion.article>
       </main>
     </Layout>
   );
