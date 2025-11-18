@@ -1,21 +1,10 @@
 
-
 import Link from "next/link";
 import { useRouter } from "next/router";
 import Container from "./container";
 import { cn } from "@/lib/utils";
 import { motion } from "framer-motion";
-
-interface NavLink { href: string; label: string; }
-
-const NAV_LINKS: NavLink[] = [
-  { href: "/", label: "Home" },
-  { href: "/showcase", label: "Showcase" },
-  { href: "/projects", label: "Projects" },
-  { href: "/blog", label: "Blog" },
-  { href: "/about", label: "About" },
-  { href: "/contact", label: "Contact" }
-];
+import { siteContent } from "@/lib/site-content";
 
 export default function Header() {
   const router = useRouter();
@@ -36,7 +25,7 @@ export default function Header() {
             AKSHAY<span className="text-primary">.</span>DEV
           </Link>
           <nav className="flex items-center gap-x-2 rounded-lg p-1">
-            {NAV_LINKS.map((link) => {
+            {siteContent.header.navLinks.map((link) => {
               const isActive = router.pathname === link.href || (link.href !== "/" && router.pathname.startsWith(link.href));
               return (
                 <Link className={linkClasses(link.href)} href={link.href} key={link.href}>

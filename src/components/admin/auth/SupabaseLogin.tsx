@@ -24,7 +24,7 @@ export default function SupabaseLogin() {
         const { data: aalData } =
           await supabase.auth.mfa.getAuthenticatorAssuranceLevel();
         if (aalData?.currentLevel === "aal2") {
-          router.replace("/admin/dashboard");
+          router.replace("/admin");
         }
       }
     };
@@ -58,7 +58,7 @@ export default function SupabaseLogin() {
       }
 
       if (aalData.currentLevel === "aal2") {
-        router.replace("/admin/dashboard");
+        router.replace("/admin");
       } else if (
         aalData.currentLevel === "aal1" &&
         aalData.nextLevel === "aal2"

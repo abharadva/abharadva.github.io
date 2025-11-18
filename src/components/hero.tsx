@@ -1,12 +1,12 @@
 
 import { motion } from "framer-motion";
-import { Github, Linkedin, Mail, ArrowRight } from "lucide-react";
+import { ArrowRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import { Badge } from "./ui/badge";
+import { siteContent } from "@/lib/site-content";
 
-const name = "Akshay Bharadva";
-const title = "Full-stack Developer.";
+const { name, title, description, statusPanel, socials } = siteContent.hero;
 
 const nameVariants = {
   hidden: {},
@@ -56,25 +56,21 @@ export default function Hero() {
           className="mt-2 text-3xl font-mono font-medium text-primary sm:text-4xl"
         >
           {title.split("").map((char, index) => (
-             <motion.span key={index} variants={letterVariant} className="inline-block">{char}</motion.span>
+             <motion.span key={index} variants={letterVariant} className="inline-block whitespace-pre">{char}</motion.span>
           ))}
           <span className="ml-2 animate-caret-blink">|</span>
         </motion.p>
 
         <motion.p variants={itemVariants} className="mt-8 max-w-xl text-lg text-muted-foreground">
-          I build robust, scalable, and user-centric web applications. With a passion for clean code and open-source, I turn complex problems into elegant digital solutions.
+          {description}
         </motion.p>
 
         <motion.div variants={itemVariants} className="mt-8 flex gap-3">
-          <Button asChild size="icon" variant="secondary" aria-label="GitHub Profile">
-            <a href="https://github.com/akshay-bharadva" rel="noopener noreferrer" target="_blank"><Github className="size-5" /></a>
-          </Button>
-          <Button asChild size="icon" variant="secondary" aria-label="LinkedIn Profile">
-            <a href="https://www.linkedin.com/in/akshay-bharadva/" rel="noopener noreferrer" target="_blank"><Linkedin className="size-5" /></a>
-          </Button>
-          <Button asChild size="icon" variant="secondary" aria-label="Email Akshay">
-            <a href="mailto:akshaybharadva19@gmail.com"><Mail className="size-5" /></a>
-          </Button>
+          {socials.map((social) => (
+            <Button asChild size="icon" variant="secondary" aria-label={social.label} key={social.href}>
+              <a href={social.href} rel="noopener noreferrer" target="_blank"><social.icon className="size-5" /></a>
+            </Button>
+          ))}
         </motion.div>
       </motion.div>
 
@@ -85,28 +81,29 @@ export default function Hero() {
         transition={{ delay: 1, duration: 0.5 }}
       >
         <div className="h-full rounded-lg bg-blueprint-bg p-6">
-          <h3 className="font-mono text-sm uppercase tracking-widest text-muted-foreground">Status Panel</h3>
+          <h3 className="font-mono text-sm uppercase tracking-widest text-muted-foreground">{statusPanel.title}</h3>
           <div className="mt-4 space-y-4">
             <div className="flex items-center gap-3">
               <span className="relative flex h-3 w-3">
                 <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-green-400 opacity-75"></span>
                 <span className="relative inline-flex h-3 w-3 rounded-full bg-green-500"></span>
               </span>
-              <p className="text-sm">Available for new opportunities</p>
+              <p className="text-sm">{statusPanel.availability}</p>
             </div>
              <div className="space-y-2">
-                <p className="font-mono text-xs uppercase text-muted-foreground">Currently Exploring</p>
+                <p className="font-mono text-xs uppercase text-muted-foreground">{statusPanel.currentlyExploring.title}</p>
                 <div className="flex flex-wrap gap-2">
-                    <Badge variant="outline">Advanced TypeScript</Badge>
-                    <Badge variant="outline">Web Assembly (WASM)</Badge>
+                    {statusPanel.currentlyExploring.items.map((item) => (
+                      <Badge key={item} variant="outline">{item}</Badge>
+                    ))}
                 </div>
             </div>
             <div className="border-t border-border pt-4">
-               <p className="font-mono text-xs uppercase text-muted-foreground mb-2">Latest Project</p>
-                <Link href="/projects" className="group flex items-center justify-between rounded-md p-2 transition-colors hover:bg-secondary">
+               <p className="font-mono text-xs uppercase text-muted-foreground mb-2">{statusPanel.latestProject.title}</p>
+                <Link href={statusPanel.latestProject.href} className="group flex items-center justify-between rounded-md p-2 transition-colors hover:bg-secondary">
                   <div>
-                    <p className="font-semibold">Portfolio Redesign</p>
-                    <p className="text-sm text-muted-foreground">See all projects</p>
+                    <p className="font-semibold">{statusPanel.latestProject.name}</p>
+                    <p className="text-sm text-muted-foreground">{statusPanel.latestProject.linkText}</p>
                   </div>
                   <ArrowRight className="size-4 text-muted-foreground transition-transform group-hover:translate-x-1 group-hover:text-foreground"/>
                 </Link>

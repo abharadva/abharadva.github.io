@@ -103,9 +103,13 @@ const SectionEditor = ({
                         e.preventDefault();
                         const formData = new FormData(e.currentTarget);
                         const data: Partial<PortfolioItem> = {
+                            id: editingItem?.id,
                             title: formData.get("item_title") as string,
                             subtitle: (formData.get("item_subtitle") as string) || null,
+                            date_from: (formData.get("item_date_from") as string) || null,
+                            date_to: (formData.get("item_date_to") as string) || null,
                             description: (formData.get("item_description") as string) || null,
+                            link_url: (formData.get("item_link_url") as string) || null,
                             tags: (formData.get("item_tags") as string)?.split(',').map(t => t.trim()).filter(Boolean) || null,
                         };
                         onSaveItem(data, section.id);
@@ -116,7 +120,12 @@ const SectionEditor = ({
                 >
                     <Input name="item_title" placeholder="Title" defaultValue={editingItem?.title || ""} required />
                     <Input name="item_subtitle" placeholder="Subtitle" defaultValue={editingItem?.subtitle || ""} />
+                    <div className="grid grid-cols-2 gap-2">
+                        <Input name="item_date_from" placeholder="From (e.g., Jan 2022)" defaultValue={editingItem?.date_from || ""} />
+                        <Input name="item_date_to" placeholder="To (e.g., Present)" defaultValue={editingItem?.date_to || ""} />
+                    </div>
                     <Textarea name="item_description" placeholder="Description" defaultValue={editingItem?.description || ""} rows={3}/>
+                    <Input name="item_link_url" placeholder="Link URL (e.g., https://...)" defaultValue={editingItem?.link_url || ""} />
                     <Input name="item_tags" placeholder="Tags (comma,separated)" defaultValue={editingItem?.tags?.join(', ') || ""}/>
                     <div className="flex gap-2 pt-2">
                         <Button type="submit">Save Item</Button>
@@ -139,7 +148,6 @@ export default function ContentManager() {
   const [selectedSectionId, setSelectedSectionId] = useState<string | null>(null);
   const [isCreating, setIsCreating] = useState(false);
   const [draggedSectionId, setDraggedSectionId] = useState<string | null>(null);
-  const [editingItem, setEditingItem] = useState<PortfolioItem | null>(null);
 
   const fetchPortfolioContent = async () => {
     setIsLoading(true);
@@ -188,8 +196,8 @@ export default function ContentManager() {
   
   const handleSaveItem = async (itemData: Partial<PortfolioItem>, sectionId: string) => {
     const dataToSave = { ...itemData, section_id: sectionId };
-    const response = editingItem?.id
-      ? await supabase.from("portfolio_items").update(dataToSave).eq("id", editingItem.id)
+    const response = itemData.id
+      ? await supabase.from("portfolio_items").update(dataToSave).eq("id", itemData.id)
       : await supabase.from("portfolio_items").insert(dataToSave);
     if (response.error) setError(response.error.message);
     else await fetchPortfolioContent();

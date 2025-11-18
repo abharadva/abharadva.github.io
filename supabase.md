@@ -1,3 +1,4 @@
+
 # Supabase Setup Guide
 
 This guide provides all the necessary steps to configure your own Supabase project to act as the backend for this portfolio application.
@@ -86,6 +87,8 @@ CREATE TABLE portfolio_items (
   user_id UUID REFERENCES auth.users(id) ON DELETE CASCADE DEFAULT auth.uid(),
   title TEXT NOT NULL,
   subtitle TEXT,
+  date_from TEXT,
+  date_to TEXT,
   description TEXT,
   image_url TEXT,
   link_url TEXT,

@@ -1,6 +1,8 @@
+
 import Layout from "@/components/layout";
 import Head from "next/head";
 import { config as appConfig } from "@/lib/config";
+import { siteContent } from "@/lib/site-content";
 import type { PortfolioSection, PortfolioItem } from "@/types";
 import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
@@ -82,10 +84,9 @@ const ShowcaseItemCard: React.FC<{ item: PortfolioItem }> = ({ item }) => {
   );
 };
 
-// getStaticProps has been removed
-
 export default function ShowcasePage() {
   const { site: siteConfig } = appConfig;
+  const content = siteContent.pages.showcase;
   const [sections, setSections] = useState<PortfolioSection[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -126,8 +127,8 @@ export default function ShowcasePage() {
   return (
     <Layout>
       <Head>
-        <title>{`Showcase | ${siteConfig.title}`}</title>
-        <meta name="description" content="A curated collection of my work, skills, and professional journey." />
+        <title>{`${content.title} | ${siteConfig.title}`}</title>
+        <meta name="description" content={content.description} />
       </Head>
 
       <main className="py-16 md:py-24">
@@ -136,10 +137,10 @@ export default function ShowcasePage() {
            className="container mx-auto mb-24 max-w-4xl px-4 text-center"
         >
           <h1 className="text-5xl font-black tracking-tighter md:text-7xl">
-            Showcase.
+            {content.heading}
           </h1>
           <p className="mx-auto mt-6 max-w-2xl text-xl text-muted-foreground font-light leading-relaxed">
-            A deep dive into my professional journey, featured projects, and technical expertise.
+            {content.subheading}
           </p>
         </motion.header>
 

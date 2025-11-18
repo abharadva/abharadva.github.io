@@ -25,11 +25,11 @@ interface AppConfig {
 export const config: AppConfig = {
   admin: {},
   mfa: {
-    appName: process.env.NEXT_PUBLIC_APP_NAME || "MyPortfolioAdmin",
-    issuer: process.env.NEXT_PUBLIC_MFA_ISSUER || "MyPortfolio",
+    appName: process.env.NEXT_PUBLIC_APP_NAME || "Akshay Bharadva | Portfolio",
+    issuer: process.env.NEXT_PUBLIC_MFA_ISSUER || "Akshay Bharadva | MFA",
   },
   site: {
-    title: process.env.NEXT_PUBLIC_SITE_TITLE || "Akshay Bharadva - Portfolio",
+    title: process.env.NEXT_PUBLIC_SITE_TITLE || "Akshay Bharadva | Portfolio",
     description:
       process.env.NEXT_PUBLIC_SITE_DESCRIPTION ||
       "A modern portfolio website with blog functionality, built by Akshay Bharadva.",

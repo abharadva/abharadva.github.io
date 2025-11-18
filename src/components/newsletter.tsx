@@ -1,5 +1,4 @@
 
-
 import type React from "react";
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
@@ -7,6 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Loader2, CheckCircle, XCircle, ArrowRight } from "lucide-react";
+import { siteContent } from "@/lib/site-content";
 
 export default function Newsletter() {
   const [email, setEmail] = useState("");
@@ -41,9 +41,9 @@ export default function Newsletter() {
     >
       <div className="grid grid-cols-1 items-center gap-8 md:grid-cols-2">
         <div>
-          <h2 className="text-3xl font-black text-foreground">Join The List</h2>
+          <h2 className="text-3xl font-black text-foreground">{siteContent.newsletter.title}</h2>
           <p className="mt-2 text-muted-foreground">
-            Get project updates, tech articles, and insights delivered straight to your inbox. No spam, ever.
+            {siteContent.newsletter.description}
           </p>
         </div>
 

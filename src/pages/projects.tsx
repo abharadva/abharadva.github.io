@@ -1,27 +1,27 @@
 
-
 import Layout from "@/components/layout";
 import ProjectsComponent from "@/components/projects";
 import Head from "next/head";
 import { config as appConfig } from "@/lib/config";
+import { siteContent } from "@/lib/site-content";
 import { motion } from "framer-motion";
 
 export default function ProjectsPage() {
   const { site: siteConfig } = appConfig;
-  const pageTitle = `My Projects | ${siteConfig.title}`;
-  const pageDescription = `A collection of projects developed by Akshay Bharadva, showcasing skills in various technologies.`;
+  const content = siteContent.pages.projects;
+  const pageTitle = `${content.title} | ${siteConfig.title}`;
   const pageUrl = `${siteConfig.url}/projects/`;
 
   return (
     <Layout>
       <Head>
         <title>{pageTitle}</title>
-        <meta name="description" content={pageDescription} />
+        <meta name="description" content={content.description} />
         <meta property="og:title" content={pageTitle} />
-        <meta property="og:description" content={pageDescription} />
+        <meta property="og:description" content={content.description} />
         <meta property="og:url" content={pageUrl} />
         <meta name="twitter:title" content={pageTitle} />
-        <meta name="twitter:description" content={pageDescription} />
+        <meta name="twitter:description" content={content.description} />
         <link rel="canonical" href={pageUrl} />
       </Head>
 
@@ -33,10 +33,10 @@ export default function ProjectsPage() {
           className="mb-12 border-b border-border pb-8 text-center"
         >
           <h1 className="text-5xl font-black tracking-tighter text-foreground md:text-6xl">
-            Projects
+            {content.heading}
           </h1>
           <p className="mt-3 text-lg text-muted-foreground">
-            A selection of my open-source work from GitHub.
+            {content.description}
           </p>
         </motion.header>
         <ProjectsComponent showTitle={false} />

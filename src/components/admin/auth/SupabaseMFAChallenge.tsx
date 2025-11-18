@@ -39,7 +39,7 @@ export default function SupabaseMFAChallenge() {
       }
 
       if (aalData?.currentLevel === "aal2") {
-        router.replace("/admin/dashboard");
+        router.replace("/admin");
         return;
       }
       if (aalData?.currentLevel !== "aal1" || aalData?.nextLevel !== "aal2") {
@@ -99,7 +99,7 @@ export default function SupabaseMFAChallenge() {
       return;
     }
 
-    router.replace("/admin/dashboard");
+    router.replace("/admin");
   };
 
   const stepVariants = {

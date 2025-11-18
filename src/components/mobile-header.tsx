@@ -4,7 +4,9 @@ import Link from "next/link";
 import { useRouter } from "next/router";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger, SheetClose } from "@/components/ui/sheet";
 import { Button } from "@/components/ui/button";
-import { Menu, X, Home, AppWindow, Code, BookOpen, User, Send, LucideIcon } from "lucide-react";
+import { Menu, X, Home, AppWindow, Code, BookOpen, User, Send } from "lucide-react";
+import { siteContent } from "@/lib/site-content";
+import { LucideIcon } from "lucide-react";
 
 type NavLink = {
   href: string;
@@ -12,14 +14,19 @@ type NavLink = {
   icon: LucideIcon;
 };
 
-const NAV_LINKS: NavLink[] = [
-  { href: "/", label: "Home", icon: Home },
-  { href: "/showcase", label: "Showcase", icon: AppWindow },
-  { href: "/projects", label: "Projects", icon: Code },
-  { href: "/blog", label: "Blog", icon: BookOpen },
-  { href: "/about", label: "About", icon: User },
-  { href: "/contact", label: "Contact", icon: Send  },
-];
+const NAV_ICONS: { [key: string]: LucideIcon } = {
+  Home: Home,
+  Showcase: AppWindow,
+  Projects: Code,
+  Blog: BookOpen,
+  About: User,
+  Contact: Send,
+};
+
+const NAV_LINKS: NavLink[] = siteContent.header.navLinks.map(link => ({
+  ...link,
+  icon: NAV_ICONS[link.label] || Home, // Default to Home icon if not found
+}));
 
 export default function MobileHeader() {
   const router = useRouter();
@@ -75,4 +82,3 @@ export default function MobileHeader() {
     </header>
   );
 }
-

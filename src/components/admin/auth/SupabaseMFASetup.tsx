@@ -92,7 +92,7 @@ export default function SupabaseMFASetup() {
     }
 
     await supabase.auth.mfa.getAuthenticatorAssuranceLevel();
-    router.replace("/admin/dashboard");
+    router.replace("/admin");
   };
 
   const copySecret = async () => {
@@ -171,7 +171,7 @@ export default function SupabaseMFASetup() {
               </p>
               {qrCodeUrl ? (
                 <div className="flex justify-center rounded-lg bg-white p-2">
-                  <Image src={qrCodeUrl} alt="QR Code for MFA setup" className="size-48" />
+                  <img src={qrCodeUrl} alt="QR Code for MFA setup" className="size-48" />
                 </div>
               ) : (
                 <div className="flex h-48 items-center justify-center rounded-lg bg-secondary">

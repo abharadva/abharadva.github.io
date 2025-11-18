@@ -190,6 +190,8 @@ CREATE TABLE portfolio_items (
   user_id UUID REFERENCES auth.users(id) ON DELETE CASCADE DEFAULT auth.uid(),
   title TEXT NOT NULL,
   subtitle TEXT,
+  date_from TEXT,
+  date_to TEXT,
   description TEXT,
   image_url TEXT,
   link_url TEXT,
@@ -638,16 +640,17 @@ This portfolio is configured for static export and deployment to GitHub Pages us
 
 ### 1. Configure `next.config.js`
 
-Your `next.config.js` is already set up for GitHub Pages. It dynamically determines the `basePath` from the `GITHUB_REPOSITORY` environment variable, which is perfect for forks. The key settings are:
-
 ```javascript
 const nextConfig = {
   output: 'export',
+  reactStrictMode: true,
+  trailingSlash: true,
   images: {
     unoptimized: true,
+    domains: ['images.unsplash.com', 'avatars.githubusercontent.com'],
   },
-  basePath: repoName ? `/${repoName}` : '',
-  assetPrefix: repoName ? `/${repoName}/` : '/',
+  basePath: '',
+  assetPrefix: '',
 };
 ```
 

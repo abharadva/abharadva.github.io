@@ -1,3 +1,4 @@
+
 export interface PortfolioSection {
   id: string;
   user_id?: string;
@@ -16,6 +17,8 @@ export interface PortfolioItem {
   user_id?: string;
   title: string;
   subtitle?: string | null;
+  date_from?: string | null;
+  date_to?: string | null;
   description?: string | null;
   image_url?: string | null;
   link_url?: string | null;

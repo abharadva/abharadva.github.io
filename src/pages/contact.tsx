@@ -2,17 +2,18 @@
 import Layout from "@/components/layout";
 import Head from "next/head";
 import { config as appConfig } from "@/lib/config";
+import { siteContent } from "@/lib/site-content";
 import { supabase } from "@/supabase/client";
 import type { PortfolioSection } from "@/types";
 import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
-import { Check, Mail, Github, Linkedin, Loader2 } from "lucide-react";
+import { Check, Loader2, AlertTriangle, Mail } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 export default function ContactPage() {
   const { site: siteConfig } = appConfig;
-  const pageTitle = `Contact Me | ${siteConfig.title}`;
-  const pageDescription = "Let's build something great together. Get in touch with Akshay Bharadva.";
+  const content = siteContent.pages.contact;
+  const pageTitle = `${content.title} | ${siteConfig.title}`;
   const pageUrl = `${siteConfig.url}/contact/`;
 
   const [serviceSection, setServiceSection] = useState<PortfolioSection | null>(null);
@@ -47,9 +48,9 @@ export default function ContactPage() {
     <Layout>
       <Head>
         <title>{pageTitle}</title>
-        <meta name="description" content={pageDescription} />
+        <meta name="description" content={content.description} />
         <meta property="og:title" content={pageTitle} />
-        <meta property="og:description" content={pageDescription} />
+        <meta property="og:description" content={content.description} />
         <meta property="og:url" content={pageUrl} />
         <link rel="canonical" href={pageUrl} />
       </Head>
@@ -58,28 +59,25 @@ export default function ContactPage() {
           initial="hidden" animate="visible" variants={itemVariants}
           className="mb-16 text-center"
         >
-          <h1 className="text-5xl font-black text-foreground md:text-6xl">Get In Touch</h1>
+          <h1 className="text-5xl font-black text-foreground md:text-6xl">{content.heading}</h1>
           <p className="mx-auto mt-4 max-w-2xl text-xl text-muted-foreground">
-            Have a project in mind or just want to say hello? I'd love to hear from you.
+            {content.subheading}
           </p>
           <div className="mt-8 flex justify-center gap-4">
-              <Button asChild size="lg">
-                  <a href="mailto:akshaybharadva19@gmail.com">
-                      <Mail className="mr-2 size-5" /> Email Me
+              {siteContent.footer.socials.map(social => (
+                <Button key={social.href} asChild size={social.icon === Mail ? 'lg' : 'icon'} variant={social.icon === Mail ? 'default' : 'secondary'}>
+                  <a href={social.href} target="_blank" rel="noopener noreferrer" aria-label={social.label}>
+                    <social.icon className={social.icon === Mail ? "mr-2 size-5" : "size-5"} />
+                    {social.icon === Mail && "Email Me"}
                   </a>
-              </Button>
-              <Button asChild variant="secondary" size="icon" aria-label="GitHub">
-                  <a href="https://github.com/akshay-bharadva" target="_blank" rel="noopener noreferrer"><Github /></a>
-              </Button>
-              <Button asChild variant="secondary" size="icon" aria-label="LinkedIn">
-                  <a href="https://www.linkedin.com/in/akshay-bharadva/" target="_blank" rel="noopener noreferrer"><Linkedin /></a>
-              </Button>
+                </Button>
+              ))}
           </div>
         </motion.header>
 
         {(isLoading || (!isLoading && serviceSection?.portfolio_items && serviceSection.portfolio_items.length > 0)) && (
           <motion.div className="mt-24">
-              <motion.h2 variants={itemVariants} initial="hidden" whileInView="visible" viewport={{ once: true }} className="mb-10 text-center text-4xl font-bold text-muted-foreground">What I Can Do For You</motion.h2>
+              <motion.h2 variants={itemVariants} initial="hidden" whileInView="visible" viewport={{ once: true }} className="mb-10 text-center text-4xl font-bold text-muted-foreground">{content.servicesTitle}</motion.h2>
               {isLoading && (
                  <div className="flex justify-center"><Loader2 className="size-8 animate-spin text-muted-foreground"/></div>
               )}
@@ -119,4 +117,3 @@ export default function ContactPage() {
     </Layout>
   );
 }
-

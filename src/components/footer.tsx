@@ -1,8 +1,7 @@
 
-
 import Link from "next/link";
-import { Github, Linkedin, Mail } from "lucide-react";
 import Container from "./container";
+import { siteContent } from "@/lib/site-content";
 
 export default function Footer() {
   const currentYear = new Date().getFullYear();
@@ -13,39 +12,25 @@ export default function Footer() {
         <div className="flex flex-col items-center justify-between gap-8 md:flex-row">
           <p className="text-center md:text-left">
             &copy; {currentYear} Akshay Bharadva. <br />
-            Built with Next.js, Tailwind, and a lot of coffee.
+            {siteContent.footer.copyrightText}
           </p>
 
           <div className="flex items-center gap-6">
-            <a
-              href="https://github.com/akshay-bharadva"
-              rel="noopener noreferrer"
-              target="_blank"
-              aria-label="GitHub Profile"
-              className="text-2xl transition-colors hover:text-primary"
-            >
-              <Github className="size-5" />
-            </a>
-            <a
-              href="https://www.linkedin.com/in/akshay-bharadva/"
-              rel="noopener noreferrer"
-              target="_blank"
-              aria-label="LinkedIn Profile"
-              className="text-2xl transition-colors hover:text-primary"
-            >
-              <Linkedin className="size-5" />
-            </a>
-            <a
-              href="mailto:akshaybharadva19@gmail.com"
-              aria-label="Email Akshay"
-              className="text-2xl transition-colors hover:text-primary"
-            >
-              <Mail className="size-5" />
-            </a>
+            {siteContent.footer.socials.map((social) => (
+              <a
+                key={social.href}
+                href={social.href}
+                rel="noopener noreferrer"
+                target="_blank"
+                aria-label={social.label}
+                className="text-2xl transition-colors hover:text-primary"
+              >
+                <social.icon className="size-5" />
+              </a>
+            ))}
           </div>
         </div>
       </Container>
     </footer>
   );
 }
-
