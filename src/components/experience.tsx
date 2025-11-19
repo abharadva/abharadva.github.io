@@ -1,7 +1,6 @@
-
 import Link from "next/link";
 import { PropsWithChildren, useState, useEffect } from "react";
-import { ArrowUpRight, Loader2 } from "lucide-react";
+import { ArrowUpRight, Loader2, Briefcase } from "lucide-react";
 import { motion } from "framer-motion";
 import { Badge } from "@/components/ui/badge";
 import { supabase } from "@/supabase/client";
@@ -24,7 +23,6 @@ export default function Experience({ children, showTitle = true }: ExperiencePro
       setIsLoading(true);
       setError(null);
       try {
-        // CORRECTED QUERY: Removed .single() to handle zero or one result gracefully.
         const { data, error: fetchError } = await supabase
           .from('portfolio_sections')
           .select('portfolio_items(*)')
@@ -33,11 +31,10 @@ export default function Experience({ children, showTitle = true }: ExperiencePro
 
         if (fetchError) throw new Error(fetchError.message);
         
-        // CORRECTED DATA HANDLING: Check if data array exists and has content.
         if (data && data.length > 0 && data[0].portfolio_items) {
           setExperienceItems(data[0].portfolio_items as PortfolioItem[]);
         } else {
-          setExperienceItems([]); // Gracefully handle no section found.
+          setExperienceItems([]);
         }
 
       } catch (err: any) {
@@ -73,6 +70,15 @@ export default function Experience({ children, showTitle = true }: ExperiencePro
       {isLoading && <div className="flex justify-center py-8"><Loader2 className="size-8 animate-spin" /></div>}
       {error && <div className="text-center text-destructive">{error}</div>}
 
+      {!isLoading && !error && experienceItems.length === 0 && (
+        <div className="py-16 text-center text-muted-foreground">
+          <div className="mx-auto flex size-16 items-center justify-center rounded-full bg-secondary">
+            <Briefcase className="size-8" />
+          </div>
+          <p className="mt-4">A detailed timeline of my professional journey will appear here soon.</p>
+        </div>
+      )}
+
       {!isLoading && !error && experienceItems.length > 0 && (
         <div className="relative mx-auto max-w-5xl px-4">
           <div className="absolute left-1/2 top-0 h-full w-0.5 -translate-x-1/2 bg-gradient-to-b from-transparent via-border to-transparent" aria-hidden="true" />
@@ -100,7 +106,6 @@ export default function Experience({ children, showTitle = true }: ExperiencePro
                     )}
                     {exp.description && (
                       <div className={`prose prose-sm dark:prose-invert mt-3 max-w-none text-muted-foreground prose-ul:list-none prose-li:mb-2 ${index % 2 === 0 ? 'text-right prose-ul:text-right prose-li:text-right' : 'text-left'}`}>
-                        {/* IMPROVEMENT: Using ReactMarkdown for safe and consistent rendering */}
                         <ReactMarkdown remarkPlugins={[remarkGfm]}>
                           {exp.description}
                         </ReactMarkdown>

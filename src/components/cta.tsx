@@ -3,10 +3,11 @@ import { motion } from "framer-motion";
 import { ArrowRight, Mail } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
-import { siteContent } from "@/lib/site-content";
+import { useSiteContent } from "@/context/SiteContentContext";
 
 export default function Cta() {
-  const email = siteContent.footer.socials.find(s => s.icon === Mail)?.href || "mailto:example@example.com";
+  const { content } = useSiteContent();
+  const emailLink = content?.social_links.find(s => s.id === 'email')?.url || "mailto:example@example.com";
 
   return (
     <motion.section
@@ -30,7 +31,7 @@ export default function Cta() {
           </p>
           <div className="mt-8 flex flex-col items-center gap-4 sm:flex-row sm:justify-center">
             <Button size="lg" asChild>
-              <a href={email}>
+              <a href={emailLink}>
                 Get In Touch <Mail className="ml-2 size-4" />
               </a>
             </Button>

@@ -13,7 +13,7 @@ type LayoutProps = PropsWithChildren & {
   isAdmin?: boolean;
 };
 
-const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || "https://akshay-bharadva.github.io";
+const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || "https://abharadva.github.io";
 const DEFAULT_OG_TITLE = "Akshay Bharadva - Fullstack Developer";
 const DEFAULT_OG_DESCRIPTION = "Portfolio and Blog of Akshay Bharadva, showcasing projects and thoughts on web development.";
 const DEFAULT_OG_IMAGE = `${SITE_URL}/default-og-image.png`;

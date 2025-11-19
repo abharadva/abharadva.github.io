@@ -1,20 +1,13 @@
-// src/pages/index.tsx
-
 import Layout from "@/components/layout";
 import Hero from "@/components/hero";
-import SectionRenderer from "@/components/SectionRenderer";
-import { supabase } from "@/supabase/client";
-import { PortfolioSection } from "@/types";
-import { useEffect, useState } from "react";
-import { config as appConfig } from "@/lib/config";
-import { Loader2 } from "lucide-react";
-import Head from "next/head";
 import Cta from "@/components/cta";
+import Head from "next/head";
+import { config as appConfig } from "@/lib/config";
+import DynamicPageContent from "@/components/DynamicPageContent";
+import { useEffect } from "react";
 
 export default function HomePage() {
   const { site: siteConfig } = appConfig;
-  const [homeSections, setHomeSections] = useState<PortfolioSection[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
     const webhookUrl = process.env.NEXT_PUBLIC_VISIT_NOTIFIER_URL || "";
@@ -47,28 +40,6 @@ export default function HomePage() {
           .catch((err) => console.error("Failed to send visit notification:", err));
       }
     }
-
-  }, []);
-
-  useEffect(() => {
-    const fetchHomeSections = async () => {
-      setIsLoading(true);
-      const { data, error } = await supabase
-        .from('portfolio_sections')
-        .select('*, portfolio_items(*)')
-        .eq('display_location', 'home')
-        .order('display_order', { ascending: true })
-        .order('display_order', { foreignTable: 'portfolio_items', ascending: true });
-
-      if (error) {
-        console.error("Error fetching home page sections:", error);
-      } else {
-        setHomeSections(data || []);
-      }
-      setIsLoading(false);
-    };
-
-    fetchHomeSections();
   }, []);
 
   return (
@@ -78,17 +49,7 @@ export default function HomePage() {
       </Head>
       <div className="py-12 md:py-20">
         <Hero />
-
-        {isLoading && (
-          <div className="flex justify-center py-16">
-            <Loader2 className="size-8 animate-spin text-muted-foreground" />
-          </div>
-        )}
-
-        {!isLoading && homeSections.map(section => (
-          <SectionRenderer key={section.id} section={section} />
-        ))}
-
+        <DynamicPageContent pagePath="/" />
         <Cta />
       </div>
     </Layout>

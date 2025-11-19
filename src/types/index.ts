@@ -1,4 +1,3 @@
-
 export interface PortfolioSection {
   id: string;
   user_id?: string;
@@ -8,7 +7,11 @@ export interface PortfolioSection {
   display_order?: number;
   created_at?: string;
   updated_at?: string;
-  display_location?: 'none' | 'home' | 'showcase';
+  // --- MODIFIED LINES START ---
+  is_visible: boolean; // Add visibility flag
+  page_path: string; // Change display_location to page_path
+  layout_style: string; // Add layout style
+  // --- MODIFIED LINES END ---
   portfolio_items?: PortfolioItem[];
 }
 
@@ -76,7 +79,7 @@ export interface GitHubRepo {
   owner: GitHubRepoOwner;
 }
 
-// --- NEW TYPES ---
+
 
 export interface Event {
   id: string;
@@ -119,7 +122,7 @@ export interface Task {
   priority?: "low" | "medium" | "high";
   created_at?: string;
   updated_at?: string;
-  sub_tasks?: SubTask[]; // This line should be present
+  sub_tasks?: SubTask[];
 }
 
 export interface Transaction {

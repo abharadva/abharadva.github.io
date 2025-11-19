@@ -1,5 +1,5 @@
 {
-  "name": "portfolio-redesigned",
+  "name": "portfolio",
   "version": "1.0.0",
   "private": true,
   "author": {
@@ -7,7 +7,7 @@
     "url": "https://abharadva.github.io"
   },
   "scripts": {
-    "dev": "next dev -p 8889",
+    "dev": "next dev",
     "build": "next build",
     "start": "next start",
     "lint": "next lint",

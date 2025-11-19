@@ -11,7 +11,7 @@ type ProjectsProps = {
   showTitle?: boolean;
 };
 
-const GITHUB_USERNAME = `akshay-bharadva`;
+const GITHUB_USERNAME = `abharadva.github.io`;
 const REPO_COUNT = 9; // Fetch more to have enough to filter from
 const GITHUB_REPOS_URL = `https://api.github.com/users/${GITHUB_USERNAME}/repos?sort=pushed&per_page=${REPO_COUNT}&type=owner`
 

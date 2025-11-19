@@ -3,7 +3,7 @@ import LoadingSpinner from "@/components/admin/LoadingSpinner";
 import { useAuthGuard } from "@/hooks/useAuthGuard";
 import SiteSettingsManager from "@/components/admin/SiteSettingsManager";
 
-export default function AdminNavigationPage() {
+export default function AdminSettingsPage() {
   const { isLoading } = useAuthGuard();
 
   if (isLoading) {

@@ -1,51 +1,34 @@
-
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/router";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger, SheetClose } from "@/components/ui/sheet";
 import { Button } from "@/components/ui/button";
 import { Menu, X, Home, AppWindow, Code, BookOpen, User, Send } from "lucide-react";
-import { siteContent } from "@/lib/site-content";
 import { LucideIcon } from "lucide-react";
 import { supabase } from "@/supabase/client";
+import { useSiteContent } from "@/context/SiteContentContext"; // --- ADD ---
+import { Skeleton } from "./ui/skeleton"; // --- ADD ---
 
 type NavLink = { href: string; label: string };
-
-
-const NAV_ICONS: { [key: string]: LucideIcon } = {
-  Home: Home,
-  Showcase: AppWindow,
-  Projects: Code,
-  Blog: BookOpen,
-  About: User,
-  Contact: Send,
-};
-
 
 export default function MobileHeader() {
   const router = useRouter();
   const [isOpen, setIsOpen] = useState(false);
   const [navLinks, setNavLinks] = useState<NavLink[]>([]);
-
+  const { content, isLoading } = useSiteContent(); // --- USE CONTEXT ---
 
   useEffect(() => {
+    // ... useEffect to fetch nav links remains the same ...
     const fetchNavAndSettings = async () => {
-      // Fetch both settings and links at the same time
       const [settingsRes, linksRes] = await Promise.all([
         supabase.from('site_settings').select('portfolio_mode').single(),
         supabase.from('navigation_links').select('label, href').eq('is_visible', true).order('display_order')
       ]);
-
       const portfolioMode = settingsRes.data?.portfolio_mode || 'multi-page';
       let finalLinks = linksRes.data || [];
-
       if (portfolioMode === 'single-page') {
-        // In single-page mode, only show essential links
-        finalLinks = finalLinks.filter(link =>
-          link.href === '/' || link.href === '/contact' || link.href === '/blog'
-        );
+        finalLinks = finalLinks.filter(link => link.href === '/' || link.href === '/contact' || link.href === '/blog');
       }
-
       setNavLinks(finalLinks);
     };
     fetchNavAndSettings();
@@ -55,10 +38,19 @@ export default function MobileHeader() {
     <header className="fixed top-0 z-50 w-full border-b border-border/50 bg-background/80 py-3 backdrop-blur-lg md:hidden">
       <div className="mx-auto flex items-center justify-between px-4">
         <Link href="/" className="font-mono text-lg font-semibold tracking-tighter" onClick={() => setIsOpen(false)}>
-          AKSHAY<span className="text-primary">.</span>DEV
+          {/* --- MODIFIED BLOCK START --- */}
+          {isLoading || !content ? (
+            <Skeleton className="h-6 w-32" />
+          ) : (
+            <>
+              {content.profile_data.logo.main}
+              <span className="text-primary">{content.profile_data.logo.highlight}</span>
+            </>
+          )}
+          {/* --- MODIFIED BLOCK END --- */}
         </Link>
-
         <Sheet open={isOpen} onOpenChange={setIsOpen}>
+          {/* ... Sheet content remains the same ... */}
           <SheetTrigger asChild>
             <Button variant="ghost" size="icon">
               <Menu className="size-5" />
@@ -87,7 +79,6 @@ export default function MobileHeader() {
                           : "text-muted-foreground hover:bg-secondary hover:text-secondary-foreground"
                         }`}
                     >
-                      {/* <link.icon className="size-5" /> */}
                       {link.label}
                     </Link>
                   );

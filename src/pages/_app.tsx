@@ -5,7 +5,8 @@ import localFont from "next/font/local";
 import { motion, AnimatePresence } from "framer-motion";
 import { useRouter } from "next/router";
 import { ThemeProvider } from "@/components/theme-provider";
-import { LearningSessionProvider } from "@/context/LearningSessionContext"; // Import the provider
+import { LearningSessionProvider } from "@/context/LearningSessionContext";
+import { SiteContentProvider } from "@/context/SiteContentContext";
 
 const tahuFont = localFont({
   src: "./fonts/Tahu.woff2",
@@ -26,29 +27,32 @@ export default function App({ Component, pageProps }: AppProps) {
 
   return (
     <ThemeProvider attribute="class" defaultTheme="dark" enableSystem={false}>
-      <AnimatePresence
-        mode="wait"
-        initial={false}
-        onExitComplete={() => window.scrollTo(0, 0)}
-      >
-        <main className={`${tahuFont.variable}`}>
-          <motion.div
-            key={router.asPath}
-            initial="initial"
-            animate="animate"
-            exit="exit"
-            variants={pageVariants}
-          >
-            {isAdminPage ? (
-              <LearningSessionProvider>
+      {/* --- WRAP WITH THE NEW PROVIDER --- */}
+      <SiteContentProvider>
+        <AnimatePresence
+          mode="wait"
+          initial={false}
+          onExitComplete={() => window.scrollTo(0, 0)}
+        >
+          <main className={`${tahuFont.variable}`}>
+            <motion.div
+              key={router.asPath}
+              initial="initial"
+              animate="animate"
+              exit="exit"
+              variants={pageVariants}
+            >
+              {isAdminPage ? (
+                <LearningSessionProvider>
+                  <Component {...pageProps} />
+                </LearningSessionProvider>
+              ) : (
                 <Component {...pageProps} />
-              </LearningSessionProvider>
-            ) : (
-              <Component {...pageProps} />
-            )}
-          </motion.div>
-        </main>
-      </AnimatePresence>
+              )}
+            </motion.div>
+          </main>
+        </AnimatePresence>
+      </SiteContentProvider>
     </ThemeProvider>
   );
 }

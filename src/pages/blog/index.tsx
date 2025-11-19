@@ -7,7 +7,7 @@ import { useEffect, useState } from "react";
 import Layout from "@/components/layout";
 import { config as appConfig } from "@/lib/config";
 import { formatDate } from "@/lib/utils";
-import { Eye, Clock, Loader2 } from "lucide-react";
+import { Eye, Clock, Loader2, FileText } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Card } from "@/components/ui/card";
 
@@ -91,8 +91,11 @@ export default function BlogIndexPage() {
 
         {posts.length === 0 && !loading && (
           <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="py-16 text-center">
-            <h3 className="text-2xl font-bold">No Posts Yet</h3>
-            <p className="text-muted-foreground">Check back soon for new articles.</p>
+            <div className="mx-auto flex size-16 items-center justify-center rounded-full bg-secondary">
+              <FileText className="size-8 text-muted-foreground" />
+            </div>
+            <h3 className="mt-6 text-2xl font-bold">No Posts Published Yet</h3>
+            <p className="mt-2 text-muted-foreground">Check back soon for new articles and insights.</p>
           </motion.div>
         )}
 

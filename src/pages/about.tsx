@@ -1,26 +1,28 @@
-
 import Layout from "@/components/layout";
-import Technology from "@/components/technology";
-import Tools from "@/components/tools";
 import Head from "next/head";
 import { config as appConfig } from "@/lib/config";
 import { motion } from "framer-motion";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { siteContent } from "@/lib/site-content";
+import DynamicPageContent from "@/components/DynamicPageContent";
+import { useSiteContent } from "@/context/SiteContentContext";
+import { Skeleton } from "@/components/ui/skeleton";
+import ReactMarkdown from "react-markdown";
 
 export default function AboutPage() {
   const { site: siteConfig } = appConfig;
-  const content = siteContent.pages.about;
-  const pageTitle = `${content.title} | ${siteConfig.title}`;
+  const { content, isLoading } = useSiteContent();
+  
+  const pageTitle = `About Me | ${content?.profile_data.name || siteConfig.title}`;
   const pageUrl = `${siteConfig.url}/about/`;
+  const pageDescription = content?.profile_data.bio.join(' ') || "Learn more about the developer behind the code.";
 
   return (
     <Layout>
       <Head>
         <title>{pageTitle}</title>
-        <meta name="description" content={content.description} />
+        <meta name="description" content={pageDescription} />
         <meta property="og:title" content={pageTitle} />
-        <meta property="og:description" content={content.description} />
+        <meta property="og:description" content={pageDescription} />
         <meta property="og:url" content={pageUrl} />
         <link rel="canonical" href={pageUrl} />
       </Head>
@@ -32,24 +34,40 @@ export default function AboutPage() {
           className="mx-auto max-w-3xl"
         >
           <h1 className="mb-4 border-b pb-4 text-center font-mono text-4xl font-bold tracking-tighter text-foreground sm:text-5xl">
-            {content.heading}
+            [ ABOUT_ME ]
           </h1>
           <div className="mt-12 flex flex-col items-center gap-8 sm:flex-row sm:items-start">
-             <Avatar className="h-24 w-24 border-2 sm:h-32 sm:w-32">
-                <AvatarImage src={"https://avatars.githubusercontent.com/u/52954931?v=4"} alt="Akshay Bharadva" />
-                <AvatarFallback>AB</AvatarFallback>
-             </Avatar>
-             <div className="prose prose-lg dark:prose-invert max-w-none text-center sm:text-left">
-                {content.bio.map((paragraph, index) => (
-                  <p key={index}>{paragraph}</p>
-                ))}
-             </div>
+             {isLoading || !content ? (
+                <>
+                    <Skeleton className="h-32 w-32 rounded-full" />
+                    <div className="space-y-4 flex-1">
+                        <Skeleton className="h-6 w-full" />
+                        <Skeleton className="h-6 w-11/12" />
+                        <Skeleton className="h-6 w-full" />
+                    </div>
+                </>
+             ) : (
+                <>
+                    {/* --- MODIFIED BLOCK START --- */}
+                    {content.profile_data.show_profile_picture && (
+                      <Avatar className="h-24 w-24 border-2 sm:h-32 sm:w-32">
+                          <AvatarImage src={content.profile_data.profile_picture_url} alt={content.profile_data.name} />
+                          <AvatarFallback>{content.profile_data.name.slice(0, 2).toUpperCase()}</AvatarFallback>
+                      </Avatar>
+                    )}
+                    {/* --- MODIFIED BLOCK END --- */}
+                    <div className="prose prose-lg dark:prose-invert max-w-none text-center sm:text-left">
+                        {content.profile_data.bio.map((paragraph, index) => (
+                          <ReactMarkdown key={index}>{paragraph}</ReactMarkdown>
+                        ))}
+                    </div>
+                </>
+             )}
           </div>
         </motion.div>
 
-        <div className="mx-auto mt-24 max-w-5xl">
-          <Technology />
-          <Tools />
+        <div className="mx-auto mt-12 max-w-5xl">
+          <DynamicPageContent pagePath="/about" />
         </div>
       </main>
     </Layout>

@@ -1,5 +1,4 @@
-
-import { ArrowUpRight, Loader2 } from "lucide-react";
+import { ArrowUpRight, Loader2, Cpu } from "lucide-react";
 import { PropsWithChildren, useState, useEffect } from "react";
 import { supabase } from "@/supabase/client";
 import { PortfolioItem } from "@/types";
@@ -49,7 +48,14 @@ export default function Technology({ children }: ToolsProps) {
       {isLoading && <div className="flex justify-center py-8"><Loader2 className="size-8 animate-spin" /></div>}
       {error && <div className="text-center text-destructive">{error}</div>}
 
-      {!isLoading && !error && (
+      {!isLoading && !error && techItems.length === 0 && (
+        <div className="py-8 text-center text-muted-foreground rounded-lg bg-secondary/30 border border-dashed">
+          <Cpu className="mx-auto size-8 mb-2" />
+          <p>A list of technologies I frequently work with will be displayed here.</p>
+        </div>
+      )}
+
+      {!isLoading && !error && techItems.length > 0 && (
         <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
           {techItems.map((tech) => (
             <a

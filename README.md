@@ -101,8 +101,8 @@ Follow these steps to get the project running on your local machine.
 ### 2. Clone the Repository
 
 ```bash
-git clone https://github.com/akshay-bharadva/portfolio.git
-cd portfolio
+git clone https://github.com/abharadva/abharadva.github.io.git
+cd abharadva.github.io
 ```
 
 ### 3. Install Dependencies
