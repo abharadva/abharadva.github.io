@@ -1,4 +1,3 @@
-
 # Supabase Setup Guide
 
 This guide provides all the necessary steps to configure your own Supabase project to act as the backend for this portfolio application.
@@ -64,6 +63,20 @@ $$ language 'plpgsql';
 
 -- ========= CORE CONTENT TABLES =========
 
+-- Navigation Links Table
+CREATE TABLE navigation_links (
+  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  user_id UUID REFERENCES auth.users(id) ON DELETE CASCADE DEFAULT auth.uid(),
+  label TEXT NOT NULL,
+  href TEXT NOT NULL,
+  display_order INT4 DEFAULT 0,
+  is_visible BOOLEAN DEFAULT true,
+  created_at TIMESTAMPTZ DEFAULT now()
+);
+ALTER TABLE navigation_links ENABLE ROW LEVEL SECURITY;
+CREATE POLICY "Admin can manage navigation" ON navigation_links FOR ALL USING (auth.uid() = user_id) WITH CHECK (auth.uid() = user_id);
+CREATE POLICY "Public can read visible navigation" ON navigation_links FOR SELECT USING (is_visible = true);
+
 -- Portfolio Sections Table
 CREATE TABLE portfolio_sections (
   id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
@@ -72,6 +85,7 @@ CREATE TABLE portfolio_sections (
   type TEXT NOT NULL CHECK (type IN ('markdown', 'list_items', 'gallery')),
   content TEXT,
   display_order INT4 DEFAULT 0,
+  show_on_showcase BOOLEAN DEFAULT false,
   created_at TIMESTAMPTZ DEFAULT now(),
   updated_at TIMESTAMPTZ DEFAULT now()
 );
@@ -285,6 +299,22 @@ ALTER TABLE learning_sessions ENABLE ROW LEVEL SECURITY;
 CREATE POLICY "Admin can manage their own sessions" ON learning_sessions FOR ALL USING (auth.uid() = user_id) WITH CHECK (auth.uid() = user_id);
 
 
+-- Asset Management Table
+CREATE TABLE storage_assets (
+  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  user_id UUID REFERENCES auth.users(id) ON DELETE CASCADE DEFAULT auth.uid(),
+  file_name TEXT NOT NULL,
+  file_path TEXT NOT NULL UNIQUE,
+  mime_type TEXT,
+  size_kb NUMERIC,
+  alt_text TEXT,
+  used_in JSONB,
+  created_at TIMESTAMPTZ DEFAULT now()
+);
+ALTER TABLE storage_assets ENABLE ROW LEVEL SECURITY;
+CREATE POLICY "Admin can manage their own assets" ON storage_assets FOR ALL USING (auth.uid() = user_id) WITH CHECK (auth.uid() = user_id);
+
+
 -- ========= RPC FUNCTIONS =========
 
 CREATE OR REPLACE FUNCTION get_calendar_data(start_date_param date, end_date_param date) RETURNS TABLE(item_id UUID, title TEXT, start_time TIMESTAMPTZ, end_time TIMESTAMPTZ, item_type TEXT, data JSONB) AS $$ BEGIN RETURN QUERY SELECT e.id, e.title, e.start_time, e.end_time, 'event' AS item_type, jsonb_build_object('description', e.description, 'is_all_day', e.is_all_day) FROM events e WHERE e.user_id = auth.uid() AND e.start_time::date BETWEEN start_date_param AND end_date_param UNION ALL SELECT t.id, t.title, (t.due_date + interval '9 hour')::timestamptz, NULL::timestamptz, 'task' AS item_type, jsonb_build_object('status', t.status, 'priority', t.priority) FROM tasks t WHERE t.user_id = auth.uid() AND t.due_date BETWEEN start_date_param AND end_date_param UNION ALL SELECT tr.id, tr.description, (tr.date + interval '12 hour')::timestamptz, NULL::timestamptz, 'transaction' AS item_type, jsonb_build_object('amount', tr.amount, 'type', tr.type, 'category', tr.category) FROM transactions tr WHERE tr.user_id = auth.uid() AND tr.date BETWEEN start_date_param AND end_date_param; END; $$ LANGUAGE plpgsql;
@@ -298,6 +328,10 @@ CREATE OR REPLACE FUNCTION delete_transaction_category(category_name TEXT) RETUR
 
 -- Ping function for keep-alive job
 CREATE OR REPLACE FUNCTION ping() RETURNS text AS $$ BEGIN RETURN 'pong'; END; $$ LANGUAGE plpgsql;
+
+-- Asset management function (optional to run periodically)
+CREATE OR REPLACE FUNCTION update_asset_usage() RETURNS void AS $$ DECLARE asset RECORD; usage JSONB; BEGIN FOR asset IN SELECT id, file_path FROM storage_assets LOOP usage := '[]'::jsonb; IF EXISTS (SELECT 1 FROM blog_posts WHERE cover_image_url LIKE '%' || asset.file_path || '%') THEN usage := usage || jsonb_build_object('type', 'Blog Cover', 'id', (SELECT id FROM blog_posts WHERE cover_image_url LIKE '%' || asset.file_path || '%' LIMIT 1)); END IF; IF EXISTS (SELECT 1 FROM blog_posts WHERE content LIKE '%' || asset.file_path || '%') THEN usage := usage || jsonb_build_object('type', 'Blog Content', 'id', (SELECT id FROM blog_posts WHERE content LIKE '%' || asset.file_path || '%' LIMIT 1)); END IF; IF EXISTS (SELECT 1 FROM portfolio_items WHERE image_url LIKE '%' || asset.file_path || '%') THEN usage := usage || jsonb_build_object('type', 'Portfolio Item', 'id', (SELECT id FROM portfolio_items WHERE image_url LIKE '%' || asset.file_path || '%' LIMIT 1)); END IF; UPDATE storage_assets SET used_in = usage WHERE id = asset.id; END LOOP; END; $$ LANGUAGE plpgsql;
+
 
 -- ========= STORAGE POLICIES =========
 -- Assumes a bucket named 'blog-assets' exists.
@@ -344,4 +378,40 @@ The public-facing site does not have a sign-up page. You must create your admin 
 
 You can now proceed to the [Local Setup section in the main README.md](README.md#5-run-the-development-server) to run the application and log in for the first time.
 
----
+-- 1. Create a table for global site settings (will only ever have one row)
+CREATE TABLE site_settings (
+  id INT PRIMARY KEY DEFAULT 1,
+  user_id UUID REFERENCES auth.users(id) ON DELETE CASCADE DEFAULT auth.uid(),
+  portfolio_mode TEXT NOT NULL DEFAULT 'multi-page' CHECK (portfolio_mode IN ('multi-page', 'single-page')),
+  updated_at TIMESTAMPTZ DEFAULT now(),
+  CONSTRAINT single_row_check CHECK (id = 1)
+);
+
+-- Pre-populate the single settings row
+INSERT INTO site_settings (id, user_id, portfolio_mode)
+VALUES (1, auth.uid(), 'multi-page')
+ON CONFLICT (id) DO NOTHING;
+
+-- Enable RLS
+ALTER TABLE site_settings ENABLE ROW LEVEL SECURITY;
+
+-- Policies for site_settings
+CREATE POLICY "Admin can manage site settings" ON site_settings FOR ALL USING (auth.uid() = user_id) WITH CHECK (auth.uid() = user_id);
+CREATE POLICY "Public can read site settings" ON site_settings FOR SELECT USING (true);
+
+
+-- 2. Upgrade the portfolio_sections table
+-- Drop the old boolean column if it exists
+ALTER TABLE portfolio_sections DROP COLUMN IF EXISTS show_on_showcase;
+
+-- Add a more flexible text column to decide where a section appears
+ALTER TABLE portfolio_sections
+ADD COLUMN IF NOT EXISTS display_location TEXT NOT NULL DEFAULT 'none'; -- 'none', 'home', 'showcase'
+
+-- Create an RPC function to easily fetch settings
+CREATE OR REPLACE FUNCTION get_site_settings()
+RETURNS TABLE (portfolio_mode TEXT) AS $$
+BEGIN
+  RETURN QUERY SELECT s.portfolio_mode FROM site_settings s LIMIT 1;
+END;
+$$ LANGUAGE plpgsql;

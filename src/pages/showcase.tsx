@@ -26,10 +26,10 @@ const ShowcaseItemCard: React.FC<{ item: PortfolioItem }> = ({ item }) => {
     <Card className="group relative flex h-full flex-col overflow-hidden bg-card/50 transition-all duration-300 hover:-translate-y-1 hover:border-primary/50 hover:shadow-lg hover:shadow-primary/10">
       {item.image_url && (
         <div className="relative aspect-[16/9] w-full overflow-hidden border-b bg-muted">
-          <img 
-            src={item.image_url} 
-            alt={item.title} 
-            className="h-full w-full object-cover object-center transition-transform duration-500 group-hover:scale-105" 
+          <img
+            src={item.image_url}
+            alt={item.title}
+            className="h-full w-full object-cover object-center transition-transform duration-500 group-hover:scale-105"
             loading="lazy"
           />
         </div>
@@ -47,9 +47,9 @@ const ShowcaseItemCard: React.FC<{ item: PortfolioItem }> = ({ item }) => {
             )}
           </div>
           {item.link_url && (
-             <div className="rounded-full bg-secondary/50 p-2 text-secondary-foreground opacity-0 transition-opacity group-hover:opacity-100">
-                <ArrowUpRight className="size-4" />
-             </div>
+            <div className="rounded-full bg-secondary/50 p-2 text-secondary-foreground opacity-0 transition-opacity group-hover:opacity-100">
+              <ArrowUpRight className="size-4" />
+            </div>
           )}
         </div>
       </CardHeader>
@@ -99,6 +99,7 @@ export default function ShowcasePage() {
         const { data, error: fetchError } = await supabase
           .from("portfolio_sections")
           .select(`*, portfolio_items (*)`)
+          .eq('show_on_showcase', true)
           .order("display_order", { ascending: true })
           .order("display_order", { foreignTable: "portfolio_items", ascending: true });
 
@@ -132,9 +133,9 @@ export default function ShowcasePage() {
       </Head>
 
       <main className="py-16 md:py-24">
-        <motion.header 
-           initial="hidden" animate="visible" variants={fadeInUp}
-           className="container mx-auto mb-24 max-w-4xl px-4 text-center"
+        <motion.header
+          initial="hidden" animate="visible" variants={fadeInUp}
+          className="container mx-auto mb-24 max-w-4xl px-4 text-center"
         >
           <h1 className="text-5xl font-black tracking-tighter md:text-7xl">
             {content.heading}
@@ -160,7 +161,7 @@ export default function ShowcasePage() {
           )}
 
           {!loading && !error && sections.map((section, index) => (
-            <motion.section 
+            <motion.section
               key={section.id}
               initial="hidden"
               whileInView="visible"
@@ -168,22 +169,22 @@ export default function ShowcasePage() {
               variants={staggerContainer}
             >
               <motion.div variants={fadeInUp} className="mb-12 flex items-baseline gap-4 border-b pb-4">
-                 <span className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-primary/5 text-lg font-bold text-primary font-mono">
-                    {String(index + 1).padStart(2, '0')}
-                 </span>
+                <span className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-primary/5 text-lg font-bold text-primary font-mono">
+                  {String(index + 1).padStart(2, '0')}
+                </span>
                 <h2 className="text-4xl font-bold tracking-tight">{section.title}</h2>
               </motion.div>
 
               {section.type === "markdown" && section.content && (
                 <motion.div variants={fadeInUp}>
                   <div className="prose dark:prose-invert max-w-3xl rounded-xl border bg-card/30 p-8 md:p-10 shadow-sm backdrop-blur-sm">
-                     <ReactMarkdown remarkPlugins={[remarkGfm]} rehypePlugins={[rehypeRaw]}>{section.content}</ReactMarkdown>
+                    <ReactMarkdown remarkPlugins={[remarkGfm]} rehypePlugins={[rehypeRaw]}>{section.content}</ReactMarkdown>
                   </div>
                 </motion.div>
               )}
 
               {section.type === "list_items" && section.portfolio_items && (
-                <motion.div 
+                <motion.div
                   variants={staggerContainer}
                   className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3"
                 >
@@ -197,7 +198,7 @@ export default function ShowcasePage() {
             </motion.section>
           ))}
         </div>
-        
+
         {!loading && !error && sections.length === 0 && (
           <div className="py-20 text-center text-muted-foreground">
             No content found. Time to add some in the admin panel!

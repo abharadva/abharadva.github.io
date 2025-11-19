@@ -15,7 +15,7 @@ import { Switch } from "@/components/ui/switch";
 import { toast } from "sonner";
 import { addDays, addWeeks, isAfter, isBefore, isSameDay, nextDay, setDate, addMonths, addYears, formatISO } from "date-fns";
 import type { RecurringTransaction } from "@/types";
-import { Banknote, CheckSquare, Edit, ListTodo, Loader2 } from "lucide-react";
+import { Banknote, CheckSquare, Edit, ListTodo, Loader2, Calendar } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Popover, PopoverContent, PopoverAnchor } from "@/components/ui/popover";
 import { Separator } from "@/components/ui/separator";
@@ -47,7 +47,6 @@ const mapItemToCalendarEvent = (item: CalendarItem): EventInput => {
         id: item.item_id,
         title: item.title,
         start: item.start_time,
-        // If item.end_time is null or undefined, use undefined. Otherwise, use item.end_time.
         end: item.end_time ?? undefined,
         allDay: item.item_type === 'task' || item.item_type === 'transaction' || item.data.is_all_day,
         extendedProps: { type: item.item_type, transactionType: transactionType, ...restOfData },
@@ -58,7 +57,6 @@ const mapItemToCalendarEvent = (item: CalendarItem): EventInput => {
 const CalendarPopoverContent: React.FC<{ event: EventInput; onEdit: () => void; onNavigate: (tab: any) => void; }> = ({ event, onEdit, onNavigate }) => {
     const { type, transactionType, amount, status, priority, description } = event.extendedProps || {};
 
-    // Determine sign and color for financial items
     const isEarning = transactionType === 'earning';
     const sign = isEarning ? '+' : '-';
     const amountColor = isEarning ? 'text-green-500' : 'text-red-500';
@@ -66,22 +64,28 @@ const CalendarPopoverContent: React.FC<{ event: EventInput; onEdit: () => void; 
     return (
         <PopoverContent className="w-80">
             <div className="space-y-4">
-                <h3 className="font-semibold">{event.title}</h3>
+                <h3 className="font-semibold text-base">{event.title}</h3>
                 <Separator />
                 <div className="space-y-2 text-sm">
                     {type === 'event' && description && <p className="text-muted-foreground">{description}</p>}
                     {type === 'task' && (
                         <>
-                            <p><strong>Status:</strong> <span className="capitalize">{status}</span></p>
-                            <p><strong>Priority:</strong> <span className="capitalize">{priority}</span></p>
+                            <p>
+                                <strong>Status:</strong> <span className="capitalize">{status}</span>
+                            </p>
+                            <p>
+                                <strong>Priority:</strong> <span className="capitalize">{priority}</span>
+                            </p>
                         </>
                     )}
                     {(type === 'transaction' || type === 'forecast') && (
                         <>
-                            <p><strong>Type:</strong> <span className="capitalize">{transactionType}</span></p>
+                            <p>
+                                <strong>Type:</strong> <span className="capitalize">{transactionType}</span>
+                            </p>
                             <p>
                                 <strong>Amount:</strong>{' '}
-                                <span className={cn("font-semibold", amountColor)}>
+                                <span className={cn("font-mono font-semibold", amountColor)}>
                                     {sign}${amount?.toFixed(2)}
                                 </span>
                             </p>
@@ -90,9 +94,12 @@ const CalendarPopoverContent: React.FC<{ event: EventInput; onEdit: () => void; 
                 </div>
                 <Separator />
                 <div className="flex gap-2">
-                    {type === 'event' && <Button onClick={onEdit} size="sm"><Edit className="mr-2 size-4" />Edit</Button>}
-                    {type === 'task' && <Button onClick={() => onNavigate('tasks')} size="sm" variant="secondary"><ListTodo className="mr-2 size-4" />Go to Tasks</Button>}
-                    {type === 'transaction' && <Button onClick={() => onNavigate('finance')} size="sm" variant="secondary"><Banknote className="mr-2 size-4" />Go to Finance</Button>}
+                    {type === 'event' && <Button onClick={onEdit} size="sm">
+                        <Edit className="mr-2 size-4" />Edit</Button>}
+                    {type === 'task' && <Button onClick={() => onNavigate('tasks')} size="sm" variant="secondary">
+                        <ListTodo className="mr-2 size-4" />Go to Tasks</Button>}
+                    {type === 'transaction' && <Button onClick={() => onNavigate('finance')} size="sm" variant="secondary">
+                        <Banknote className="mr-2 size-4" />Go to Finance</Button>}
                 </div>
             </div>
         </PopoverContent>
@@ -108,7 +115,6 @@ export default function CommandCalendar({ onNavigate }: { onNavigate: (tab: any)
         anchorProps: { display: 'none' },
         event: null,
     });
-
     const calendarContainerRef = useRef<HTMLDivElement>(null);
     const calendarApiRef = useRef<FullCalendar | null>(null);
 
@@ -185,7 +191,6 @@ export default function CommandCalendar({ onNavigate }: { onNavigate: (tab: any)
         const containerRect = calendarEl.getBoundingClientRect();
         const eventRect = eventEl.getBoundingClientRect();
 
-        // Position the anchor in the middle of the event element.
         const top = eventRect.top - containerRect.top + eventRect.height / 2;
         const left = eventRect.left - containerRect.left + eventRect.width / 2;
 
@@ -280,7 +285,6 @@ export default function CommandCalendar({ onNavigate }: { onNavigate: (tab: any)
             is_all_day: !!eventToEdit.allDay,
         });
 
-
         setPopoverState({ open: false, anchorProps: { display: 'none' }, event: null });
         setDialogState({ open: true, isNew: false });
     };
@@ -290,8 +294,10 @@ export default function CommandCalendar({ onNavigate }: { onNavigate: (tab: any)
 
         if (type === 'event' || type === 'task') {
             const isEvent = type === 'event';
-            const icon = isEvent ? <div className="size-2 rounded-full bg-primary" /> : <CheckSquare className="size-3.5 shrink-0" />;
+            const icon = isEvent ? <Calendar className="size-3.5 shrink-0" /> : <CheckSquare className="size-3.5 shrink-0" />;
             const iconClass = isEvent ? '' : cn({ "text-destructive": priority === 'high', "text-yellow-400": priority === 'medium', "text-blue-400": priority === 'low' });
+
+
             return (
                 <div className="flex w-full items-center gap-2 overflow-hidden p-1 text-xs text-foreground">
                     <div className={cn("flex h-full items-center", iconClass)}>{icon}</div>
@@ -311,17 +317,22 @@ export default function CommandCalendar({ onNavigate }: { onNavigate: (tab: any)
                     <div className={cn("mt-1.5 size-2 shrink-0 rounded-full", iconColor, isForecast && "opacity-50")} />
                     <div className="flex flex-col overflow-hidden">
                         <span className="truncate text-foreground">{eventInfo.event.title}</span>
-                        <span className={cn("font-mono font-semibold", amountColor)}>{`${sign}$${amount}`}</span>
+                        <span className={cn("font-mono text-[10px] font-semibold", amountColor)}>{`${sign}$${amount?.toFixed(2)}`}</span>
                     </div>
                 </div>
             )
         }
+
         return <i>{eventInfo.event.title}</i>;
     };
 
     return (
-        <div ref={calendarContainerRef} className="relative rounded-lg border bg-card p-4">
-            {isLoading && <div className="absolute inset-0 z-10 flex items-center justify-center bg-card/80 backdrop-blur-sm"><Loader2 className="size-6 animate-spin" /></div>}
+        <div ref={calendarContainerRef} className="relative rounded-lg border bg-card p-4 calendar-blueprint-theme">
+            {isLoading && (
+                <div className="absolute inset-0 z-10 flex items-center justify-center bg-card/80 backdrop-blur-sm rounded-lg">
+                    <Loader2 className="size-6 animate-spin text-primary" />
+                </div>
+            )}
 
             <Popover open={popoverState.open} onOpenChange={(open) => {
                 if (!open) {
@@ -356,22 +367,74 @@ export default function CommandCalendar({ onNavigate }: { onNavigate: (tab: any)
                 eventContent={renderEventContent}
                 height="auto"
             />
+
             <Dialog open={dialogState.open} onOpenChange={(open) => !open && setDialogState({ ...dialogState, open: false })}>
                 <DialogContent>
-                    <DialogHeader><DialogTitle>{dialogState.isNew ? 'Create New Event' : 'Edit Event'}</DialogTitle></DialogHeader>
+                    <DialogHeader>
+                        <DialogTitle className="text-lg">
+                            {dialogState.isNew ? 'Create New Event' : 'Edit Event'}
+                        </DialogTitle>
+                    </DialogHeader>
                     <form onSubmit={handleEventFormSubmit} className="space-y-4 pt-4">
-                        <div><Label htmlFor="title">Title</Label><Input id="title" value={eventFormData.title} onChange={(e) => setEventFormData({ ...eventFormData, title: e.target.value })} required /></div>
-                        <div><Label htmlFor="description">Description</Label><Textarea id="description" value={eventFormData.description} onChange={(e) => setEventFormData({ ...eventFormData, description: e.target.value })} /></div>
-                        <div className="flex items-center space-x-2"><Switch id="is_all_day" checked={eventFormData.is_all_day} onCheckedChange={(c) => setEventFormData({ ...eventFormData, is_all_day: c })} /><Label htmlFor="is_all_day">All-day event</Label></div>
+                        <div>
+                            <Label htmlFor="title">Title</Label>
+                            <Input
+                                id="title"
+                                value={eventFormData.title}
+                                onChange={(e) => setEventFormData({ ...eventFormData, title: e.target.value })}
+                                required
+                            />
+                        </div>
+                        <div>
+                            <Label htmlFor="description">Description</Label>
+                            <Textarea
+                                id="description"
+                                value={eventFormData.description}
+                                onChange={(e) => setEventFormData({ ...eventFormData, description: e.target.value })}
+                            />
+                        </div>
+                        <div className="flex items-center space-x-2">
+                            <Switch
+                                id="is_all_day"
+                                checked={eventFormData.is_all_day}
+                                onCheckedChange={(c) => setEventFormData({ ...eventFormData, is_all_day: c })}
+                            />
+                            <Label htmlFor="is_all_day">All-day event</Label>
+                        </div>
                         <div className="grid grid-cols-2 gap-4">
-                            <div><Label htmlFor="start_time">Start</Label><Input id="start_time" type="datetime-local" value={eventFormData.start_time} onChange={(e) => setEventFormData({ ...eventFormData, start_time: e.target.value })} required /></div>
-                            <div><Label htmlFor="end_time">End</Label><Input id="end_time" type="datetime-local" value={eventFormData.end_time} onChange={(e) => setEventFormData({ ...eventFormData, end_time: e.target.value })} /></div>
+                            <div>
+                                <Label htmlFor="start_time">Start</Label>
+                                <Input
+                                    id="start_time"
+                                    type="datetime-local"
+                                    value={eventFormData.start_time}
+                                    onChange={(e) => setEventFormData({ ...eventFormData, start_time: e.target.value })}
+                                    required
+                                />
+                            </div>
+                            <div>
+                                <Label htmlFor="end_time">End</Label>
+                                <Input
+                                    id="end_time"
+                                    type="datetime-local"
+                                    value={eventFormData.end_time}
+                                    onChange={(e) => setEventFormData({ ...eventFormData, end_time: e.target.value })}
+                                />
+                            </div>
                         </div>
                         <div className="flex justify-between pt-4">
-                            {!dialogState.isNew && <Button type="button" variant="destructive" onClick={handleDeleteEvent}>Delete</Button>}
+                            {!dialogState.isNew && (
+                                <Button type="button" variant="destructive" onClick={handleDeleteEvent}>
+                                    Delete
+                                </Button>
+                            )}
                             <div className="flex gap-2 ml-auto">
-                                <DialogClose asChild><Button type="button" variant="ghost">Cancel</Button></DialogClose>
-                                <Button type="submit">{dialogState.isNew ? 'Create' : 'Save Changes'}</Button>
+                                <DialogClose asChild>
+                                    <Button type="button" variant="ghost">Cancel</Button>
+                                </DialogClose>
+                                <Button type="submit">
+                                    {dialogState.isNew ? 'Create' : 'Save Changes'}
+                                </Button>
                             </div>
                         </div>
                     </form>

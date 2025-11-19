@@ -7,17 +7,19 @@
 @layer base {
   :root {
     /* A deep, focused dark theme inspired by code editors and technical diagrams */
-    --background: 220 20% 5%; /* Deepest navy/charcoal */
+    --background: 220 20% 5%;
+    /* Deepest navy/charcoal */
     --foreground: 210 20% 90%;
 
-    --card: 220 20% 8%; /* Slightly lighter for cards */
+    --card: 220 20% 8%;
+    /* Slightly lighter for cards */
     --card-foreground: 210 20% 90%;
 
     --popover: 220 20% 5%;
     --popover-foreground: 210 20% 90%;
 
     /* A vibrant, electric blue for primary actions and highlights */
-    --primary: 200 100% 50%; 
+    --primary: 200 100% 50%;
     --primary-foreground: 220 20% 5%;
 
     --secondary: 220 20% 12%;
@@ -27,9 +29,9 @@
     --muted-foreground: 220 10% 60%;
 
     /* Accent uses the same electric blue for consistency */
-    --accent: 200 100% 50%; 
+    --accent: 200 100% 50%;
     --accent-foreground: 220 20% 5%;
-    
+
     --destructive: 0 84% 60%;
     --destructive-foreground: 210 40% 98%;
 
@@ -37,7 +39,8 @@
     --input: 220 20% 12%;
     --ring: 200 100% 50%;
 
-    --radius: 0.375rem; /* Slightly sharper corners */
+    --radius: 0.375rem;
+    /* Slightly sharper corners */
 
     --chart-1: 200 80% 60%;
     --chart-2: 160 60% 55%;
@@ -53,66 +56,106 @@
   * {
     @apply border-border;
   }
+
   body {
     @apply bg-background text-foreground;
   }
+
   html {
     font-family: 'Inter', sans-serif;
   }
 
   /* Headings now use the sharp monospace font for a technical feel */
-  h1, h2, h3, h4, h5, h6 {
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
     @apply font-mono font-semibold;
   }
 
   /* --- FullCalendar Theming --- */
   /* This block applies the "Digital Blueprint" theme to the calendar component */
+  .calendar-blueprint-theme 
   .fc {
     /* General colors */
     --fc-border-color: hsl(var(--border));
     --fc-daygrid-event-dot-width: 6px;
     --fc-list-event-dot-width: 8px;
-    --fc-today-bg-color: hsl(var(--secondary) / 0.5);
-    --fc-page-bg-color: transparent;
-    --fc-neutral-bg-color: transparent;
+    --fc-today-bg-color: hsl(var(--primary) / 0.1);
+    --fc-page-bg-color: hsl(var(--card));
+    --fc-neutral-bg-color: hsl(var(--card));
+
+    /* Set the background for the entire calendar */
+    background-color: hsl(var(--card));
 
     /* Toolbar buttons to match shadcn/ui "outline" variant */
     .fc-button {
       @apply h-9 rounded-md px-3 text-sm font-medium;
       @apply border border-input bg-transparent hover:bg-accent hover:text-accent-foreground;
       @apply focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2;
+      @apply transition-colors;
     }
+
     .fc-button-primary {
       @apply bg-primary text-primary-foreground hover:bg-primary/90;
     }
+
     .fc-button-primary:disabled {
       @apply bg-primary/50;
     }
+
     .fc-button-active {
-       @apply bg-accent text-accent-foreground;
+      @apply bg-accent text-accent-foreground;
     }
-    
+
     /* Toolbar Title (e.g., "October 2024") */
     .fc-toolbar-title {
-      @apply font-mono text-lg font-bold text-foreground;
+      @apply font-mono text-xl font-bold text-foreground;
     }
 
     /* Day Headers (e.g., "Sun", "Mon") */
-    .fc-col-header-cell-cushion {
-      @apply font-mono text-xs uppercase text-muted-foreground;
+    .fc-col-header-cell {
+      background-color: hsl(var(--secondary)) !important;
+      border-color: hsl(var(--border)) !important;
     }
-    
+
+    .fc-col-header-cell-cushion {
+      @apply font-mono text-xs uppercase text-muted-foreground font-semibold;
+      padding: 0.75rem 0.5rem;
+    }
+
     /* Main grid and borders */
     .fc-theme-standard .fc-scrollgrid {
-      border-color: hsl(var(--border));
+      border-color: hsl(var(--border)) !important;
+    }
+
+    /* Day cells styling */
+    .fc-daygrid-day {
+      background-color: hsl(var(--card)) !important;
+      border-color: hsl(var(--border)) !important;
+    }
+
+    /* Today cell with electric blue glow */
+    .fc-day-today {
+      background-color: hsl(var(--primary) / 0.05) !important;
+      border: 1px solid hsl(var(--primary) / 0.3) !important;
     }
 
     /* Day numbers in month view */
     .fc-daygrid-day-number {
-      @apply text-muted-foreground text-xs;
+      @apply text-muted-foreground text-sm font-mono;
+      padding: 0.5rem;
     }
+
     .fc-day-today .fc-daygrid-day-number {
-      @apply font-bold text-foreground;
+      @apply font-bold text-primary;
+    }
+
+    /* Other month days (dimmed) */
+    .fc-day-other .fc-daygrid-day-number {
+      @apply text-muted-foreground/40;
     }
 
     /* --- EVENT STYLING OVERHAUL --- */
@@ -122,6 +165,7 @@
       background-color: transparent !important;
       border: none !important;
       cursor: pointer;
+      margin: 1px 2px;
     }
 
     /* Add visual feedback for dragging */
@@ -131,32 +175,150 @@
 
     /* Style the container for list-item events to add spacing and hover effect */
     .fc-daygrid-event {
-      @apply rounded-md transition-colors;
+      @apply rounded-md transition-all duration-200;
+      background-color: hsl(var(--secondary)) !important;
+      border-left: 2px solid transparent;
+      padding: 2px 4px;
     }
+
     .fc-daygrid-event:hover {
-       @apply bg-secondary;
+      @apply bg-secondary/80;
+      border-left-color: hsl(var(--primary));
+      transform: translateX(1px);
     }
-    
+
+    /* Time grid events (week/day view) */
+    .fc-timegrid-event {
+      @apply rounded-md transition-all duration-200;
+      background-color: hsl(var(--secondary)) !important;
+      border-left: 3px solid hsl(var(--primary)) !important;
+      border-right: none !important;
+      border-top: none !important;
+      border-bottom: none !important;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+    }
+
+    .fc-timegrid-event:hover {
+      background-color: hsl(var(--secondary) / 0.8) !important;
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.4);
+      transform: translateX(2px);
+    }
+
+    .fc-timegrid-event .fc-event-main {
+      padding: 4px 6px;
+    }
+
+    /* Time grid slots styling */
+    .fc-timegrid-slot {
+      border-color: hsl(var(--border)) !important;
+    }
+
+    .fc-timegrid-slot-minor {
+      border-color: hsl(var(--border) / 0.5) !important;
+    }
+
+    /* Time labels in time grid */
+    .fc-timegrid-slot-label {
+      @apply text-muted-foreground font-mono text-xs;
+    }
+
+    /* Time grid columns */
+    .fc-timegrid-col {
+      background-color: hsl(var(--card)) !important;
+    }
+
+    .fc-timegrid-col.fc-day-today {
+      background-color: hsl(var(--primary) / 0.05) !important;
+    }
+
+    /* Time grid axis (left column with times) */
+    .fc-timegrid-axis {
+      background-color: hsl(var(--secondary)) !important;
+      border-color: hsl(var(--border)) !important;
+    }
+
+    /* Now indicator (current time line) */
+    .fc-timegrid-now-indicator-line {
+      border-color: hsl(var(--primary)) !important;
+      border-width: 2px !important;
+    }
+
+    .fc-timegrid-now-indicator-arrow {
+      border-color: hsl(var(--primary)) !important;
+    }
+
     /* Remove default dot provided by FullCalendar for list-items */
     .fc-daygrid-event-dot {
       display: none;
     }
 
     /* Ensure our custom rendered content fills the event container */
-    .fc-event-main-frame, .fc-event-main {
+    .fc-event-main-frame,
+    .fc-event-main {
       @apply w-full;
     }
-    
+
+    /* Event time text styling */
+    .fc-event-time {
+      @apply font-mono text-[10px] text-muted-foreground;
+    }
+
     /* List view styling */
-    .fc-list-day-text, .fc-list-day-side-text {
-        color: hsl(var(--foreground));
-        font-weight: 600;
+    .fc-list-day-cushion {
+      background-color: hsl(var(--secondary));
+    }
+
+    .fc-list-day-text,
+    .fc-list-day-side-text {
+      color: hsl(var(--foreground));
+      font-weight: 600;
+    }
+
+    .fc-list-event {
+      background-color: hsl(var(--card));
+    }
+
+    .fc-list-event:hover {
+      background-color: hsl(var(--secondary));
+    }
+
+    /* More events link */
+    .fc-daygrid-more-link {
+      @apply text-primary hover:text-primary/80 font-mono text-xs;
+    }
+
+    /* Popover for "more events" */
+    .fc-more-popover {
+      background-color: hsl(var(--popover));
+      border: 1px solid hsl(var(--border));
+      box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.3);
+    }
+
+    .fc-more-popover .fc-popover-header {
+      background-color: hsl(var(--secondary));
+      color: hsl(var(--foreground));
+    }
+  }
+
+  /* Additional forced styles for stubborn FullCalendar elements */
+  .calendar-blueprint-theme {
+
+    .fc-scrollgrid,
+    .fc-scrollgrid-section,
+    .fc-scrollgrid-section>td {
+      background-color: hsl(var(--card)) !important;
+    }
+
+    .fc-theme-standard td,
+    .fc-theme-standard th {
+      border-color: hsl(var(--border)) !important;
     }
   }
 }
 
 
 @layer components {
+
   /* The new background grid pattern for the "Digital Blueprint" theme */
   .bg-grid-pattern {
     background-image: radial-gradient(hsl(var(--foreground)) / 0.1 1px, transparent 1px);

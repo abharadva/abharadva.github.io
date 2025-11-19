@@ -15,6 +15,7 @@ import { Label } from "@/components/ui/label";
 import { ResizableHandle, ResizablePanel, ResizablePanelGroup } from "@/components/ui/resizable";
 import { cn } from "@/lib/utils";
 import { ScrollArea } from "../ui/scroll-area";
+import { Switch } from "@/components/ui/switch";
 
 // Reusable component to edit a selected section
 const SectionEditor = ({
@@ -47,6 +48,27 @@ const SectionEditor = ({
             <CardDescription>Type: {section.type} | Order: {section.display_order}</CardDescription>
           </div>
           <div className="flex gap-2">
+            <div className="flex items-center space-x-2">
+              <Label htmlFor={`display-location-${section.id}`}>Display On</Label>
+              <Select
+                value={section.display_location || 'none'}
+                onValueChange={(value) =>
+                  onSaveSection({
+                    id: section.id,
+                    display_location: value as "none" | "home" | "showcase"
+                  })
+                }
+              >
+                <SelectTrigger id={`display-location-${section.id}`} className="w-[150px]">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="home">Home Page</SelectItem>
+                  <SelectItem value="showcase">Showcase Page</SelectItem>
+                  <SelectItem value="none">Hidden</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
             <Button variant="outline" size="sm" onClick={() => setIsEditingSection(!isEditingSection)}>
               <Edit className="mr-2 size-4" /> {isEditingSection ? 'Cancel' : 'Edit Section'}
             </Button>
@@ -62,7 +84,7 @@ const SectionEditor = ({
                 className="space-y-4"
               >
                 <div><Label htmlFor="title">Section Title</Label><Input id="title" name="title" defaultValue={section.title} required /></div>
-                <div><Label htmlFor="type">Section Type</Label><Select name="type" defaultValue={section.type}><SelectTrigger><SelectValue/></SelectTrigger><SelectContent><SelectItem value="markdown">Markdown</SelectItem><SelectItem value="list_items">List of Items</SelectItem></SelectContent></Select></div>
+                <div><Label htmlFor="type">Section Type</Label><Select name="type" defaultValue={section.type}><SelectTrigger><SelectValue /></SelectTrigger><SelectContent><SelectItem value="markdown">Markdown</SelectItem><SelectItem value="list_items">List of Items</SelectItem></SelectContent></Select></div>
                 <div className="flex gap-2"><Button type="submit">Save Changes</Button><Button variant="ghost" type="button" onClick={() => setIsEditingSection(false)}>Cancel</Button></div>
               </form>
             </div>
@@ -77,61 +99,63 @@ const SectionEditor = ({
           )}
 
           {section.type === 'list_items' && (
-             <div className="space-y-4">
-               <h4 className="font-semibold text-foreground">Items in this Section</h4>
-               {section.portfolio_items?.map(item => (
-                 <div key={item.id} className="rounded-md border p-3 flex justify-between items-start">
-                    <div>
-                      <p className="font-medium">{item.title}</p>
-                      <p className="text-sm text-muted-foreground">{item.subtitle}</p>
-                    </div>
-                    <div className="flex gap-1">
-                      <Button variant="ghost" size="icon" className="size-8" onClick={() => { setEditingItem(item); setIsCreatingItem(false); }}><Edit className="size-4"/></Button>
-                      <Button variant="ghost" size="icon" className="size-8 hover:bg-destructive/10 hover:text-destructive" onClick={() => onDeleteItem(item.id)}><Trash2 className="size-4"/></Button>
-                    </div>
-                 </div>
-               ))}
-               <Button variant="secondary" onClick={() => { setIsCreatingItem(true); setEditingItem(null); }}><Plus className="mr-2 size-4"/> Add New Item</Button>
-             </div>
+            <div className="space-y-4">
+              <h4 className="font-semibold text-foreground">Items in this Section</h4>
+              {section.portfolio_items?.map(item => (
+                <div key={item.id} className="rounded-md border p-3 flex justify-between items-start">
+                  <div>
+                    <p className="font-medium">{item.title}</p>
+                    <p className="text-sm text-muted-foreground">{item.subtitle}</p>
+                  </div>
+                  <div className="flex gap-1">
+                    <Button variant="ghost" size="icon" className="size-8" onClick={() => { setEditingItem(item); setIsCreatingItem(false); }}><Edit className="size-4" /></Button>
+                    <Button variant="ghost" size="icon" className="size-8 hover:bg-destructive/10 hover:text-destructive" onClick={() => onDeleteItem(item.id)}><Trash2 className="size-4" /></Button>
+                  </div>
+                </div>
+              ))}
+              <Button variant="secondary" onClick={() => { setIsCreatingItem(true); setEditingItem(null); }}><Plus className="mr-2 size-4" /> Add New Item</Button>
+            </div>
           )}
 
           {(isCreatingItem || editingItem) && (
             <div className="mt-6 rounded-md border bg-secondary/20 p-4">
-                <h4 className="mb-3 text-lg font-semibold">{editingItem ? `Editing: ${editingItem.title}` : 'Create New Item'}</h4>
-                <form
-                    onSubmit={(e) => {
-                        e.preventDefault();
-                        const formData = new FormData(e.currentTarget);
-                        const data: Partial<PortfolioItem> = {
-                            id: editingItem?.id,
-                            title: formData.get("item_title") as string,
-                            subtitle: (formData.get("item_subtitle") as string) || null,
-                            date_from: (formData.get("item_date_from") as string) || null,
-                            date_to: (formData.get("item_date_to") as string) || null,
-                            description: (formData.get("item_description") as string) || null,
-                            link_url: (formData.get("item_link_url") as string) || null,
-                            tags: (formData.get("item_tags") as string)?.split(',').map(t => t.trim()).filter(Boolean) || null,
-                        };
-                        onSaveItem(data, section.id);
-                        setEditingItem(null);
-                        setIsCreatingItem(false);
-                    }}
-                    className="space-y-3"
-                >
-                    <Input name="item_title" placeholder="Title" defaultValue={editingItem?.title || ""} required />
-                    <Input name="item_subtitle" placeholder="Subtitle" defaultValue={editingItem?.subtitle || ""} />
-                    <div className="grid grid-cols-2 gap-2">
-                        <Input name="item_date_from" placeholder="From (e.g., Jan 2022)" defaultValue={editingItem?.date_from || ""} />
-                        <Input name="item_date_to" placeholder="To (e.g., Present)" defaultValue={editingItem?.date_to || ""} />
-                    </div>
-                    <Textarea name="item_description" placeholder="Description" defaultValue={editingItem?.description || ""} rows={3}/>
-                    <Input name="item_link_url" placeholder="Link URL (e.g., https://...)" defaultValue={editingItem?.link_url || ""} />
-                    <Input name="item_tags" placeholder="Tags (comma,separated)" defaultValue={editingItem?.tags?.join(', ') || ""}/>
-                    <div className="flex gap-2 pt-2">
-                        <Button type="submit">Save Item</Button>
-                        <Button variant="outline" type="button" onClick={() => { setEditingItem(null); setIsCreatingItem(false); }}>Cancel</Button>
-                    </div>
-                </form>
+              <h4 className="mb-3 text-lg font-semibold">{editingItem ? `Editing: ${editingItem.title}` : 'Create New Item'}</h4>
+              <form
+                onSubmit={(e) => {
+                  e.preventDefault();
+                  const formData = new FormData(e.currentTarget);
+                  const data: Partial<PortfolioItem> = {
+                    id: editingItem?.id,
+                    title: formData.get("item_title") as string,
+                    subtitle: (formData.get("item_subtitle") as string) || null,
+                    date_from: (formData.get("item_date_from") as string) || null,
+                    date_to: (formData.get("item_date_to") as string) || null,
+                    description: (formData.get("item_description") as string) || null,
+                    link_url: (formData.get("item_link_url") as string) || null,
+                    image_url: (formData.get("item_image_url") as string) || null,
+                    tags: (formData.get("item_tags") as string)?.split(',').map(t => t.trim()).filter(Boolean) || null,
+                  };
+                  onSaveItem(data, section.id);
+                  setEditingItem(null);
+                  setIsCreatingItem(false);
+                }}
+                className="space-y-3"
+              >
+                <Input name="item_title" placeholder="Title" defaultValue={editingItem?.title || ""} required />
+                <Input name="item_subtitle" placeholder="Subtitle" defaultValue={editingItem?.subtitle || ""} />
+                <div className="grid grid-cols-2 gap-2">
+                  <Input name="item_date_from" placeholder="From (e.g., Jan 2022)" defaultValue={editingItem?.date_from || ""} />
+                  <Input name="item_date_to" placeholder="To (e.g., Present)" defaultValue={editingItem?.date_to || ""} />
+                </div>
+                <Textarea name="item_description" placeholder="Description" defaultValue={editingItem?.description || ""} rows={3} />
+                <Input name="item_link_url" placeholder="Link URL (e.g., https://...)" defaultValue={editingItem?.link_url || ""} />
+                <Input name="item_image_url" placeholder="Image URL (e.g., https://...)" defaultValue={editingItem?.image_url || ""} />
+                <Input name="item_tags" placeholder="Tags (comma,separated)" defaultValue={editingItem?.tags?.join(', ') || ""} />
+                <div className="flex gap-2 pt-2">
+                  <Button type="submit">Save Item</Button>
+                  <Button variant="outline" type="button" onClick={() => { setEditingItem(null); setIsCreatingItem(false); }}>Cancel</Button>
+                </div>
+              </form>
             </div>
           )}
 
@@ -153,7 +177,7 @@ export default function ContentManager() {
     setIsLoading(true);
     setError(null);
     const { data, error: err } = await supabase.from("portfolio_sections").select(`*, portfolio_items (*)`).order("display_order", { ascending: true }).order("display_order", { foreignTable: "portfolio_items", ascending: true });
-    if (err) { setError("Failed to load portfolio content: " + err.message); setSections([]); } 
+    if (err) { setError("Failed to load portfolio content: " + err.message); setSections([]); }
     else { setSections(data || []); }
     setIsLoading(false);
   };
@@ -162,7 +186,7 @@ export default function ContentManager() {
   const handleDragStart = (e: DragEvent<HTMLDivElement>, sectionId: string) => { setDraggedSectionId(sectionId); };
   const handleDragOver = (e: DragEvent<HTMLDivElement>) => e.preventDefault();
   const handleDragEnd = () => setDraggedSectionId(null);
-  
+
   const handleDrop = async (targetSectionId: string) => {
     if (!draggedSectionId || draggedSectionId === targetSectionId) return;
     const reorderedSections = [...sections];
@@ -171,7 +195,7 @@ export default function ContentManager() {
     const [draggedItem] = reorderedSections.splice(draggedIndex, 1);
     reorderedSections.splice(targetIndex, 0, draggedItem);
     setSections(reorderedSections); // Optimistic update
-    
+
     const sectionIdsInNewOrder = reorderedSections.map(s => s.id);
     const { error: rpcError } = await supabase.rpc('update_section_order', { section_ids: sectionIdsInNewOrder });
     if (rpcError) { setError("Failed to save new order."); await fetchPortfolioContent(); } // Revert on error
@@ -179,7 +203,7 @@ export default function ContentManager() {
 
   const handleSaveSection = async (data: Partial<PortfolioSection>) => {
     setIsLoading(true);
-    const response = data.id 
+    const response = data.id
       ? await supabase.from("portfolio_sections").update(data).eq("id", data.id)
       : await supabase.from("portfolio_sections").insert(data).select().single();
     if (response.error) setError(response.error.message);
@@ -193,14 +217,17 @@ export default function ContentManager() {
     setSelectedSectionId(null);
     await fetchPortfolioContent();
   };
-  
+
   const handleSaveItem = async (itemData: Partial<PortfolioItem>, sectionId: string) => {
     const dataToSave = { ...itemData, section_id: sectionId };
     const response = itemData.id
       ? await supabase.from("portfolio_items").update(dataToSave).eq("id", itemData.id)
       : await supabase.from("portfolio_items").insert(dataToSave);
     if (response.error) setError(response.error.message);
-    else await fetchPortfolioContent();
+    else {
+      await fetchPortfolioContent();
+      await supabase.rpc('update_asset_usage');
+    }
   };
 
   const handleDeleteItem = async (itemId: string) => {
@@ -216,7 +243,7 @@ export default function ContentManager() {
       <ResizablePanel defaultSize={25} minSize={20} maxSize={30}>
         <div className="flex h-full flex-col p-2">
           <Button onClick={() => { setIsCreating(true); setSelectedSectionId(null); }} className="mb-2">
-            <Plus className="mr-2 size-4"/> New Section
+            <Plus className="mr-2 size-4" /> New Section
           </Button>
           <div className="flex-grow overflow-auto">
             {sections.map(section => (
@@ -234,7 +261,7 @@ export default function ContentManager() {
                   className="w-full justify-start"
                   onClick={() => { setSelectedSectionId(section.id); setIsCreating(false); }}
                 >
-                  <GripVertical className="mr-2 size-4 text-muted-foreground cursor-grab"/>
+                  <GripVertical className="mr-2 size-4 text-muted-foreground cursor-grab" />
                   {section.title}
                 </Button>
               </div>
@@ -251,7 +278,7 @@ export default function ContentManager() {
               <CardContent>
                 <form onSubmit={(e) => { e.preventDefault(); const formData = new FormData(e.currentTarget); handleSaveSection({ title: formData.get("title") as string, type: formData.get("type") as any }); }} className="space-y-4">
                   <div><Label htmlFor="new-title">Section Title</Label><Input id="new-title" name="title" required /></div>
-                  <div><Label htmlFor="new-type">Section Type</Label><Select name="type" defaultValue="list_items" required><SelectTrigger><SelectValue/></SelectTrigger><SelectContent><SelectItem value="markdown">Markdown</SelectItem><SelectItem value="list_items">List of Items</SelectItem></SelectContent></Select></div>
+                  <div><Label htmlFor="new-type">Section Type</Label><Select name="type" defaultValue="list_items" required><SelectTrigger><SelectValue /></SelectTrigger><SelectContent><SelectItem value="markdown">Markdown</SelectItem><SelectItem value="list_items">List of Items</SelectItem></SelectContent></Select></div>
                   <div className="flex gap-2"><Button type="submit">Create Section</Button><Button variant="ghost" onClick={() => setIsCreating(false)}>Cancel</Button></div>
                 </form>
               </CardContent>

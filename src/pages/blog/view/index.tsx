@@ -1,3 +1,5 @@
+// src/pages/blog/view/index.tsx
+
 import { useRouter } from "next/router";
 import { useEffect, useState } from "react";
 import { supabase } from "@/supabase/client";
@@ -19,8 +21,6 @@ import rehypeRaw from 'rehype-raw';
 import rehypePrism from 'rehype-prism-plus';
 import NotFoundComponent from "@/components/not-found";
 import { BsTwitterX } from "react-icons/bs";
-
-// --- Reusable Sub-Components for the Page ---
 
 const PostBreadcrumb = ({ post }: { post: BlogPost }) => (
   <nav aria-label="breadcrumb">
@@ -45,9 +45,7 @@ const PostMeta = ({ post, readTime }: { post: BlogPost, readTime: number }) => (
     <div className="text-sm">
       <p className="font-semibold text-foreground">{appConfig.site.author}</p>
       <div className="flex flex-wrap items-center gap-x-2 gap-y-1 text-muted-foreground">
-        <time dateTime={new Date(post.published_at || post.created_at || "").toISOString()}>
-          {formatDate(post.published_at || post.created_at || new Date())}
-        </time>
+        <time dateTime={new Date(post.published_at || post.created_at || "").toISOString()}>{formatDate(post.published_at || post.created_at || new Date())}</time>
         <span className="hidden sm:inline">·</span>
         <span className="flex items-center gap-1.5">
           <Clock className="size-4" /> {readTime} min read</span>
@@ -61,13 +59,7 @@ const PostMeta = ({ post, readTime }: { post: BlogPost, readTime: number }) => (
 
 const PostContent = ({ content }: { content: string }) => (
   <div className="prose dark:prose-invert max-w-none prose-p:text-foreground/80 prose-headings:text-foreground prose-a:text-primary hover:prose-a:text-primary/80 prose-strong:text-foreground">
-    <ReactMarkdown
-      remarkPlugins={[remarkGfm]}
-      rehypePlugins={[rehypeRaw, rehypePrism]}
-      components={{
-        a: ({ node, ...props }) => <a {...props} target="_blank" rel="noopener noreferrer" />,
-      }}
-    >
+    <ReactMarkdown remarkPlugins={[remarkGfm]} rehypePlugins={[rehypeRaw, rehypePrism]} components={{ a: ({ node, ...props }) => <a {...props} target="_blank" rel="noopener noreferrer" />, }}>
       {content}
     </ReactMarkdown>
   </div>
@@ -79,11 +71,9 @@ const PostFooter = ({ post, onShareX, onShareLinkedIn }: { post: BlogPost, onSha
       <div>
         <h3 className="mb-3 text-lg font-semibold">Tags</h3>
         <div className="flex flex-wrap gap-2">
-          {post.tags.map((tag) => (
-            <Badge key={tag} variant="secondary">
-              <Link href={`/blog/tags/${encodeURIComponent(tag.toLowerCase())}`}>#{tag}</Link>
-            </Badge>
-          ))}
+          {post.tags.map((tag) => <Badge key={tag} variant="secondary">
+            <Link href={`/blog/tags/${encodeURIComponent(tag.toLowerCase())}`}>#{tag}</Link>
+          </Badge>)}
         </div>
       </div>
     )}
@@ -99,7 +89,7 @@ const PostFooter = ({ post, onShareX, onShareLinkedIn }: { post: BlogPost, onSha
   </footer>
 );
 
-// --- Main Page Component ---
+
 export default function BlogPostViewPage() {
   const router = useRouter();
   const { slug } = router.query;
@@ -107,34 +97,29 @@ export default function BlogPostViewPage() {
   const { site: siteConfig } = appConfig;
 
   useEffect(() => {
-    if (router.isReady) {
-      if (slug && typeof slug === "string") {
-        const fetchPostData = async () => {
-          setPost(undefined);
-          try {
-            const { data, error } = await supabase.from("blog_posts").select("*").eq("slug", slug).eq("published", true).single();
-            if (error && error.code !== "PGRST116") throw error;
-            setPost(data);
-          } catch (e) {
-            console.error("Failed to fetch post", e);
-            setPost(null);
-          }
-        };
-        fetchPostData();
-      } else {
-        setPost(null);
-      }
+    if (router.isReady && slug && typeof slug === "string") {
+      const fetchPostData = async () => {
+        setPost(undefined);
+        try {
+          const { data, error } = await supabase.from("blog_posts").select("*").eq("slug", slug).eq("published", true).single();
+          if (error && error.code !== "PGRST116") throw error;
+          setPost(data);
+        } catch (e) {
+          console.error("Failed to fetch post", e);
+          setPost(null);
+        }
+      };
+      fetchPostData();
+    } else if (router.isReady) {
+      setPost(null);
     }
   }, [slug, router.isReady]);
 
-  // View counter
+
   useEffect(() => {
     if (post?.id && process.env.NODE_ENV === "production") {
       const timer = setTimeout(async () => {
-        const { error } = await supabase.rpc("increment_blog_post_view", {
-          post_id_to_increment: post.id
-        });
-        if (error) { console.error("Failed to increment view count:", error); }
+        await supabase.rpc("increment_blog_post_view", { post_id_to_increment: post.id });
       }, 3000);
       return () => clearTimeout(timer);
     }
@@ -158,16 +143,8 @@ export default function BlogPostViewPage() {
   const metaDescription = post.excerpt || post.content?.substring(0, 160).replace(/\n/g, " ") || post.title;
   const readTime = Math.max(1, Math.ceil((post.content?.split(/\s+/).filter(Boolean).length || 0) / 225));
 
-  const shareOnX = () => {
-    const text = encodeURIComponent(`Check out this article: ${post.title}`);
-    const url = encodeURIComponent(postUrl);
-    window.open(`https://x.com/intent/tweet?text=${text}&url=${url}`, '_blank');
-  };
-
-  const shareOnLinkedIn = () => {
-    const url = encodeURIComponent(postUrl);
-    window.open(`https://www.linkedin.com/sharing/share-offsite/?url=${url}`, '_blank');
-  };
+  const shareOnX = () => window.open(`https://x.com/intent/tweet?text=${encodeURIComponent(`Check out this article: ${post.title}`)}&url=${encodeURIComponent(postUrl)}`, '_blank');
+  const shareOnLinkedIn = () => window.open(`https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(postUrl)}`, '_blank');
 
   return (
     <Layout>
@@ -179,36 +156,16 @@ export default function BlogPostViewPage() {
         <link rel="canonical" href={postUrl} />
       </Head>
       <main className="py-8 md:py-16">
-        <motion.article
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5 }}
-          className="mx-auto max-w-4xl px-4"
-        >
+        <motion.article initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }} className="mx-auto max-w-4xl px-4">
           <PostBreadcrumb post={post} />
-
-          <h1 className="mt-6 text-4xl font-extrabold leading-tight tracking-tighter text-foreground md:text-5xl lg:text-6xl">
-            {post.title}
-          </h1>
-
-          {post.excerpt && (
-            <p className="mt-4 text-lg text-muted-foreground md:text-xl">{post.excerpt}</p>
-          )}
-
+          <h1 className="mt-6 text-4xl font-extrabold leading-tight tracking-tighter text-foreground md:text-5xl lg:text-6xl">{post.title}</h1>
+          {post.excerpt && <p className="mt-4 text-lg text-muted-foreground md:text-xl">{post.excerpt}</p>}
           <div className="mt-8">
             <PostMeta post={post} readTime={readTime} />
           </div>
-
-          {post.cover_image_url && (
-            <img src={post.cover_image_url} alt={post.title} width={1200} height={630} className="my-8 h-auto w-full rounded-lg border object-cover" />
-          )}
-
-          <div className="mt-8">
-            {post.content && <PostContent content={post.content} />}
-          </div>
-
+          {post.cover_image_url && <img src={post.cover_image_url} alt={post.title} width={1200} height={630} className="my-8 h-auto w-full rounded-lg border object-cover" />}
+          <div className="mt-8">{post.content && <PostContent content={post.content} />}</div>
           <Separator className="my-12" />
-
           <PostFooter post={post} onShareX={shareOnX} onShareLinkedIn={shareOnLinkedIn} />
         </motion.article>
       </main>

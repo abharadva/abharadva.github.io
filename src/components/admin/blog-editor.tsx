@@ -116,6 +116,7 @@ export default function BlogEditor({
       internal_notes: formData.internal_notes || null
     };
     await onSave(postDataToSave);
+    await supabase.rpc('update_asset_usage');
     setIsSaving(false);
   };
 
@@ -150,7 +151,8 @@ export default function BlogEditor({
       }));
     }
 
-    const fileName = `${Date.now()}_${compressedFile.name.replace(/\s+/g, "_")}`;
+    const sanitizedName = compressedFile.name.replace(/[^a-zA-Z0-9._-]/g, '_').replace(/__+/g, '_');
+    const fileName = `${Date.now()}_${sanitizedName}`;
     const filePath = `blog_images/${fileName}`;
 
     const { data, error: uploadError } = await supabase.storage
@@ -275,16 +277,16 @@ export default function BlogEditor({
                     value={formData.cover_image_url}
                     onChange={(e) => setFormData((prev) => ({ ...prev, cover_image_url: e.target.value }))}
                     className="mb-2"
-                    placeholder="Paste image URL or upload"
+                    placeholder="Paste image URL"
                   />
-                  <Input
+                  {/* <Input
                     type="file"
                     id="cover_image_file_input"
                     ref={coverImageFileInputRef}
                     accept="image/*"
                     onChange={(e) => onFileSelected(e, true)}
-                  />
-                  {formData.cover_image_url && <Image src={formData.cover_image_url} alt="Cover preview" className="mt-2 max-h-40 w-full rounded-md border object-contain" />}
+                  /> */}
+                  {formData.cover_image_url && <img src={formData.cover_image_url} alt="Cover preview" className="mt-2 max-h-40 w-full rounded-md border object-contain" />}
                   {errors.cover_image_url && <p className="mt-1 text-xs text-destructive">{errors.cover_image_url}</p>}
                 </div>
               </div>

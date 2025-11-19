@@ -11,6 +11,9 @@ import {
     Calendar as CalendarIcon,
     BrainCircuit,
     Home,
+    Navigation,
+    ImageIcon,
+    Settings,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -23,6 +26,9 @@ const navigation = [
     { name: "Notes", href: "/admin/notes", icon: StickyNote },
     { name: "Finance", href: "/admin/finance", icon: Banknote },
     { name: "Learning", href: "/admin/learning", icon: BrainCircuit },
+    { name: "Assets", href: "/admin/assets", icon: ImageIcon },
+    { name: "Navigation", href: "/admin/navigation", icon: Navigation },
+    { name: "Settings", href: "/admin/settings", icon: Settings },
     { name: "Security", href: "/admin/security", icon: Lock },
 ];
 

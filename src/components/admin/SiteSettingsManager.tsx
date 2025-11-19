@@ -1,123 +1,80 @@
-
+// src/components/admin/SiteSettingsManager.tsx
 "use client";
 import React, { useState, useEffect } from "react";
 import { supabase } from "@/supabase/client";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Loader2, Trash2, Plus } from "lucide-react";
 import { toast } from "sonner";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import { Label } from "@/components/ui/label";
+import { Loader2 } from "lucide-react";
 
-interface SocialLink {
-  name: string;
-  url: string;
-}
+type PortfolioMode = 'multi-page' | 'single-page';
 
 export default function SiteSettingsManager() {
-  const [settings, setSettings] = useState<any>(null);
-  const [socialLinks, setSocialLinks] = useState<SocialLink[]>([]);
+  const [mode, setMode] = useState<PortfolioMode>('multi-page');
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
     const fetchSettings = async () => {
       setIsLoading(true);
-      const { data, error } = await supabase.from("site_config").select("*").single();
-      if (error) {
-        toast.error("Failed to load site settings", { description: error.message });
-      } else {
-        setSettings(data);
-        setSocialLinks(data.social_links || []);
-      }
+      const { data, error } = await supabase.from("site_settings").select("portfolio_mode").single();
+      if (data) setMode(data.portfolio_mode as PortfolioMode);
       setIsLoading(false);
     };
     fetchSettings();
   }, []);
 
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-    const { name, value } = e.target;
-    setSettings({ ...settings, [name]: value });
-  };
-
-  const handleSocialLinkChange = (index: number, field: keyof SocialLink, value: string) => {
-    const newLinks = [...socialLinks];
-    newLinks[index][field] = value;
-    setSocialLinks(newLinks);
-  };
-
-  const addSocialLink = () => {
-    setSocialLinks([...socialLinks, { name: "", url: "" }]);
-  };
-
-  const removeSocialLink = (index: number) => {
-    setSocialLinks(socialLinks.filter((_, i) => i !== index));
-  };
-
   const handleSave = async () => {
     setIsLoading(true);
-    const { id, updated_at, ...settingsToUpdate } = settings;
-    settingsToUpdate.social_links = socialLinks;
-
-    const { error } = await supabase.from("site_config").update(settingsToUpdate).eq("id", id);
-    if (error) {
-      toast.error("Failed to save settings", { description: error.message });
-    } else {
-      toast.success("Site settings updated successfully!");
-    }
+    const { error } = await supabase.from("site_settings").update({ portfolio_mode: mode }).eq("id", 1);
+    if (error) { toast.error("Failed to save settings", { description: error.message }); }
+    else { toast.success("Portfolio mode updated successfully!"); }
     setIsLoading(false);
   };
 
-  if (isLoading && !settings) {
-    return <div className="flex justify-center p-8"><Loader2 className="animate-spin" /></div>;
-  }
+  if (isLoading) return <div className="flex justify-center p-8"><Loader2 className="animate-spin" /></div>;
   
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 max-w-2xl mx-auto">
       <div>
-        <h2 className="text-2xl font-bold">Site-wide Settings</h2>
-        <p className="text-muted-foreground">Manage global content like hero text and social links.</p>
+        <h2 className="text-2xl font-bold">Site Settings</h2>
+        <p className="text-muted-foreground">Manage global settings for your portfolio's structure and layout.</p>
       </div>
-      <Card>
-        <CardHeader><CardTitle>Hero Section</CardTitle></CardHeader>
-        <CardContent className="space-y-4">
-          <div><Label htmlFor="hero_name">Name</Label><Input id="hero_name" name="hero_name" value={settings?.hero_name || ""} onChange={handleInputChange} /></div>
-          <div><Label htmlFor="hero_title">Title / Tagline</Label><Input id="hero_title" name="hero_title" value={settings?.hero_title || ""} onChange={handleInputChange} /></div>
-          <div><Label htmlFor="hero_bio">Bio</Label><Textarea id="hero_bio" name="hero_bio" value={settings?.hero_bio || ""} onChange={handleInputChange} /></div>
-        </CardContent>
-      </Card>
-      
       <Card>
         <CardHeader>
-          <div className="flex justify-between items-center">
-            <CardTitle>Social Links</CardTitle>
-            <Button size="sm" variant="outline" onClick={addSocialLink}><Plus className="mr-2 size-4" /> Add Link</Button>
-          </div>
+          <CardTitle>Portfolio Layout Mode</CardTitle>
+          <CardDescription>Choose how visitors navigate your content.</CardDescription>
         </CardHeader>
-        <CardContent className="space-y-3">
-          {socialLinks.map((link, index) => (
-            <div key={index} className="flex items-center gap-2">
-              <Input placeholder="Name (e.g., GitHub)" value={link.name} onChange={(e) => handleSocialLinkChange(index, "name", e.target.value)} />
-              <Input placeholder="URL" value={link.url} onChange={(e) => handleSocialLinkChange(index, "url", e.target.value)} />
-              <Button size="icon" variant="destructive" onClick={() => removeSocialLink(index)}><Trash2 className="size-4" /></Button>
-            </div>
-          ))}
-        </CardContent>
-      </Card>
-
-      <Card>
-        <CardHeader><CardTitle>Footer</CardTitle></CardHeader>
         <CardContent>
-          <div><Label htmlFor="footer_text">Footer Text</Label><Input id="footer_text" name="footer_text" value={settings?.footer_text || ""} onChange={handleInputChange} /></div>
+          <RadioGroup value={mode} onValueChange={(value: PortfolioMode) => setMode(value)}>
+            <div className="flex items-start space-x-3 rounded-md border p-4">
+              <RadioGroupItem value="multi-page" id="multi-page" />
+              <Label htmlFor="multi-page" className="flex flex-col space-y-1">
+                <span className="font-semibold">Multi-Page</span>
+                <span className="text-sm font-normal text-muted-foreground">
+                  Traditional site with separate pages for Projects, About, etc. All navigation links are shown.
+                </span>
+              </Label>
+            </div>
+            <div className="flex items-start space-x-3 rounded-md border p-4">
+              <RadioGroupItem value="single-page" id="single-page" />
+              <Label htmlFor="single-page" className="flex flex-col space-y-1">
+                <span className="font-semibold">Single-Page</span>
+                <span className="text-sm font-normal text-muted-foreground">
+                  All selected "Home" content appears on the main page. Most navigation links are hidden.
+                </span>
+              </Label>
+            </div>
+          </RadioGroup>
         </CardContent>
+        <CardFooter>
+          <Button onClick={handleSave} disabled={isLoading}>
+            {isLoading && <Loader2 className="mr-2 size-4 animate-spin" />}
+            Save Settings
+          </Button>
+        </CardFooter>
       </Card>
-
-      <div className="flex justify-end">
-        <Button onClick={handleSave} disabled={isLoading}>
-          {isLoading && <Loader2 className="mr-2 size-4 animate-spin" />}
-          Save All Settings
-        </Button>
-      </div>
     </div>
   );
 }

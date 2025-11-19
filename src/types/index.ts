@@ -8,6 +8,7 @@ export interface PortfolioSection {
   display_order?: number;
   created_at?: string;
   updated_at?: string;
+  display_location?: 'none' | 'home' | 'showcase';
   portfolio_items?: PortfolioItem[];
 }
 
