@@ -1,4 +1,3 @@
-
 import Head from "next/head";
 import { PropsWithChildren, useEffect, useState } from "react";
 import Container from "./container";
@@ -75,7 +74,7 @@ export default function Layout({ children, isAdmin = false }: LayoutProps) {
         <motion.div
           className="pointer-events-none fixed inset-0 z-[-1] transition duration-300"
           style={{
-            background: `radial - gradient(400px at ${mousePosition.x}px ${mousePosition.y}px, hsl(var(--primary) / 0.15), transparent 80%)`,
+            background: `radial-gradient(400px at ${mousePosition.x}px ${mousePosition.y}px, hsl(var(--primary) / 0.15), transparent 80%)`,
           }}
         />
         <div className="fixed inset-0 z-[-2] h-full w-full bg-background" />
@@ -92,4 +91,3 @@ export default function Layout({ children, isAdmin = false }: LayoutProps) {
     </>
   );
 }
-

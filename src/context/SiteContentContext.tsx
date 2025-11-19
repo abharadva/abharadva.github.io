@@ -26,6 +26,16 @@ export interface SiteContent {
       };
     };
     bio: string[];
+    github_projects_config: {
+      username: string;
+      show: boolean;
+      sort_by: 'created' | 'updated' | 'pushed';
+      exclude_forks: boolean;
+      exclude_archived: boolean;
+      exclude_profile_repo: boolean;
+      min_stars: number;
+      projects_per_page: number;
+    };
   };
   social_links: {
     id: string;

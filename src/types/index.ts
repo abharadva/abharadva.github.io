@@ -7,11 +7,9 @@ export interface PortfolioSection {
   display_order?: number;
   created_at?: string;
   updated_at?: string;
-  // --- MODIFIED LINES START ---
-  is_visible: boolean; // Add visibility flag
-  page_path: string; // Change display_location to page_path
-  layout_style: string; // Add layout style
-  // --- MODIFIED LINES END ---
+  is_visible: boolean;
+  page_path: string;
+  layout_style: string;
   portfolio_items?: PortfolioItem[];
 }
 

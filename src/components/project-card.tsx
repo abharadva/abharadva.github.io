@@ -19,13 +19,13 @@ export default function ProjectCard({ project }: ProjectCardProps) {
             {project.name.replaceAll("-", " ")}
           </CardTitle>
           <div className="flex items-center gap-1 font-mono text-xs text-muted-foreground">
-             <Star className="size-3" />
-             <span>{project.stargazers_count}</span>
+            <Star className="size-3" />
+            <span>{project.stargazers_count}</span>
           </div>
         </div>
-        <CardDescription className="line-clamp-3 pt-1 text-sm">
-          {project.description || <span className="italic">No description provided.</span>}
-        </CardDescription>
+        {project.description ? <CardDescription className="line-clamp-3 pt-1 text-sm">
+          {project.description}
+        </CardDescription> : null}
       </CardHeader>
       <CardContent className="flex-grow" />
       {(project.language || (project.topics && project.topics.length > 0)) && (
@@ -42,9 +42,9 @@ export default function ProjectCard({ project }: ProjectCardProps) {
         </CardFooter>
       )}
       {project.html_url && (
-         <Link href={project.html_url} target="_blank" rel="noopener noreferrer" className="absolute inset-0 z-10">
-            <span className="sr-only">View project: {project.name}</span>
-         </Link>
+        <Link href={project.html_url} target="_blank" rel="noopener noreferrer" className="absolute inset-0 z-10">
+          <span className="sr-only">View project: {project.name}</span>
+        </Link>
       )}
     </Card>
   );

@@ -16,11 +16,11 @@ import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, For
 import { Loader2 } from 'lucide-react';
 import { Separator } from '../ui/separator';
 import { Switch } from '@/components/ui/switch';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../ui/select';
 
-// --- UPDATED ZOD SCHEMA for social links ---
 const socialLinkSchema = z.object({
   id: z.string(),
-  label: z.string(), // Label is static, no validation needed
+  label: z.string(),
   url: z.string().url("Must be a valid URL"),
   is_visible: z.boolean(),
 });
@@ -49,6 +49,16 @@ const settingsFormSchema = z.object({
         href: z.string().min(1, "Project URL path is required"),
       }),
     }),
+    github_projects_config: z.object({
+      username: z.string().min(1, "GitHub username is required."),
+      show: z.boolean(),
+      sort_by: z.enum(['pushed', 'created', 'updated']),
+      exclude_forks: z.boolean(),
+      exclude_archived: z.boolean(),
+      exclude_profile_repo: z.boolean(),
+      min_stars: z.coerce.number().min(0, "Cannot be negative."),
+      projects_per_page: z.coerce.number().min(1, "Must be at least 1.").max(100, "Max is 100."),
+    }),
   }),
   social_links: z.array(socialLinkSchema),
   footer_data: z.object({
@@ -67,13 +77,26 @@ export default function SiteSettingsManager() {
         { id: 'linkedin', label: 'LinkedIn', url: '', is_visible: true },
         { id: 'email', label: 'Email', url: '', is_visible: true },
       ],
-      profile_data: { bio: [''], status_panel: { currently_exploring: { items: [''] } } },
+      profile_data: {
+        bio: [''],
+        status_panel: { currently_exploring: { items: [''] } },
+        github_projects_config: {
+          username: '',
+          show: true,
+          sort_by: 'pushed',
+          exclude_forks: true,
+          exclude_archived: true,
+          exclude_profile_repo: true,
+          min_stars: 1,
+          projects_per_page: 9,
+        }
+      },
     },
   });
 
   useEffect(() => {
     const fetchSettings = async () => {
-      form.reset(); // Clear previous state
+      form.reset();
       const { data: identityData, error: identityError } = await supabase.from("site_identity").select("*").single();
       const { data: settingsData, error: settingsError } = await supabase.from("site_settings").select("*").single();
 
@@ -82,7 +105,6 @@ export default function SiteSettingsManager() {
         return;
       }
 
-      // Merge fetched social links with default structure to ensure all are present
       const defaultSocials = [
         { id: 'github', label: 'GitHub', url: '', is_visible: true },
         { id: 'linkedin', label: 'LinkedIn', url: '', is_visible: true },
@@ -97,7 +119,13 @@ export default function SiteSettingsManager() {
 
       form.reset({
         portfolio_mode: settingsData.portfolio_mode,
-        profile_data: { ...identityData.profile_data, bio: identityData.profile_data.bio || [''], status_panel: { ...identityData.profile_data.status_panel, currently_exploring: { ...identityData.profile_data.status_panel.currently_exploring, items: identityData.profile_data.status_panel.currently_exploring.items || [''] } } },
+        profile_data: {
+          ...form.getValues().profile_data, // Keep form defaults
+          ...identityData.profile_data, // Override with fetched data
+          bio: identityData.profile_data.bio || [''],
+          status_panel: { ...identityData.profile_data.status_panel, currently_exploring: { ...identityData.profile_data.status_panel.currently_exploring, items: identityData.profile_data.status_panel.currently_exploring.items || [''] } },
+          github_projects_config: { ...form.getValues().profile_data.github_projects_config, ...identityData.profile_data.github_projects_config },
+        },
         social_links: mergedSocials,
         footer_data: identityData.footer_data,
       });
@@ -169,26 +197,15 @@ export default function SiteSettingsManager() {
                   </FormControl>
                   <FormMessage />
                 </FormItem>)} />
-                <FormField
-                  control={form.control}
-                  name="profile_data.show_profile_picture"
-                  render={({ field }) => (
-                    <FormItem className="flex flex-row items-center justify-between rounded-lg border p-3 shadow-sm">
-                      <div className="space-y-0.5">
-                        <FormLabel>Show Profile Picture</FormLabel>
-                        <FormDescription>
-                          Display your avatar on the "About" page.
-                        </FormDescription>
-                      </div>
-                      <FormControl>
-                        <Switch
-                          checked={field.value}
-                          onCheckedChange={field.onChange}
-                        />
-                      </FormControl>
-                    </FormItem>
-                  )}
-                />
+                <FormField control={form.control} name="profile_data.show_profile_picture" render={({ field }) => (<FormItem className="flex flex-row items-center justify-between rounded-lg border p-3 shadow-sm">
+                  <div className="space-y-0.5">
+                    <FormLabel>Show Profile Picture</FormLabel>
+                    <FormDescription>Display your avatar on the "About" page.</FormDescription>
+                  </div>
+                  <FormControl>
+                    <Switch checked={field.value} onCheckedChange={field.onChange} />
+                  </FormControl>
+                </FormItem>)} />
               </CardContent>
             </Card>
 
@@ -252,40 +269,99 @@ export default function SiteSettingsManager() {
                 <CardTitle>Social Links</CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
-                {/* --- THIS IS THE CORRECTED MAPPING --- */}
                 {form.getValues('social_links').map((field, index) => (
                   <div key={field.id} className="space-y-2">
                     <div className="flex items-center justify-between">
                       <FormLabel>{field.label}</FormLabel>
-                      <FormField
-                        control={form.control}
-                        name={`social_links.${index}.is_visible`}
-                        render={({ field: switchField }) => (
-                          <FormItem>
-                            <FormControl>
-                              <Switch
-                                checked={switchField.value}
-                                onCheckedChange={switchField.onChange}
-                              />
-                            </FormControl>
-                          </FormItem>
-                        )}
-                      />
+                      <FormField control={form.control} name={`social_links.${index}.is_visible`} render={({ field: switchField }) => (<FormItem>
+                        <FormControl>
+                          <Switch checked={switchField.value} onCheckedChange={switchField.onChange} />
+                        </FormControl>
+                      </FormItem>)} />
                     </div>
-                    <FormField
-                      control={form.control}
-                      name={`social_links.${index}.url`}
-                      render={({ field: urlField }) => (
-                        <FormItem>
-                          <FormControl>
-                            <Input {...urlField} placeholder={`Enter ${field.label} URL`} />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
+                    <FormField control={form.control} name={`social_links.${index}.url`} render={({ field: urlField }) => (<FormItem>
+                      <FormControl>
+                        <Input {...urlField} placeholder={`Enter ${field.label} URL`} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>)} />
                   </div>
                 ))}
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardHeader>
+                <CardTitle>GitHub Projects Integration</CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <FormField control={form.control} name="profile_data.github_projects_config.show" render={({ field }) => (<FormItem className="flex flex-row items-center justify-between rounded-lg border p-3 shadow-sm">
+                  <div className="space-y-0.5">
+                    <FormLabel>Show GitHub Projects Section</FormLabel>
+                  </div>
+                  <FormControl>
+                    <Switch checked={field.value} onCheckedChange={field.onChange} />
+                  </FormControl>
+                </FormItem>)} />
+                <FormField control={form.control} name="profile_data.github_projects_config.username" render={({ field }) => (<FormItem>
+                  <FormLabel>GitHub Username</FormLabel>
+                  <FormControl>
+                    <Input {...field} placeholder="your-username" />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>)} />
+                <FormField control={form.control} name="profile_data.github_projects_config.sort_by" render={({ field }) => (<FormItem>
+                  <FormLabel>Sort Repos By</FormLabel>
+                  <Select onValueChange={field.onChange} defaultValue={field.value}>
+                    <FormControl>
+                      <SelectTrigger>
+                        <SelectValue />
+                      </SelectTrigger>
+                    </FormControl>
+                    <SelectContent>
+                      <SelectItem value="pushed">Last Pushed</SelectItem>
+                      <SelectItem value="updated">Last Updated</SelectItem>
+                      <SelectItem value="created">Created Date</SelectItem>
+                    </SelectContent>
+                  </Select>
+                  <FormMessage />
+                </FormItem>)} />
+                <div className="grid grid-cols-2 gap-4">
+                  <FormField control={form.control} name="profile_data.github_projects_config.min_stars" render={({ field }) => (<FormItem>
+                    <FormLabel>Min Stars</FormLabel>
+                    <FormControl>
+                      <Input type="number" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>)} />
+                  <FormField control={form.control} name="profile_data.github_projects_config.projects_per_page" render={({ field }) => (<FormItem>
+                    <FormLabel>Projects Per Page</FormLabel>
+                    <FormControl>
+                      <Input type="number" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>)} />
+                </div>
+                <div className="space-y-2 pt-2">
+                  <FormField control={form.control} name="profile_data.github_projects_config.exclude_forks" render={({ field }) => (<FormItem className="flex flex-row items-center justify-between">
+                    <FormLabel>Exclude Forks</FormLabel>
+                    <FormControl>
+                      <Switch checked={field.value} onCheckedChange={field.onChange} />
+                    </FormControl>
+                  </FormItem>)} />
+                  <FormField control={form.control} name="profile_data.github_projects_config.exclude_archived" render={({ field }) => (<FormItem className="flex flex-row items-center justify-between">
+                    <FormLabel>Exclude Archived</FormLabel>
+                    <FormControl>
+                      <Switch checked={field.value} onCheckedChange={field.onChange} />
+                    </FormControl>
+                  </FormItem>)} />
+                  <FormField control={form.control} name="profile_data.github_projects_config.exclude_profile_repo" render={({ field }) => (<FormItem className="flex flex-row items-center justify-between">
+                    <FormLabel>Exclude Profile Repo</FormLabel>
+                    <FormControl>
+                      <Switch checked={field.value} onCheckedChange={field.onChange} />
+                    </FormControl>
+                  </FormItem>)} />
+                </div>
               </CardContent>
             </Card>
 
@@ -338,11 +414,7 @@ export default function SiteSettingsManager() {
               <CardContent>
                 <FormField control={form.control} name="portfolio_mode" render={({ field }) => (<FormItem>
                   <FormControl>
-                    <RadioGroup
-                      onValueChange={field.onChange}
-                      value={field.value} // Use `value` instead of `defaultValue`
-                      className="space-y-2"
-                    >
+                    <RadioGroup onValueChange={field.onChange} value={field.value} className="space-y-2">
                       <FormItem className="flex items-center space-x-3 space-y-0">
                         <FormControl>
                           <RadioGroupItem value="multi-page" />
