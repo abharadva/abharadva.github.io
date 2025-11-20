@@ -1,4 +1,4 @@
-
+// src/components/admin/auth/SupabaseMFASetup.tsx
 "use client";
 
 import React, { useEffect, useState } from "react";
@@ -14,7 +14,7 @@ import { Button } from "@/components/ui/button";
 import { Loader2, Smartphone, Copy, Eye, EyeOff } from "lucide-react";
 import { config } from "@/lib/config";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-import Image from "next/image";
+import { useSignOutMutation } from "@/store/api/adminApi";
 
 export default function SupabaseMFASetup() {
   const [qrCodeUrl, setQrCodeUrl] = useState("");
@@ -25,6 +25,7 @@ export default function SupabaseMFASetup() {
   const [isLoadingState, setIsLoadingState] = useState(true);
   const [showSecret, setShowSecret] = useState(false);
   const router = useRouter();
+  const [signOut] = useSignOutMutation();
 
   useEffect(() => {
     const protectPageAndEnroll = async () => {
@@ -95,6 +96,11 @@ export default function SupabaseMFASetup() {
     router.replace("/admin");
   };
 
+  const handleSignOut = async () => {
+    await signOut().unwrap();
+    router.replace("/admin/login");
+  };
+
   const copySecret = async () => {
     try {
       await navigator.clipboard.writeText(manualEntryKey);
@@ -159,7 +165,6 @@ export default function SupabaseMFASetup() {
             </motion.div>
           )}
         </AnimatePresence>
-
         {factorId && (
           <div className="space-y-8">
             <div className="space-y-4">
@@ -199,8 +204,8 @@ export default function SupabaseMFASetup() {
                 </Button>
               </div>
             </div>
-
             <div className="space-y-4">
+
               <form onSubmit={handleVerify} className="space-y-6">
                 <div>
                   <h3 className="font-mono text-lg font-bold text-foreground">
@@ -219,19 +224,18 @@ export default function SupabaseMFASetup() {
                 </div>
 
                 <AnimatePresence>
-                   {error && (
-                      <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: "auto" }} exit={{ opacity: 0, height: 0 }}>
-                         <Alert variant="destructive"><AlertDescription>{error}</AlertDescription></Alert>
-                      </motion.div>
-                   )}
+                  {error && (
+                    <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: "auto" }} exit={{ opacity: 0, height: 0 }}>
+                      <Alert variant="destructive"><AlertDescription>{error}</AlertDescription></Alert>
+                    </motion.div>
+                  )}
                 </AnimatePresence>
-
                 <div className="flex flex-col gap-3 sm:flex-row-reverse">
                   <Button type="submit" disabled={isLoadingState || otp.length !== 6} className="flex-1">
                     {isLoadingState ? <Loader2 className="mr-2 size-4 animate-spin" /> : null}
                     Verify & Complete
                   </Button>
-                  <Button type="button" variant="outline" className="flex-1" onClick={async () => { await supabase.auth.signOut(); router.push("/admin/login"); }}>
+                  <Button type="button" variant="outline" className="flex-1" onClick={handleSignOut}>
                     Cancel
                   </Button>
                 </div>

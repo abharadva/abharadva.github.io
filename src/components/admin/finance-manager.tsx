@@ -1,9 +1,9 @@
+// src/components/admin/finance-manager.tsx
 "use client";
-import React, { useState, useEffect, useMemo, FormEvent, useCallback } from "react";
-import { supabase } from "@/supabase/client";
+import React, { useState, useEffect, useMemo, FormEvent } from "react";
 import type { FinancialGoal, RecurringTransaction, Transaction } from "@/types";
 import { DateRange } from "react-day-picker";
-import { addDays, addMonths, addWeeks, addYears, format, startOfMonth, subMonths, differenceInDays, isBefore, isAfter, isSameDay, nextDay, setDate } from "date-fns";
+import { addDays, format, startOfMonth, subMonths, differenceInDays, isBefore, isAfter, isSameDay } from "date-fns";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle, } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -14,7 +14,7 @@ import FinancialGoalForm from "@/components/admin/financial-goal-form";
 import { Popover, PopoverContent, PopoverTrigger, } from "@/components/ui/popover";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { ChartContainer, ChartTooltip, ChartTooltipContent, ChartLegend, ChartLegendContent, type ChartConfig, } from "@/components/ui/chart";
+import { ChartContainer, ChartTooltip, ChartTooltipContent, ChartLegend, ChartLegendContent, type ChartConfig } from "@/components/ui/chart";
 import { Bar, BarChart, CartesianGrid, XAxis, YAxis, Pie, PieChart, Cell, ResponsiveContainer } from "recharts";
 import { Edit, Trash2, Calendar as CalendarIcon, Search, TrendingUp, TrendingDown, PiggyBank, Target, Plus, Repeat, AlertCircle, Copy, ArrowDown, ArrowUp, X as XIcon, HandCoins, MoreVertical } from "lucide-react";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow, } from "@/components/ui/table";
@@ -32,6 +32,8 @@ import { cn } from "@/lib/utils";
 import { ScrollArea } from "../ui/scroll-area";
 import { Progress } from "../ui/progress";
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from "../ui/sheet";
+import { useGetFinancialDataQuery, useDeleteTransactionMutation, useDeleteRecurringMutation, useDeleteGoalMutation, useAddFundsToGoalMutation, useManageCategoryMutation } from "@/store/api/adminApi";
+import { getNextOccurrence } from "@/lib/utils";
 
 // --- DYNAMIC IMPORTS ---
 const Calendar = dynamic(() => import('@/components/ui/calendar').then(mod => mod.Calendar), {
@@ -60,13 +62,13 @@ const StatCard: React.FC<{ title: string; value: string | number; icon?: React.R
     </Card>
 );
 
-// --- NEW CATEGORIES TAB COMPONENT ---
 type CategoryData = { name: string; total: number; count: number; percentage: number; };
 type CategoryAction = { type: 'edit' | 'merge' | 'delete', category: CategoryData } | null;
 
-const CategoriesTab = ({ transactions, totalExpenses, allCategories, onRefresh }: { transactions: Transaction[], totalExpenses: number, allCategories: string[], onRefresh: () => void }) => {
+const CategoriesTab = ({ transactions, totalExpenses, allCategories }: { transactions: Transaction[], totalExpenses: number, allCategories: string[] }) => {
     const [selectedCategory, setSelectedCategory] = useState<CategoryData | null>(null);
     const [actionDialog, setActionDialog] = useState<CategoryAction>(null);
+    const [manageCategory] = useManageCategoryMutation();
 
     const categoryData: CategoryData[] = useMemo(() => {
         const expenseTransactions = transactions.filter(t => t.type === 'expense');
@@ -85,29 +87,12 @@ const CategoriesTab = ({ transactions, totalExpenses, allCategories, onRefresh }
     }, [transactions, totalExpenses]);
 
     const handleAction = async (type: 'edit' | 'merge' | 'delete', oldName: string, newName?: string) => {
-        let rpcName: 'rename_transaction_category' | 'merge_transaction_categories' | 'delete_transaction_category' | null = null;
-        let params: any = {};
-        let successMessage = "";
-
-        if (type === 'edit' && newName) {
-            rpcName = 'rename_transaction_category';
-            params = { old_name: oldName, new_name: newName };
-            successMessage = `Category "${oldName}" renamed to "${newName}".`;
-        } else if (type === 'merge' && newName) {
-            rpcName = 'merge_transaction_categories';
-            params = { source_name: oldName, target_name: newName };
-            successMessage = `Category "${oldName}" merged into "${newName}".`;
-        } else if (type === 'delete') {
-            rpcName = 'delete_transaction_category';
-            params = { category_name: oldName };
-            successMessage = `Category "${oldName}" removed from transactions.`;
+        try {
+            await manageCategory({ type, oldName, newName }).unwrap();
+            toast.success(`Category action "${type}" successful.`);
+        } catch (err: any) {
+            toast.error(`Failed to ${type} category`, { description: err.message });
         }
-
-        if (!rpcName) return;
-
-        const { error } = await supabase.rpc(rpcName, params);
-        if (error) { toast.error(`Failed to ${type} category`, { description: error.message }); }
-        else { toast.success(successMessage); onRefresh(); }
         setActionDialog(null);
     }
 
@@ -465,45 +450,18 @@ const GoalCard = ({ goal, onAddFunds, onEdit, onDelete }: { goal: FinancialGoal,
     );
 };
 
-const getNextOccurrence = (cursor: Date, rule: RecurringTransaction): Date => {
-    let next = new Date(cursor);
-    switch (rule.frequency) {
-        case 'daily': return addDays(next, 1);
-        case 'weekly': return rule.occurrence_day !== null && rule.occurrence_day !== undefined ? nextDay(next, rule.occurrence_day as any) : addWeeks(next, 1);
-        case 'bi-weekly': return rule.occurrence_day !== null && rule.occurrence_day !== undefined ? nextDay(addWeeks(next, 1), rule.occurrence_day as any) : addWeeks(next, 2);
-        case 'monthly': next = addMonths(next, 1); return rule.occurrence_day ? setDate(next, rule.occurrence_day) : next;
-        case 'yearly': return addYears(next, 1);
-        default: return addDays(next, 1);
-    }
-};
-
 export default function FinanceManager() {
-    const [transactions, setTransactions] = useState<Transaction[]>([]);
-    const [goals, setGoals] = useState<FinancialGoal[]>([]);
-    const [recurring, setRecurring] = useState<RecurringTransaction[]>([]);
-    const [isLoading, setIsLoading] = useState(true);
-    const [error, setError] = useState<string | null>(null);
     const [searchTerm, setSearchTerm] = useState("");
     const [date, setDate] = useState<DateRange | undefined>({ from: startOfMonth(new Date()), to: new Date() });
     const [dialogState, setDialogState] = useState<DialogState>({ type: null });
 
-    const loadAllFinancialData = useCallback(async () => {
-        setIsLoading(true); setError(null);
-        try {
-            const [tranRes, goalRes, recurRes] = await Promise.all([
-                supabase.from("transactions").select("*").order("date", { ascending: false }),
-                supabase.from("financial_goals").select("*").order("target_date"),
-                supabase.from("recurring_transactions").select("*").order("start_date")
-            ]);
-            if (tranRes.error || goalRes.error || recurRes.error) throw new Error(tranRes.error?.message || "Failed to load data");
-            setTransactions(tranRes.data || []);
-            setGoals(goalRes.data || []);
-            setRecurring(recurRes.data || []);
-        } catch (err: any) { setError(err.message); toast.error("Data Load Error", { description: err.message }); }
-        finally { setIsLoading(false); }
-    }, []);
+    const { data: financialData, isLoading, error } = useGetFinancialDataQuery();
+    const [deleteTransaction] = useDeleteTransactionMutation();
+    const [deleteRecurring] = useDeleteRecurringMutation();
+    const [deleteGoal] = useDeleteGoalMutation();
+    const [addFundsToGoal] = useAddFundsToGoalMutation();
 
-    useEffect(() => { loadAllFinancialData(); }, [loadAllFinancialData]);
+    const { transactions = [], goals = [], recurring = [] } = financialData || {};
 
     const filteredTransactions = useMemo(() => {
         return transactions.filter((t) => {
@@ -550,6 +508,7 @@ export default function FinanceManager() {
         }
         return Object.entries(monthlyData).map(([name, values]) => ({ name, ...values })).slice(-6);
     }, [transactions]);
+
     const forecast = useMemo(() => {
         const upcomingTransactions: { description: string, amount: number, type: 'earning' | 'expense', date: Date }[] = [];
         const today = new Date();
@@ -572,17 +531,30 @@ export default function FinanceManager() {
         return { upcomingTransactions: upcomingTransactions.sort((a, b) => a.date.getTime() - b.date.getTime()) };
     }, [recurring]);
 
-    const handleSaveSuccess = () => { loadAllFinancialData(); setDialogState({ type: null }); };
-    const handleDelete = async (tableName: string, id: string, message: string) => { if (!confirm(message)) return; const { error } = await supabase.from(tableName).delete().eq("id", id); if (error) { toast.error(`Failed to delete: ${error.message}`); } else { toast.success("Item deleted."); await loadAllFinancialData(); } };
+    const handleSaveSuccess = () => { setDialogState({ type: null }); };
+
+    const handleDelete = async (type: 'transactions' | 'recurring_transactions' | 'financial_goals', id: string, message: string) => {
+        if (!confirm(message)) return;
+        const mutation =
+            type === 'transactions' ? deleteTransaction :
+                type === 'recurring_transactions' ? deleteRecurring :
+                    deleteGoal;
+
+        try {
+            await mutation(id).unwrap();
+            toast.success("Item deleted.");
+        } catch (err: any) {
+            toast.error(`Failed to delete: ${err.message}`);
+        }
+    };
 
     const handleDuplicateTransaction = (transaction: Transaction) => {
         const { id, created_at, updated_at, ...duplicatableData } = transaction;
         const newTransactionData = {
             ...duplicatableData,
-            date: new Date().toISOString().split('T')[0], // Default to today's date
+            date: new Date().toISOString().split('T')[0],
             description: `${transaction.description} (Copy)`,
         };
-        // Open the dialog with this pre-filled data, but without an ID, so it acts as a "new" transaction
         setDialogState({ type: "transaction", data: newTransactionData });
     };
 
@@ -592,13 +564,14 @@ export default function FinanceManager() {
         const amount = parseFloat(formData.get("amount") as string);
         const goal = dialogState.data as FinancialGoal;
         if (!amount || amount <= 0 || !goal) { toast.error("Invalid amount provided."); return; }
-        const newCurrentAmount = goal.current_amount + amount;
-        const { error: goalError } = await supabase.from("financial_goals").update({ current_amount: newCurrentAmount }).eq("id", goal.id);
-        if (goalError) { toast.error("Failed to update goal", { description: goalError.message }); return; }
-        const { error: transError } = await supabase.from("transactions").insert({ date: new Date().toISOString().split("T")[0], description: `Contribution to goal: ${goal.name}`, amount: amount, type: "expense", category: "Savings & Goals" });
-        if (transError) { toast.warning("Goal updated, but failed to create a matching transaction.", { description: transError.message }); }
-        else { toast.success(`$${amount.toFixed(2)} added to "${goal.name}"`); }
-        await handleSaveSuccess();
+
+        try {
+            await addFundsToGoal({ goal, amount }).unwrap();
+            toast.success(`$${amount.toFixed(2)} added to "${goal.name}"`);
+            handleSaveSuccess();
+        } catch (err: any) {
+            toast.error("Failed to add funds", { description: err.message });
+        }
     };
 
     return (
@@ -610,16 +583,11 @@ export default function FinanceManager() {
                 </div>
                 <Menubar>
                     <MenubarMenu>
-                        <MenubarTrigger>
-                            <Plus className="size-4" />
-                        </MenubarTrigger>
+                        <MenubarTrigger><Plus className="size-4" /></MenubarTrigger>
                         <MenubarContent>
-                            <MenubarItem onSelect={() => setDialogState({ type: "transaction" })}>
-                                <Plus className="mr-2 size-4" /> New Transaction</MenubarItem>
-                            <MenubarItem onSelect={() => setDialogState({ type: "recurring" })}>
-                                <Repeat className="mr-2 size-4" /> New Recurring</MenubarItem>
-                            <MenubarItem onSelect={() => setDialogState({ type: "goal" })}>
-                                <Target className="mr-2 size-4" /> New Goal</MenubarItem>
+                            <MenubarItem onSelect={() => setDialogState({ type: "transaction" })}><Plus className="mr-2 size-4" /> New Transaction</MenubarItem>
+                            <MenubarItem onSelect={() => setDialogState({ type: "recurring" })}><Repeat className="mr-2 size-4" /> New Recurring</MenubarItem>
+                            <MenubarItem onSelect={() => setDialogState({ type: "goal" })}><Target className="mr-2 size-4" /> New Goal</MenubarItem>
                         </MenubarContent>
                     </MenubarMenu>
                 </Menubar>
@@ -633,7 +601,7 @@ export default function FinanceManager() {
                     <TabsTrigger value="goals">Goals</TabsTrigger>
                     <TabsTrigger value="analytics">Analytics</TabsTrigger>
                 </TabsList>
-                {/* Dashboard Tab - No changes */}
+
                 <TabsContent value="dashboard" className="mt-6 space-y-6">
                     <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
                         <div className="lg:col-span-2 space-y-6">
@@ -798,7 +766,7 @@ export default function FinanceManager() {
                 </TabsContent>
 
                 <TabsContent value="categories" className="mt-6">
-                    <CategoriesTab transactions={filteredTransactions} totalExpenses={totalExpenses} allCategories={allCategories} onRefresh={loadAllFinancialData} />
+                    <CategoriesTab transactions={filteredTransactions} totalExpenses={totalExpenses} allCategories={allCategories} />
                 </TabsContent>
 
                 <TabsContent value="recurring">
@@ -857,39 +825,26 @@ export default function FinanceManager() {
             <Dialog open={!!dialogState.type} onOpenChange={(open) => !open && setDialogState({ type: null })}>
                 <DialogContent>
                     {dialogState.type === 'transaction' && (<>
-                        <DialogHeader>
-                            <DialogTitle>{dialogState.data?.id ? "Edit" : "Add"} Transaction</DialogTitle>
-                        </DialogHeader>
-                        <TransactionForm
-                            transaction={dialogState.data}
-                            onSuccess={handleSaveSuccess}
-                            categories={allCategories}
-                        />                    </>)}
+                        <DialogHeader><DialogTitle>{dialogState.data?.id ? "Edit" : "Add"} Transaction</DialogTitle></DialogHeader>
+                        <TransactionForm transaction={dialogState.data} onSuccess={handleSaveSuccess} categories={allCategories} />
+                    </>)}
                     {dialogState.type === 'recurring' && (<>
-                        <DialogHeader>
-                            <DialogTitle>{dialogState.data ? "Edit" : "Create"} Recurring Rule</DialogTitle>
-                        </DialogHeader>
+                        <DialogHeader><DialogTitle>{dialogState.data ? "Edit" : "Create"} Recurring Rule</DialogTitle></DialogHeader>
                         <RecurringTransactionForm recurringTransaction={dialogState.data} onSuccess={handleSaveSuccess} />
                     </>)}
                     {dialogState.type === 'goal' && (<>
-                        <DialogHeader>
-                            <DialogTitle>{dialogState.data ? "Edit" : "Create"} Financial Goal</DialogTitle>
-                        </DialogHeader>
+                        <DialogHeader><DialogTitle>{dialogState.data ? "Edit" : "Create"} Financial Goal</DialogTitle></DialogHeader>
                         <FinancialGoalForm goal={dialogState.data} onSuccess={handleSaveSuccess} />
                     </>)}
                     {dialogState.type === 'addFunds' && (<>
-                        <DialogHeader>
-                            <DialogTitle>Add Funds to "{dialogState.data?.name}"</DialogTitle>
-                        </DialogHeader>
+                        <DialogHeader><DialogTitle>Add Funds to "{dialogState.data?.name}"</DialogTitle></DialogHeader>
                         <form onSubmit={handleAddFunds} className="space-y-4 pt-4">
                             <div>
                                 <Label htmlFor="add-funds-amount">Amount</Label>
                                 <Input id="add-funds-amount" name="amount" type="number" step="1" required autoFocus />
                             </div>
                             <div className="flex justify-end gap-2">
-                                <DialogClose asChild>
-                                    <Button type="button" variant="ghost">Cancel</Button>
-                                </DialogClose>
+                                <DialogClose asChild><Button type="button" variant="ghost">Cancel</Button></DialogClose>
                                 <Button type="submit">Confirm Contribution</Button>
                             </div>
                         </form>
@@ -899,3 +854,6 @@ export default function FinanceManager() {
         </div>
     );
 }
+
+// NOTE: Only the logic section of FinanceManager and the CategoriesTab call are shown.
+// The sub-components and the main JSX structure remain identical to your version.

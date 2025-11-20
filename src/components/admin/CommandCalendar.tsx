@@ -1,11 +1,11 @@
+// src/components/admin/CommandCalendar.tsx
 "use client";
-import React, { useState, useEffect, useCallback, useRef } from "react";
-import { supabase } from "@/supabase/client";
+import React, { useState, useEffect, useCallback, useRef, useMemo } from "react";
 import FullCalendar from "@fullcalendar/react";
 import dayGridPlugin from "@fullcalendar/daygrid";
 import timeGridPlugin from "@fullcalendar/timegrid";
 import interactionPlugin from "@fullcalendar/interaction";
-import { EventClickArg, DateSelectArg, EventInput, EventContentArg, EventDropArg } from "@fullcalendar/core";
+import { EventClickArg, DateSelectArg, EventInput, EventContentArg, EventDropArg, ViewApi } from "@fullcalendar/core";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogClose } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -19,15 +19,10 @@ import { Banknote, CheckSquare, Edit, ListTodo, Loader2, Calendar } from "lucide
 import { cn } from "@/lib/utils";
 import { Popover, PopoverContent, PopoverAnchor } from "@/components/ui/popover";
 import { Separator } from "@/components/ui/separator";
+import { useGetCalendarDataQuery, useAddEventMutation, useUpdateEventMutation, useDeleteEventMutation, useUpdateTaskMutation } from "@/store/api/adminApi";
+import { skipToken } from "@reduxjs/toolkit/query";
 
-type CalendarItem = {
-    item_id: string;
-    title: string;
-    start_time: string;
-    end_time: string | null;
-    item_type: 'event' | 'task' | 'transaction';
-    data: any;
-};
+type CalendarItem = { item_id: string; title: string; start_time: string; end_time: string | null; item_type: 'event' | 'task' | 'transaction'; data: any; };
 
 const getNextOccurrence = (cursor: Date, rule: RecurringTransaction): Date => {
     let next = new Date(cursor);
@@ -56,7 +51,6 @@ const mapItemToCalendarEvent = (item: CalendarItem): EventInput => {
 
 const CalendarPopoverContent: React.FC<{ event: EventInput; onEdit: () => void; onNavigate: (tab: any) => void; }> = ({ event, onEdit, onNavigate }) => {
     const { type, transactionType, amount, status, priority, description } = event.extendedProps || {};
-
     const isEarning = transactionType === 'earning';
     const sign = isEarning ? '+' : '-';
     const amountColor = isEarning ? 'text-green-500' : 'text-red-500';
@@ -68,29 +62,8 @@ const CalendarPopoverContent: React.FC<{ event: EventInput; onEdit: () => void; 
                 <Separator />
                 <div className="space-y-2 text-sm">
                     {type === 'event' && description && <p className="text-muted-foreground">{description}</p>}
-                    {type === 'task' && (
-                        <>
-                            <p>
-                                <strong>Status:</strong> <span className="capitalize">{status}</span>
-                            </p>
-                            <p>
-                                <strong>Priority:</strong> <span className="capitalize">{priority}</span>
-                            </p>
-                        </>
-                    )}
-                    {(type === 'transaction' || type === 'forecast') && (
-                        <>
-                            <p>
-                                <strong>Type:</strong> <span className="capitalize">{transactionType}</span>
-                            </p>
-                            <p>
-                                <strong>Amount:</strong>{' '}
-                                <span className={cn("font-mono font-semibold", amountColor)}>
-                                    {sign}${amount?.toFixed(2)}
-                                </span>
-                            </p>
-                        </>
-                    )}
+                    {type === 'task' && (<> <p> <strong>Status:</strong> <span className="capitalize">{status}</span> </p> <p> <strong>Priority:</strong> <span className="capitalize">{priority}</span> </p> </>)}
+                    {(type === 'transaction' || type === 'forecast') && (<> <p> <strong>Type:</strong> <span className="capitalize">{transactionType}</span> </p> <p> <strong>Amount:</strong>{' '} <span className={cn("font-mono font-semibold", amountColor)}> {sign}${amount?.toFixed(2)} </span> </p> </>)}
                 </div>
                 <Separator />
                 <div className="flex gap-2">
@@ -107,69 +80,48 @@ const CalendarPopoverContent: React.FC<{ event: EventInput; onEdit: () => void; 
 }
 
 export default function CommandCalendar({ onNavigate }: { onNavigate: (tab: any) => void }) {
-    const [events, setEvents] = useState<EventInput[]>([]);
-    const [isLoading, setIsLoading] = useState(true);
+    const [dateRange, setDateRange] = useState<{ start: string, end: string } | null>(null);
+    const { data, isLoading, error } = useGetCalendarDataQuery(dateRange ?? skipToken);
+
+    const [addEvent] = useAddEventMutation();
+    const [updateEvent] = useUpdateEventMutation();
+    const [deleteEvent] = useDeleteEventMutation();
+    const [updateTask] = useUpdateTaskMutation();
+
     const [dialogState, setDialogState] = useState<{ open: boolean, data?: any, isNew: boolean }>({ open: false, isNew: false });
-    const [popoverState, setPopoverState] = useState<{ open: boolean, anchorProps: React.CSSProperties, event: EventInput | null }>({
-        open: false,
-        anchorProps: { display: 'none' },
-        event: null,
-    });
+    const [popoverState, setPopoverState] = useState<{ open: boolean, anchorProps: React.CSSProperties, event: EventInput | null }>({ open: false, anchorProps: { display: 'none' }, event: null });
     const calendarContainerRef = useRef<HTMLDivElement>(null);
-    const calendarApiRef = useRef<FullCalendar | null>(null);
+    const [eventFormData, setEventFormData] = useState({ id: '', title: '', description: '', start_time: '', end_time: '', is_all_day: false });
 
-    const [eventFormData, setEventFormData] = useState({
-        id: '', title: '', description: '', start_time: '', end_time: '', is_all_day: false
-    });
+    useEffect(() => {
+        if (error) toast.error("Failed to load calendar data", { description: (error as any).message });
+    }, [error]);
 
-    const loadCalendarData = useCallback(async (start: Date, end: Date) => {
-        setIsLoading(true);
-        try {
-            const [calendarDataRes, recurringRes] = await Promise.all([
-                supabase.rpc('get_calendar_data', { start_date_param: start.toISOString(), end_date_param: end.toISOString() }),
-                supabase.from('recurring_transactions').select('*')
-            ]);
+    const events = useMemo(() => {
+        if (!data) return [];
+        const baseEvents = data.baseEvents.map(mapItemToCalendarEvent);
+        const forecastEvents: EventInput[] = [];
+        const today = new Date();
+        const forecastEndDate = addDays(today, 30);
 
-            if (calendarDataRes.error) throw calendarDataRes.error;
-            if (recurringRes.error) throw recurringRes.error;
-
-            const baseEvents = (calendarDataRes.data as CalendarItem[]).map(mapItemToCalendarEvent);
-
-            const forecastEvents: EventInput[] = [];
-            const today = new Date();
-            const forecastEndDate = addDays(today, 30);
-
-            (recurringRes.data as RecurringTransaction[]).forEach(rule => {
-                let cursor = rule.last_processed_date ? new Date(rule.last_processed_date) : new Date(rule.start_date);
-                if (isBefore(cursor, new Date(rule.start_date))) { cursor = new Date(rule.start_date); }
-                let nextOccurrence = new Date(cursor);
-
-                if (rule.last_processed_date && (isAfter(nextOccurrence, today) || isSameDay(nextOccurrence, today))) { /* First candidate */ }
-                else { nextOccurrence = getNextOccurrence(cursor, rule); }
-
-                const ruleEndDate = rule.end_date ? new Date(rule.end_date) : null;
-                while (isBefore(nextOccurrence, forecastEndDate)) {
-                    if (ruleEndDate && isAfter(nextOccurrence, ruleEndDate)) break;
-                    if ((isAfter(nextOccurrence, today) || isSameDay(nextOccurrence, today))) {
-                        forecastEvents.push({
-                            title: rule.description,
-                            start: nextOccurrence,
-                            allDay: true,
-                            display: 'list-item',
-                            extendedProps: { type: 'forecast', amount: rule.amount, transactionType: rule.type }
-                        });
-                    }
-                    nextOccurrence = getNextOccurrence(nextOccurrence, rule);
+        data.recurring.forEach(rule => {
+            let cursor = rule.last_processed_date ? new Date(rule.last_processed_date) : new Date(rule.start_date);
+            if (isBefore(cursor, new Date(rule.start_date))) { cursor = new Date(rule.start_date); }
+            let nextOccurrence = new Date(cursor);
+            if (rule.last_processed_date && (isAfter(nextOccurrence, today) || isSameDay(nextOccurrence, today))) { /* First candidate */ }
+            else { nextOccurrence = getNextOccurrence(cursor, rule); }
+            const ruleEndDate = rule.end_date ? new Date(rule.end_date) : null;
+            while (isBefore(nextOccurrence, forecastEndDate)) {
+                if (ruleEndDate && isAfter(nextOccurrence, ruleEndDate)) break;
+                if ((isAfter(nextOccurrence, today) || isSameDay(nextOccurrence, today))) {
+                    forecastEvents.push({ title: rule.description, start: nextOccurrence, allDay: true, display: 'list-item', extendedProps: { type: 'forecast', amount: rule.amount, transactionType: rule.type } });
                 }
-            });
+                nextOccurrence = getNextOccurrence(nextOccurrence, rule);
+            }
+        });
 
-            setEvents([...baseEvents, ...forecastEvents]);
-        } catch (error: any) {
-            toast.error("Failed to load calendar data", { description: error.message });
-        } finally {
-            setIsLoading(false);
-        }
-    }, []);
+        return [...baseEvents, ...forecastEvents];
+    }, [data]);
 
     const handleDateSelect = (selectInfo: DateSelectArg) => {
         setPopoverState({ open: false, anchorProps: { display: 'none' }, event: null });
@@ -186,83 +138,65 @@ export default function CommandCalendar({ onNavigate }: { onNavigate: (tab: any)
         clickInfo.jsEvent.preventDefault();
         const calendarEl = calendarContainerRef.current;
         if (!calendarEl) return;
-
         const eventEl = clickInfo.el;
         const containerRect = calendarEl.getBoundingClientRect();
         const eventRect = eventEl.getBoundingClientRect();
-
         const top = eventRect.top - containerRect.top + eventRect.height / 2;
         const left = eventRect.left - containerRect.left + eventRect.width / 2;
-
-        setPopoverState({
-            open: true,
-            anchorProps: { position: 'absolute', top: `${top}px`, left: `${left}px` },
-            event: clickInfo.event as EventInput
-        });
+        setPopoverState({ open: true, anchorProps: { position: 'absolute', top: `${top}px`, left: `${left}px` }, event: clickInfo.event as EventInput });
     };
 
     const handleEventDrop = async (dropInfo: EventDropArg) => {
         const { event } = dropInfo;
         const { type } = event.extendedProps;
-        let updateData = {};
-        let tableName = '';
 
-        if (type === 'event') {
-            tableName = 'events';
-            updateData = { start_time: event.start?.toISOString(), end_time: event.end?.toISOString() };
-        } else if (type === 'task') {
-            tableName = 'tasks';
-            updateData = { due_date: event.start?.toISOString().split('T')[0] };
-        } else {
-            toast.info("Only tasks and personal events can be rescheduled via drag & drop.");
-            dropInfo.revert();
-            return;
-        }
-
-        const { error } = await supabase.from(tableName).update(updateData).eq('id', event.id);
-
-        if (error) {
-            toast.error(`Failed to update ${type}`, { description: error.message });
-            dropInfo.revert();
-        } else {
+        try {
+            if (type === 'event') {
+                await updateEvent({ id: event.id, start_time: event.start?.toISOString(), end_time: event.end?.toISOString() }).unwrap();
+            } else if (type === 'task') {
+                await updateTask({ id: event.id, due_date: event.start?.toISOString().split('T')[0] }).unwrap();
+            } else {
+                toast.info("Only tasks and personal events can be rescheduled via drag & drop.");
+                dropInfo.revert();
+                return;
+            }
             toast.success(`${type.charAt(0).toUpperCase() + type.slice(1)} rescheduled successfully.`);
+        } catch (err: any) {
+            toast.error(`Failed to update ${type}`, { description: err.message });
+            dropInfo.revert();
         }
     };
 
     const handleEventFormSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         const dataToSave = {
-            title: eventFormData.title, description: eventFormData.description || null,
+            id: eventFormData.id, title: eventFormData.title, description: eventFormData.description || null,
             start_time: new Date(eventFormData.start_time).toISOString(),
             end_time: eventFormData.end_time ? new Date(eventFormData.end_time).toISOString() : null,
             is_all_day: eventFormData.is_all_day,
         };
-        const { error } = dialogState.isNew ? await supabase.from('events').insert(dataToSave) : await supabase.from('events').update(dataToSave).eq('id', eventFormData.id);
 
-        if (error) {
-            toast.error("Failed to save event", { description: error.message });
-        } else {
+        try {
+            if (dialogState.isNew) {
+                await addEvent(dataToSave).unwrap();
+            } else {
+                await updateEvent(dataToSave).unwrap();
+            }
             toast.success(`Event ${dialogState.isNew ? 'created' : 'updated'} successfully.`);
             setDialogState({ open: false, isNew: false });
-            const api = calendarApiRef.current?.getApi();
-            if (api) {
-                loadCalendarData(api.view.currentStart, api.view.currentEnd);
-            }
+        } catch (err: any) {
+            toast.error("Failed to save event", { description: err.message });
         }
     };
 
     const handleDeleteEvent = async () => {
         if (!confirm("Are you sure you want to delete this event?")) return;
-        const { error } = await supabase.from('events').delete().eq('id', eventFormData.id);
-        if (error) {
-            toast.error("Failed to delete event", { description: error.message });
-        } else {
+        try {
+            await deleteEvent(eventFormData.id).unwrap();
             toast.success("Event deleted.");
             setDialogState({ open: false, isNew: false });
-            const api = calendarApiRef.current?.getApi();
-            if (api) {
-                loadCalendarData(api.view.currentStart, api.view.currentEnd);
-            }
+        } catch (err: any) {
+            toast.error("Failed to delete event", { description: err.message });
         }
     };
 
@@ -328,52 +262,24 @@ export default function CommandCalendar({ onNavigate }: { onNavigate: (tab: any)
 
     return (
         <div ref={calendarContainerRef} className="relative rounded-lg border bg-card p-4 calendar-blueprint-theme">
-            {isLoading && (
-                <div className="absolute inset-0 z-10 flex items-center justify-center bg-card/80 backdrop-blur-sm rounded-lg">
-                    <Loader2 className="size-6 animate-spin text-primary" />
-                </div>
-            )}
-
-            <Popover open={popoverState.open} onOpenChange={(open) => {
-                if (!open) {
-                    setPopoverState({ open: false, anchorProps: { display: 'none' }, event: null });
-                }
-            }}>
+            {isLoading && (<div className="absolute inset-0 z-10 flex items-center justify-center bg-card/80 backdrop-blur-sm rounded-lg">
+                <Loader2 className="size-6 animate-spin text-primary" />
+            </div>)}
+            <Popover open={popoverState.open} onOpenChange={(open) => !open && setPopoverState({ open: false, anchorProps: { display: 'none' }, event: null })}>
                 <PopoverAnchor style={popoverState.anchorProps} />
-                {popoverState.event && <CalendarPopoverContent
-                    event={popoverState.event}
-                    onEdit={handleEditClick}
-                    onNavigate={(tab) => {
-                        setPopoverState({ open: false, anchorProps: { display: 'none' }, event: null });
-                        onNavigate(tab);
-                    }}
-                />}
+                {popoverState.event && <CalendarPopoverContent event={popoverState.event} onEdit={handleEditClick} onNavigate={(tab) => { setPopoverState({ open: false, anchorProps: { display: 'none' }, event: null }); onNavigate(tab); }} />}
             </Popover>
-
             <FullCalendar
-                ref={calendarApiRef}
                 plugins={[dayGridPlugin, timeGridPlugin, interactionPlugin]}
                 headerToolbar={{ left: "prev,next today", center: "title", right: "dayGridMonth,timeGridWeek,timeGridDay" }}
-                initialView="dayGridMonth"
-                editable={true}
-                selectable={true}
-                selectMirror={true}
-                dayMaxEvents={true}
-                events={events}
-                datesSet={(arg) => loadCalendarData(arg.view.currentStart, arg.view.currentEnd)}
-                select={handleDateSelect}
-                eventClick={handleEventClick}
-                eventDrop={handleEventDrop}
-                eventContent={renderEventContent}
-                height="auto"
+                initialView="dayGridMonth" editable={true} selectable={true} selectMirror={true} dayMaxEvents={true}
+                events={events} datesSet={(arg) => setDateRange({ start: arg.view.currentStart.toISOString(), end: arg.view.currentEnd.toISOString() })}
+                select={handleDateSelect} eventClick={handleEventClick} eventDrop={handleEventDrop} eventContent={renderEventContent} height="auto"
             />
-
             <Dialog open={dialogState.open} onOpenChange={(open) => !open && setDialogState({ ...dialogState, open: false })}>
                 <DialogContent>
                     <DialogHeader>
-                        <DialogTitle className="text-lg">
-                            {dialogState.isNew ? 'Create New Event' : 'Edit Event'}
-                        </DialogTitle>
+                        <DialogTitle className="text-lg">{dialogState.isNew ? 'Create New Event' : 'Edit Event'}</DialogTitle>
                     </DialogHeader>
                     <form onSubmit={handleEventFormSubmit} className="space-y-4 pt-4">
                         <div>

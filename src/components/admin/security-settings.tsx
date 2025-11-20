@@ -1,10 +1,9 @@
-
+// src/components/admin/security-settings.tsx
 "use client";
 import type React from "react";
-import { useState, useEffect, FormEvent } from "react";
+import { useState, FormEvent, useEffect } from "react";
 import { motion } from "framer-motion";
 import { supabase } from "@/supabase/client";
-import type { Factor } from "@supabase/supabase-js";
 import { useRouter } from "next/router";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -12,41 +11,32 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Badge } from "@/components/ui/badge";
-import { List, CheckCircle, AlertCircle } from "lucide-react";
+import { CheckCircle, AlertCircle, Loader2 } from "lucide-react";
+import { toast } from "sonner";
+import { useGetMfaFactorsQuery, useUnenrollMfaFactorMutation, useUpdateUserPasswordMutation } from "@/store/api/adminApi";
 
 export default function SecuritySettings() {
-  const [factors, setFactors] = useState<Factor[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-  const [success, setSuccess] = useState<string | null>(null);
   const [newPassword, setNewPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [passwordError, setPasswordError] = useState("");
-  const [passwordSuccess, setPasswordSuccess] = useState("");
-  const [isUpdatingPassword, setIsUpdatingPassword] = useState(false);
   const router = useRouter();
 
-  const loadFactors = async () => {
-    setIsLoading(true); setError(null); setSuccess(null);
-    const { data, error: factorsError } = await supabase.auth.mfa.listFactors();
-    if (factorsError) { setError("Failed to load MFA factors: " + factorsError.message); setFactors([]); } 
-    else { setFactors(data?.totp || []); }
-    setIsLoading(false);
-  };
-
-  useEffect(() => { loadFactors(); }, []);
+  const { data: factors = [], isLoading: isLoadingFactors, error: factorsError } = useGetMfaFactorsQuery();
+  const [unenrollFactor, { isLoading: isUnenrolling }] = useUnenrollMfaFactorMutation();
+  const [updatePassword, { isLoading: isUpdatingPassword }] = useUpdateUserPasswordMutation();
 
   const handleUnenroll = async (factorId: string) => {
     if (!confirm("Are you sure you want to remove this MFA method? You might be logged out or lose access if it's your only method.")) return;
-    setIsLoading(true); setError(null); setSuccess(null);
-    const { error: unenrollError } = await supabase.auth.mfa.unenroll({ factorId });
-    if (unenrollError) { setError("Failed to unenroll MFA: " + unenrollError.message); setIsLoading(false); } 
-    else {
-      setSuccess("MFA method removed successfully.");
-      await loadFactors();
+    
+    try {
+      await unenrollFactor(factorId).unwrap();
+      toast.success("MFA method removed successfully.");
       const { data: aalData } = await supabase.auth.mfa.getAuthenticatorAssuranceLevel();
-      if (aalData?.currentLevel !== "aal2") { router.push("/admin/login"); } 
-      else { setIsLoading(false); }
+      if (aalData?.currentLevel !== "aal2") {
+        router.push("/admin/login");
+      }
+    } catch(err: any) {
+      toast.error("Failed to unenroll MFA", { description: err.message });
     }
   };
 
@@ -54,15 +44,22 @@ export default function SecuritySettings() {
 
   const handlePasswordChange = async (e: FormEvent) => {
     e.preventDefault();
-    setPasswordError(""); setPasswordSuccess("");
+    setPasswordError("");
     if (newPassword.length < 6) { setPasswordError("Password must be at least 6 characters long."); return; }
     if (newPassword !== confirmPassword) { setPasswordError("Passwords do not match."); return; }
-    setIsUpdatingPassword(true);
-    const { error: updateError } = await supabase.auth.updateUser({ password: newPassword });
-    setIsUpdatingPassword(false);
-    if (updateError) { setPasswordError("Failed to update password: " + updateError.message); } 
-    else { setPasswordSuccess("Password updated successfully!"); setNewPassword(""); setConfirmPassword(""); }
+    
+    try {
+      await updatePassword(newPassword).unwrap();
+      toast.success("Password updated successfully!");
+      setNewPassword(""); 
+      setConfirmPassword("");
+    } catch(err: any) {
+      setPasswordError("Failed to update password: " + err.message);
+      toast.error("Password Update Failed", { description: err.message });
+    }
   };
+  
+  const isLoading = isLoadingFactors || isUnenrolling;
 
   return (
     <motion.div
@@ -75,8 +72,7 @@ export default function SecuritySettings() {
         <p className="text-muted-foreground">Manage your account security and two-factor authentication.</p>
       </div>
 
-      {success && <Alert className="border-green-500/50 text-green-400"><CheckCircle className="h-4 w-4" /><AlertDescription>{success}</AlertDescription></Alert>}
-      {error && <Alert variant="destructive"><AlertCircle className="h-4 w-4" /><AlertDescription>{error}</AlertDescription></Alert>}
+      {!!factorsError && <Alert variant="destructive"><AlertCircle className="h-4 w-4" /><AlertDescription>{(factorsError as any).message || 'Failed to load MFA status'}</AlertDescription></Alert>}
 
       <Card>
         <CardHeader className="flex-row items-start justify-between">
@@ -100,13 +96,13 @@ export default function SecuritySettings() {
                     <p className="text-xs text-muted-foreground">Status: {factor.status}</p>
                   </div>
                   <Button onClick={() => handleUnenroll(factor.id)} variant="destructive" size="sm" disabled={isLoading}>
-                    {isLoading ? "Removing..." : "Remove"}
+                    {isUnenrolling ? "Removing..." : "Remove"}
                   </Button>
                 </div>
               ))}
             </div>
           )}
-          {!isLoading && factors.length === 0 && !error && <p className="text-sm text-muted-foreground">No MFA methods are currently set up.</p>}
+          {!isLoading && factors.length === 0 && !factorsError && <p className="text-sm text-muted-foreground">No MFA methods are currently set up.</p>}
         </CardContent>
         <CardFooter>
           <Button onClick={() => router.push("/admin/setup-mfa")} disabled={isLoading}>
@@ -131,9 +127,8 @@ export default function SecuritySettings() {
               <Input id="confirm-password" type="password" value={confirmPassword} onChange={e => setConfirmPassword(e.target.value)} required minLength={6} />
             </div>
             {passwordError && <p className="text-sm font-medium text-destructive">{passwordError}</p>}
-            {passwordSuccess && <p className="text-sm font-medium text-green-400">{passwordSuccess}</p>}
             <Button type="submit" disabled={isUpdatingPassword || !newPassword || !confirmPassword}>
-              {isUpdatingPassword ? "Updating..." : "Update Password"}
+              {isUpdatingPassword ? <><Loader2 className="mr-2 size-4 animate-spin" /> Updating...</> : "Update Password"}
             </Button>
           </form>
         </CardContent>

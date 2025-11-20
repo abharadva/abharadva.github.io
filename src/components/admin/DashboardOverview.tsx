@@ -1,11 +1,12 @@
+// src/components/admin/DashboardOverview.tsx
 import React from "react";
-import { DashboardData } from "@/pages/admin";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Banknote, CheckCircle, BrainCircuit, ListTodo, StickyNote, Timer, ExternalLink } from "lucide-react";
 import { TrendingDown, TrendingUp } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
 import Link from "next/link";
 import { Button } from "../ui/button";
+import type { DashboardData } from "@/pages/admin";
 
 const StatCard: React.FC<{
   title: string;
@@ -95,7 +96,6 @@ export default function DashboardOverview({ dashboardData }: DashboardOverviewPr
         </div>
       </div>
 
-      {/* Pinned Notes */}
       {dashboardData.pinnedNotes.length > 0 && (
         <div>
           <h3 className="mb-3 text-xl font-bold text-foreground">Pinned Notes</h3>
@@ -121,7 +121,6 @@ export default function DashboardOverview({ dashboardData }: DashboardOverviewPr
         </div>
       )}
 
-      {/* Recent Blog Posts */}
       {dashboardData.recentPosts.length > 0 && (
         <div>
           <h3 className="mb-3 text-xl font-bold text-foreground">Recently Updated Blog Posts</h3>
@@ -148,7 +147,7 @@ export default function DashboardOverview({ dashboardData }: DashboardOverviewPr
                   <div className="flex w-full shrink-0 space-x-2 sm:w-auto">
                     <Button asChild variant="ghost" size="sm" className="flex-1">
                       <Link
-                        href={`/blog/${post.slug}`}
+                        href={`/blog/view?slug=${post.slug}`}
                         target="_blank"
                         rel="noopener noreferrer"
                         aria-label={`View post: ${post.title}`}

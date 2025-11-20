@@ -3,10 +3,10 @@ import { motion } from "framer-motion";
 import { ArrowRight, Mail } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
-import { useSiteContent } from "@/context/SiteContentContext";
+import { useGetSiteIdentityQuery } from "@/store/api/publicApi";
 
 export default function Cta() {
-  const { content } = useSiteContent();
+  const { data: content } = useGetSiteIdentityQuery();
   const emailLink = content?.social_links.find(s => s.id === 'email')?.url || "mailto:example@example.com";
 
   return (

@@ -1,3 +1,4 @@
+// src/pages/admin/security.tsx
 import { AdminLayout } from "@/components/admin/AdminLayout";
 import SecuritySettings from "@/components/admin/security-settings";
 import LoadingSpinner from "@/components/admin/LoadingSpinner";

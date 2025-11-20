@@ -1,3 +1,4 @@
+// src/components/admin/learning/SessionTracker.tsx
 "use client";
 
 import React, { useState } from "react";
@@ -7,11 +8,11 @@ import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Timer, Play, Square, Loader2, X } from "lucide-react";
 import { toast } from "sonner";
-import { useLearningSession } from "@/context/LearningSessionContext";
+import { useAppSelector } from "@/store/hooks";
+import { useAddLearningSessionMutation, useUpdateLearningSessionMutation, useDeleteLearningSessionMutation } from "@/store/api/adminApi";
 
 interface SessionTrackerProps {
   topic: LearningTopic | null;
-  onSessionEnd: () => void;
 }
 
 const formatTime = (seconds: number) => {
@@ -21,9 +22,14 @@ const formatTime = (seconds: number) => {
   return `${h}:${m}:${s}`;
 };
 
-export default function SessionTracker({ topic, onSessionEnd }: SessionTrackerProps) {
+export default function SessionTracker({ topic }: SessionTrackerProps) {
   const [journalNotes, setJournalNotes] = useState("");
-  const { activeSession, elapsedTime, isLoading, startSession, stopSession, cancelSession } = useLearningSession();
+  const { activeSession, elapsedTime } = useAppSelector((state) => state.learningSession);
+  
+  const [startSessionMutation, { isLoading: isStarting }] = useAddLearningSessionMutation();
+  const [stopSessionMutation, { isLoading: isStopping }] = useUpdateLearningSessionMutation();
+  const [cancelSessionMutation, { isLoading: isCancelling }] = useDeleteLearningSessionMutation();
+  const isLoading = isStarting || isStopping || isCancelling;
 
   const handleStart = async () => {
     if (!topic) return;
@@ -31,25 +37,37 @@ export default function SessionTracker({ topic, onSessionEnd }: SessionTrackerPr
       toast.warning("Another session is already active.", { description: "Please stop the current session before starting a new one." });
       return;
     }
-    await startSession(topic.id);
-    toast.success(`Session started for "${topic.title}"`);
+    try {
+      await startSessionMutation({ topic_id: topic.id, start_time: new Date().toISOString() }).unwrap();
+      // Logic is now in LearningSessionManager via Redux listener, just show toast
+      toast.success(`Session started for "${topic.title}"`);
+    } catch(err) {
+      toast.error("Failed to start session");
+    }
   };
 
   const handleStop = async () => {
     if (!activeSession) return;
-    const duration_minutes = Math.max(1, Math.round((elapsedTime || 0) / 60));
-    await stopSession(journalNotes);
-    toast.success(`Session saved! Duration: ${duration_minutes} min.`);
-    setJournalNotes("");
-    onSessionEnd(); // Refresh session list
+    const endTime = new Date();
+    const duration_minutes = Math.max(1, Math.round((endTime.getTime() - new Date(activeSession.start_time).getTime()) / 60000));
+    try {
+      await stopSessionMutation({ id: activeSession.id, end_time: endTime.toISOString(), duration_minutes, journal_notes: journalNotes || null }).unwrap();
+      toast.success(`Session saved! Duration: ${duration_minutes} min.`);
+      setJournalNotes("");
+    } catch(err) {
+      toast.error("Failed to stop session");
+    }
   };
 
   const handleCancel = async () => {
     if (!activeSession || !confirm("Are you sure you want to cancel this session? It will be permanently deleted.")) return;
-    await cancelSession();
-    toast.warning("Session cancelled and deleted.");
-    setJournalNotes("");
-    onSessionEnd();
+    try {
+      await cancelSessionMutation(activeSession.id).unwrap();
+      toast.warning("Session cancelled and deleted.");
+      setJournalNotes("");
+    } catch(err) {
+      toast.error("Failed to cancel session");
+    }
   };
 
   if (!topic) return null;

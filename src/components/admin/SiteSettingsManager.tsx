@@ -1,7 +1,7 @@
+// src/components/admin/SiteSettingsManager.tsx
 "use client";
 
 import React, { useEffect } from 'react';
-import { supabase } from '@/supabase/client';
 import { toast } from 'sonner';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -17,11 +17,13 @@ import { Loader2 } from 'lucide-react';
 import { Separator } from '../ui/separator';
 import { Switch } from '@/components/ui/switch';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../ui/select';
+import { useGetSiteSettingsQuery, useUpdateSiteSettingsMutation } from '@/store/api/adminApi';
+import type { SiteContent } from '@/types';
 
 const socialLinkSchema = z.object({
   id: z.string(),
   label: z.string(),
-  url: z.string().url("Must be a valid URL"),
+  url: z.string().url("Must be a valid URL").or(z.literal("")),
   is_visible: z.boolean(),
 });
 
@@ -31,7 +33,7 @@ const settingsFormSchema = z.object({
     name: z.string().min(1, "Name is required"),
     title: z.string().min(1, "Title is required"),
     description: z.string().min(1, "Hero description is required"),
-    profile_picture_url: z.string().url("Must be a valid URL"),
+    profile_picture_url: z.string().url("Must be a valid URL").or(z.literal("")),
     show_profile_picture: z.boolean(),
     logo: z.object({
       main: z.string().min(1, "Main logo text is required"),
@@ -39,8 +41,10 @@ const settingsFormSchema = z.object({
     }),
     bio: z.array(z.string()).min(1, "At least one bio paragraph is required"),
     status_panel: z.object({
+      title: z.string(),
       availability: z.string().min(1, "Availability text is required"),
       currently_exploring: z.object({
+        title: z.string(),
         items: z.array(z.string()).transform(items => items.filter(item => item.trim() !== '')),
       }),
       latestProject: z.object({
@@ -68,82 +72,100 @@ const settingsFormSchema = z.object({
 
 type SettingsFormValues = z.infer<typeof settingsFormSchema>;
 
-export default function SiteSettingsManager() {
-  const form = useForm<SettingsFormValues>({
-    resolver: zodResolver(settingsFormSchema),
-    defaultValues: {
-      social_links: [
+const defaultValues: SettingsFormValues = {
+    portfolio_mode: 'multi-page',
+    profile_data: {
+        name: '',
+        title: '',
+        description: '',
+        profile_picture_url: '',
+        show_profile_picture: true,
+        logo: { main: '', highlight: '' },
+        bio: [''],
+        status_panel: {
+            title: 'Status Panel',
+            availability: '',
+            currently_exploring: { title: 'Exploring', items: [''] },
+            latestProject: { name: '', linkText: '', href: '' }
+        },
+        github_projects_config: {
+            username: '', show: true, sort_by: 'pushed', exclude_forks: true,
+            exclude_archived: true, exclude_profile_repo: true, min_stars: 1, projects_per_page: 9,
+        }
+    },
+    social_links: [
         { id: 'github', label: 'GitHub', url: '', is_visible: true },
         { id: 'linkedin', label: 'LinkedIn', url: '', is_visible: true },
         { id: 'email', label: 'Email', url: '', is_visible: true },
-      ],
-      profile_data: {
-        bio: [''],
-        status_panel: { currently_exploring: { items: [''] } },
-        github_projects_config: {
-          username: '',
-          show: true,
-          sort_by: 'pushed',
-          exclude_forks: true,
-          exclude_archived: true,
-          exclude_profile_repo: true,
-          min_stars: 1,
-          projects_per_page: 9,
-        }
-      },
+    ],
+    footer_data: {
+        copyright_text: '',
     },
+};
+
+export default function SiteSettingsManager() {
+  const { data: settingsData, isLoading: isLoadingSettings } = useGetSiteSettingsQuery();
+  const [updateSiteSettings, { isLoading: isSubmitting }] = useUpdateSiteSettingsMutation();
+  
+  const form = useForm<SettingsFormValues>({
+    resolver: zodResolver(settingsFormSchema),
+    defaultValues,
   });
 
   useEffect(() => {
-    const fetchSettings = async () => {
-      form.reset();
-      const { data: identityData, error: identityError } = await supabase.from("site_identity").select("*").single();
-      const { data: settingsData, error: settingsError } = await supabase.from("site_settings").select("*").single();
-
-      if (identityError || settingsError) {
-        toast.error("Failed to load settings", { description: identityError?.message || settingsError?.message });
-        return;
-      }
-
-      const defaultSocials = [
-        { id: 'github', label: 'GitHub', url: '', is_visible: true },
-        { id: 'linkedin', label: 'LinkedIn', url: '', is_visible: true },
-        { id: 'email', label: 'Email', url: '', is_visible: true },
-      ];
-
-      const fetchedSocials = (identityData.social_links as any[]) || [];
-      const mergedSocials = defaultSocials.map(def => {
+    if (settingsData) {
+      const { identity, settings } = settingsData;
+      
+      const fetchedSocials = (identity.social_links as any[]) || [];
+      const mergedSocials = (defaultValues.social_links || []).map(def => {
         const fetched = fetchedSocials.find(f => f.id === def.id);
         return fetched ? { ...def, ...fetched } : def;
       });
 
-      form.reset({
-        portfolio_mode: settingsData.portfolio_mode,
-        profile_data: {
-          ...form.getValues().profile_data, // Keep form defaults
-          ...identityData.profile_data, // Override with fetched data
-          bio: identityData.profile_data.bio || [''],
-          status_panel: { ...identityData.profile_data.status_panel, currently_exploring: { ...identityData.profile_data.status_panel.currently_exploring, items: identityData.profile_data.status_panel.currently_exploring.items || [''] } },
-          github_projects_config: { ...form.getValues().profile_data.github_projects_config, ...identityData.profile_data.github_projects_config },
+      const mergedProfileData = {
+        ...defaultValues.profile_data,
+        ...identity.profile_data,
+        bio: identity.profile_data.bio?.length ? identity.profile_data.bio : [''],
+        status_panel: { 
+            ...defaultValues.profile_data.status_panel, 
+            ...identity.profile_data.status_panel, 
+            currently_exploring: { 
+                ...defaultValues.profile_data.status_panel.currently_exploring, 
+                ...identity.profile_data.status_panel.currently_exploring, 
+                items: identity.profile_data.status_panel.currently_exploring.items?.length ? identity.profile_data.status_panel.currently_exploring.items : [''] 
+            } 
         },
+        github_projects_config: { 
+            ...defaultValues.profile_data.github_projects_config, 
+            ...identity.profile_data.github_projects_config 
+        },
+      };
+
+      form.reset({
+        portfolio_mode: settings.portfolio_mode as 'multi-page' | 'single-page',
+        profile_data: mergedProfileData,
         social_links: mergedSocials,
-        footer_data: identityData.footer_data,
+        footer_data: identity.footer_data,
       });
-    };
-    fetchSettings();
-  }, [form]);
+    }
+  }, [settingsData, form]);
 
   const onSubmit = async (values: SettingsFormValues) => {
     const { portfolio_mode, ...identityValues } = values;
-    const [identityRes, settingsRes] = await Promise.all([
-      supabase.from('site_identity').update(identityValues).eq('id', 1),
-      supabase.from('site_settings').update({ portfolio_mode }).eq('id', 1),
-    ]);
-    if (identityRes.error || settingsRes.error) { toast.error("Failed to save settings", { description: identityRes.error?.message || settingsRes.error?.message }); }
-    else { toast.success("Site settings updated successfully!"); }
+    try {
+        await updateSiteSettings({
+            identity: identityValues,
+            settings: { portfolio_mode }
+        }).unwrap();
+        toast.success("Site settings updated successfully!");
+    } catch(err: any) {
+        toast.error("Failed to save settings", { description: err.message });
+    }
   };
-
-  const { formState: { isSubmitting } } = form;
+  
+  if (isLoadingSettings) {
+    return <div className="flex justify-center py-20"><Loader2 className="size-8 animate-spin" /></div>;
+  }
 
   return (
     <div className="space-y-6 max-w-6xl mx-auto">

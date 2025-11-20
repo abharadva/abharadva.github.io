@@ -1,16 +1,13 @@
 // src/pages/blog/view/index.tsx
-
 import { useRouter } from "next/router";
-import { useEffect, useState } from "react";
-import { supabase } from "@/supabase/client";
-import type { BlogPost } from "@/types";
+import { useEffect } from "react";
 import Head from "next/head";
 import Link from "next/link";
 import { motion } from "framer-motion";
 import Layout from "@/components/layout";
 import { config as appConfig } from "@/lib/config";
 import { formatDate } from "@/lib/utils";
-import { Eye, Loader2, Calendar, Clock, Linkedin, ChevronRight } from "lucide-react";
+import { Eye, Loader2, Clock, Linkedin, ChevronRight } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -21,16 +18,14 @@ import rehypeRaw from 'rehype-raw';
 import rehypePrism from 'rehype-prism-plus';
 import NotFoundComponent from "@/components/not-found";
 import { BsTwitterX } from "react-icons/bs";
+import { useGetBlogPostBySlugQuery, useIncrementPostViewMutation } from "@/store/api/publicApi";
+import type { BlogPost } from "@/types";
 
 const PostBreadcrumb = ({ post }: { post: BlogPost }) => (
   <nav aria-label="breadcrumb">
     <ol className="flex items-center gap-1.5 text-sm text-muted-foreground">
-      <li>
-        <Link href="/blog" className="hover:text-foreground">Blog</Link>
-      </li>
-      <li>
-        <ChevronRight className="size-4" />
-      </li>
+      <li><Link href="/blog" className="hover:text-foreground">Blog</Link></li>
+      <li><ChevronRight className="size-4" /></li>
       <li className="font-medium text-foreground truncate max-w-xs">{post.title}</li>
     </ol>
   </nav>
@@ -47,11 +42,9 @@ const PostMeta = ({ post, readTime }: { post: BlogPost, readTime: number }) => (
       <div className="flex flex-wrap items-center gap-x-2 gap-y-1 text-muted-foreground">
         <time dateTime={new Date(post.published_at || post.created_at || "").toISOString()}>{formatDate(post.published_at || post.created_at || new Date())}</time>
         <span className="hidden sm:inline">·</span>
-        <span className="flex items-center gap-1.5">
-          <Clock className="size-4" /> {readTime} min read</span>
+        <span className="flex items-center gap-1.5"><Clock className="size-4" /> {readTime} min read</span>
         <span className="hidden sm:inline">·</span>
-        <span className="flex items-center gap-1.5">
-          <Eye className="size-4" /> {(post.views || 0).toLocaleString()} views</span>
+        <span className="flex items-center gap-1.5"><Eye className="size-4" /> {(post.views || 0).toLocaleString()} views</span>
       </div>
     </div>
   </div>
@@ -80,63 +73,39 @@ const PostFooter = ({ post, onShareX, onShareLinkedIn }: { post: BlogPost, onSha
     <div>
       <h3 className="mb-3 text-lg font-semibold">Share this article</h3>
       <div className="flex gap-2">
-        <Button variant="outline" onClick={onShareX}>
-          <BsTwitterX className="mr-2 size-4" /> X</Button>
-        <Button variant="outline" onClick={onShareLinkedIn}>
-          <Linkedin className="mr-2 size-4" /> LinkedIn</Button>
+        <Button variant="outline" onClick={onShareX}><BsTwitterX className="mr-2 size-4" /> X</Button>
+        <Button variant="outline" onClick={onShareLinkedIn}><Linkedin className="mr-2 size-4" /> LinkedIn</Button>
       </div>
     </div>
   </footer>
 );
 
-
 export default function BlogPostViewPage() {
   const router = useRouter();
   const { slug } = router.query;
-  const [post, setPost] = useState<BlogPost | null | undefined>(undefined); // undefined = loading
+
+  const { data: post, isLoading, isError } = useGetBlogPostBySlugQuery(slug as string, {
+    skip: !router.isReady || !slug,
+  });
+
+  const [incrementView] = useIncrementPostViewMutation();
   const { site: siteConfig } = appConfig;
 
   useEffect(() => {
-    if (router.isReady && slug && typeof slug === "string") {
-      const fetchPostData = async () => {
-        setPost(undefined);
-        try {
-          const { data, error } = await supabase.from("blog_posts").select("*").eq("slug", slug).eq("published", true).single();
-          if (error && error.code !== "PGRST116") throw error;
-          setPost(data);
-        } catch (e) {
-          console.error("Failed to fetch post", e);
-          setPost(null);
-        }
-      };
-      fetchPostData();
-    } else if (router.isReady) {
-      setPost(null);
-    }
-  }, [slug, router.isReady]);
-
-
-  useEffect(() => {
     if (post?.id && process.env.NODE_ENV === "production") {
-      const timer = setTimeout(async () => {
-        await supabase.rpc("increment_blog_post_view", { post_id_to_increment: post.id });
+      const timer = setTimeout(() => {
+        incrementView(post.id);
       }, 3000);
       return () => clearTimeout(timer);
     }
-  }, [post?.id]);
+  }, [post?.id, incrementView]);
 
-  if (post === undefined) {
-    return <Layout>
-      <div className="flex min-h-[50vh] items-center justify-center">
-        <Loader2 className="size-8 animate-spin text-muted-foreground" />
-      </div>
-    </Layout>;
+  if (isLoading || !router.isReady) {
+    return <Layout><div className="flex min-h-[50vh] items-center justify-center"><Loader2 className="size-8 animate-spin text-muted-foreground" /></div></Layout>;
   }
 
-  if (post === null) {
-    return <Layout>
-      <NotFoundComponent />
-    </Layout>;
+  if (isError || !post) {
+    return <Layout><NotFoundComponent /></Layout>;
   }
 
   const postUrl = `${siteConfig.url}/blog/view?slug=${post.slug}`;

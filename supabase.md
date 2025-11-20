@@ -1,51 +1,48 @@
 # Supabase Setup Guide
 
-This guide provides all the necessary steps to configure your own Supabase project to act as the backend for this portfolio application.
+This guide provides the necessary steps to configure a Supabase project to serve as the backend for this portfolio application.
 
 ### Prerequisites
-
--   A free [Supabase](https://supabase.com) account.
+- A free [Supabase](https://supabase.com) account.
 
 ---
 
-### Step 1: Create a Supabase Project
+### Step 1: Create a New Project
 
 1.  Log in to your Supabase account and click **New project**.
-2.  Choose an organization and give your project a **Name** (e.g., `my-portfolio`).
-3.  Generate a secure **Database Password** and save it somewhere safe.
-4.  Choose the **Region** closest to your users.
-5.  Click **Create project**.
+2.  Choose an organization, give your project a **Name**, and generate a secure **Database Password**.
+3.  Choose the **Region** closest to your users.
+4.  Click **Create project** and wait for it to be provisioned.
 
 ---
 
 ### Step 2: Configure Environment Variables
 
 1.  In your Supabase project dashboard, navigate to **Project Settings** (the gear icon) > **API**.
-2.  In your local project folder, create a new file named `.env.local`.
-3.  Copy the contents of `.env.example` into your new `.env.local` file.
-4.  Find the **Project URL** and the **Project API Keys** (`anon`, `public` key).
-5.  Update your `.env.local` file with these values:
+2.  You will need the **Project URL** and the `anon` **Project API Key**.
+3.  In your local project folder, create a new file named `.env.local` by copying `.env.example`.
+4.  Update your `.env.local` file with these values:
 
     ```env
     NEXT_PUBLIC_SUPABASE_URL=YOUR_SUPABASE_PROJECT_URL
     NEXT_PUBLIC_SUPABASE_ANON_KEY=YOUR_SUPABASE_ANON_PUBLIC_KEY
     NEXT_PUBLIC_BUCKET_NAME=blog-assets
-    NEXT_PUBLIC_SITE_URL=http://localhost:8889
+    NEXT_PUBLIC_SITE_URL=http://localhost:3000
     ```
 
 ---
 
 ### Step 3: Run the Database Setup Script
 
-This single SQL script will create all necessary tables, types, security policies, functions, and default settings.
+This single SQL script creates all necessary tables, security policies, and server-side functions.
 
 1.  In your Supabase project dashboard, navigate to the **SQL Editor** (the terminal icon).
 2.  Click **+ New query**.
-3.  Copy the entire SQL script below and paste it into the editor.
-4.  Click **Run**.
+3.  Copy the entire SQL script provided below and paste it into the editor.
+4.  Click **Run**. The script is idempotent, meaning you can safely run it multiple times.
 
 <details>
-<summary><strong>Click to expand the full Supabase SQL setup script</strong></summary>
+<summary><strong>Click to Expand Full Supabase SQL Script</strong></summary>
 
 ```sql
 -- ========= HELPER FUNCTION =========
@@ -289,28 +286,30 @@ CREATE POLICY "Admin can update files in blog-assets" ON storage.objects FOR UPD
 DROP POLICY IF EXISTS "Admin can delete files in blog-assets" ON storage.objects;
 CREATE POLICY "Admin can delete files in blog-assets" ON storage.objects FOR DELETE USING (bucket_id = 'blog-assets' AND auth.role() = 'authenticated');
 ```
+
 </details>
 
 ---
 
-### Step 4: Create Storage Bucket
+### Step 4: Configure Storage
 
-The application uses Supabase Storage to handle image uploads for blog posts and portfolio items.
+The application uses Supabase Storage for image uploads.
 
 1.  Navigate to **Storage** in your Supabase dashboard.
 2.  Click **Create a new bucket**.
-3.  Enter the bucket name you defined in your `.env.local` file (e.g., `blog-assets`).
+3.  Enter the bucket name from your `.env.local` file (e.g., `blog-assets`).
 4.  Toggle **Public bucket** to **ON**.
-5.  Click **Create bucket**. The RLS policies from the SQL script will secure the bucket appropriately.
+5.  Click **Create bucket**. The Row Level Security (RLS) policies from the SQL script will automatically secure access, allowing public reads but restricting writes to the authenticated admin user.
 
 ---
 
 ### Step 5: Enable Two-Factor Authentication (MFA)
 
-The admin panel requires Two-Factor Authentication (MFA/TOTP) for security.
+The admin panel requires MFA for security.
 
-1.  Navigate to **Authentication** > **Settings** > **MFA**.
-2.  Enable **TOTP**.
+1.  Navigate to **Authentication** > **Providers** in your Supabase dashboard.
+2.  Find **Multi-Factor Authentication** and click to configure.
+3.  Enable **TOTP**.
 
 ---
 
@@ -319,6 +318,6 @@ The admin panel requires Two-Factor Authentication (MFA/TOTP) for security.
 The admin panel does not have a public sign-up page. You must create your first user manually.
 
 1.  Go to **Authentication** > **Users** in your Supabase dashboard.
-2.  Click **Add user** and create your admin account using an email and a secure password.
-3.  Check your inbox for a confirmation email from Supabase and click the link to verify your account.
-4.  You can now proceed to your local application at `http://localhost:3000/admin/login` to log in for the first time and set up MFA.
+2.  Click **Add user** and create your admin account via email.
+3.  You will receive a confirmation email from Supabase. Click the link to verify your account.
+4.  You can now proceed to `http://localhost:3000/admin/login` to log in for the first time and set up MFA.

@@ -1,3 +1,4 @@
+// src/pages/admin/finance.tsx
 import { AdminLayout } from "@/components/admin/AdminLayout";
 import FinanceManager from "@/components/admin/finance-manager";
 import LoadingSpinner from "@/components/admin/LoadingSpinner";

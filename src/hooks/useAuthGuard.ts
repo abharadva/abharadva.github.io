@@ -1,6 +1,8 @@
+// src/hooks/useAuthGuard.ts
 import { useEffect, useState } from "react";
 import { useRouter } from "next/router";
-import { supabase, Session } from "@/supabase/client";
+import { supabase } from "@/supabase/client";
+import type { Session } from "@supabase/supabase-js";
 
 export function useAuthGuard() {
   const router = useRouter();
@@ -9,42 +11,51 @@ export function useAuthGuard() {
 
   useEffect(() => {
     const checkAuthAndAAL = async () => {
-      const { data: { session: currentSession }, error: sessionError } = await supabase.auth.getSession();
+      const { data: { session: currentSession } } = await supabase.auth.getSession();
 
-      if (sessionError || !currentSession) {
-        router.replace("/admin/login");
+      if (!currentSession) {
+        if (router.pathname !== "/admin/login") {
+          router.replace("/admin/login");
+        } else {
+          setIsLoading(false);
+        }
         return;
       }
 
       setSession(currentSession);
 
-      const { data: aalData, error: aalError } = await supabase.auth.mfa.getAuthenticatorAssuranceLevel();
-      
-      if (aalError || aalData.currentLevel !== 'aal2') {
-        // If AAL2 is not met, always redirect to login. 
-        // The login page will correctly route to MFA challenge or setup if needed.
-        router.replace("/admin/login");
+      const { data: aalData } = await supabase.auth.mfa.getAuthenticatorAssuranceLevel();
+
+      if (aalData?.currentLevel !== 'aal2') {
+        // Let login page handle redirection logic
+        if (router.pathname !== "/admin/login" && router.pathname !== "/admin/mfa-challenge" && router.pathname !== "/admin/setup-mfa") {
+          router.replace("/admin/login");
+        } else {
+          setIsLoading(false);
+        }
         return;
       }
-      
+
       // If we reach here, the user is fully authenticated.
       setIsLoading(false);
     };
 
     checkAuthAndAAL();
-    
-    // Listen for auth changes to handle logout from another tab
+
     const { data: authListener } = supabase.auth.onAuthStateChange((event, newSession) => {
-        if (event === 'SIGNED_OUT' || !newSession) {
-            router.replace('/admin/login');
-        }
+      if (event === 'SIGNED_OUT' || !newSession) {
+        router.replace('/admin/login');
+      } else {
+        // Re-check AAL on sign-in event
+        checkAuthAndAAL();
+      }
     });
 
     return () => {
-        authListener?.subscription?.unsubscribe();
+      authListener?.subscription?.unsubscribe();
     };
 
-  }, [router]);
+  }, [router.pathname, router]);
 
   return { isLoading, session };
 }

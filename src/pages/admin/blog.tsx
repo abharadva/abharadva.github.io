@@ -1,3 +1,4 @@
+// src/pages/admin/blog.tsx
 import { AdminLayout } from "@/components/admin/AdminLayout";
 import BlogManager from "@/components/admin/blog-manager";
 import LoadingSpinner from "@/components/admin/LoadingSpinner";

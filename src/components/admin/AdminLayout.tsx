@@ -1,14 +1,14 @@
-import { useState, ReactNode, useEffect } from "react";
-import { supabase } from "@/supabase/client";
+// src/components/admin/AdminLayout.tsx
+import { useState, ReactNode } from "react";
 import { useRouter } from "next/router";
 import Link from "next/link";
 import { Sidebar } from "@/components/admin/Sidebar";
 import { Button } from "@/components/ui/button";
-import { LogOut, Menu, Timer, Loader2 } from "lucide-react"; // Import Loader2
+import { LogOut, Menu, Timer, Loader2 } from "lucide-react";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
-import { useLearningSession } from "@/context/LearningSessionContext";
-import { LearningTopic } from "@/types";
 import { Separator } from "../ui/separator";
+import { useAppSelector } from "@/store/hooks";
+import { useGetLearningDataQuery, useSignOutMutation } from "@/store/api/adminApi";
 
 const formatTime = (seconds: number) => {
   const h = Math.floor(seconds / 3600).toString().padStart(2, '0');
@@ -20,25 +20,19 @@ const formatTime = (seconds: number) => {
 export function AdminLayout({ children }: { children: ReactNode }) {
   const router = useRouter();
   const [mobileSidebarOpen, setMobileSidebarOpen] = useState(false);
-  const { activeSession, elapsedTime } = useLearningSession();
-  const [learningTopics, setLearningTopics] = useState<Pick<LearningTopic, "id" | "title">[]>([]);
   
-  useEffect(() => {
-    if (activeSession) {
-      const fetchTopics = async () => {
-        const { data } = await supabase.from('learning_topics').select('id, title');
-        if (data) setLearningTopics(data);
-      };
-      fetchTopics();
-    }
-  }, [activeSession]);
+  const { activeSession, elapsedTime } = useAppSelector((state) => state.learningSession);
+  const { data: learningData } = useGetLearningDataQuery();
+  const [signOut] = useSignOutMutation();
 
   const handleLogout = async () => {
-    await supabase.auth.signOut();
+    await signOut().unwrap();
     router.replace("/admin/login");
   };
 
-  const currentTopicName = activeSession ? learningTopics.find(t => t.id === activeSession.topic_id)?.title : null;
+  const currentTopicName = activeSession
+    ? learningData?.topics.find(t => t.id === activeSession.topic_id)?.title
+    : null;
 
   return (
     <div className="min-h-screen bg-secondary/30">
@@ -69,13 +63,11 @@ export function AdminLayout({ children }: { children: ReactNode }) {
                   <Timer className="size-4 animate-pulse" />
                   <div className="flex items-center gap-2">
                     <span className="hidden sm:inline truncate max-w-[150px]">{currentTopicName || 'Session'}</span>
-                    {/* --- THIS IS THE CHANGE --- */}
                     {elapsedTime === null ? (
                       <Loader2 className="size-4 animate-spin" />
                     ) : (
                       <span className="font-mono tracking-wider">{formatTime(elapsedTime)}</span>
                     )}
-                    {/* --- END OF CHANGE --- */}
                   </div>
                 </Button>
               )}

@@ -1,3 +1,4 @@
+// src/pages/admin/notes.tsx
 import { AdminLayout } from "@/components/admin/AdminLayout";
 import NotesManager from "@/components/admin/notes-manager";
 import LoadingSpinner from "@/components/admin/LoadingSpinner";

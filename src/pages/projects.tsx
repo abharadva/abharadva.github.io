@@ -1,17 +1,15 @@
 // src/pages/projects.tsx
 import Layout from "@/components/layout";
 import ProjectsComponent from "@/components/projects";
-import FeaturedProject from "@/components/case-study-card"; // Updated import name
+import FeaturedProject from "@/components/case-study-card";
 import Head from "next/head";
 import { config as appConfig } from "@/lib/config";
 import { siteContent } from "@/lib/site-content";
 import { motion } from "framer-motion";
-import { useState, useEffect } from "react";
-import { supabase } from "@/supabase/client";
-import type { PortfolioSection } from "@/types";
 import { Loader2, AlertTriangle } from "lucide-react";
 import { Separator } from "@/components/ui/separator";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { useGetSectionsByPathQuery } from "@/store/api/publicApi";
 
 export default function ProjectsPage() {
   const { site: siteConfig } = appConfig;
@@ -19,32 +17,11 @@ export default function ProjectsPage() {
   const pageTitle = `${content.title} | ${siteConfig.title}`;
   const pageUrl = `${siteConfig.url}/projects/`;
 
-  const [featuredSection, setFeaturedSection] = useState<PortfolioSection | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  // Fetch all sections for the '/projects' page path
+  const { data: sections, isLoading, error } = useGetSectionsByPathQuery('/projects');
 
-  useEffect(() => {
-    const fetchFeaturedProjects = async () => {
-      setIsLoading(true);
-      setError(null);
-      try {
-        const { data, error: fetchError } = await supabase
-          .from('portfolio_sections')
-          .select('*, portfolio_items(*)')
-          .eq('title', 'Featured Projects')
-          .order('display_order', { foreignTable: 'portfolio_items', ascending: true })
-          .single();
-
-        if (fetchError && fetchError.code !== 'PGRST116') throw fetchError;
-        setFeaturedSection(data);
-      } catch (err: any) {
-        setError(err.message || "Could not load featured projects.");
-      } finally {
-        setIsLoading(false);
-      }
-    };
-    fetchFeaturedProjects();
-  }, []);
+  // Find the specific "Featured Projects" section from the fetched data
+  const featuredSection = sections?.find(s => s.title === 'Featured Projects');
 
   return (
     <Layout>
@@ -77,13 +54,15 @@ export default function ProjectsPage() {
             <Loader2 className="size-8 animate-spin text-muted-foreground" />
           </div>
         )}
-        
-        {error && (
-            <Alert variant="destructive" className="max-w-2xl mx-auto my-16">
-              <AlertTriangle className="h-4 w-4" />
-              <AlertTitle>Error Loading Case Studies</AlertTitle>
-              <AlertDescription>{error}</AlertDescription>
-            </Alert>
+
+        {!!error && (
+          <Alert variant="destructive" className="max-w-2xl mx-auto my-16">
+            <AlertTriangle className="h-4 w-4" />
+            <AlertTitle>Error Loading Case Studies</AlertTitle>
+            <AlertDescription>{error && typeof error === 'object' && 'message' in error
+              ? String((error as { message: unknown }).message)
+              : "An unknown error occurred."}</AlertDescription>
+          </Alert>
         )}
 
         {featuredSection?.portfolio_items && featuredSection.portfolio_items.length > 0 && (
@@ -97,9 +76,9 @@ export default function ProjectsPage() {
         <div className="my-24">
           <Separator />
         </div>
-        
+
         <div className="mx-auto max-w-6xl">
-            <ProjectsComponent showTitle={true} />
+          <ProjectsComponent showTitle={true} />
         </div>
       </main>
     </Layout>

@@ -1,51 +1,26 @@
+// src/components/experience.tsx
 import Link from "next/link";
-import { PropsWithChildren, useState, useEffect } from "react";
+import { PropsWithChildren } from "react";
 import { ArrowUpRight, Loader2, Briefcase } from "lucide-react";
 import { motion } from "framer-motion";
 import { Badge } from "@/components/ui/badge";
-import { supabase } from "@/supabase/client";
+import { useGetSectionsByPathQuery } from "@/store/api/publicApi";
 import { PortfolioItem } from "@/types";
-import { siteContent } from "@/lib/site-content";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
+import { siteContent } from "@/lib/site-content";
 
 type ExperienceProps = PropsWithChildren<{
   showTitle?: boolean;
 }>;
 
 export default function Experience({ children, showTitle = true }: ExperienceProps) {
-  const [experienceItems, setExperienceItems] = useState<PortfolioItem[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-
-  useEffect(() => {
-    const fetchExperience = async () => {
-      setIsLoading(true);
-      setError(null);
-      try {
-        const { data, error: fetchError } = await supabase
-          .from('portfolio_sections')
-          .select('portfolio_items(*)')
-          .eq('title', 'Experience')
-          .order('display_order', { foreignTable: 'portfolio_items', ascending: true });
-
-        if (fetchError) throw new Error(fetchError.message);
-        
-        if (data && data.length > 0 && data[0].portfolio_items) {
-          setExperienceItems(data[0].portfolio_items as PortfolioItem[]);
-        } else {
-          setExperienceItems([]);
-        }
-
-      } catch (err: any) {
-        setError(err.message || "Could not load experience data.");
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
-    fetchExperience();
-  }, []);
+  // Fetch all sections for the homepage, which includes "Experience"
+  const { data: sections, isLoading, error } = useGetSectionsByPathQuery('/');
+  
+  // Find the specific "Experience" section from the fetched data
+  const experienceSection = sections?.find(s => s.title === 'Experience');
+  const experienceItems: PortfolioItem[] = (experienceSection?.portfolio_items as PortfolioItem[]) || [];
 
   return (
     <section className="my-16 py-16">
@@ -68,7 +43,7 @@ export default function Experience({ children, showTitle = true }: ExperiencePro
       )}
 
       {isLoading && <div className="flex justify-center py-8"><Loader2 className="size-8 animate-spin" /></div>}
-      {error && <div className="text-center text-destructive">{error}</div>}
+      {!!error && <div className="text-center text-destructive">Could not load experience data.</div>}
 
       {!isLoading && !error && experienceItems.length === 0 && (
         <div className="py-16 text-center text-muted-foreground">

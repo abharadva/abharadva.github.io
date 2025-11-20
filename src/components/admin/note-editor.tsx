@@ -1,4 +1,4 @@
-
+// src/components/admin/note-editor.tsx
 "use client";
 import React, { useState, useEffect } from "react";
 import { motion } from "framer-motion";
@@ -8,6 +8,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "../ui/card";
 import { Label } from "../ui/label";
+import { Loader2 } from "lucide-react";
 
 interface NoteEditorProps {
   note: Note | null;
@@ -91,7 +92,9 @@ export default function NoteEditor({ note, onSave, onCancel }: NoteEditorProps) 
           </CardContent>
           <CardFooter className="flex justify-end gap-3">
             <Button type="button" variant="outline" onClick={onCancel} disabled={isSaving}>Cancel</Button>
-            <Button type="submit" disabled={isSaving}>{isSaving ? "Saving..." : "Save Note"}</Button>
+            <Button type="submit" disabled={isSaving}>
+              {isSaving ? <><Loader2 className="mr-2 size-4 animate-spin" /> Saving...</> : "Save Note"}
+            </Button>
           </CardFooter>
         </Card>
       </form>

@@ -1,9 +1,10 @@
+// src/components/hero.tsx
 import { motion } from "framer-motion";
 import { ArrowRight, Github, Linkedin, Mail } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import { Badge } from "./ui/badge";
-import { useSiteContent } from "@/context/SiteContentContext";
+import { useGetSiteIdentityQuery } from "@/store/api/publicApi";
 import { Skeleton } from "@/components/ui/skeleton";
 import ReactMarkdown from 'react-markdown';
 
@@ -26,7 +27,7 @@ const HeroSkeleton = () => (
 );
 
 export default function Hero() {
-  const { content, isLoading } = useSiteContent();
+  const { data: content, isLoading } = useGetSiteIdentityQuery();
 
   const nameVariants = { hidden: {}, visible: { transition: { staggerChildren: 0.05 } } };
   const titleVariants = { hidden: {}, visible: { transition: { staggerChildren: 0.03, delayChildren: (content?.profile_data.name.length || 0) * 0.05 } } };
@@ -62,7 +63,7 @@ export default function Hero() {
         </motion.div>
 
         <motion.div variants={itemVariants} className="mt-8 flex gap-3">
-          {socials.filter(s => s.is_visible).map((social) => { // ADD .filter() HERE
+          {socials.filter(s => s.is_visible).map((social) => {
             const Icon = socialIcons[social.id.toLowerCase()];
             return Icon ? (
               <Button asChild size="icon" variant="secondary" aria-label={social.label} key={social.url}>
@@ -75,7 +76,7 @@ export default function Hero() {
 
       <motion.div className="lg:col-span-2" initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} transition={{ delay: 1, duration: 0.5 }}>
         <div className="h-full rounded-lg bg-blueprint-bg p-6">
-          <h3 className="font-mono text-sm uppercase tracking-widest text-muted-foreground">{status_panel.title}</h3>
+          <h3 className="font-mono text-sm uppercase tracking-widest text-muted-foreground">{status_panel.title || "Status Panel"}</h3>
           <div className="mt-4 space-y-4">
             <div className="flex items-center gap-3">
               <span className="relative flex h-3 w-3">
@@ -85,7 +86,7 @@ export default function Hero() {
               <p className="text-sm">{status_panel.availability}</p>
             </div>
             <div className="space-y-2">
-              <p className="font-mono text-xs uppercase text-muted-foreground">{status_panel.currently_exploring.title}</p>
+              <p className="font-mono text-xs uppercase text-muted-foreground">{status_panel.currently_exploring.title || "Exploring"}</p>
               <div className="flex flex-wrap gap-2">
                 {status_panel.currently_exploring.items.map((item) => <Badge key={item} variant="outline">{item}</Badge>)}
               </div>

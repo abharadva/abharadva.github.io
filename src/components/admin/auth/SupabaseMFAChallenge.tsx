@@ -1,4 +1,4 @@
-
+// src/components/admin/auth/SupabaseMFAChallenge.tsx
 "use client";
 
 import React, { useState, useEffect } from "react";
@@ -12,6 +12,7 @@ import {
   InputOTPSlot,
 } from "@/components/ui/input-otp";
 import { KeyRound, Loader2 } from "lucide-react";
+import { useSignOutMutation } from "@/store/api/adminApi";
 
 export default function SupabaseMFAChallenge() {
   const [otp, setOtp] = useState("");
@@ -20,35 +21,21 @@ export default function SupabaseMFAChallenge() {
   const [remainingTime, setRemainingTime] = useState(30);
   const [factorId, setFactorId] = useState<string | null>(null);
   const router = useRouter();
+  const [signOut] = useSignOutMutation();
 
   useEffect(() => {
     const protectPageAndGetFactor = async () => {
       setIsLoadingState(true);
       const { data: { session } } = await supabase.auth.getSession();
-      if (!session) {
-        router.replace("/admin/login");
-        return;
-      }
+      if (!session) { router.replace("/admin/login"); return; }
 
-      const { data: aalData, error: aalError } =
-        await supabase.auth.mfa.getAuthenticatorAssuranceLevel();
-      if (aalError) {
-        setError("Could not check MFA status: " + aalError.message);
-        setIsLoadingState(false);
-        return;
-      }
+      const { data: aalData, error: aalError } = await supabase.auth.mfa.getAuthenticatorAssuranceLevel();
+      if (aalError) { setError("Could not check MFA status: " + aalError.message); setIsLoadingState(false); return; }
 
-      if (aalData?.currentLevel === "aal2") {
-        router.replace("/admin");
-        return;
-      }
-      if (aalData?.currentLevel !== "aal1" || aalData?.nextLevel !== "aal2") {
-        router.replace("/admin/login");
-        return;
-      }
+      if (aalData?.currentLevel === "aal2") { router.replace("/admin"); return; }
+      if (aalData?.currentLevel !== "aal1" || aalData?.nextLevel !== "aal2") { router.replace("/admin/login"); return; }
 
-      const { data: factorsData, error: factorsError } =
-        await supabase.auth.mfa.listFactors();
+      const { data: factorsData, error: factorsError } = await supabase.auth.mfa.listFactors();
       if (factorsError || !factorsData?.totp?.length) {
         setError("Could not retrieve MFA factor. Please try logging in again.");
         setIsLoadingState(false);
@@ -57,13 +44,8 @@ export default function SupabaseMFAChallenge() {
       }
 
       const firstVerifiedFactor = factorsData.totp.find((f) => f.status === "verified");
-      if (firstVerifiedFactor) {
-        setFactorId(firstVerifiedFactor.id);
-      } else {
-        setError("No verified MFA factor found. Please set up MFA or try logging in again.");
-        router.replace("/admin/setup-mfa");
-        return;
-      }
+      if (firstVerifiedFactor) { setFactorId(firstVerifiedFactor.id); }
+      else { setError("No verified MFA factor found. Please set up MFA or try logging in again."); router.replace("/admin/setup-mfa"); return; }
       setIsLoadingState(false);
     };
     protectPageAndGetFactor();
@@ -78,28 +60,23 @@ export default function SupabaseMFAChallenge() {
 
   const handleVerify = async (e: React.FormEvent | string) => {
     if (typeof e !== 'string') e.preventDefault();
-    if (!factorId) {
-      setError("MFA factor ID is missing. Please try logging in again.");
-      return;
-    }
-    setIsLoadingState(true);
-    setError("");
+    if (!factorId) { setError("MFA factor ID is missing. Please try logging in again."); return; }
+    setIsLoadingState(true); setError("");
 
     const codeToVerify = typeof e === 'string' ? e : otp;
-    
-    const { error: verifyError } = await supabase.auth.mfa.challengeAndVerify({
-      factorId: factorId,
-      code: codeToVerify,
-    });
+
+    const { error: verifyError } = await supabase.auth.mfa.challengeAndVerify({ factorId: factorId, code: codeToVerify });
 
     setIsLoadingState(false);
-    if (verifyError) {
-      setError(verifyError.message || "Invalid OTP. Please try again.");
-      setOtp("");
-      return;
-    }
+    if (verifyError) { setError(verifyError.message || "Invalid OTP. Please try again."); setOtp(""); return; }
 
     router.replace("/admin");
+  };
+
+  const handleSignOut = async () => {
+    setIsLoadingState(true);
+    await signOut().unwrap();
+    router.replace("/admin/login");
   };
 
   const stepVariants = {
@@ -144,9 +121,7 @@ export default function SupabaseMFAChallenge() {
           <p className="mt-2 text-muted-foreground">
             Enter the code from your authenticator app.
           </p>
-        </div>
-
-        <form className="space-y-6" onSubmit={handleVerify}>
+        </div>        <form className="space-y-6" onSubmit={handleVerify}>
           <div className="relative">
             <label htmlFor="totpCode" className="sr-only">
               Verification Code
@@ -203,18 +178,12 @@ export default function SupabaseMFAChallenge() {
             ) : (
               "Verify & Sign In"
             )}
-          </Button>
-
-          <div className="text-center">
+          </Button>          <div className="text-center">
             <Button
               type="button"
               variant="link"
               className="text-sm text-muted-foreground"
-              onClick={async () => {
-                setIsLoadingState(true);
-                await supabase.auth.signOut();
-                router.replace("/admin/login");
-              }}
+              onClick={handleSignOut}
             >
               Cancel and sign out
             </Button>

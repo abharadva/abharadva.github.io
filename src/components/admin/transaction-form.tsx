@@ -1,125 +1,96 @@
 // src/components/admin/transaction-form.tsx
-
 "use client";
-import { useState, useEffect, FormEvent } from "react";
+import { FormEvent } from "react";
 import type { Transaction } from "@/types";
-import { supabase } from "@/supabase/client";
+import { useSaveTransactionMutation } from "@/store/api/adminApi";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
-import { Combobox } from "../ui/combobox"; // Import the new component
+import { Combobox } from "../ui/combobox";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { z } from "zod";
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
+import { toast } from "sonner";
+import { Loader2 } from "lucide-react";
+
+const transactionSchema = z.object({
+  date: z.string().min(1, 'Date is required'),
+  description: z.string().min(1, 'Description is required'),
+  amount: z.coerce.number().positive('Amount must be positive'),
+  type: z.enum(['earning', 'expense']),
+  category: z.string().optional(),
+});
+type TransactionFormValues = z.infer<typeof transactionSchema>;
 
 interface TransactionFormProps {
-  transaction: Transaction | null;
+  transaction: Partial<Transaction> | null;
   onSuccess: () => void;
-  categories: string[]; // Add this new prop
+  categories: string[];
 }
 
-export default function TransactionForm({
-  transaction,
-  onSuccess,
-  categories, // Destructure the prop
-}: TransactionFormProps) {
-  const [date, setDate] = useState("");
-  const [description, setDescription] = useState("");
-  const [amount, setAmount] = useState("");
-  const [type, setType] = useState<"earning" | "expense">("expense");
-  const [category, setCategory] = useState("");
-  const [error, setError] = useState("");
-
-  useEffect(() => {
-    if (transaction) {
-      setDate(transaction.date);
-      setDescription(transaction.description);
-      setAmount(String(transaction.amount));
-      setType(transaction.type);
-      setCategory(transaction.category || "");
-    } else {
-      const today = new Date().toISOString().split("T")[0];
-      setDate(today);
-      setDescription("");
-      setAmount("");
-      setType("expense");
-      setCategory("");
+export default function TransactionForm({ transaction, onSuccess, categories }: TransactionFormProps) {
+  const [saveTransaction, { isLoading }] = useSaveTransactionMutation();
+  const form = useForm<TransactionFormValues>({
+    resolver: zodResolver(transactionSchema),
+    defaultValues: {
+      date: transaction?.date || new Date().toISOString().split('T')[0],
+      description: transaction?.description || '',
+      amount: transaction?.amount || 0,
+      type: transaction?.type || 'expense',
+      category: transaction?.category || '',
     }
-  }, [transaction]);
+  });
 
-  const handleSubmit = async (e: FormEvent) => {
-    e.preventDefault();
-    setError("");
-    if (!date || !description || !amount) {
-      setError("Please fill all required fields.");
-      return;
+  const handleSubmit = async (values: TransactionFormValues) => {
+    try {
+        await saveTransaction({ ...values, id: transaction?.id, category: values.category || null }).unwrap();
+        toast.success(`Transaction "${values.description}" saved.`);
+        onSuccess();
+    } catch (err: any) {
+        toast.error("Failed to save transaction", { description: err.message });
     }
-
-    const transactionData = {
-      date,
-      description,
-      amount: parseFloat(amount),
-      type,
-      category: category.trim() || null,
-    };
-
-    const { error: dbError } = transaction
-      ? await supabase
-          .from("transactions")
-          .update(transactionData)
-          .eq("id", transaction.id)
-      : await supabase.from("transactions").insert(transactionData);
-
-    if (dbError) setError(dbError.message);
-    else onSuccess();
   };
 
   const categoryOptions = categories.map(c => ({ value: c, label: c }));
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-4 pt-4">
-      <div className="grid grid-cols-2 gap-4">
-        <div>
-          <Label htmlFor="date">Date *</Label>
-          <Input id="date" type="date" value={date} onChange={(e) => setDate(e.target.value)} required />
+    <Form {...form}>
+      <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-4 pt-4">
+        <div className="grid grid-cols-2 gap-4">
+          <FormField control={form.control} name="date" render={({ field }) => (
+            <FormItem><FormLabel>Date *</FormLabel><FormControl><Input type="date" {...field} /></FormControl><FormMessage /></FormItem>
+          )} />
+          <FormField control={form.control} name="amount" render={({ field }) => (
+            <FormItem><FormLabel>Amount *</FormLabel><FormControl><Input type="number" step="0.01" {...field} /></FormControl><FormMessage /></FormItem>
+          )} />
         </div>
-        <div>
-          <Label htmlFor="amount">Amount *</Label>
-          <Input id="amount" type="number" step="0.01" value={amount} onChange={(e) => setAmount(e.target.value)} placeholder="0.00" required />
+        <FormField control={form.control} name="description" render={({ field }) => (
+          <FormItem><FormLabel>Description *</FormLabel><FormControl><Input {...field} /></FormControl><FormMessage /></FormItem>
+        )} />
+        <FormField control={form.control} name="category" render={({ field }) => (
+          <FormItem><FormLabel>Category</FormLabel><FormControl>
+            <Combobox
+              options={categoryOptions}
+              value={field.value || ''}
+              onChange={field.onChange}
+              placeholder="Select or create a category..."
+              searchPlaceholder="Search categories..."
+              emptyPlaceholder="No categories found."
+            />
+          </FormControl><FormMessage /></FormItem>
+        )} />
+        <FormField control={form.control} name="type" render={({ field }) => (
+          <FormItem><FormLabel>Type *</FormLabel><FormControl><RadioGroup onValueChange={field.onChange} defaultValue={field.value} className="flex items-center gap-4 pt-2"><FormItem className="flex items-center space-x-2"><FormControl><RadioGroupItem value="expense" /></FormControl><FormLabel className="font-normal">Expense</FormLabel></FormItem><FormItem className="flex items-center space-x-2"><FormControl><RadioGroupItem value="earning" /></FormControl><FormLabel className="font-normal">Earning</FormLabel></FormItem></RadioGroup></FormControl><FormMessage /></FormItem>
+        )} />
+        <div className="flex justify-end pt-4">
+          <Button type="submit" disabled={isLoading}>
+            {isLoading && <Loader2 className="mr-2 size-4 animate-spin" />}
+            {transaction?.id ? "Save Changes" : "Add Transaction"}
+          </Button>
         </div>
-      </div>
-      <div>
-        <Label htmlFor="description">Description *</Label>
-        <Input id="description" value={description} onChange={(e) => setDescription(e.target.value)} required />
-      </div>
-      
-      {/* --- REPLACEMENT --- */}
-      <div>
-        <Label htmlFor="category">Category</Label>
-        <Combobox
-          options={categoryOptions}
-          value={category}
-          onChange={setCategory}
-          placeholder="Select or create a category..."
-          searchPlaceholder="Search categories..."
-          emptyPlaceholder="No categories found."
-        />
-      </div>
-      {/* --- END REPLACEMENT --- */}
-
-      <div>
-        <Label>Type *</Label>
-        <RadioGroup value={type} onValueChange={(v: "earning" | "expense") => setType(v)} className="flex items-center gap-4 pt-2">
-          <div className="flex items-center space-x-2"><RadioGroupItem value="expense" id="type-expense" /><Label htmlFor="type-expense">Expense</Label></div>
-          <div className="flex items-center space-x-2"><RadioGroupItem value="earning" id="type-earning" /><Label htmlFor="type-earning">Earning</Label></div>
-        </RadioGroup>
-      </div>
-
-      {error && <p className="text-sm font-semibold text-red-600">{error}</p>}
-
-      <div className="flex justify-end pt-4">
-        <Button type="submit">
-          {transaction ? "Save Changes" : "Add Transaction"}
-        </Button>
-      </div>
-    </form>
+      </form>
+    </Form>
   );
 }

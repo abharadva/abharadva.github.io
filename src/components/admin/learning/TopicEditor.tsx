@@ -1,8 +1,9 @@
+// src/components/admin/learning/TopicEditor.tsx
 "use client";
 
 import React, { useState, useEffect } from "react";
-import { supabase } from "@/supabase/client";
 import type { LearningTopic, LearningStatus } from "@/types";
+import { useSaveTopicMutation } from "@/store/api/adminApi";
 import AdvancedMarkdownEditor from "@/components/admin/AdvancedMarkdownEditor";
 import SessionTracker from "./SessionTracker";
 import { Button } from "@/components/ui/button";
@@ -16,46 +17,47 @@ interface TopicEditorProps {
   topic: LearningTopic | null;
   onBack: () => void;
   onTopicUpdate: (updatedTopic: LearningTopic) => void;
-  onSessionEnd: () => void;
 }
 
-export default function TopicEditor({ topic, onBack, onTopicUpdate, onSessionEnd }: TopicEditorProps) {
+export default function TopicEditor({ topic, onBack, onTopicUpdate }: TopicEditorProps) {
   const [coreNotes, setCoreNotes] = useState("");
   const [status, setStatus] = useState<LearningStatus>('To Learn');
   const [resources, setResources] = useState<{ name: string; url: string }[]>([]);
-  const [isSaving, setIsSaving] = useState(false);
-  
+
+  const [saveTopic, { isLoading: isSaving }] = useSaveTopicMutation();
+
   useEffect(() => {
     if (topic) {
-        setCoreNotes(topic.core_notes || "");
-        setStatus(topic.status || 'To Learn');
-        setResources(topic.resources || []);
+      setCoreNotes(topic.core_notes || "");
+      setStatus(topic.status || 'To Learn');
+      setResources(topic.resources || []);
     }
   }, [topic]);
+
+  // Use useCallback to memoize the function
+  const handleSave = React.useCallback(async (updateData: Partial<LearningTopic>, isAutosave: boolean = false) => {
+    if (!topic) return;
+    try {
+      const updatedTopic = await saveTopic({ id: topic.id, ...updateData }).unwrap();
+      if (!isAutosave) toast.success("Topic updated successfully!");
+      else console.log("Autosaved notes.");
+      onTopicUpdate(updatedTopic);
+    } catch (err: any) {
+      toast.error("Failed to save topic", { description: err.message });
+    }
+  }, [topic, saveTopic, onTopicUpdate]);
 
   useEffect(() => {
     if (!topic || coreNotes === (topic.core_notes || "")) return;
 
     const handler = setTimeout(() => {
       handleSave({ core_notes: coreNotes }, true);
-    }, 2000); 
+    }, 2000);
 
     return () => clearTimeout(handler);
-  }, [coreNotes, topic]);
-  
-  const handleSave = async (updateData: Partial<LearningTopic>, isAutosave: boolean = false) => {
-    if (!topic) return;
-    setIsSaving(true);
-    const { data, error } = await supabase.from("learning_topics").update(updateData).eq("id", topic.id).select().single();
-    if (error) { toast.error("Failed to save topic", { description: error.message }); } 
-    else if (data) {
-      if (!isAutosave) toast.success("Topic updated successfully!");
-      else console.log("Autosaved notes.");
-      onTopicUpdate(data);
-    }
-    setIsSaving(false);
-  };
-  
+  }, [coreNotes, topic, handleSave]); // Added handleSave to dependency array
+
+
   const handleStatusChange = (newStatus: LearningStatus) => {
     setStatus(newStatus);
     handleSave({ status: newStatus });
@@ -78,8 +80,8 @@ export default function TopicEditor({ topic, onBack, onTopicUpdate, onSessionEnd
     <div className="space-y-8">
       <div className="flex items-center justify-between"><Button variant="ghost" size="sm" onClick={onBack}><ArrowLeft className="mr-2 size-4" />Back to Dashboard</Button><div className="flex items-center gap-4"><Label htmlFor="status-select">Status</Label><Select value={status} onValueChange={handleStatusChange}><SelectTrigger id="status-select" className="w-[180px]"><SelectValue /></SelectTrigger><SelectContent><SelectItem value="To Learn">To Learn</SelectItem><SelectItem value="Learning">Learning</SelectItem><SelectItem value="Practicing">Practicing</SelectItem><SelectItem value="Mastered">Mastered</SelectItem></SelectContent></Select></div></div>
       <h2 className="text-3xl font-bold tracking-tight text-foreground">{topic.title}</h2>
-      <SessionTracker topic={topic} onSessionEnd={onSessionEnd} />
-      
+      <SessionTracker topic={topic} />
+
       <div className="space-y-4">
         <h4 className="text-lg font-semibold">Resources</h4>
         <div className="rounded-lg border bg-card/50 p-4">
@@ -95,11 +97,11 @@ export default function TopicEditor({ topic, onBack, onTopicUpdate, onSessionEnd
             ))}
           </div>
           <div className="flex justify-between items-center pt-4 mt-4 border-t">
-              <Button variant="outline" size="sm" onClick={addResource}><Plus className="mr-2 size-4" />Add Resource</Button>
-              <Button size="sm" onClick={() => handleSave({ resources })} disabled={isSaving}>
-                {isSaving ? <Loader2 className="mr-2 size-4 animate-spin"/> : <Save className="mr-2 size-4"/>}
-                Save Resources
-              </Button>
+            <Button variant="outline" size="sm" onClick={addResource}><Plus className="mr-2 size-4" />Add Resource</Button>
+            <Button size="sm" onClick={() => handleSave({ resources })} disabled={isSaving}>
+              {isSaving ? <Loader2 className="mr-2 size-4 animate-spin" /> : <Save className="mr-2 size-4" />}
+              Save Resources
+            </Button>
           </div>
         </div>
       </div>

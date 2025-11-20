@@ -1,6 +1,7 @@
+// src/components/admin/AssetManager.tsx
 "use client";
 
-import React, { useState, useEffect, useCallback, useRef } from 'react';
+import React, { useState, useRef } from 'react';
 import { supabase } from '@/supabase/client';
 import { toast } from 'sonner';
 import { Button, buttonVariants } from '@/components/ui/button';
@@ -8,12 +9,13 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
-import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
 import { Upload, Loader2, Trash2, Copy, AlertTriangle, Link as LinkIcon, Edit, LayoutGrid, List } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '../ui/tooltip';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
+import { useGetAssetsQuery, useAddAssetMutation, useUpdateAssetMutation, useDeleteAssetMutation, useRescanAssetUsageMutation } from '@/store/api/adminApi';
 
 type StorageAsset = {
   id: string;
@@ -29,30 +31,18 @@ type StorageAsset = {
 const BUCKET_NAME = process.env.NEXT_PUBLIC_BUCKET_NAME || 'blog-assets';
 
 export default function AssetManager() {
-  const [assets, setAssets] = useState<StorageAsset[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
   const [isUploading, setIsUploading] = useState(false);
   const [selectedAsset, setSelectedAsset] = useState<StorageAsset | null>(null);
   const [assetToDelete, setAssetToDelete] = useState<StorageAsset | null>(null);
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
-
-  const fetchAssets = useCallback(async () => {
-    setIsLoading(true);
-    const { data: dbData, error: dbError } = await supabase.from('storage_assets').select('*').order('created_at', { ascending: false });
-
-    if (dbError) {
-      toast.error("Failed to fetch asset metadata", { description: dbError.message });
-    } else {
-      setAssets(dbData || []);
-    }
-    setIsLoading(false);
-  }, []);
-
-  useEffect(() => {
-    fetchAssets();
-  }, [fetchAssets]);
+  
+  const { data: assets = [], isLoading } = useGetAssetsQuery();
+  const [addAsset] = useAddAssetMutation();
+  const [updateAsset] = useUpdateAssetMutation();
+  const [deleteAsset] = useDeleteAssetMutation();
+  const [rescanUsage] = useRescanAssetUsageMutation();
 
   const handleFileSelect = (event: React.ChangeEvent<HTMLInputElement>) => {
     const files = event.target.files;
@@ -71,10 +61,11 @@ export default function AssetManager() {
       const { error: uploadError } = await supabase.storage.from(BUCKET_NAME).upload(filePath, file);
       if (uploadError) throw new Error(`Upload failed for ${file.name}: ${uploadError.message}`);
 
-      const { error: dbInsertError } = await supabase.from('storage_assets').insert({ file_name: file.name, file_path: filePath, mime_type: file.type, size_kb: file.size / 1024 });
-      if (dbInsertError) {
+      try {
+        await addAsset({ file_name: file.name, file_path: filePath, mime_type: file.type, size_kb: file.size / 1024 }).unwrap();
+      } catch (dbInsertError) {
         await supabase.storage.from(BUCKET_NAME).remove([filePath]);
-        throw new Error(`DB insert failed for ${file.name}: ${dbInsertError.message}`);
+        throw new Error(`DB insert failed for ${file.name}: ${(dbInsertError as any).message}`);
       }
     });
 
@@ -89,29 +80,41 @@ export default function AssetManager() {
       if (fileInputRef.current) fileInputRef.current.value = "";
     }
   };
-
+  
   const confirmDelete = async () => {
     if (!assetToDelete) return;
 
-    const { error: storageError } = await supabase.storage.from(BUCKET_NAME).remove([assetToDelete.file_path]);
-    if (storageError) { toast.error("Failed to delete from storage", { description: storageError.message }); return; }
-
-    const { error: dbError } = await supabase.from('storage_assets').delete().eq('id', assetToDelete.id);
-    if (dbError) { toast.error("Storage file deleted, but failed to remove metadata.", { description: dbError.message }); }
-    else { toast.success(`Asset "${assetToDelete.file_name}" deleted.`); }
-
+    try {
+        await deleteAsset(assetToDelete).unwrap();
+        toast.success(`Asset "${assetToDelete.file_name}" deleted.`);
+    } catch(err: any) {
+        toast.error("Failed to delete asset", { description: err.message });
+    }
     setAssetToDelete(null);
-    fetchAssets();
   };
 
-  const handleUpdateAltText = async (e: React.FormEvent<HTMLFormElement>) => { /* ... (This function remains unchanged) */ };
+  const handleUpdateAltText = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    if (!selectedAsset) return;
+    const formData = new FormData(e.currentTarget);
+    const alt_text = formData.get('alt_text') as string;
+    
+    try {
+        await updateAsset({ id: selectedAsset.id, alt_text }).unwrap();
+        toast.success("Alt text updated.");
+        setIsEditDialogOpen(false);
+    } catch(err: any) {
+        toast.error("Failed to update alt text", { description: err.message });
+    }
+  };
 
   const handleRescanUsage = async (isSilent = false) => {
-    if (!isSilent) setIsLoading(true);
-    const { error } = await supabase.rpc('update_asset_usage');
-    if (error) { if (!isSilent) toast.error("Failed to rescan asset usage", { description: error.message }); }
-    else { if (!isSilent) toast.success("Asset usage successfully updated."); }
-    fetchAssets();
+    try {
+      await rescanUsage().unwrap();
+      if (!isSilent) toast.success("Asset usage successfully updated.");
+    } catch (err: any) {
+      if (!isSilent) toast.error("Failed to rescan asset usage", { description: err.message });
+    }
   }
 
   const getPublicUrl = (filePath: string) => {
@@ -168,7 +171,8 @@ export default function AssetManager() {
                     <p className="text-xs font-semibold truncate">{asset.file_name}</p>
                     <div className="flex justify-end gap-1">
                       <Button size="icon" variant="ghost" className="h-7 w-7 text-white hover:bg-white/20" onClick={() => copyUrl(getPublicUrl(asset.file_path))}><Copy className="size-4" /></Button>
-                      <Button size="icon" variant="ghost" className="h-7 w-7 text-white hover:bg-white/20" onClick={() => { setSelectedAsset(asset); setIsEditDialogOpen(true); }}><Edit className="size-4" /></Button>                <Button size="icon" variant="ghost" className="h-7 w-7 text-white hover:bg-destructive/80" onClick={() => setAssetToDelete(asset)}><Trash2 className="size-4" /></Button>
+                      <Button size="icon" variant="ghost" className="h-7 w-7 text-white hover:bg-white/20" onClick={() => { setSelectedAsset(asset); setIsEditDialogOpen(true); }}><Edit className="size-4" /></Button>                
+                      <Button size="icon" variant="ghost" className="h-7 w-7 text-white hover:bg-destructive/80" onClick={() => setAssetToDelete(asset)}><Trash2 className="size-4" /></Button>
                     </div>
                   </div>
                   {asset.used_in && asset.used_in.length > 0 && (

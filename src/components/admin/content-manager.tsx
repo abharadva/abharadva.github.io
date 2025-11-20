@@ -1,11 +1,10 @@
 // src/components/admin/content-manager.tsx
 "use client";
 
-import { useState, useEffect, FormEvent, DragEvent } from "react";
+import { useState, FormEvent, DragEvent, useEffect } from "react";
 import { motion } from "framer-motion";
-import { supabase } from "@/supabase/client";
 import type { PortfolioSection, PortfolioItem } from "@/types";
-import { GripVertical, Plus, Edit, Trash2 } from "lucide-react";
+import { GripVertical, Plus, Edit, Trash2, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -18,6 +17,16 @@ import { ScrollArea } from "../ui/scroll-area";
 import { Switch } from "@/components/ui/switch";
 import { toast } from "sonner";
 import { Combobox } from "../ui/combobox";
+import {
+  useGetPortfolioContentQuery,
+  useGetNavLinksAdminQuery,
+  useSaveSectionMutation,
+  useDeleteSectionMutation,
+  useSavePortfolioItemMutation,
+  useDeletePortfolioItemMutation,
+  useUpdateSectionOrderMutation,
+  useRescanAssetUsageMutation
+} from "@/store/api/adminApi";
 
 const SectionEditor = ({
   section,
@@ -27,8 +36,8 @@ const SectionEditor = ({
   onSaveItem,
   onDeleteItem, }: {
     section: PortfolioSection;
-    onSaveSection: (data: Partial<PortfolioSection>) => void;
     availablePaths: { label: string; value: string }[];
+    onSaveSection: (data: Partial<PortfolioSection>) => void;
     onDeleteSection: (id: string) => void;
     onSaveItem: (data: Partial<PortfolioItem>, sectionId: string) => void;
     onDeleteItem: (id: string) => void;
@@ -191,50 +200,40 @@ const SectionEditor = ({
 };
 
 export default function ContentManager() {
-  const [sections, setSections] = useState<PortfolioSection[]>([]);
+  const [localSections, setLocalSections] = useState<PortfolioSection[]>([]);
   const [availablePaths, setAvailablePaths] = useState<{ label: string; value: string }[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
   const [selectedSectionId, setSelectedSectionId] = useState<string | null>(null);
   const [isCreating, setIsCreating] = useState(false);
   const [draggedSectionId, setDraggedSectionId] = useState<string | null>(null);
 
-  const fetchPortfolioContent = async () => {
-    setIsLoading(true);
-    setError(null);
-    try {
-      const [sectionsRes, navLinksRes] = await Promise.all([
-        supabase.from("portfolio_sections").select(`*, portfolio_items (*)`).order("page_path").order("display_order", { ascending: true }).order("display_order", { foreignTable: "portfolio_items", ascending: true }),
-        supabase.from("navigation_links").select("href")
-      ]);
+  const { data: sections, isLoading: isLoadingSections } = useGetPortfolioContentQuery();
+  const { data: navLinks } = useGetNavLinksAdminQuery();
+  const [saveSection] = useSaveSectionMutation();
+  const [deleteSection] = useDeleteSectionMutation();
+  const [saveItem] = useSavePortfolioItemMutation();
+  const [deleteItem] = useDeletePortfolioItemMutation();
+  const [updateOrder] = useUpdateSectionOrderMutation();
+  const [rescanUsage] = useRescanAssetUsageMutation();
 
-      if (sectionsRes.error) throw sectionsRes.error;
-      if (navLinksRes.error) throw navLinksRes.error;
+  useEffect(() => {
+    if (sections) setLocalSections(sections);
+  }, [sections]);
 
-      setSections(sectionsRes.data || []);
-
-      const paths = new Set<string>(['/']); // Start with homepage
-      navLinksRes.data?.forEach(link => paths.add(link.href));
+  useEffect(() => {
+    if (navLinks) {
+      const paths = new Set<string>(['/']);
+      navLinks.forEach(link => paths.add(link.href));
       setAvailablePaths(Array.from(paths).sort().map(path => ({ label: path, value: path })));
-
-    } catch (err: any) {
-      setError("Failed to load portfolio content: " + err.message);
-      setSections([]);
-    } finally {
-      setIsLoading(false);
     }
-  };
-
-  useEffect(() => { fetchPortfolioContent(); }, []);
+  }, [navLinks]);
 
   const handleDragStart = (e: DragEvent<HTMLDivElement>, sectionId: string) => { setDraggedSectionId(sectionId); };
   const handleDragOver = (e: DragEvent<HTMLDivElement>) => e.preventDefault();
   const handleDragEnd = () => setDraggedSectionId(null);
 
-
   const handleDrop = async (targetSectionId: string) => {
     if (!draggedSectionId || draggedSectionId === targetSectionId) return;
-    const reorderedSections = [...sections];
+    const reorderedSections = [...localSections];
     const draggedIndex = reorderedSections.findIndex(s => s.id === draggedSectionId);
     const targetIndex = reorderedSections.findIndex(s => s.id === targetSectionId);
     if (reorderedSections[draggedIndex].page_path !== reorderedSections[targetIndex].page_path) {
@@ -243,52 +242,62 @@ export default function ContentManager() {
     }
     const [draggedItem] = reorderedSections.splice(draggedIndex, 1);
     reorderedSections.splice(targetIndex, 0, draggedItem);
-    setSections(reorderedSections);
+    setLocalSections(reorderedSections);
 
     const sectionIdsInNewOrder = reorderedSections.filter(s => s.page_path === draggedItem.page_path).map(s => s.id);
-    const { error: rpcError } = await supabase.rpc('update_section_order', { section_ids: sectionIdsInNewOrder });
-    if (rpcError) { toast.error("Failed to save new order."); await fetchPortfolioContent(); }
+    try {
+      await updateOrder(sectionIdsInNewOrder).unwrap();
+    } catch {
+      toast.error("Failed to save new order.");
+    }
   };
 
   const handleSaveSection = async (data: Partial<PortfolioSection>) => {
-    setIsLoading(true);
-    const response = data.id
-      ? await supabase.from("portfolio_sections").update(data).eq("id", data.id).select().single()
-      : await supabase.from("portfolio_sections").insert(data).select().single();
-    if (response.error) { toast.error(response.error.message); }
-    else { setIsCreating(false); if (response.data) setSelectedSectionId(response.data.id); await fetchPortfolioContent(); }
-    setIsLoading(false);
+    try {
+      const saved = await saveSection(data).unwrap();
+      toast.success(`Section "${saved.title}" saved.`);
+      setIsCreating(false);
+      setSelectedSectionId(saved.id);
+    } catch (err: any) {
+      toast.error("Failed to save section", { description: err.message });
+    }
   };
 
   const handleDeleteSection = async (id: string) => {
     if (!confirm("Delete this section and ALL its items? This is irreversible.")) return;
-    await supabase.from("portfolio_sections").delete().eq("id", id);
-    setSelectedSectionId(null);
-    await fetchPortfolioContent();
+    try {
+      await deleteSection(id).unwrap();
+      toast.success("Section deleted.");
+      setSelectedSectionId(null);
+    } catch (err: any) {
+      toast.error("Failed to delete section", { description: err.message });
+    }
   };
 
   const handleSaveItem = async (itemData: Partial<PortfolioItem>, sectionId: string) => {
-    const dataToSave = { ...itemData, section_id: sectionId };
-    const response = itemData.id
-      ? await supabase.from("portfolio_items").update(dataToSave).eq("id", itemData.id)
-      : await supabase.from("portfolio_items").insert(dataToSave);
-    if (response.error) { toast.error(response.error.message) }
-    else {
+    try {
+      await saveItem({ ...itemData, section_id: sectionId }).unwrap();
       toast.success("Item saved.");
-      await fetchPortfolioContent();
-      await supabase.rpc('update_asset_usage');
+      await rescanUsage().unwrap();
+    } catch (err: any) {
+      toast.error("Failed to save item", { description: err.message });
     }
   };
 
   const handleDeleteItem = async (itemId: string) => {
     if (!confirm("Delete this item? This is irreversible.")) return;
-    await supabase.from("portfolio_items").delete().eq("id", itemId);
-    await fetchPortfolioContent();
+    try {
+      await deleteItem(itemId).unwrap();
+      toast.success("Item deleted.");
+      await rescanUsage().unwrap();
+    } catch (err: any) {
+      toast.error("Failed to delete item", { description: err.message });
+    }
   };
 
-  const selectedSection = sections.find(s => s.id === selectedSectionId);
+  const selectedSection = localSections.find(s => s.id === selectedSectionId);
 
-  const groupedSections = sections.reduce((acc, section) => {
+  const groupedSections = localSections.reduce((acc, section) => {
     const path = section.page_path || 'Uncategorized';
     if (!acc[path]) acc[path] = [];
     acc[path].push(section);
@@ -303,19 +312,20 @@ export default function ContentManager() {
             <Plus className="mr-2 size-4" /> New Section
           </Button>
           <ScrollArea className="flex-grow">
-            {Object.entries(groupedSections).map(([path, sectionsInGroup]) => (
-              <div key={path} className="mb-4">
-                <h3 className="px-2 py-1 font-mono text-xs font-semibold uppercase text-muted-foreground">{path === '/' ? 'Home Page' : path}</h3>
-                {sectionsInGroup.map(section => (
-                  <div key={section.id} draggable onDragStart={(e) => handleDragStart(e, section.id)} onDrop={() => handleDrop(section.id)} onDragOver={handleDragOver} onDragEnd={handleDragEnd} className={cn("mb-1", draggedSectionId === section.id && "opacity-50")}>
-                    <Button variant={selectedSectionId === section.id ? "secondary" : "ghost"} className="w-full justify-start h-9" onClick={() => { setSelectedSectionId(section.id); setIsCreating(false); }}>
-                      <GripVertical className="mr-2 size-4 text-muted-foreground cursor-grab" />
-                      <span className="truncate">{section.title}</span>
-                    </Button>
-                  </div>
-                ))}
-              </div>
-            ))}
+            {isLoadingSections ? <Loader2 className="mx-auto my-10 animate-spin" /> :
+              Object.entries(groupedSections).map(([path, sectionsInGroup]) => (
+                <div key={path} className="mb-4">
+                  <h3 className="px-2 py-1 font-mono text-xs font-semibold uppercase text-muted-foreground">{path === '/' ? 'Home Page' : path}</h3>
+                  {sectionsInGroup.map(section => (
+                    <div key={section.id} draggable onDragStart={(e) => handleDragStart(e, section.id)} onDrop={() => handleDrop(section.id)} onDragOver={handleDragOver} onDragEnd={handleDragEnd} className={cn("mb-1", draggedSectionId === section.id && "opacity-50")}>
+                      <Button variant={selectedSectionId === section.id ? "secondary" : "ghost"} className="w-full justify-start h-9" onClick={() => { setSelectedSectionId(section.id); setIsCreating(false); }}>
+                        <GripVertical className="mr-2 size-4 text-muted-foreground cursor-grab" />
+                        <span className="truncate">{section.title}</span>
+                      </Button>
+                    </div>
+                  ))}
+                </div>
+              ))}
           </ScrollArea>
         </div>
       </ResizablePanel>
@@ -326,7 +336,7 @@ export default function ContentManager() {
             <Card className="m-1">
               <CardHeader><CardTitle>Create a New Section</CardTitle></CardHeader>
               <CardContent>
-                <form onSubmit={(e) => { e.preventDefault(); const formData = new FormData(e.currentTarget); handleSaveSection({ title: formData.get("title") as string, type: formData.get("type") as any, page_path: formData.get("page_path") as string, layout_style: formData.get("layout_style") as string }); }} className="space-y-4">
+                <form onSubmit={(e) => { e.preventDefault(); const formData = new FormData(e.currentTarget); handleSaveSection({ title: formData.get("title") as string, type: formData.get("type") as any, page_path: (document.querySelector('input[name="page_path"]') as HTMLInputElement)?.value, layout_style: formData.get("layout_style") as string }); }} className="space-y-4">
                   <div><Label htmlFor="new-title">Section Title *</Label><Input id="new-title" name="title" required /></div>
                   <div>
                     <Label>Page Path *</Label>
@@ -364,7 +374,7 @@ export default function ContentManager() {
             />
           )}
 
-          {!isCreating && !selectedSection && (
+          {!isCreating && !selectedSection && !isLoadingSections && (
             <div className="flex h-full items-center justify-center">
               <div className="text-center text-muted-foreground">
                 <p>Select a section to edit</p>
@@ -373,7 +383,7 @@ export default function ContentManager() {
               </div>
             </div>
           )}
-          {error && <p className="p-4 text-sm text-destructive">{error}</p>}
+          {isLoadingSections && <div className="flex justify-center py-10"><Loader2 className="h-8 w-8 animate-spin text-muted-foreground" /></div>}
         </ScrollArea>
       </ResizablePanel>
     </ResizablePanelGroup>

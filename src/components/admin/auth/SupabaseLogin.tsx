@@ -1,4 +1,4 @@
-
+// src/components/admin/auth/SupabaseLogin.tsx
 "use client";
 
 import React, { useState, useEffect } from "react";
@@ -65,21 +65,7 @@ export default function SupabaseLogin() {
       ) {
         router.replace("/admin/mfa-challenge");
       } else {
-        const { data: factorsData, error: factorsError } =
-          await supabase.auth.mfa.listFactors();
-        if (factorsError) {
-          setIsLoading(false);
-          setError(factorsError.message || "Could not list MFA factors.");
-          return;
-        }
-        const totpFactor = factorsData?.totp?.find(
-          (factor) => factor.status === "verified",
-        );
-        if (totpFactor) {
-          router.replace("/admin/mfa-challenge");
-        } else {
-          router.replace("/admin/setup-mfa");
-        }
+        router.replace("/admin/setup-mfa");
       }
     } else {
       setIsLoading(false);

@@ -1,3 +1,4 @@
+// src/pages/admin/tasks.tsx
 import { AdminLayout } from "@/components/admin/AdminLayout";
 import TaskManager from "@/components/admin/tasks-manager";
 import LoadingSpinner from "@/components/admin/LoadingSpinner";

@@ -1,43 +1,15 @@
+// src/components/tools.tsx
 import { ArrowUpRight, Loader2, Terminal } from "lucide-react";
-import { PropsWithChildren, useState, useEffect } from "react";
-import { supabase } from "@/supabase/client";
-import { PortfolioItem } from "@/types";
+import { PropsWithChildren } from "react";
+import { useGetSectionsByPathQuery } from "@/store/api/publicApi";
+import type { PortfolioItem } from "@/types";
 
 type ToolsProps = PropsWithChildren;
 
 export default function Tools({ children }: ToolsProps) {
-  const [toolItems, setToolItems] = useState<PortfolioItem[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-
-  useEffect(() => {
-    const fetchTools = async () => {
-      setIsLoading(true);
-      setError(null);
-      try {
-        const { data, error: fetchError } = await supabase
-          .from('portfolio_sections')
-          .select('portfolio_items(*)')
-          .eq('title', 'Tools')
-          .order('display_order', { foreignTable: 'portfolio_items', ascending: true });
-
-        if (fetchError) throw new Error(fetchError.message);
-        
-        if (data && data.length > 0 && data[0].portfolio_items) {
-          setToolItems(data[0].portfolio_items as PortfolioItem[]);
-        } else {
-          setToolItems([]);
-        }
-
-      } catch (err: any) {
-        setError(err.message || "Could not load tools data.");
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
-    fetchTools();
-  }, []);
+  const { data: sections, isLoading, error } = useGetSectionsByPathQuery('/');
+  const toolSection = sections?.find(s => s.title === 'Tools');
+  const toolItems: PortfolioItem[] = (toolSection?.portfolio_items as PortfolioItem[]) || [];
 
   return (
     <section className="my-12 py-12">
@@ -46,7 +18,7 @@ export default function Tools({ children }: ToolsProps) {
       </h2>
       
       {isLoading && <div className="flex justify-center py-8"><Loader2 className="size-8 animate-spin" /></div>}
-      {error && <div className="text-center text-destructive">{error}</div>}
+      {!!error && <div className="text-center text-destructive">Could not load tools data.</div>}
 
       {!isLoading && !error && toolItems.length === 0 && (
         <div className="py-8 text-center text-muted-foreground rounded-lg bg-secondary/30 border border-dashed">

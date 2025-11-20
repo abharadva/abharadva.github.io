@@ -1,16 +1,15 @@
+// src/pages/contact.tsx
 import Layout from "@/components/layout";
 import Head from "next/head";
 import { config as appConfig } from "@/lib/config";
-import { supabase } from "@/supabase/client";
 import type { PortfolioSection } from "@/types";
 import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
-import { Check, Loader2, Mail, Briefcase, Github, Linkedin } from "lucide-react"; // --- ADD ICONS ---
+import { Check, Loader2, Mail, Briefcase, Github, Linkedin } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { useSiteContent } from "@/context/SiteContentContext"; // --- ADD THIS IMPORT ---
-import { Skeleton } from "@/components/ui/skeleton"; // --- ADD THIS IMPORT ---
+import { useGetSiteIdentityQuery, useGetSectionsByPathQuery } from "@/store/api/publicApi";
+import { Skeleton } from "@/components/ui/skeleton";
 
-// --- ADD THIS HELPER ---
 const socialIcons: { [key: string]: React.ComponentType<any> } = {
   github: Github,
   linkedin: Linkedin,
@@ -19,12 +18,14 @@ const socialIcons: { [key: string]: React.ComponentType<any> } = {
 
 export default function ContactPage() {
   const { site: siteConfig } = appConfig;
-  const { content, isLoading: isContentLoading } = useSiteContent(); // --- USE THE CONTEXT ---
+  const { data: content, isLoading: isContentLoading } = useGetSiteIdentityQuery();
 
-  // Static content for the page title itself
+  const { data: sections, isLoading: isLoadingServices, error } = useGetSectionsByPathQuery('/contact');
+  const serviceSection = sections?.find(s => s.title === 'Services');
+
   const pageStaticContent = {
     title: "Contact Me",
-    description: "Let's build something great together. Get in touch with Akshay Bharadva.",
+    description: "Let's build something great together. Get in touch.",
     heading: "Get In Touch",
     subheading: "Have a project in mind or just want to say hello? I'd love to hear from you.",
     servicesTitle: "What I Can Do For You"
@@ -32,31 +33,6 @@ export default function ContactPage() {
 
   const pageTitle = `${pageStaticContent.title} | ${siteConfig.title}`;
   const pageUrl = `${siteConfig.url}/contact/`;
-
-  const [serviceSection, setServiceSection] = useState<PortfolioSection | null>(null);
-  const [isLoadingServices, setIsLoadingServices] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-
-  useEffect(() => {
-    const fetchServices = async () => {
-      setIsLoadingServices(true);
-      setError(null);
-      try {
-        const { data, error: fetchError } = await supabase
-          .from('portfolio_sections')
-          .select('*, portfolio_items(*)')
-          .eq('title', 'Services')
-          .order('display_order', { foreignTable: 'portfolio_items', ascending: true })
-          .single();
-
-        if (fetchError && fetchError.code !== 'PGRST116') throw new Error(fetchError.message);
-        setServiceSection(data);
-      } catch (err: any) { setError(err.message || "Could not load services."); }
-      finally { setIsLoadingServices(false); }
-    };
-
-    fetchServices();
-  }, []);
 
   const containerVariants = { hidden: { opacity: 0 }, visible: { opacity: 1, transition: { staggerChildren: 0.1 } } };
   const itemVariants = { hidden: { opacity: 0, y: 20 }, visible: { opacity: 1, y: 0, transition: { duration: 0.5, ease: 'easeOut' } } };
@@ -81,7 +57,6 @@ export default function ContactPage() {
             {pageStaticContent.subheading}
           </p>
           <div className="mt-8 flex justify-center gap-4">
-            {/* --- MODIFIED BLOCK START --- */}
             {isContentLoading || !content ? (
               <>
                 <Skeleton className="h-12 w-36" />
@@ -103,7 +78,6 @@ export default function ContactPage() {
                 );
               })
             )}
-            {/* --- MODIFIED BLOCK END --- */}
           </div>
         </motion.header>
 
@@ -153,7 +127,6 @@ export default function ContactPage() {
               <p className="mt-4">Services I offer will be listed here soon.</p>
             </motion.div>
           )}
-
         </motion.div>
       </main>
     </Layout>

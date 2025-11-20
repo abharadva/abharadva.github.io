@@ -1,12 +1,26 @@
-
+// src/components/admin/financial-goal-form.tsx
 "use client";
-import { useState, useEffect, FormEvent } from "react";
+import { FormEvent } from "react";
 import type { FinancialGoal } from "@/types";
-import { supabase } from "@/supabase/client";
+import { useSaveGoalMutation } from "@/store/api/adminApi";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
+import { toast } from "sonner";
+import { Loader2 } from "lucide-react";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { z } from "zod";
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
+
+const goalSchema = z.object({
+  name: z.string().min(1, 'Goal name is required.'),
+  description: z.string().optional(),
+  target_amount: z.coerce.number().positive('Target amount must be positive.'),
+  target_date: z.string().optional(),
+});
+type GoalFormValues = z.infer<typeof goalSchema>;
 
 interface FinancialGoalFormProps {
   goal: Partial<FinancialGoal> | null;
@@ -14,48 +28,52 @@ interface FinancialGoalFormProps {
 }
 
 export default function FinancialGoalForm({ goal, onSuccess }: FinancialGoalFormProps) {
-  const [formData, setFormData] = useState({ name: "", description: "", target_amount: "", target_date: "" });
-  const [error, setError] = useState("");
-
-  useEffect(() => {
-    if (goal) {
-      setFormData({
-        name: goal.name || "",
-        description: goal.description || "",
-        target_amount: String(goal.target_amount || ""),
-        target_date: goal.target_date || "",
-      });
+  const [saveGoal, { isLoading }] = useSaveGoalMutation();
+  
+  const form = useForm<GoalFormValues>({
+    resolver: zodResolver(goalSchema),
+    defaultValues: {
+      name: goal?.name || '',
+      description: goal?.description || '',
+      target_amount: goal?.target_amount || 0,
+      target_date: goal?.target_date || '',
     }
-  }, [goal]);
+  });
 
-  const handleSubmit = async (e: FormEvent) => {
-    e.preventDefault();
-    setError("");
-
-    const dataToSave = { ...formData, target_amount: parseFloat(formData.target_amount), target_date: formData.target_date || null, description: formData.description || null, };
-    
-    const { error: dbError } = goal?.id
-      ? await supabase.from("financial_goals").update(dataToSave).eq("id", goal.id)
-      : await supabase.from("financial_goals").insert(dataToSave);
-
-    if (dbError) setError(dbError.message);
-    else onSuccess();
-  };
-
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-    setFormData({ ...formData, [e.target.name]: e.target.value });
+  const handleSubmit = async (values: GoalFormValues) => {
+    try {
+        await saveGoal({ ...values, id: goal?.id }).unwrap();
+        toast.success(`Goal "${values.name}" saved successfully.`);
+        onSuccess();
+    } catch (err: any) {
+        toast.error("Failed to save goal", { description: err.message });
+    }
   };
   
   return (
-    <form onSubmit={handleSubmit} className="space-y-4 pt-4">
-        <div><Label htmlFor="name">Goal Name *</Label><Input id="name" name="name" value={formData.name} onChange={handleChange} required /></div>
-        <div><Label htmlFor="description">Description</Label><Textarea id="description" name="description" value={formData.description} onChange={handleChange} rows={3} /></div>
+    <Form {...form}>
+      <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-4 pt-4">
+        <FormField control={form.control} name="name" render={({ field }) => (
+          <FormItem><FormLabel>Goal Name *</FormLabel><FormControl><Input {...field} /></FormControl><FormMessage /></FormItem>
+        )} />
+        <FormField control={form.control} name="description" render={({ field }) => (
+          <FormItem><FormLabel>Description</FormLabel><FormControl><Textarea {...field} rows={3} /></FormControl><FormMessage /></FormItem>
+        )} />
         <div className="grid grid-cols-2 gap-4">
-            <div><Label htmlFor="target_amount">Target Amount *</Label><Input id="target_amount" name="target_amount" type="number" step="100" value={formData.target_amount} onChange={handleChange} required /></div>
-            <div><Label htmlFor="target_date">Target Date</Label><Input id="target_date" name="target_date" type="date" value={formData.target_date} onChange={handleChange} /></div>
+          <FormField control={form.control} name="target_amount" render={({ field }) => (
+            <FormItem><FormLabel>Target Amount *</FormLabel><FormControl><Input type="number" step="100" {...field} /></FormControl><FormMessage /></FormItem>
+          )} />
+          <FormField control={form.control} name="target_date" render={({ field }) => (
+            <FormItem><FormLabel>Target Date</FormLabel><FormControl><Input type="date" {...field} /></FormControl><FormMessage /></FormItem>
+          )} />
         </div>
-      {error && <p className="text-sm font-semibold text-red-600">{error}</p>}
-      <div className="flex justify-end pt-4"><Button type="submit">{goal?.id ? "Save Changes" : "Create Goal"}</Button></div>
-    </form>
+        <div className="flex justify-end pt-4">
+            <Button type="submit" disabled={isLoading}>
+                {isLoading && <Loader2 className="mr-2 size-4 animate-spin" />}
+                {goal?.id ? "Save Changes" : "Create Goal"}
+            </Button>
+        </div>
+      </form>
+    </Form>
   );
 }

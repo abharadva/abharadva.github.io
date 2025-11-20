@@ -1,16 +1,17 @@
+// src/pages/about.tsx
 import Layout from "@/components/layout";
 import Head from "next/head";
 import { config as appConfig } from "@/lib/config";
 import { motion } from "framer-motion";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import DynamicPageContent from "@/components/DynamicPageContent";
-import { useSiteContent } from "@/context/SiteContentContext";
+import { useGetSiteIdentityQuery } from "@/store/api/publicApi";
 import { Skeleton } from "@/components/ui/skeleton";
 import ReactMarkdown from "react-markdown";
 
 export default function AboutPage() {
   const { site: siteConfig } = appConfig;
-  const { content, isLoading } = useSiteContent();
+  const { data: content, isLoading } = useGetSiteIdentityQuery();
   
   const pageTitle = `About Me | ${content?.profile_data.name || siteConfig.title}`;
   const pageUrl = `${siteConfig.url}/about/`;
@@ -48,14 +49,12 @@ export default function AboutPage() {
                 </>
              ) : (
                 <>
-                    {/* --- MODIFIED BLOCK START --- */}
                     {content.profile_data.show_profile_picture && (
                       <Avatar className="h-24 w-24 border-2 sm:h-32 sm:w-32">
                           <AvatarImage src={content.profile_data.profile_picture_url} alt={content.profile_data.name} />
                           <AvatarFallback>{content.profile_data.name.slice(0, 2).toUpperCase()}</AvatarFallback>
                       </Avatar>
                     )}
-                    {/* --- MODIFIED BLOCK END --- */}
                     <div className="prose prose-lg dark:prose-invert max-w-none text-center sm:text-left">
                         {content.profile_data.bio.map((paragraph, index) => (
                           <ReactMarkdown key={index}>{paragraph}</ReactMarkdown>

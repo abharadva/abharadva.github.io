@@ -2,14 +2,14 @@
 "use client";
 
 import React, { useState, useEffect } from 'react';
-import { supabase } from '@/supabase/client';
 import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent } from '@/components/ui/card';
 import { Loader2, Plus, Edit, Trash2, Eye, EyeOff } from 'lucide-react';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogClose } from '@/components/ui/dialog';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogClose } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { useGetNavLinksAdminQuery, useSaveNavLinkMutation, useDeleteNavLinkMutation } from '@/store/api/adminApi';
 
 type NavLink = {
   id: string;
@@ -49,41 +49,41 @@ const LinkForm = ({ link, onSave, onCancel }: { link: Partial<NavLink> | null, o
 };
 
 export default function NavigationManager() {
-  const [links, setLinks] = useState<NavLink[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
   const [editingLink, setEditingLink] = useState<NavLink | null>(null);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
 
-  const fetchLinks = async () => {
-    setIsLoading(true);
-    const { data, error } = await supabase.from('navigation_links').select('*').order('display_order');
-    if (error) { toast.error("Failed to fetch navigation links", { description: error.message }); }
-    else { setLinks(data || []); }
-    setIsLoading(false);
-  };
-
-  useEffect(() => { fetchLinks(); }, []);
+  const { data: links = [], isLoading } = useGetNavLinksAdminQuery();
+  const [saveNavLink, { isLoading: isSaving }] = useSaveNavLinkMutation();
+  const [deleteNavLink, { isLoading: isDeleting }] = useDeleteNavLinkMutation();
+  const [updateNavLinkVisibility] = useSaveNavLinkMutation(); // Re-use for visibility toggle
 
   const handleSave = async (data: Partial<NavLink>) => {
-    const { error } = data.id
-      ? await supabase.from('navigation_links').update(data).eq('id', data.id)
-      : await supabase.from('navigation_links').insert(data);
-
-    if (error) { toast.error("Failed to save link", { description: error.message }); }
-    else { toast.success("Navigation link saved."); fetchLinks(); setIsDialogOpen(false); }
+    try {
+      await saveNavLink(data).unwrap();
+      toast.success("Navigation link saved.");
+      setIsDialogOpen(false);
+    } catch (err: any) {
+      toast.error("Failed to save link", { description: err.message });
+    }
   };
 
   const handleDelete = async (id: string) => {
     if (!confirm("Are you sure you want to delete this link?")) return;
-    const { error } = await supabase.from('navigation_links').delete().eq('id', id);
-    if (error) { toast.error("Failed to delete link", { description: error.message }); }
-    else { toast.success("Navigation link deleted."); fetchLinks(); }
+    try {
+      await deleteNavLink(id).unwrap();
+      toast.success("Navigation link deleted.");
+    } catch (err: any) {
+      toast.error("Failed to delete link", { description: err.message });
+    }
   };
 
   const handleToggleVisibility = async (link: NavLink) => {
-    const { error } = await supabase.from('navigation_links').update({ is_visible: !link.is_visible }).eq('id', link.id);
-    if (error) { toast.error("Failed to update visibility", { description: error.message }); }
-    else { toast.success(`"${link.label}" is now ${!link.is_visible ? 'visible' : 'hidden'}.`); fetchLinks(); }
+    try {
+      await updateNavLinkVisibility({ id: link.id, is_visible: !link.is_visible }).unwrap();
+      toast.success(`"${link.label}" is now ${!link.is_visible ? 'visible' : 'hidden'}.`);
+    } catch (err: any) {
+      toast.error("Failed to update visibility", { description: err.message });
+    }
   };
 
   return (
@@ -99,20 +99,23 @@ export default function NavigationManager() {
       </div>
       <Card>
         <CardContent className="p-4">
-          {isLoading && <div className="flex justify-center p-8"><Loader2 className="animate-spin" /></div>}
-          <div className="space-y-2">
-            {links.map(link => (
-              <div key={link.id} className="flex items-center gap-2 rounded-md p-2 hover:bg-secondary">
-                <span className="flex-1 font-medium">{link.label} ({link.href})</span>
-                <span className="text-sm text-muted-foreground">Order: {link.display_order}</span>
-                <Button variant="ghost" size="icon" onClick={() => handleToggleVisibility(link)} title={link.is_visible ? 'Hide' : 'Show'}>
-                  {link.is_visible ? <Eye className="size-4" /> : <EyeOff className="size-4 text-muted-foreground" />}
-                </Button>
-                <Button variant="ghost" size="icon" onClick={() => { setEditingLink(link); setIsDialogOpen(true); }}><Edit className="size-4" /></Button>
-                <Button variant="ghost" size="icon" className="hover:bg-destructive/10 hover:text-destructive" onClick={() => handleDelete(link.id)}><Trash2 className="size-4" /></Button>
-              </div>
-            ))}
-          </div>
+          {isLoading ? (
+            <div className="flex justify-center p-8"><Loader2 className="animate-spin" /></div>
+          ) : (
+            <div className="space-y-2">
+              {links.map(link => (
+                <div key={link.id} className="flex items-center gap-2 rounded-md p-2 hover:bg-secondary">
+                  <span className="flex-1 font-medium">{link.label} ({link.href})</span>
+                  <span className="text-sm text-muted-foreground">Order: {link.display_order}</span>
+                  <Button variant="ghost" size="icon" onClick={() => handleToggleVisibility(link)} title={link.is_visible ? 'Hide' : 'Show'}>
+                    {link.is_visible ? <Eye className="size-4" /> : <EyeOff className="size-4 text-muted-foreground" />}
+                  </Button>
+                  <Button variant="ghost" size="icon" onClick={() => { setEditingLink(link); setIsDialogOpen(true); }}><Edit className="size-4" /></Button>
+                  <Button variant="ghost" size="icon" className="hover:bg-destructive/10 hover:text-destructive" onClick={() => handleDelete(link.id)}><Trash2 className="size-4" /></Button>
+                </div>
+              ))}
+            </div>
+          )}
         </CardContent>
       </Card>
       <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>

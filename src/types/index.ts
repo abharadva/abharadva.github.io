@@ -1,3 +1,5 @@
+// src/types/index.ts
+
 export interface PortfolioSection {
   id: string;
   user_id?: string;
@@ -76,8 +78,6 @@ export interface GitHubRepo {
   homepage?: string | null;
   owner: GitHubRepoOwner;
 }
-
-
 
 export interface Event {
   id: string;
@@ -197,4 +197,52 @@ export interface LearningSession {
   duration_minutes?: number | null;
   journal_notes?: string | null;
   created_at?: string;
+}
+
+// Added from old SiteContentContext
+export interface SiteContent {
+    profile_data: {
+      name: string;
+      title: string;
+      description: string;
+      profile_picture_url: string;
+      show_profile_picture: boolean;
+      logo: {
+        main: string;
+        highlight: string;
+      };
+      status_panel: {
+        title: string;
+        availability: string;
+        currently_exploring: {
+          title: string;
+          items: string[];
+        };
+        latestProject: {
+          name: string;
+          linkText: string;
+          href: string;
+        };
+      };
+      bio: string[];
+      github_projects_config: {
+        username: string;
+        show: boolean;
+        sort_by: 'created' | 'updated' | 'pushed';
+        exclude_forks: boolean;
+        exclude_archived: boolean;
+        exclude_profile_repo: boolean;
+        min_stars: number;
+        projects_per_page: number;
+      };
+    };
+    social_links: {
+      id: string;
+      label: string;
+      url: string;
+      is_visible: boolean;
+    }[];
+    footer_data: {
+      copyright_text: string;
+    };
 }

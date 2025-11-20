@@ -1,14 +1,24 @@
 // src/components/admin/learning/SubjectForm.tsx
 "use client";
-
-import { useState, useEffect, FormEvent } from "react";
+import { FormEvent } from "react";
 import type { LearningSubject } from "@/types";
-import { supabase } from "@/supabase/client";
+import { useSaveSubjectMutation } from "@/store/api/adminApi";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { toast } from "sonner";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { z } from "zod";
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
+import { Loader2 } from "lucide-react";
+
+const subjectSchema = z.object({
+  name: z.string().min(1, 'Subject name is required.'),
+  description: z.string().optional(),
+});
+type SubjectFormValues = z.infer<typeof subjectSchema>;
 
 interface SubjectFormProps {
   subject: Partial<LearningSubject> | null;
@@ -16,37 +26,41 @@ interface SubjectFormProps {
 }
 
 export default function SubjectForm({ subject, onSuccess }: SubjectFormProps) {
-  const [formData, setFormData] = useState({ name: "", description: "" });
+  const [saveSubject, { isLoading }] = useSaveSubjectMutation();
+  const form = useForm<SubjectFormValues>({
+    resolver: zodResolver(subjectSchema),
+    defaultValues: {
+      name: subject?.name || '',
+      description: subject?.description || '',
+    },
+  });
 
-  useEffect(() => {
-    if (subject) {
-      setFormData({ name: subject.name || "", description: subject.description || "" });
-    }
-  }, [subject]);
-
-  const handleSubmit = async (e: FormEvent) => {
-    e.preventDefault();
-    const { error } = subject?.id
-      ? await supabase.from("learning_subjects").update(formData).eq("id", subject.id)
-      : await supabase.from("learning_subjects").insert(formData);
-
-    if (error) {
-      toast.error("Failed to save subject", { description: error.message });
-    } else {
-      toast.success(`Subject "${formData.name}" saved successfully.`);
+  const handleSubmit = async (values: SubjectFormValues) => {
+    try {
+      await saveSubject({ ...values, id: subject?.id }).unwrap();
+      toast.success(`Subject "${values.name}" saved successfully.`);
       onSuccess();
+    } catch (err: any) {
+      toast.error("Failed to save subject", { description: err.message });
     }
   };
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-    setFormData({ ...formData, [e.target.name]: e.target.value });
-  };
-  
   return (
-    <form onSubmit={handleSubmit} className="space-y-4 pt-4">
-      <div><Label htmlFor="name">Subject Name *</Label><Input id="name" name="name" value={formData.name} onChange={handleChange} required autoFocus /></div>
-      <div><Label htmlFor="description">Description</Label><Textarea id="description" name="description" value={formData.description} onChange={handleChange} rows={3} /></div>
-      <div className="flex justify-end pt-4"><Button type="submit">{subject?.id ? "Save Changes" : "Create Subject"}</Button></div>
-    </form>
+    <Form {...form}>
+      <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-4 pt-4">
+        <FormField control={form.control} name="name" render={({ field }) => (
+          <FormItem><FormLabel>Subject Name *</FormLabel><FormControl><Input {...field} autoFocus /></FormControl><FormMessage /></FormItem>
+        )} />
+        <FormField control={form.control} name="description" render={({ field }) => (
+          <FormItem><FormLabel>Description</FormLabel><FormControl><Textarea {...field} rows={3} /></FormControl><FormMessage /></FormItem>
+        )} />
+        <div className="flex justify-end pt-4">
+          <Button type="submit" disabled={isLoading}>
+            {isLoading && <Loader2 className="mr-2 size-4 animate-spin" />}
+            {subject?.id ? "Save Changes" : "Create Subject"}
+          </Button>
+        </div>
+      </form>
+    </Form>
   );
 }

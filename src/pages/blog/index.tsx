@@ -1,15 +1,15 @@
+// src/pages/blog/index.tsx
 import Link from "next/link";
-import { supabase } from "@/supabase/client";
 import type { BlogPost } from "@/types";
 import Head from "next/head";
 import { motion } from "framer-motion";
-import { useEffect, useState } from "react";
 import Layout from "@/components/layout";
 import { config as appConfig } from "@/lib/config";
 import { formatDate } from "@/lib/utils";
 import { Eye, Clock, Loader2, FileText } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Card } from "@/components/ui/card";
+import { useGetPublishedBlogPostsQuery } from "@/store/api/publicApi";
 
 const calculateReadTime = (content: string = ""): number => {
   const wordsPerMinute = 225;
@@ -19,32 +19,8 @@ const calculateReadTime = (content: string = ""): number => {
 };
 
 export default function BlogIndexPage() {
-  const [posts, setPosts] = useState<BlogPost[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-
+  const { data: posts = [], isLoading, error } = useGetPublishedBlogPostsQuery();
   const { site: siteConfig } = appConfig;
-
-  useEffect(() => {
-    const fetchPosts = async () => {
-      setLoading(true);
-      setError(null);
-      try {
-        const { data, error: fetchError } = await supabase
-          .from("blog_posts")
-          .select("*")
-          .eq("published", true)
-          .order("published_at", { ascending: false });
-        if (fetchError) throw new Error(fetchError.message);
-        setPosts(data || []);
-      } catch (e: any) {
-        setError(e.message || "An unexpected error occurred.");
-        setPosts([]);
-      }
-      setLoading(false);
-    };
-    fetchPosts();
-  }, []);
 
   const containerVariants = {
     hidden: { opacity: 0 },
@@ -56,12 +32,12 @@ export default function BlogIndexPage() {
     visible: { opacity: 1, y: 0, transition: { duration: 0.5, ease: "easeOut" } },
   };
 
-  if (loading) {
+  if (isLoading) {
     return <Layout><div className="flex min-h-[50vh] items-center justify-center"><Loader2 className="h-8 w-8 animate-spin text-muted-foreground" /></div></Layout>;
   }
 
   if (error) {
-    return <Layout><div className="flex min-h-[50vh] items-center justify-center p-4"><div className="rounded-md border border-destructive/50 bg-destructive/10 p-6 font-medium text-destructive">Error loading posts: {error}</div></div></Layout>;
+    return <Layout><div className="flex min-h-[50vh] items-center justify-center p-4"><div className="rounded-md border border-destructive/50 bg-destructive/10 p-6 font-medium text-destructive">Error loading posts.</div></div></Layout>;
   }
 
   return (
@@ -89,7 +65,7 @@ export default function BlogIndexPage() {
           </p>
         </motion.header>
 
-        {posts.length === 0 && !loading && (
+        {posts.length === 0 && !isLoading && (
           <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="py-16 text-center">
             <div className="mx-auto flex size-16 items-center justify-center rounded-full bg-secondary">
               <FileText className="size-8 text-muted-foreground" />
@@ -123,7 +99,7 @@ export default function BlogIndexPage() {
                     )}
                     <div className="flex flex-col p-6 md:w-2/3">
                       <div className="flex-grow">
-                         {post.tags && post.tags[0] && <Badge variant="outline" className="mb-2">{post.tags[0]}</Badge>}
+                        {post.tags && post.tags[0] && <Badge variant="outline" className="mb-2">{post.tags[0]}</Badge>}
                         <h2 className="mb-2 text-2xl font-bold tracking-tight text-foreground transition-colors group-hover:text-primary">
                           {post.title}
                         </h2>

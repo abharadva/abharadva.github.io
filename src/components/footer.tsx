@@ -1,6 +1,7 @@
+// src/components/footer.tsx
 import Link from "next/link";
 import Container from "./container";
-import { useSiteContent } from "@/context/SiteContentContext";
+import { useGetSiteIdentityQuery } from "@/store/api/publicApi";
 import { Skeleton } from "./ui/skeleton";
 import { Github, Linkedin, Mail } from "lucide-react";
 import ReactMarkdown from "react-markdown";
@@ -23,7 +24,7 @@ const FooterSkeleton = () => (
 );
 
 export default function Footer() {
-  const { content, isLoading } = useSiteContent();
+  const { data: content, isLoading } = useGetSiteIdentityQuery();
   const currentYear = new Date().getFullYear();
 
   if (isLoading || !content) {
@@ -42,7 +43,7 @@ export default function Footer() {
           </div>
 
           <div className="flex items-center gap-6">
-            {social_links.filter(s => s.is_visible).map((social) => { // ADD .filter() HERE
+            {social_links.filter(s => s.is_visible).map((social) => {
               const Icon = socialIcons[social.id.toLowerCase()];
               return Icon ? (
                 <a
