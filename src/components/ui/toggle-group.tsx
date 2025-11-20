@@ -1,4 +1,3 @@
-
 "use client";
 
 import * as React from "react";
@@ -22,7 +21,10 @@ const ToggleGroup = React.forwardRef<
 >(({ className, variant, size, children, ...props }, ref) => (
   <ToggleGroupPrimitive.Root
     ref={ref}
-    className={cn("inline-flex items-center justify-center gap-1 rounded-md bg-muted p-1", className)}
+    className={cn(
+      "inline-flex items-center justify-center gap-1 rounded-md bg-muted p-1",
+      className,
+    )}
     {...props}
   >
     <ToggleGroupContext.Provider value={{ variant, size }}>
@@ -48,7 +50,7 @@ const ToggleGroupItem = React.forwardRef<
           size: context.size || size,
         }),
         "data-[state=on]:bg-background data-[state=on]:text-foreground data-[state=on]:shadow-sm",
-        className
+        className,
       )}
       {...props}
     >

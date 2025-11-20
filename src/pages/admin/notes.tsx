@@ -14,7 +14,7 @@ export default function AdminNotesPage() {
       </AdminLayout>
     );
   }
-  
+
   return (
     <AdminLayout>
       <NotesManager />

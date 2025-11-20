@@ -3,6 +3,7 @@
 This guide provides the necessary steps to configure a Supabase project to serve as the backend for this portfolio application.
 
 ### Prerequisites
+
 - A free [Supabase](https://supabase.com) account.
 
 ---

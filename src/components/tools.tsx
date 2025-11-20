@@ -7,18 +7,27 @@ import type { PortfolioItem } from "@/types";
 type ToolsProps = PropsWithChildren;
 
 export default function Tools({ children }: ToolsProps) {
-  const { data: sections, isLoading, error } = useGetSectionsByPathQuery('/');
-  const toolSection = sections?.find(s => s.title === 'Tools');
-  const toolItems: PortfolioItem[] = (toolSection?.portfolio_items as PortfolioItem[]) || [];
+  const { data: sections, isLoading, error } = useGetSectionsByPathQuery("/");
+  const toolSection = sections?.find((s) => s.title === "Tools");
+  const toolItems: PortfolioItem[] =
+    (toolSection?.portfolio_items as PortfolioItem[]) || [];
 
   return (
     <section className="my-12 py-12">
       <h2 className="mb-8 font-mono text-3xl font-bold text-foreground">
         / Tools
       </h2>
-      
-      {isLoading && <div className="flex justify-center py-8"><Loader2 className="size-8 animate-spin" /></div>}
-      {!!error && <div className="text-center text-destructive">Could not load tools data.</div>}
+
+      {isLoading && (
+        <div className="flex justify-center py-8">
+          <Loader2 className="size-8 animate-spin" />
+        </div>
+      )}
+      {!!error && (
+        <div className="text-center text-destructive">
+          Could not load tools data.
+        </div>
+      )}
 
       {!isLoading && !error && toolItems.length === 0 && (
         <div className="py-8 text-center text-muted-foreground rounded-lg bg-secondary/30 border border-dashed">

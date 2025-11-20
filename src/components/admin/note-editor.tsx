@@ -6,7 +6,13 @@ import type { Note } from "@/types";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "../ui/card";
+import {
+  Card,
+  CardContent,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from "../ui/card";
 import { Label } from "../ui/label";
 import { Loader2 } from "lucide-react";
 
@@ -16,7 +22,11 @@ interface NoteEditorProps {
   onCancel: () => void;
 }
 
-export default function NoteEditor({ note, onSave, onCancel }: NoteEditorProps) {
+export default function NoteEditor({
+  note,
+  onSave,
+  onCancel,
+}: NoteEditorProps) {
   const [formData, setFormData] = useState({
     title: "",
     content: "",
@@ -39,7 +49,10 @@ export default function NoteEditor({ note, onSave, onCancel }: NoteEditorProps) 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsSaving(true);
-    const tagsArray = formData.tags.split(",").map(tag => tag.trim()).filter(tag => tag);
+    const tagsArray = formData.tags
+      .split(",")
+      .map((tag) => tag.trim())
+      .filter((tag) => tag);
     const noteDataToSave: Partial<Note> = {
       title: formData.title || null,
       content: formData.content || null,
@@ -66,7 +79,9 @@ export default function NoteEditor({ note, onSave, onCancel }: NoteEditorProps) 
               <Input
                 id="title"
                 value={formData.title}
-                onChange={(e) => setFormData(prev => ({ ...prev, title: e.target.value }))}
+                onChange={(e) =>
+                  setFormData((prev) => ({ ...prev, title: e.target.value }))
+                }
                 placeholder="A title for your note"
               />
             </div>
@@ -75,7 +90,9 @@ export default function NoteEditor({ note, onSave, onCancel }: NoteEditorProps) 
               <Textarea
                 id="content"
                 value={formData.content}
-                onChange={(e) => setFormData(prev => ({ ...prev, content: e.target.value }))}
+                onChange={(e) =>
+                  setFormData((prev) => ({ ...prev, content: e.target.value }))
+                }
                 placeholder="Jot down your thoughts..."
                 rows={10}
               />
@@ -85,15 +102,30 @@ export default function NoteEditor({ note, onSave, onCancel }: NoteEditorProps) 
               <Input
                 id="tags"
                 value={formData.tags}
-                onChange={(e) => setFormData(prev => ({ ...prev, tags: e.target.value }))}
+                onChange={(e) =>
+                  setFormData((prev) => ({ ...prev, tags: e.target.value }))
+                }
                 placeholder="idea, to-do, reminder"
               />
             </div>
           </CardContent>
           <CardFooter className="flex justify-end gap-3">
-            <Button type="button" variant="outline" onClick={onCancel} disabled={isSaving}>Cancel</Button>
+            <Button
+              type="button"
+              variant="outline"
+              onClick={onCancel}
+              disabled={isSaving}
+            >
+              Cancel
+            </Button>
             <Button type="submit" disabled={isSaving}>
-              {isSaving ? <><Loader2 className="mr-2 size-4 animate-spin" /> Saving...</> : "Save Note"}
+              {isSaving ? (
+                <>
+                  <Loader2 className="mr-2 size-4 animate-spin" /> Saving...
+                </>
+              ) : (
+                "Save Note"
+              )}
             </Button>
           </CardFooter>
         </Card>

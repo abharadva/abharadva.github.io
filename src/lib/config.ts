@@ -33,8 +33,7 @@ export const config: AppConfig = {
     description:
       process.env.NEXT_PUBLIC_SITE_DESCRIPTION ||
       "A modern portfolio website with blog functionality, built by Akshay Bharadva.",
-    url:
-      process.env.NEXT_PUBLIC_SITE_URL || "https://abharadva.github.io",
+    url: process.env.NEXT_PUBLIC_SITE_URL || "https://abharadva.github.io",
     defaultOgImage: `${process.env.NEXT_PUBLIC_SITE_URL || "https://abharadva.github.io"}/default-og-image.png`,
     author: "Akshay Bharadva",
   },

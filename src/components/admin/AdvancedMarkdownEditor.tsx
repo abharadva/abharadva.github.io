@@ -1,13 +1,17 @@
-import React, { useState, useEffect } from 'react';
-import { Expand, Shrink, ImageIcon } from 'lucide-react';
-import { cn } from '@/lib/utils';
-import { Button } from '@/components/ui/button';
-import { ResizableHandle, ResizablePanel, ResizablePanelGroup } from '@/components/ui/resizable';
-import { Textarea } from '@/components/ui/textarea';
-import ReactMarkdown from 'react-markdown';
-import remarkGfm from 'remark-gfm';
-import rehypeRaw from 'rehype-raw';
-import rehypePrism from 'rehype-prism-plus';
+import React, { useState, useEffect } from "react";
+import { Expand, Shrink, ImageIcon } from "lucide-react";
+import { cn } from "@/lib/utils";
+import { Button } from "@/components/ui/button";
+import {
+  ResizableHandle,
+  ResizablePanel,
+  ResizablePanelGroup,
+} from "@/components/ui/resizable";
+import { Textarea } from "@/components/ui/textarea";
+import ReactMarkdown from "react-markdown";
+import remarkGfm from "remark-gfm";
+import rehypeRaw from "rehype-raw";
+import rehypePrism from "rehype-prism-plus";
 
 interface AdvancedMarkdownEditorProps {
   value: string;
@@ -20,37 +24,37 @@ export default function AdvancedMarkdownEditor({
   value,
   onChange,
   onImageUploadRequest,
-  minHeight = '400px',
+  minHeight = "400px",
 }: AdvancedMarkdownEditorProps) {
   const [isFullScreen, setIsFullScreen] = useState(false);
 
   useEffect(() => {
     const handleKeyDown = (event: KeyboardEvent) => {
-      if (event.key === 'Escape' && isFullScreen) {
+      if (event.key === "Escape" && isFullScreen) {
         setIsFullScreen(false);
       }
     };
 
     if (isFullScreen) {
-      document.body.style.overflow = 'hidden';
-      window.addEventListener('keydown', handleKeyDown);
+      document.body.style.overflow = "hidden";
+      window.addEventListener("keydown", handleKeyDown);
     } else {
-      document.body.style.overflow = '';
+      document.body.style.overflow = "";
     }
 
     return () => {
-      window.removeEventListener('keydown', handleKeyDown);
-      document.body.style.overflow = '';
+      window.removeEventListener("keydown", handleKeyDown);
+      document.body.style.overflow = "";
     };
   }, [isFullScreen]);
 
-  const editorHeight = isFullScreen ? 'calc(100vh - 60px)' : minHeight;
+  const editorHeight = isFullScreen ? "calc(100vh - 60px)" : minHeight;
 
   return (
     <div
       className={cn(
-        'rounded-lg border bg-card',
-        isFullScreen && 'fixed inset-0 z-50 flex flex-col bg-background'
+        "rounded-lg border bg-card",
+        isFullScreen && "fixed inset-0 z-50 flex flex-col bg-background",
       )}
     >
       {/* Toolbar */}
@@ -71,7 +75,7 @@ export default function AdvancedMarkdownEditor({
           <Button
             type="button"
             onClick={() => setIsFullScreen(!isFullScreen)}
-            title={isFullScreen ? 'Exit Fullscreen (Esc)' : 'Enter Fullscreen'}
+            title={isFullScreen ? "Exit Fullscreen (Esc)" : "Enter Fullscreen"}
             variant="ghost"
             size="icon"
             className="h-8 w-8"
@@ -82,15 +86,20 @@ export default function AdvancedMarkdownEditor({
               <Expand className="size-4" />
             )}
             <span className="sr-only">
-              {isFullScreen ? 'Exit Fullscreen' : 'Enter Fullscreen'}
+              {isFullScreen ? "Exit Fullscreen" : "Enter Fullscreen"}
             </span>
           </Button>
         </div>
       </div>
 
       {/* Editor Container */}
-      <div className={cn('relative', isFullScreen && 'flex-grow overflow-hidden')}>
-        <ResizablePanelGroup direction="horizontal" className="h-full w-full rounded-b-lg">
+      <div
+        className={cn("relative", isFullScreen && "flex-grow overflow-hidden")}
+      >
+        <ResizablePanelGroup
+          direction="horizontal"
+          className="h-full w-full rounded-b-lg"
+        >
           <ResizablePanel defaultSize={50}>
             <Textarea
               value={value}

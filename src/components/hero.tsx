@@ -6,7 +6,7 @@ import Link from "next/link";
 import { Badge } from "./ui/badge";
 import { useGetSiteIdentityQuery } from "@/store/api/publicApi";
 import { Skeleton } from "@/components/ui/skeleton";
-import ReactMarkdown from 'react-markdown';
+import ReactMarkdown from "react-markdown";
 
 const socialIcons: { [key: string]: React.ComponentType<any> } = {
   github: Github,
@@ -20,20 +20,57 @@ const HeroSkeleton = () => (
       <Skeleton className="h-20 w-full max-w-lg" />
       <Skeleton className="h-12 w-full max-w-md" />
       <Skeleton className="h-24 w-full max-w-xl" />
-      <div className="flex gap-3"><Skeleton className="size-10 rounded-full" /><Skeleton className="size-10 rounded-full" /><Skeleton className="size-10 rounded-full" /></div>
+      <div className="flex gap-3">
+        <Skeleton className="size-10 rounded-full" />
+        <Skeleton className="size-10 rounded-full" />
+        <Skeleton className="size-10 rounded-full" />
+      </div>
     </div>
-    <div className="lg:col-span-2"><Skeleton className="h-full w-full rounded-lg min-h-[250px]" /></div>
+    <div className="lg:col-span-2">
+      <Skeleton className="h-full w-full rounded-lg min-h-[250px]" />
+    </div>
   </section>
 );
 
 export default function Hero() {
   const { data: content, isLoading } = useGetSiteIdentityQuery();
 
-  const nameVariants = { hidden: {}, visible: { transition: { staggerChildren: 0.05 } } };
-  const titleVariants = { hidden: {}, visible: { transition: { staggerChildren: 0.03, delayChildren: (content?.profile_data.name.length || 0) * 0.05 } } };
-  const letterVariant = { hidden: { y: 20, opacity: 0 }, visible: { y: 0, opacity: 1, transition: { type: "spring", stiffness: 100 } } };
-  const containerVariants = { hidden: { opacity: 0 }, visible: { opacity: 1, transition: { staggerChildren: 0.2, delayChildren: 0.5 } } };
-  const itemVariants = { hidden: { opacity: 0, y: 20 }, visible: { opacity: 1, y: 0, transition: { duration: 0.6, ease: "easeOut" } } };
+  const nameVariants = {
+    hidden: {},
+    visible: { transition: { staggerChildren: 0.05 } },
+  };
+  const titleVariants = {
+    hidden: {},
+    visible: {
+      transition: {
+        staggerChildren: 0.03,
+        delayChildren: (content?.profile_data.name.length || 0) * 0.05,
+      },
+    },
+  };
+  const letterVariant = {
+    hidden: { y: 20, opacity: 0 },
+    visible: {
+      y: 0,
+      opacity: 1,
+      transition: { type: "spring", stiffness: 100 },
+    },
+  };
+  const containerVariants = {
+    hidden: { opacity: 0 },
+    visible: {
+      opacity: 1,
+      transition: { staggerChildren: 0.2, delayChildren: 0.5 },
+    },
+  };
+  const itemVariants = {
+    hidden: { opacity: 0, y: 20 },
+    visible: {
+      opacity: 1,
+      y: 0,
+      transition: { duration: 0.6, ease: "easeOut" },
+    },
+  };
 
   if (isLoading || !content) {
     return <HeroSkeleton />;
@@ -44,39 +81,88 @@ export default function Hero() {
 
   return (
     <section className="mb-24 grid grid-cols-1 gap-16 lg:grid-cols-5 lg:gap-8">
-      <motion.div className="lg:col-span-3" initial="hidden" animate="visible" variants={containerVariants}>
-        <motion.h1 variants={nameVariants} aria-label={hero.name} className="text-5xl font-black text-foreground sm:text-6xl md:text-7xl">
+      <motion.div
+        className="lg:col-span-3"
+        initial="hidden"
+        animate="visible"
+        variants={containerVariants}
+      >
+        <motion.h1
+          variants={nameVariants}
+          aria-label={hero.name}
+          className="text-5xl font-black text-foreground sm:text-6xl md:text-7xl"
+        >
           {hero.name.split("").map((char, index) => (
-            <motion.span key={index} variants={letterVariant} className="inline-block">{char === " " ? "\u00A0" : char}</motion.span>
+            <motion.span
+              key={index}
+              variants={letterVariant}
+              className="inline-block"
+            >
+              {char === " " ? "\u00A0" : char}
+            </motion.span>
           ))}
         </motion.h1>
 
-        <motion.p aria-label={hero.title} variants={titleVariants} className="mt-2 text-3xl font-mono font-medium text-primary sm:text-4xl">
+        <motion.p
+          aria-label={hero.title}
+          variants={titleVariants}
+          className="mt-2 text-3xl font-mono font-medium text-primary sm:text-4xl"
+        >
           {hero.title.split("").map((char, index) => (
-            <motion.span key={index} variants={letterVariant} className="inline-block whitespace-pre">{char}</motion.span>
+            <motion.span
+              key={index}
+              variants={letterVariant}
+              className="inline-block whitespace-pre"
+            >
+              {char}
+            </motion.span>
           ))}
           <span className="ml-2 animate-caret-blink">|</span>
         </motion.p>
 
-        <motion.div variants={itemVariants} className="prose prose-lg dark:prose-invert mt-8 max-w-xl text-muted-foreground">
+        <motion.div
+          variants={itemVariants}
+          className="prose prose-lg dark:prose-invert mt-8 max-w-xl text-muted-foreground"
+        >
           <ReactMarkdown>{hero.description}</ReactMarkdown>
         </motion.div>
 
         <motion.div variants={itemVariants} className="mt-8 flex gap-3">
-          {socials.filter(s => s.is_visible).map((social) => {
-            const Icon = socialIcons[social.id.toLowerCase()];
-            return Icon ? (
-              <Button asChild size="icon" variant="secondary" aria-label={social.label} key={social.url}>
-                <a href={social.url} rel="noopener noreferrer" target="_blank"><Icon className="size-5" /></a>
-              </Button>
-            ) : null;
-          })}
+          {socials
+            .filter((s) => s.is_visible)
+            .map((social) => {
+              const Icon = socialIcons[social.id.toLowerCase()];
+              return Icon ? (
+                <Button
+                  asChild
+                  size="icon"
+                  variant="secondary"
+                  aria-label={social.label}
+                  key={social.url}
+                >
+                  <a
+                    href={social.url}
+                    rel="noopener noreferrer"
+                    target="_blank"
+                  >
+                    <Icon className="size-5" />
+                  </a>
+                </Button>
+              ) : null;
+            })}
         </motion.div>
       </motion.div>
 
-      <motion.div className="lg:col-span-2" initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} transition={{ delay: 1, duration: 0.5 }}>
+      <motion.div
+        className="lg:col-span-2"
+        initial={{ opacity: 0, scale: 0.95 }}
+        animate={{ opacity: 1, scale: 1 }}
+        transition={{ delay: 1, duration: 0.5 }}
+      >
         <div className="h-full rounded-lg bg-blueprint-bg p-6">
-          <h3 className="font-mono text-sm uppercase tracking-widest text-muted-foreground">{status_panel.title || "Status Panel"}</h3>
+          <h3 className="font-mono text-sm uppercase tracking-widest text-muted-foreground">
+            {status_panel.title || "Status Panel"}
+          </h3>
           <div className="mt-4 space-y-4">
             <div className="flex items-center gap-3">
               <span className="relative flex h-3 w-3">
@@ -86,17 +172,32 @@ export default function Hero() {
               <p className="text-sm">{status_panel.availability}</p>
             </div>
             <div className="space-y-2">
-              <p className="font-mono text-xs uppercase text-muted-foreground">{status_panel.currently_exploring.title || "Exploring"}</p>
+              <p className="font-mono text-xs uppercase text-muted-foreground">
+                {status_panel.currently_exploring.title || "Exploring"}
+              </p>
               <div className="flex flex-wrap gap-2">
-                {status_panel.currently_exploring.items.map((item) => <Badge key={item} variant="outline">{item}</Badge>)}
+                {status_panel.currently_exploring.items.map((item) => (
+                  <Badge key={item} variant="outline">
+                    {item}
+                  </Badge>
+                ))}
               </div>
             </div>
             <div className="border-t border-border pt-4">
-              <p className="font-mono text-xs uppercase text-muted-foreground mb-2">Latest Project</p>
-              <Link href={status_panel.latestProject.href} className="group flex items-center justify-between rounded-md p-2 transition-colors hover:bg-secondary">
+              <p className="font-mono text-xs uppercase text-muted-foreground mb-2">
+                Latest Project
+              </p>
+              <Link
+                href={status_panel.latestProject.href}
+                className="group flex items-center justify-between rounded-md p-2 transition-colors hover:bg-secondary"
+              >
                 <div>
-                  <p className="font-semibold">{status_panel.latestProject.name}</p>
-                  <p className="text-sm text-muted-foreground">{status_panel.latestProject.linkText}</p>
+                  <p className="font-semibold">
+                    {status_panel.latestProject.name}
+                  </p>
+                  <p className="text-sm text-muted-foreground">
+                    {status_panel.latestProject.linkText}
+                  </p>
                 </div>
                 <ArrowRight className="size-4 text-muted-foreground transition-transform group-hover:translate-x-1 group-hover:text-foreground" />
               </Link>

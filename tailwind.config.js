@@ -92,8 +92,8 @@ module.exports = {
     require("@tailwindcss/typography"),
     function ({ addUtilities }) {
       addUtilities({
-        '.break-inside-avoid': {
-          'break-inside': 'avoid',
+        ".break-inside-avoid": {
+          "break-inside": "avoid",
         },
       });
     },

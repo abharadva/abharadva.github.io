@@ -18,17 +18,28 @@ export default function SupabaseLogin() {
   const router = useRouter();
 
   useEffect(() => {
-    const checkAuth = async () => {
-      const { data: { session } } = await supabase.auth.getSession();
+    const redirectIfAuthenticated = async () => {
+      setIsLoading(true);
+      const {
+        data: { session },
+      } = await supabase.auth.getSession();
+
       if (session) {
         const { data: aalData } =
           await supabase.auth.mfa.getAuthenticatorAssuranceLevel();
         if (aalData?.currentLevel === "aal2") {
-          router.replace("/admin");
+          router.replace("/admin"); // Already fully logged in
+        } else if (aalData?.nextLevel === "aal2") {
+          router.replace("/admin/mfa-challenge"); // Needs MFA
+        } else {
+          router.replace("/admin/setup-mfa"); // Needs MFA setup
         }
+      } else {
+        setIsLoading(false); // No session, stay on login page
       }
     };
-    checkAuth();
+
+    redirectIfAuthenticated();
   }, [router]);
 
   const handleLogin = async (e: React.FormEvent) => {
@@ -36,10 +47,12 @@ export default function SupabaseLogin() {
     setIsLoading(true);
     setError("");
 
-    const { data, error: signInError } = await supabase.auth.signInWithPassword({
-      email,
-      password,
-    });
+    const { data, error: signInError } = await supabase.auth.signInWithPassword(
+      {
+        email,
+        password,
+      },
+    );
 
     if (signInError) {
       setIsLoading(false);
@@ -94,7 +107,9 @@ export default function SupabaseLogin() {
           <div className="mx-auto mb-4 flex size-12 items-center justify-center rounded-full bg-secondary">
             <Lock className="size-6 text-primary" />
           </div>
-          <h2 className="font-mono text-3xl font-bold text-foreground">Admin Access</h2>
+          <h2 className="font-mono text-3xl font-bold text-foreground">
+            Admin Access
+          </h2>
           <p className="mt-2 text-muted-foreground">
             Authenticate to access the command center.
           </p>

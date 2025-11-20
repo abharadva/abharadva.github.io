@@ -26,16 +26,33 @@ export default function SupabaseMFAChallenge() {
   useEffect(() => {
     const protectPageAndGetFactor = async () => {
       setIsLoadingState(true);
-      const { data: { session } } = await supabase.auth.getSession();
-      if (!session) { router.replace("/admin/login"); return; }
+      const {
+        data: { session },
+      } = await supabase.auth.getSession();
+      if (!session) {
+        router.replace("/admin/login");
+        return;
+      }
 
-      const { data: aalData, error: aalError } = await supabase.auth.mfa.getAuthenticatorAssuranceLevel();
-      if (aalError) { setError("Could not check MFA status: " + aalError.message); setIsLoadingState(false); return; }
+      const { data: aalData, error: aalError } =
+        await supabase.auth.mfa.getAuthenticatorAssuranceLevel();
+      if (aalError) {
+        setError("Could not check MFA status: " + aalError.message);
+        setIsLoadingState(false);
+        return;
+      }
 
-      if (aalData?.currentLevel === "aal2") { router.replace("/admin"); return; }
-      if (aalData?.currentLevel !== "aal1" || aalData?.nextLevel !== "aal2") { router.replace("/admin/login"); return; }
+      if (aalData?.currentLevel === "aal2") {
+        router.replace("/admin");
+        return;
+      }
+      if (aalData?.currentLevel !== "aal1" || aalData?.nextLevel !== "aal2") {
+        router.replace("/admin/login");
+        return;
+      }
 
-      const { data: factorsData, error: factorsError } = await supabase.auth.mfa.listFactors();
+      const { data: factorsData, error: factorsError } =
+        await supabase.auth.mfa.listFactors();
       if (factorsError || !factorsData?.totp?.length) {
         setError("Could not retrieve MFA factor. Please try logging in again.");
         setIsLoadingState(false);
@@ -43,9 +60,18 @@ export default function SupabaseMFAChallenge() {
         return;
       }
 
-      const firstVerifiedFactor = factorsData.totp.find((f) => f.status === "verified");
-      if (firstVerifiedFactor) { setFactorId(firstVerifiedFactor.id); }
-      else { setError("No verified MFA factor found. Please set up MFA or try logging in again."); router.replace("/admin/setup-mfa"); return; }
+      const firstVerifiedFactor = factorsData.totp.find(
+        (f) => f.status === "verified",
+      );
+      if (firstVerifiedFactor) {
+        setFactorId(firstVerifiedFactor.id);
+      } else {
+        setError(
+          "No verified MFA factor found. Please set up MFA or try logging in again.",
+        );
+        router.replace("/admin/setup-mfa");
+        return;
+      }
       setIsLoadingState(false);
     };
     protectPageAndGetFactor();
@@ -59,16 +85,27 @@ export default function SupabaseMFAChallenge() {
   }, []);
 
   const handleVerify = async (e: React.FormEvent | string) => {
-    if (typeof e !== 'string') e.preventDefault();
-    if (!factorId) { setError("MFA factor ID is missing. Please try logging in again."); return; }
-    setIsLoadingState(true); setError("");
+    if (typeof e !== "string") e.preventDefault();
+    if (!factorId) {
+      setError("MFA factor ID is missing. Please try logging in again.");
+      return;
+    }
+    setIsLoadingState(true);
+    setError("");
 
-    const codeToVerify = typeof e === 'string' ? e : otp;
+    const codeToVerify = typeof e === "string" ? e : otp;
 
-    const { error: verifyError } = await supabase.auth.mfa.challengeAndVerify({ factorId: factorId, code: codeToVerify });
+    const { error: verifyError } = await supabase.auth.mfa.challengeAndVerify({
+      factorId: factorId,
+      code: codeToVerify,
+    });
 
     setIsLoadingState(false);
-    if (verifyError) { setError(verifyError.message || "Invalid OTP. Please try again."); setOtp(""); return; }
+    if (verifyError) {
+      setError(verifyError.message || "Invalid OTP. Please try again.");
+      setOtp("");
+      return;
+    }
 
     router.replace("/admin");
   };
@@ -121,7 +158,8 @@ export default function SupabaseMFAChallenge() {
           <p className="mt-2 text-muted-foreground">
             Enter the code from your authenticator app.
           </p>
-        </div>        <form className="space-y-6" onSubmit={handleVerify}>
+        </div>{" "}
+        <form className="space-y-6" onSubmit={handleVerify}>
           <div className="relative">
             <label htmlFor="totpCode" className="sr-only">
               Verification Code
@@ -151,7 +189,6 @@ export default function SupabaseMFAChallenge() {
               </span>
             </div>
           </div>
-
           <AnimatePresence>
             {error && (
               <motion.div
@@ -164,7 +201,6 @@ export default function SupabaseMFAChallenge() {
               </motion.div>
             )}
           </AnimatePresence>
-
           <Button
             type="submit"
             disabled={isLoadingState || otp.length !== 6 || !factorId}
@@ -178,7 +214,8 @@ export default function SupabaseMFAChallenge() {
             ) : (
               "Verify & Sign In"
             )}
-          </Button>          <div className="text-center">
+          </Button>{" "}
+          <div className="text-center">
             <Button
               type="button"
               variant="link"

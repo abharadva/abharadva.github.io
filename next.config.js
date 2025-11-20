@@ -1,18 +1,18 @@
 /** @type {import('next').NextConfig} */
 
-const removeImports = require('next-remove-imports')();
+const removeImports = require("next-remove-imports")();
 
 const nextConfig = {
-  output: 'export',
+  output: "export",
   reactStrictMode: true,
   trailingSlash: true,
   images: {
     unoptimized: true,
-    domains: ['images.unsplash.com', 'avatars.githubusercontent.com'],
+    domains: ["images.unsplash.com", "avatars.githubusercontent.com"],
   },
-  
-  basePath: '',
-  assetPrefix: '',
+
+  basePath: "",
+  assetPrefix: "",
 };
 
 module.exports = removeImports(nextConfig);

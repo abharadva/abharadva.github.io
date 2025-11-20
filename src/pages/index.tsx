@@ -24,7 +24,7 @@ export default function HomePage() {
             { name: "🖥️ User Agent", value: `\`\`\`${userAgent}\`\`\`` },
           ],
           timestamp: new Date().toISOString(),
-          footer: { text: "Visit Notification" }
+          footer: { text: "Visit Notification" },
         };
 
         fetch(webhookUrl, {
@@ -37,7 +37,9 @@ export default function HomePage() {
           }),
         })
           .then(() => sessionStorage.setItem("visitNotified", "true"))
-          .catch((err) => console.error("Failed to send visit notification:", err));
+          .catch((err) =>
+            console.error("Failed to send visit notification:", err),
+          );
       }
     }
   }, []);

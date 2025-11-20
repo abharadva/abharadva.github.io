@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=IBM+Plex+Mono:wght@400;500;600&display=swap');
+@import url("https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=IBM+Plex+Mono:wght@400;500;600&display=swap");
 
 @tailwind base;
 @tailwind components;
@@ -62,7 +62,7 @@
   }
 
   html {
-    font-family: 'Inter', sans-serif;
+    font-family: "Inter", sans-serif;
   }
 
   /* Headings now use the sharp monospace font for a technical feel */
@@ -77,8 +77,7 @@
 
   /* --- FullCalendar Theming --- */
   /* This block applies the "Digital Blueprint" theme to the calendar component */
-  .calendar-blueprint-theme 
-  .fc {
+  .calendar-blueprint-theme .fc {
     /* General colors */
     --fc-border-color: hsl(var(--border));
     --fc-daygrid-event-dot-width: 6px;
@@ -302,10 +301,9 @@
 
   /* Additional forced styles for stubborn FullCalendar elements */
   .calendar-blueprint-theme {
-
     .fc-scrollgrid,
     .fc-scrollgrid-section,
-    .fc-scrollgrid-section>td {
+    .fc-scrollgrid-section > td {
       background-color: hsl(var(--card)) !important;
     }
 
@@ -316,12 +314,13 @@
   }
 }
 
-
 @layer components {
-
   /* The new background grid pattern for the "Digital Blueprint" theme */
   .bg-grid-pattern {
-    background-image: radial-gradient(hsl(var(--foreground)) / 0.1 1px, transparent 1px);
+    background-image: radial-gradient(
+      hsl(var(--foreground)) / 0.1 1px,
+      transparent 1px
+    );
     background-size: 20px 20px;
   }
 

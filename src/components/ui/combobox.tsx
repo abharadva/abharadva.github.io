@@ -39,20 +39,24 @@ export function Combobox({
   const [open, setOpen] = React.useState(false);
   const [inputValue, setInputValue] = React.useState("");
 
-  const selectedOption = options.find((option) => option.value.toLowerCase() === value?.toLowerCase());
+  const selectedOption = options.find(
+    (option) => option.value.toLowerCase() === value?.toLowerCase(),
+  );
 
   const handleSelect = (currentValue: string) => {
     onChange(currentValue === value ? "" : currentValue);
     setOpen(false);
   };
 
-  const filteredOptions = options.filter(option =>
-    option.label.toLowerCase().includes(inputValue.toLowerCase())
+  const filteredOptions = options.filter((option) =>
+    option.label.toLowerCase().includes(inputValue.toLowerCase()),
   );
-  
-  const showCreateOption = inputValue && !filteredOptions.some(
-    option => option.label.toLowerCase() === inputValue.toLowerCase()
-  );
+
+  const showCreateOption =
+    inputValue &&
+    !filteredOptions.some(
+      (option) => option.label.toLowerCase() === inputValue.toLowerCase(),
+    );
 
   return (
     <Popover open={open} onOpenChange={setOpen}>
@@ -75,9 +79,7 @@ export function Combobox({
             onValueChange={setInputValue}
           />
           <CommandList>
-            <CommandEmpty>
-              {!showCreateOption && emptyPlaceholder}
-            </CommandEmpty>
+            <CommandEmpty>{!showCreateOption && emptyPlaceholder}</CommandEmpty>
             <CommandGroup>
               {filteredOptions.map((option) => (
                 <CommandItem
@@ -88,13 +90,13 @@ export function Combobox({
                   <Check
                     className={cn(
                       "mr-2 h-4 w-4",
-                      value === option.value ? "opacity-100" : "opacity-0"
+                      value === option.value ? "opacity-100" : "opacity-0",
                     )}
                   />
                   {option.label}
                 </CommandItem>
               ))}
-               {showCreateOption && (
+              {showCreateOption && (
                 <CommandItem
                   key={inputValue}
                   value={inputValue}

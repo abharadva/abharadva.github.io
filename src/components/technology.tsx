@@ -7,9 +7,10 @@ import type { PortfolioItem } from "@/types";
 type ToolsProps = PropsWithChildren;
 
 export default function Technology({ children }: ToolsProps) {
-  const { data: sections, isLoading, error } = useGetSectionsByPathQuery('/');
-  const techSection = sections?.find(s => s.title === 'Tech Stack');
-  const techItems: PortfolioItem[] = (techSection?.portfolio_items as PortfolioItem[]) || [];
+  const { data: sections, isLoading, error } = useGetSectionsByPathQuery("/");
+  const techSection = sections?.find((s) => s.title === "Tech Stack");
+  const techItems: PortfolioItem[] =
+    (techSection?.portfolio_items as PortfolioItem[]) || [];
 
   return (
     <section className="my-12 py-12">
@@ -17,13 +18,24 @@ export default function Technology({ children }: ToolsProps) {
         / Tech Stack
       </h2>
 
-      {isLoading && <div className="flex justify-center py-8"><Loader2 className="size-8 animate-spin" /></div>}
-      {!!error && <div className="text-center text-destructive">Could not load tech stack.</div>}
+      {isLoading && (
+        <div className="flex justify-center py-8">
+          <Loader2 className="size-8 animate-spin" />
+        </div>
+      )}
+      {!!error && (
+        <div className="text-center text-destructive">
+          Could not load tech stack.
+        </div>
+      )}
 
       {!isLoading && !error && techItems.length === 0 && (
         <div className="py-8 text-center text-muted-foreground rounded-lg bg-secondary/30 border border-dashed">
           <Cpu className="mx-auto size-8 mb-2" />
-          <p>A list of technologies I frequently work with will be displayed here.</p>
+          <p>
+            A list of technologies I frequently work with will be displayed
+            here.
+          </p>
         </div>
       )}
 

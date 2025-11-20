@@ -14,7 +14,7 @@ export default function AdminFinancePage() {
       </AdminLayout>
     );
   }
-  
+
   return (
     <AdminLayout>
       <FinanceManager />

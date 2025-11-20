@@ -18,7 +18,7 @@ export default function ShowcasePage() {
       </Head>
 
       <main className="py-16 md:py-24">
-         <motion.header
+        <motion.header
           initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5 }}

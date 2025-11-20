@@ -10,29 +10,29 @@ This repository contains the source code for a comprehensive personal portfolio 
 
 ### Public-Facing Website
 
--   **Modern & Responsive:** A sleek, minimalist dark theme built with Tailwind CSS and shadcn/ui, optimized for all screen sizes.
--   **Dynamic Content:** All sections—including Work Experience, Tech Stack, Projects, and custom pages—are dynamically populated from the CMS.
--   **Full-Featured Blog:** Clean, readable articles with server-side rendering for SEO, view counters, and tag-based organization.
--   **Engaging UI/UX:** Features kinetic typography on the homepage and elegant hover effects for a polished user experience.
--   **GitHub Integration:** An "Open Source" section automatically fetches and displays public repositories from a specified GitHub account.
+- **Modern & Responsive:** A sleek, minimalist dark theme built with Tailwind CSS and shadcn/ui, optimized for all screen sizes.
+- **Dynamic Content:** All sections—including Work Experience, Tech Stack, Projects, and custom pages—are dynamically populated from the CMS.
+- **Full-Featured Blog:** Clean, readable articles with server-side rendering for SEO, view counters, and tag-based organization.
+- **Engaging UI/UX:** Features kinetic typography on the homepage and elegant hover effects for a polished user experience.
+- **GitHub Integration:** An "Open Source" section automatically fetches and displays public repositories from a specified GitHub account.
 
 ### 🔐 Admin Panel & CMS
 
--   **Secure Authentication:** Powered by Supabase Auth with mandatory Two-Factor Authentication (MFA/TOTP) for robust admin access.
--   **Central Dashboard:** An at-a-glance overview of key metrics: monthly finances, task progress, total notes, and blog views.
--   **Comprehensive CMS:**
-    -   Manage all public-facing content sections across multiple pages (`/`, `/about`, `/contact`, etc.).
-    -   Create, update, and reorder sections (Markdown, List Items, Galleries) with drag-and-drop.
-    -   Full CRUD functionality for all portfolio items within sections.
--   **Blog Manager:**
-    -   Advanced Markdown editor with live preview, syntax highlighting, and integrated image uploads.
-    -   On-the-fly image compression (to WEBP) and cloud storage via Supabase Storage.
-    -   Manage post metadata: slugs, tags, excerpts, and publish status.
--   **Personal Management Suite:**
-    -   **Task Manager:** Kanban-style board with sub-tasks, priorities, and due dates.
-    -   **Finance Tracker:** Log earnings/expenses, manage recurring transactions, and view monthly/yearly analytics with charts. Includes a 30-day cash flow forecast.
-    -   **Knowledge Hub:** A system to track learning progress on subjects and topics, complete with session tracking and a GitHub-style activity heatmap.
-    -   **Notes Manager:** A simple, effective tool for personal notes with pinning functionality.
+- **Secure Authentication:** Powered by Supabase Auth with mandatory Two-Factor Authentication (MFA/TOTP) for robust admin access.
+- **Central Dashboard:** An at-a-glance overview of key metrics: monthly finances, task progress, total notes, and blog views.
+- **Comprehensive CMS:**
+  - Manage all public-facing content sections across multiple pages (`/`, `/about`, `/contact`, etc.).
+  - Create, update, and reorder sections (Markdown, List Items, Galleries) with drag-and-drop.
+  - Full CRUD functionality for all portfolio items within sections.
+- **Blog Manager:**
+  - Advanced Markdown editor with live preview, syntax highlighting, and integrated image uploads.
+  - On-the-fly image compression (to WEBP) and cloud storage via Supabase Storage.
+  - Manage post metadata: slugs, tags, excerpts, and publish status.
+- **Personal Management Suite:**
+  - **Task Manager:** Kanban-style board with sub-tasks, priorities, and due dates.
+  - **Finance Tracker:** Log earnings/expenses, manage recurring transactions, and view monthly/yearly analytics with charts. Includes a 30-day cash flow forecast.
+  - **Knowledge Hub:** A system to track learning progress on subjects and topics, complete with session tracking and a GitHub-style activity heatmap.
+  - **Notes Manager:** A simple, effective tool for personal notes with pinning functionality.
 
 ---
 
@@ -40,23 +40,23 @@ This repository contains the source code for a comprehensive personal portfolio 
 
 This project is built with a modern, scalable tech stack focused on developer experience and performance.
 
--   **Framework:** [Next.js](https://nextjs.org/) (React) with TypeScript
--   **Styling:** [Tailwind CSS](https://tailwindcss.com/) with [shadcn/ui](https://ui.shadcn.com/) for components.
--   **Backend & Database:** [Supabase](https://supabase.com/) (PostgreSQL, Auth, Storage)
--   **State Management:** [Redux Toolkit](https://redux-toolkit.js.org/) with **RTK Query** for centralized state and efficient, cached data fetching.
--   **Animation:** [Framer Motion](https://www.framer.com/motion/)
--   **Forms:** [React Hook Form](https://react-hook-form.com/) & [Zod](https://zod.dev/) for validation
--   **Charts & Calendar:** [Recharts](https://recharts.org/) & [FullCalendar](https://fullcalendar.io/)
--   **Deployment:** Configured for static export to [GitHub Pages](https://pages.github.com/) via GitHub Actions.
+- **Framework:** [Next.js](https://nextjs.org/) (React) with TypeScript
+- **Styling:** [Tailwind CSS](https://tailwindcss.com/) with [shadcn/ui](https://ui.shadcn.com/) for components.
+- **Backend & Database:** [Supabase](https://supabase.com/) (PostgreSQL, Auth, Storage)
+- **State Management:** [Redux Toolkit](https://redux-toolkit.js.org/) with **RTK Query** for centralized state and efficient, cached data fetching.
+- **Animation:** [Framer Motion](https://www.framer.com/motion/)
+- **Forms:** [React Hook Form](https://react-hook-form.com/) & [Zod](https://zod.dev/) for validation
+- **Charts & Calendar:** [Recharts](https://recharts.org/) & [FullCalendar](https://fullcalendar.io/)
+- **Deployment:** Configured for static export to [GitHub Pages](https://pages.github.com/) via GitHub Actions.
 
 ### Architectural Overview
 
 The application utilizes a sophisticated state management architecture with **RTK Query** at its core.
 
--   **Centralized API Logic:** All interactions with the Supabase backend are defined declaratively in API "slices" (`publicApi.ts` for the public site, `adminApi.ts` for the admin panel). This removes data-fetching logic from components.
--   **Automated Caching:** RTK Query provides intelligent, automatic caching of fetched data. This reduces redundant API calls, improves performance, and minimizes backend load.
--   **Tag-Based Re-validation:** The system uses a tagging mechanism to automatically re-fetch data when related information is mutated. For example, adding a new blog post automatically invalidates the "posts" tag, causing any component displaying the post list to update without manual intervention.
--   **Client State Management:** For non-API state, such as the learning session timer, standard Redux slices are used to manage state predictably.
+- **Centralized API Logic:** All interactions with the Supabase backend are defined declaratively in API "slices" (`publicApi.ts` for the public site, `adminApi.ts` for the admin panel). This removes data-fetching logic from components.
+- **Automated Caching:** RTK Query provides intelligent, automatic caching of fetched data. This reduces redundant API calls, improves performance, and minimizes backend load.
+- **Tag-Based Re-validation:** The system uses a tagging mechanism to automatically re-fetch data when related information is mutated. For example, adding a new blog post automatically invalidates the "posts" tag, causing any component displaying the post list to update without manual intervention.
+- **Client State Management:** For non-API state, such as the learning session timer, standard Redux slices are used to manage state predictably.
 
 ---
 
@@ -66,9 +66,9 @@ Follow these steps to get the project running on your local machine.
 
 ### 1. Prerequisites
 
--   [Node.js](https://nodejs.org/en/) (v18 or later)
--   [npm](https://www.npmjs.com/) or [yarn](https://yarnpkg.com/)
--   A free [Supabase](https://supabase.com/) account.
+- [Node.js](https://nodejs.org/en/) (v18 or later)
+- [npm](https://www.npmjs.com/) or [yarn](https://yarnpkg.com/)
+- A free [Supabase](https://supabase.com/) account.
 
 ### 2. Clone and Install
 
@@ -124,10 +124,10 @@ For GitHub Actions to build the site, you must add your Supabase credentials as 
 
 1.  In your GitHub repository, go to **Settings** > **Secrets and variables** > **Actions**.
 2.  Click **New repository secret** for each of the following variables from your `.env.local` file:
-    -   `NEXT_PUBLIC_SUPABASE_URL`
-    -   `NEXT_PUBLIC_SUPABASE_ANON_KEY`
-    -   `NEXT_PUBLIC_BUCKET_NAME`
-    -   `NEXT_PUBLIC_SITE_URL` (Set this to your public GitHub Pages URL, e.g., `https://your-username.github.io`)
+    - `NEXT_PUBLIC_SUPABASE_URL`
+    - `NEXT_PUBLIC_SUPABASE_ANON_KEY`
+    - `NEXT_PUBLIC_BUCKET_NAME`
+    - `NEXT_PUBLIC_SITE_URL` (Set this to your public GitHub Pages URL, e.g., `https://your-username.github.io`)
 
 ### 2. Enable GitHub Pages
 
@@ -142,7 +142,7 @@ The workflow file at `.github/workflows/next-deploy.yml` is already configured.
 
 ## 📜 Available Scripts
 
--   `npm run dev`: Starts the development server.
--   `npm run build`: Creates a production-ready static build in the `./out` directory.
--   `npm run lint`: Runs ESLint to check for code quality issues.
--   `npm run format`: Formats all code using Prettier.
+- `npm run dev`: Starts the development server.
+- `npm run build`: Creates a production-ready static build in the `./out` directory.
+- `npm run lint`: Runs ESLint to check for code quality issues.
+- `npm run format`: Formats all code using Prettier.

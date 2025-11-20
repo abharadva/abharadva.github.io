@@ -1,14 +1,20 @@
 // src/components/DynamicPageContent.tsx
-import { useGetSectionsByPathQuery } from '@/store/api/publicApi';
-import SectionRenderer from './SectionRenderer';
-import { Loader2 } from 'lucide-react';
+import { useGetSectionsByPathQuery } from "@/store/api/publicApi";
+import SectionRenderer from "./SectionRenderer";
+import { Loader2 } from "lucide-react";
 
 interface DynamicPageContentProps {
   pagePath: string;
 }
 
-export default function DynamicPageContent({ pagePath }: DynamicPageContentProps) {
-  const { data: sections, isLoading, error } = useGetSectionsByPathQuery(pagePath);
+export default function DynamicPageContent({
+  pagePath,
+}: DynamicPageContentProps) {
+  const {
+    data: sections,
+    isLoading,
+    error,
+  } = useGetSectionsByPathQuery(pagePath);
 
   if (isLoading) {
     return (
@@ -17,7 +23,7 @@ export default function DynamicPageContent({ pagePath }: DynamicPageContentProps
       </div>
     );
   }
-  
+
   if (error) {
     console.error(`Error fetching content for ${pagePath}:`, error);
     return null; // Or show an error message
@@ -25,7 +31,7 @@ export default function DynamicPageContent({ pagePath }: DynamicPageContentProps
 
   return (
     <>
-      {sections?.map(section => (
+      {sections?.map((section) => (
         <SectionRenderer key={section.id} section={section} />
       ))}
     </>

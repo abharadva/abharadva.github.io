@@ -22,17 +22,22 @@ export interface DashboardData {
     topicsInProgress: number;
   } | null;
   recentPosts: Pick<BlogPost, "id" | "title" | "updated_at" | "slug">[];
-  pinnedNotes: Pick<Note, 'id' | 'title' | 'content'>[];
+  pinnedNotes: Pick<Note, "id" | "title" | "content">[];
 }
 
 export default function AdminIndexPage() {
   const { isLoading: isAuthLoading, session } = useAuthGuard();
-  const { data: dashboardData, isLoading: isDataLoading } = useGetDashboardDataQuery(undefined, {
-    skip: !session,
-  });
+  const { data: dashboardData, isLoading: isDataLoading } =
+    useGetDashboardDataQuery(undefined, {
+      skip: !session,
+    });
 
   if (isAuthLoading || !session) {
-    return (<div className="flex min-h-screen items-center justify-center bg-secondary/30"><LoadingSpinner /></div>);
+    return (
+      <div className="flex min-h-screen items-center justify-center bg-secondary/30">
+        <LoadingSpinner />
+      </div>
+    );
   }
 
   return (
@@ -40,9 +45,15 @@ export default function AdminIndexPage() {
       <div className="space-y-6">
         <div>
           <h1 className="text-3xl font-bold">Dashboard</h1>
-          <p className="text-muted-foreground mt-1">Welcome back! Here's your portfolio overview.</p>
+          <p className="text-muted-foreground mt-1">
+            Welcome back! Here's your portfolio overview.
+          </p>
         </div>
-        {isDataLoading || !dashboardData ? <LoadingSpinner/> : <DashboardOverview dashboardData={dashboardData} />}
+        {isDataLoading || !dashboardData ? (
+          <LoadingSpinner />
+        ) : (
+          <DashboardOverview dashboardData={dashboardData} />
+        )}
       </div>
     </AdminLayout>
   );

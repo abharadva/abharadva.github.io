@@ -18,10 +18,16 @@ export default function ProjectsPage() {
   const pageUrl = `${siteConfig.url}/projects/`;
 
   // Fetch all sections for the '/projects' page path
-  const { data: sections, isLoading, error } = useGetSectionsByPathQuery('/projects');
+  const {
+    data: sections,
+    isLoading,
+    error,
+  } = useGetSectionsByPathQuery("/projects");
 
   // Find the specific "Featured Projects" section from the fetched data
-  const featuredSection = sections?.find(s => s.title === 'Featured Projects');
+  const featuredSection = sections?.find(
+    (s) => s.title === "Featured Projects",
+  );
 
   return (
     <Layout>
@@ -59,19 +65,26 @@ export default function ProjectsPage() {
           <Alert variant="destructive" className="max-w-2xl mx-auto my-16">
             <AlertTriangle className="h-4 w-4" />
             <AlertTitle>Error Loading Case Studies</AlertTitle>
-            <AlertDescription>{error && typeof error === 'object' && 'message' in error
-              ? String((error as { message: unknown }).message)
-              : "An unknown error occurred."}</AlertDescription>
+            <AlertDescription>
+              {error && typeof error === "object" && "message" in error
+                ? String((error as { message: unknown }).message)
+                : "An unknown error occurred."}
+            </AlertDescription>
           </Alert>
         )}
 
-        {featuredSection?.portfolio_items && featuredSection.portfolio_items.length > 0 && (
-          <div className="mx-auto max-w-6xl space-y-24">
-            {featuredSection.portfolio_items.map((project, index) => (
-              <FeaturedProject key={project.id} project={project} index={index} />
-            ))}
-          </div>
-        )}
+        {featuredSection?.portfolio_items &&
+          featuredSection.portfolio_items.length > 0 && (
+            <div className="mx-auto max-w-6xl space-y-24">
+              {featuredSection.portfolio_items.map((project, index) => (
+                <FeaturedProject
+                  key={project.id}
+                  project={project}
+                  index={index}
+                />
+              ))}
+            </div>
+          )}
 
         <div className="my-24">
           <Separator />

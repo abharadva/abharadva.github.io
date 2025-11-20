@@ -115,7 +115,7 @@ export interface Task {
   id: string;
   user_id?: string;
   title: string;
-  status?: 'todo' | 'inprogress' | 'done';
+  status?: "todo" | "inprogress" | "done";
   due_date?: string | null;
   priority?: "low" | "medium" | "high";
   created_at?: string;
@@ -173,7 +173,11 @@ export interface LearningSubject {
   updated_at?: string;
 }
 
-export type LearningStatus = 'To Learn' | 'Learning' | 'Practicing' | 'Mastered';
+export type LearningStatus =
+  | "To Learn"
+  | "Learning"
+  | "Practicing"
+  | "Mastered";
 
 export interface LearningTopic {
   id: string;
@@ -201,48 +205,48 @@ export interface LearningSession {
 
 // Added from old SiteContentContext
 export interface SiteContent {
-    profile_data: {
-      name: string;
+  profile_data: {
+    name: string;
+    title: string;
+    description: string;
+    profile_picture_url: string;
+    show_profile_picture: boolean;
+    logo: {
+      main: string;
+      highlight: string;
+    };
+    status_panel: {
       title: string;
-      description: string;
-      profile_picture_url: string;
-      show_profile_picture: boolean;
-      logo: {
-        main: string;
-        highlight: string;
-      };
-      status_panel: {
+      availability: string;
+      currently_exploring: {
         title: string;
-        availability: string;
-        currently_exploring: {
-          title: string;
-          items: string[];
-        };
-        latestProject: {
-          name: string;
-          linkText: string;
-          href: string;
-        };
+        items: string[];
       };
-      bio: string[];
-      github_projects_config: {
-        username: string;
-        show: boolean;
-        sort_by: 'created' | 'updated' | 'pushed';
-        exclude_forks: boolean;
-        exclude_archived: boolean;
-        exclude_profile_repo: boolean;
-        min_stars: number;
-        projects_per_page: number;
+      latestProject: {
+        name: string;
+        linkText: string;
+        href: string;
       };
     };
-    social_links: {
-      id: string;
-      label: string;
-      url: string;
-      is_visible: boolean;
-    }[];
-    footer_data: {
-      copyright_text: string;
+    bio: string[];
+    github_projects_config: {
+      username: string;
+      show: boolean;
+      sort_by: "created" | "updated" | "pushed";
+      exclude_forks: boolean;
+      exclude_archived: boolean;
+      exclude_profile_repo: boolean;
+      min_stars: number;
+      projects_per_page: number;
     };
+  };
+  social_links: {
+    id: string;
+    label: string;
+    url: string;
+    is_visible: boolean;
+  }[];
+  footer_data: {
+    copyright_text: string;
+  };
 }

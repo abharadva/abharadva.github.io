@@ -1,10 +1,17 @@
-import { createClient, Session, User, SupabaseClientOptions } from "@supabase/supabase-js";
+import {
+  createClient,
+  Session,
+  User,
+  SupabaseClientOptions,
+} from "@supabase/supabase-js";
 import { config } from "@/lib/config";
 
 const { supabase: supabaseConfig } = config;
 
 if (!supabaseConfig.url || !supabaseConfig.anonKey) {
-  throw new Error("Supabase URL and Anon Key must be configured in environment variables.");
+  throw new Error(
+    "Supabase URL and Anon Key must be configured in environment variables.",
+  );
 }
 
 const options: SupabaseClientOptions<"public"> = {};

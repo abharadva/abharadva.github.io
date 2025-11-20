@@ -16,8 +16,15 @@ const FooterSkeleton = () => (
   <footer className="w-full border-t border-border/50 py-16 text-sm text-muted-foreground">
     <Container>
       <div className="flex flex-col items-center justify-between gap-8 md:flex-row">
-        <div className="space-y-2"><Skeleton className="h-4 w-64" /><Skeleton className="h-4 w-48" /></div>
-        <div className="flex items-center gap-6"><Skeleton className="size-6 rounded-full" /><Skeleton className="size-6 rounded-full" /><Skeleton className="size-6 rounded-full" /></div>
+        <div className="space-y-2">
+          <Skeleton className="h-4 w-64" />
+          <Skeleton className="h-4 w-48" />
+        </div>
+        <div className="flex items-center gap-6">
+          <Skeleton className="size-6 rounded-full" />
+          <Skeleton className="size-6 rounded-full" />
+          <Skeleton className="size-6 rounded-full" />
+        </div>
       </div>
     </Container>
   </footer>
@@ -38,26 +45,30 @@ export default function Footer() {
       <Container>
         <div className="flex flex-col items-center justify-between gap-8 md:flex-row">
           <div className="prose prose-sm dark:prose-invert text-center text-muted-foreground md:text-left [&_p]:m-0">
-            <p>&copy; {currentYear} {profile_data.name}.</p>
+            <p>
+              &copy; {currentYear} {profile_data.name}.
+            </p>
             <ReactMarkdown>{footer_data.copyright_text}</ReactMarkdown>
           </div>
 
           <div className="flex items-center gap-6">
-            {social_links.filter(s => s.is_visible).map((social) => {
-              const Icon = socialIcons[social.id.toLowerCase()];
-              return Icon ? (
-                <a
-                  key={social.url}
-                  href={social.url}
-                  rel="noopener noreferrer"
-                  target="_blank"
-                  aria-label={social.label}
-                  className="text-2xl transition-colors hover:text-primary"
-                >
-                  <Icon className="size-5" />
-                </a>
-              ) : null;
-            })}
+            {social_links
+              .filter((s) => s.is_visible)
+              .map((social) => {
+                const Icon = socialIcons[social.id.toLowerCase()];
+                return Icon ? (
+                  <a
+                    key={social.url}
+                    href={social.url}
+                    rel="noopener noreferrer"
+                    target="_blank"
+                    aria-label={social.label}
+                    className="text-2xl transition-colors hover:text-primary"
+                  >
+                    <Icon className="size-5" />
+                  </a>
+                ) : null;
+              })}
           </div>
         </div>
       </Container>

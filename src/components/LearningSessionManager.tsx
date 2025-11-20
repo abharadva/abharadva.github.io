@@ -1,11 +1,19 @@
 // src/components/LearningSessionManager.tsx
-import { useEffect } from 'react';
-import { useAppDispatch, useAppSelector } from '@/store/hooks';
-import { sessionStarted, sessionStopped, tick } from '@/store/slices/learningSessionSlice';
-import { useAddLearningSessionMutation, useUpdateLearningSessionMutation, useDeleteLearningSessionMutation } from '@/store/api/adminApi';
-import type { LearningSession } from '@/types';
+import { useEffect } from "react";
+import { useAppDispatch, useAppSelector } from "@/store/hooks";
+import {
+  sessionStarted,
+  sessionStopped,
+  tick,
+} from "@/store/slices/learningSessionSlice";
+import {
+  useAddLearningSessionMutation,
+  useUpdateLearningSessionMutation,
+  useDeleteLearningSessionMutation,
+} from "@/store/api/adminApi";
+import type { LearningSession } from "@/types";
 
-const SESSION_KEY = 'activeLearningSession';
+const SESSION_KEY = "activeLearningSession";
 
 // This is now a "headless" component that bridges Redux state with localStorage and API calls.
 export const LearningSessionManager = () => {

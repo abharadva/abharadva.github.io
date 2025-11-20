@@ -13,7 +13,7 @@ export default function AdminContentPage() {
       </AdminLayout>
     );
   }
-  
+
   return (
     <AdminLayout>
       <ContentManager />

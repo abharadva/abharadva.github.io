@@ -14,7 +14,7 @@ export default function AdminSecurityPage() {
       </AdminLayout>
     );
   }
-  
+
   return (
     <AdminLayout>
       <SecuritySettings />

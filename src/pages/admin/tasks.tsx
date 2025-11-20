@@ -14,7 +14,7 @@ export default function AdminTasksPage() {
       </AdminLayout>
     );
   }
-  
+
   return (
     <AdminLayout>
       <TaskManager />

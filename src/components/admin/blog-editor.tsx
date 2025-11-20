@@ -1,5 +1,3 @@
-
-
 "use client";
 import type React from "react";
 import { useState, useEffect, FormEvent, useRef } from "react";
@@ -13,7 +11,13 @@ import { Input } from "../ui/input";
 import { Label } from "../ui/label";
 import { Switch } from "../ui/switch";
 import { Textarea } from "../ui/textarea";
-import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "../ui/card";
+import {
+  Card,
+  CardContent,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from "../ui/card";
 import { Loader2 } from "lucide-react";
 import { Alert, AlertDescription } from "../ui/alert";
 import Image from "next/image";
@@ -113,10 +117,10 @@ export default function BlogEditor({
       tags: tagsArray.length > 0 ? tagsArray : null,
       published: formData.published,
       cover_image_url: formData.cover_image_url || null,
-      internal_notes: formData.internal_notes || null
+      internal_notes: formData.internal_notes || null,
     };
     await onSave(postDataToSave);
-    await supabase.rpc('update_asset_usage');
+    await supabase.rpc("update_asset_usage");
     setIsSaving(false);
   };
 
@@ -151,7 +155,9 @@ export default function BlogEditor({
       }));
     }
 
-    const sanitizedName = compressedFile.name.replace(/[^a-zA-Z0-9._-]/g, '_').replace(/__+/g, '_');
+    const sanitizedName = compressedFile.name
+      .replace(/[^a-zA-Z0-9._-]/g, "_")
+      .replace(/__+/g, "_");
     const fileName = `${Date.now()}_${sanitizedName}`;
     const filePath = `blog_images/${fileName}`;
 
@@ -208,7 +214,9 @@ export default function BlogEditor({
             <Switch
               id="published-status"
               checked={formData.published}
-              onCheckedChange={(checked) => setFormData((prev) => ({ ...prev, published: checked }))}
+              onCheckedChange={(checked) =>
+                setFormData((prev) => ({ ...prev, published: checked }))
+              }
             />
             <Label htmlFor="published-status">Published</Label>
           </div>
@@ -225,28 +233,60 @@ export default function BlogEditor({
                     onChange={(e) => handleTitleChange(e.target.value)}
                     className={errors.title ? "border-destructive" : ""}
                   />
-                  {errors.title && <p className="mt-1 text-xs text-destructive">{errors.title}</p>}
+                  {errors.title && (
+                    <p className="mt-1 text-xs text-destructive">
+                      {errors.title}
+                    </p>
+                  )}
                 </div>
                 <div>
                   <Label>Content (Markdown) *</Label>
                   <AdvancedMarkdownEditor
                     value={formData.content}
-                    onChange={(newContent) => setFormData((prev) => ({ ...prev, content: newContent }))}
+                    onChange={(newContent) =>
+                      setFormData((prev) => ({ ...prev, content: newContent }))
+                    }
                     onImageUploadRequest={() => fileInputRef.current?.click()}
                     minHeight="400px"
                   />
-                  <input type="file" ref={fileInputRef} onChange={(e) => onFileSelected(e, false)} accept="image/*" className="hidden" id="content_image_file_input" />
-                  {errors.content && <p className="mt-1 text-xs text-destructive">{errors.content}</p>}
-                  {errors.image_upload && <Alert variant="destructive" className="mt-2"><AlertDescription>{errors.image_upload}</AlertDescription></Alert>}
-                  {isUploading && <p className="mt-2 text-sm text-muted-foreground">Uploading image...</p>}
+                  <input
+                    type="file"
+                    ref={fileInputRef}
+                    onChange={(e) => onFileSelected(e, false)}
+                    accept="image/*"
+                    className="hidden"
+                    id="content_image_file_input"
+                  />
+                  {errors.content && (
+                    <p className="mt-1 text-xs text-destructive">
+                      {errors.content}
+                    </p>
+                  )}
+                  {errors.image_upload && (
+                    <Alert variant="destructive" className="mt-2">
+                      <AlertDescription>{errors.image_upload}</AlertDescription>
+                    </Alert>
+                  )}
+                  {isUploading && (
+                    <p className="mt-2 text-sm text-muted-foreground">
+                      Uploading image...
+                    </p>
+                  )}
                 </div>
                 <div>
-                  <Label htmlFor="internal_notes">Internal Notes (Admin only)</Label>
+                  <Label htmlFor="internal_notes">
+                    Internal Notes (Admin only)
+                  </Label>
                   <Textarea
                     id="internal_notes"
                     rows={3}
                     value={formData.internal_notes}
-                    onChange={(e) => setFormData((prev) => ({ ...prev, internal_notes: e.target.value }))}
+                    onChange={(e) =>
+                      setFormData((prev) => ({
+                        ...prev,
+                        internal_notes: e.target.value,
+                      }))
+                    }
                   />
                 </div>
               </div>
@@ -257,25 +297,58 @@ export default function BlogEditor({
                   <Input
                     id="slug"
                     value={formData.slug}
-                    onChange={(e) => setFormData((prev) => ({ ...prev, slug: e.target.value.toLowerCase().replace(/[^a-z0-9-]/g, "").replace(/\s+/g, "-") }))}
+                    onChange={(e) =>
+                      setFormData((prev) => ({
+                        ...prev,
+                        slug: e.target.value
+                          .toLowerCase()
+                          .replace(/[^a-z0-9-]/g, "")
+                          .replace(/\s+/g, "-"),
+                      }))
+                    }
                     className={errors.slug ? "border-destructive" : ""}
                   />
-                  {errors.slug && <p className="mt-1 text-xs text-destructive">{errors.slug}</p>}
+                  {errors.slug && (
+                    <p className="mt-1 text-xs text-destructive">
+                      {errors.slug}
+                    </p>
+                  )}
                 </div>
                 <div>
                   <Label htmlFor="excerpt">Excerpt (Short summary)</Label>
-                  <Textarea id="excerpt" rows={3} value={formData.excerpt} onChange={(e) => setFormData((prev) => ({ ...prev, excerpt: e.target.value }))} />
+                  <Textarea
+                    id="excerpt"
+                    rows={3}
+                    value={formData.excerpt}
+                    onChange={(e) =>
+                      setFormData((prev) => ({
+                        ...prev,
+                        excerpt: e.target.value,
+                      }))
+                    }
+                  />
                 </div>
                 <div>
                   <Label htmlFor="tags">Tags (comma-separated)</Label>
-                  <Input id="tags" value={formData.tags} onChange={(e) => setFormData((prev) => ({ ...prev, tags: e.target.value }))} />
+                  <Input
+                    id="tags"
+                    value={formData.tags}
+                    onChange={(e) =>
+                      setFormData((prev) => ({ ...prev, tags: e.target.value }))
+                    }
+                  />
                 </div>
                 <div>
                   <Label htmlFor="cover_image_url_display">Cover Image</Label>
                   <Input
                     id="cover_image_url_display"
                     value={formData.cover_image_url}
-                    onChange={(e) => setFormData((prev) => ({ ...prev, cover_image_url: e.target.value }))}
+                    onChange={(e) =>
+                      setFormData((prev) => ({
+                        ...prev,
+                        cover_image_url: e.target.value,
+                      }))
+                    }
                     className="mb-2"
                     placeholder="Paste image URL"
                   />
@@ -286,16 +359,54 @@ export default function BlogEditor({
                     accept="image/*"
                     onChange={(e) => onFileSelected(e, true)}
                   /> */}
-                  {formData.cover_image_url && <img src={formData.cover_image_url} alt="Cover preview" className="mt-2 max-h-40 w-full rounded-md border object-contain" />}
-                  {errors.cover_image_url && <p className="mt-1 text-xs text-destructive">{errors.cover_image_url}</p>}
+                  {formData.cover_image_url && (
+                    <img
+                      src={formData.cover_image_url}
+                      alt="Cover preview"
+                      className="mt-2 max-h-40 w-full rounded-md border object-contain"
+                    />
+                  )}
+                  {errors.cover_image_url && (
+                    <p className="mt-1 text-xs text-destructive">
+                      {errors.cover_image_url}
+                    </p>
+                  )}
                 </div>
               </div>
             </div>
           </CardContent>
           <CardFooter className="flex justify-end gap-3 border-t pt-6">
-            <Button type="button" variant="outline" onClick={onCancel} disabled={isSaving || isUploading}>Cancel</Button>
-            <Button type="submit" disabled={isSaving || isUploading || !formData.title || !formData.slug || !formData.content}>
-              {isSaving ? <><Loader2 className="mr-2 size-4 animate-spin" /> Saving...</> : isUploading ? <><Loader2 className="mr-2 size-4 animate-spin" /> Processing...</> : post?.id ? "Update Post" : "Create Post"}
+            <Button
+              type="button"
+              variant="outline"
+              onClick={onCancel}
+              disabled={isSaving || isUploading}
+            >
+              Cancel
+            </Button>
+            <Button
+              type="submit"
+              disabled={
+                isSaving ||
+                isUploading ||
+                !formData.title ||
+                !formData.slug ||
+                !formData.content
+              }
+            >
+              {isSaving ? (
+                <>
+                  <Loader2 className="mr-2 size-4 animate-spin" /> Saving...
+                </>
+              ) : isUploading ? (
+                <>
+                  <Loader2 className="mr-2 size-4 animate-spin" /> Processing...
+                </>
+              ) : post?.id ? (
+                "Update Post"
+              ) : (
+                "Create Post"
+              )}
             </Button>
           </CardFooter>
         </form>

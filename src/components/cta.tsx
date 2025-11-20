@@ -7,7 +7,9 @@ import { useGetSiteIdentityQuery } from "@/store/api/publicApi";
 
 export default function Cta() {
   const { data: content } = useGetSiteIdentityQuery();
-  const emailLink = content?.social_links.find(s => s.id === 'email')?.url || "mailto:example@example.com";
+  const emailLink =
+    content?.social_links.find((s) => s.id === "email")?.url ||
+    "mailto:example@example.com";
 
   return (
     <motion.section
@@ -18,7 +20,7 @@ export default function Cta() {
       className="my-24"
     >
       <div className="relative overflow-hidden rounded-lg bg-blueprint-bg p-8 text-center md:p-12">
-         {/* Decorative elements */}
+        {/* Decorative elements */}
         <div className="absolute -top-4 -left-4 z-0 h-16 w-16 rounded-full bg-primary/10" />
         <div className="absolute -bottom-8 -right-8 z-0 h-24 w-24 rounded-lg bg-primary/10" />
 
@@ -27,7 +29,9 @@ export default function Cta() {
             Have a project in mind?
           </h2>
           <p className="mx-auto mt-4 max-w-xl text-lg text-muted-foreground">
-            I'm always open to discussing new projects, creative ideas, or opportunities to be part of an amazing team. Let's build something great together.
+            I'm always open to discussing new projects, creative ideas, or
+            opportunities to be part of an amazing team. Let's build something
+            great together.
           </p>
           <div className="mt-8 flex flex-col items-center gap-4 sm:flex-row sm:justify-center">
             <Button size="lg" asChild>

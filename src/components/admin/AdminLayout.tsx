@@ -8,20 +8,29 @@ import { LogOut, Menu, Timer, Loader2 } from "lucide-react";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { Separator } from "../ui/separator";
 import { useAppSelector } from "@/store/hooks";
-import { useGetLearningDataQuery, useSignOutMutation } from "@/store/api/adminApi";
+import {
+  useGetLearningDataQuery,
+  useSignOutMutation,
+} from "@/store/api/adminApi";
 
 const formatTime = (seconds: number) => {
-  const h = Math.floor(seconds / 3600).toString().padStart(2, '0');
-  const m = Math.floor((seconds % 3600) / 60).toString().padStart(2, '0');
-  const s = (seconds % 60).toString().padStart(2, '0');
+  const h = Math.floor(seconds / 3600)
+    .toString()
+    .padStart(2, "0");
+  const m = Math.floor((seconds % 3600) / 60)
+    .toString()
+    .padStart(2, "0");
+  const s = (seconds % 60).toString().padStart(2, "0");
   return `${h}:${m}:${s}`;
 };
 
 export function AdminLayout({ children }: { children: ReactNode }) {
   const router = useRouter();
   const [mobileSidebarOpen, setMobileSidebarOpen] = useState(false);
-  
-  const { activeSession, elapsedTime } = useAppSelector((state) => state.learningSession);
+
+  const { activeSession, elapsedTime } = useAppSelector(
+    (state) => state.learningSession,
+  );
   const { data: learningData } = useGetLearningDataQuery();
   const [signOut] = useSignOutMutation();
 
@@ -31,7 +40,7 @@ export function AdminLayout({ children }: { children: ReactNode }) {
   };
 
   const currentTopicName = activeSession
-    ? learningData?.topics.find(t => t.id === activeSession.topic_id)?.title
+    ? learningData?.topics.find((t) => t.id === activeSession.topic_id)?.title
     : null;
 
   return (
@@ -59,14 +68,22 @@ export function AdminLayout({ children }: { children: ReactNode }) {
           <div className="flex flex-1 items-center justify-end gap-x-4 self-stretch lg:gap-x-6">
             <div className="flex items-center gap-x-4 lg:gap-x-6">
               {activeSession && (
-                <Button variant="ghost" onClick={() => router.push('/admin/learning')} className="flex items-center gap-2 rounded-md bg-primary/10 px-3 py-1.5 text-sm font-semibold text-primary transition-colors hover:bg-primary/20">
+                <Button
+                  variant="ghost"
+                  onClick={() => router.push("/admin/learning")}
+                  className="flex items-center gap-2 rounded-md bg-primary/10 px-3 py-1.5 text-sm font-semibold text-primary transition-colors hover:bg-primary/20"
+                >
                   <Timer className="size-4 animate-pulse" />
                   <div className="flex items-center gap-2">
-                    <span className="hidden sm:inline truncate max-w-[150px]">{currentTopicName || 'Session'}</span>
+                    <span className="hidden sm:inline truncate max-w-[150px]">
+                      {currentTopicName || "Session"}
+                    </span>
                     {elapsedTime === null ? (
                       <Loader2 className="size-4 animate-spin" />
                     ) : (
-                      <span className="font-mono tracking-wider">{formatTime(elapsedTime)}</span>
+                      <span className="font-mono tracking-wider">
+                        {formatTime(elapsedTime)}
+                      </span>
                     )}
                   </div>
                 </Button>
@@ -75,7 +92,12 @@ export function AdminLayout({ children }: { children: ReactNode }) {
                 <Link href="/">Back to Portfolio</Link>
               </Button>
               <Separator orientation="vertical" className="h-6" />
-              <Button variant="ghost" size="sm" onClick={handleLogout} className="text-destructive hover:text-destructive hover:bg-destructive/10">
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={handleLogout}
+                className="text-destructive hover:text-destructive hover:bg-destructive/10"
+              >
                 <LogOut className="mr-2 size-4" />
                 Logout
               </Button>
