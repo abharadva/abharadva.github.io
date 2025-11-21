@@ -94,26 +94,38 @@ CREATE TRIGGER update_site_identity_updated_at BEFORE UPDATE ON site_identity FO
 INSERT INTO site_identity (id, profile_data, social_links, footer_data)
 VALUES (1,
   '{
-    "name": "Alex Doe",
-    "title": "Creative Web Developer.",
-    "description": "I craft beautiful and intuitive digital experiences. With a focus on modern web standards and user-centric design, I build web applications that are both functional and delightful.",
+    "name": "Your Name",
+    "title": "Your Professional Title.",
+    "description": "A brief, compelling description about who you are and what you do. This will appear on your homepage.",
     "profile_picture_url": "https://i.pravatar.cc/150?u=alexdoe",
     "show_profile_picture": true,
-    "logo": { "main": "ALEX", "highlight": ".DEV" },
+    "logo": { "main": "YOUR", "highlight": ".DEV" },
+    "default_theme": "blueprint",
     "status_panel": {
-      "availability": "Open to new projects & collaborations",
-      "currently_exploring": { "items": ["Edge Computing", "Web3 Integration"] },
-      "latestProject": { "name": "This Portfolio CMS", "linkText": "View all projects", "href": "/projects" }
+      "title": "Status Panel",
+      "availability": "Open for new opportunities",
+      "currently_exploring": { "title": "Exploring", "items": ["New Tech 1", "New Tech 2"] },
+      "latestProject": { "name": "My Latest Project", "linkText": "View all projects", "href": "/projects" }
     },
     "bio": [
-      "As a developer with a keen eye for design, my passion lies in creating seamless user journeys from concept to deployment. I believe that the best products are built at the intersection of powerful technology and thoughtful design.",
-      "I''m always learning and experimenting with new tools to stay at the forefront of web development. When I''m not coding, I enjoy contributing to open-source projects and exploring digital art."
-    ]
+      "This is the first paragraph of your bio on the About page. Share your story, your passion for your work, and what drives you.",
+      "This is the second paragraph. You can talk about your philosophy, interests outside of work, or your long-term goals."
+    ],
+    "github_projects_config": {
+      "username": "your-github-username",
+      "show": true,
+      "sort_by": "pushed",
+      "exclude_forks": true,
+      "exclude_archived": true,
+      "exclude_profile_repo": true,
+      "min_stars": 1,
+      "projects_per_page": 9
+    }
   }',
   '[
-    {"id": "github", "label": "GitHub", "url": "https://github.com/", "is_visible": true},
-    {"id": "linkedin", "label": "LinkedIn", "url": "https://www.linkedin.com/", "is_visible": true},
-    {"id": "email", "label": "Email", "url": "mailto:hello@example.com", "is_visible": true}
+    {"id": "github", "label": "GitHub", "url": "https://github.com/your-username", "is_visible": true},
+    {"id": "linkedin", "label": "LinkedIn", "url": "https://www.linkedin.com/in/your-profile", "is_visible": true},
+    {"id": "email", "label": "Email", "url": "mailto:your-email@example.com", "is_visible": true}
   ]',
   '{ "copyright_text": "Crafted with Next.js & Supabase. Deployed on GitHub Pages." }'
 ) ON CONFLICT (id) DO UPDATE SET
@@ -263,7 +275,14 @@ ALTER TABLE storage_assets ENABLE ROW LEVEL SECURITY; DROP POLICY IF EXISTS "Adm
 
 -- ========= RPC FUNCTIONS =========
 CREATE OR REPLACE FUNCTION get_calendar_data(start_date_param date, end_date_param date) RETURNS TABLE(item_id UUID, title TEXT, start_time TIMESTAMPTZ, end_time TIMESTAMPTZ, item_type TEXT, data JSONB) AS $$ BEGIN RETURN QUERY SELECT e.id, e.title, e.start_time, e.end_time, 'event' AS item_type, jsonb_build_object('description', e.description, 'is_all_day', e.is_all_day) FROM events e WHERE e.user_id = auth.uid() AND e.start_time :: date BETWEEN start_date_param AND end_date_param UNION ALL SELECT t.id, t.title, (t.due_date + interval '9 hour'):: timestamptz, NULL :: timestamptz, 'task' AS item_type, jsonb_build_object('status', t.status, 'priority', t.priority) FROM tasks t WHERE t.user_id = auth.uid() AND t.due_date BETWEEN start_date_param AND end_date_param UNION ALL SELECT tr.id, tr.description, (tr.date + interval '12 hour'):: timestamptz, NULL :: timestamptz, 'transaction' AS item_type, jsonb_build_object('amount', tr.amount, 'type', tr.type, 'category', tr.category) FROM transactions tr WHERE tr.user_id = auth.uid() AND tr.date BETWEEN start_date_param AND end_date_param; END; $$ LANGUAGE plpgsql;
-CREATE OR REPLACE FUNCTION increment_blog_post_view (post_id_to_increment UUID) RETURNS void LANGUAGE plpgsql AS $$ BEGIN UPDATE blog_posts SET views = views + 1 WHERE id = post_id_to_increment; END; $$;
+CREATE OR REPLACE FUNCTION increment_blog_post_view (post_id_to_increment UUID) 
+RETURNS void LANGUAGE plpgsql AS $$ 
+BEGIN 
+  UPDATE blog_posts 
+  SET views = views + 1 
+  WHERE id = post_id_to_increment AND published = true;
+END; 
+$$;
 CREATE OR REPLACE FUNCTION update_section_order(section_ids UUID[]) RETURNS void AS $$ BEGIN FOR i IN 1..array_length(section_ids, 1) LOOP UPDATE portfolio_sections SET display_order = i WHERE id = section_ids[i]; END LOOP; END; $$ LANGUAGE plpgsql;
 CREATE OR REPLACE FUNCTION get_total_blog_views() RETURNS BIGINT AS $$ DECLARE total_views BIGINT; BEGIN SELECT SUM(views) INTO total_views FROM blog_posts WHERE published = true; RETURN COALESCE(total_views, 0); END; $$ LANGUAGE plpgsql;
 CREATE OR REPLACE FUNCTION get_learning_heatmap_data(start_date DATE, end_date DATE) RETURNS TABLE(day DATE, total_minutes INT) AS $$ BEGIN RETURN QUERY SELECT DATE(s.start_time AT TIME ZONE 'UTC') AS day, COALESCE(SUM(s.duration_minutes), 0):: INT AS total_minutes FROM learning_sessions s WHERE s.user_id = auth.uid() AND s.start_time AT TIME ZONE 'UTC' >= start_date AND s.start_time AT TIME ZONE 'UTC' <= end_date GROUP BY day ORDER BY day; END; $$ LANGUAGE plpgsql;

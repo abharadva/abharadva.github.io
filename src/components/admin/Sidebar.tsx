@@ -13,6 +13,7 @@ import {
   Navigation,
   ImageIcon,
   Settings,
+  FlaskConical,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -29,6 +30,7 @@ const navigation = [
   { name: "Navigation", href: "/admin/navigation", icon: Navigation },
   { name: "Settings", href: "/admin/settings", icon: Settings },
   { name: "Security", href: "/admin/security", icon: Lock },
+  { name: "CRUD Test", href: "/admin/test", icon: FlaskConical },
 ];
 
 interface SidebarProps {

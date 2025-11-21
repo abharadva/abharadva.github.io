@@ -6,42 +6,34 @@
 
 @layer base {
   :root {
-    /* A deep, focused dark theme inspired by code editors and technical diagrams */
     --background: 220 20% 5%;
-    /* Deepest navy/charcoal */
     --foreground: 210 20% 90%;
-
-    --card: 220 20% 8%;
-    /* Slightly lighter for cards */
-    --card-foreground: 210 20% 90%;
-
-    --popover: 220 20% 5%;
-    --popover-foreground: 210 20% 90%;
-
-    /* A vibrant, electric blue for primary actions and highlights */
     --primary: 200 100% 50%;
     --primary-foreground: 220 20% 5%;
+    --radius: 0.375rem;
+  }
 
+  .theme-blueprint {
+    --background: 220 20% 5%;
+    --foreground: 210 20% 90%;
+    --card: 220 20% 8%;
+    --card-foreground: 210 20% 90%;
+    --popover: 220 20% 5%;
+    --popover-foreground: 210 20% 90%;
+    --primary: 200 100% 50%;
+    --primary-foreground: 220 20% 5%;
     --secondary: 220 20% 12%;
     --secondary-foreground: 210 20% 90%;
-
     --muted: 220 20% 12%;
     --muted-foreground: 220 10% 60%;
-
-    /* Accent uses the same electric blue for consistency */
     --accent: 200 100% 50%;
     --accent-foreground: 220 20% 5%;
-
     --destructive: 0 84% 60%;
     --destructive-foreground: 210 40% 98%;
-
     --border: 220 20% 15%;
     --input: 220 20% 12%;
     --ring: 200 100% 50%;
-
     --radius: 0.375rem;
-    /* Slightly sharper corners */
-
     --chart-1: 200 80% 60%;
     --chart-2: 160 60% 55%;
     --chart-3: 30 80% 65%;
@@ -49,7 +41,87 @@
     --chart-5: 340 75% 65%;
   }
 
-  /* No light theme needed per design spec, but could be added here */
+  .theme-matrix {
+    --background: 0 0% 2%;
+    /* Near black */
+    --foreground: 120 100% 85%;
+    /* Light green */
+    --card: 120 15% 8%;
+    --card-foreground: 120 100% 85%;
+    --popover: 0 0% 2%;
+    --popover-foreground: 120 100% 85%;
+    --primary: 120 100% 50%;
+    /* Bright green */
+    --primary-foreground: 0 0% 2%;
+    --secondary: 120 20% 12%;
+    --secondary-foreground: 120 100% 85%;
+    --muted: 120 20% 12%;
+    --muted-foreground: 120 40% 50%;
+    --accent: 120 100% 50%;
+    --accent-foreground: 0 0% 2%;
+    --destructive: 0 84% 60%;
+    --destructive-foreground: 210 40% 98%;
+    --border: 120 20% 15%;
+    --input: 120 20% 12%;
+    --ring: 120 100% 50%;
+  }
+
+  .theme-solarized-light {
+    --background: 44 100% 97%;
+    /* #fdf6e3 */
+    --foreground: 202 24% 39%;
+    /* #657b83 */
+    --card: 44 100% 93%;
+    /* #eee8d5 */
+    --card-foreground: 202 24% 39%;
+    --popover: 44 100% 97%;
+    --popover-foreground: 202 24% 39%;
+    --primary: 197 71% 51%;
+    /* #268bd2 */
+    --primary-foreground: 44 100% 97%;
+    --secondary: 44 100% 93%;
+    --secondary-foreground: 197 71% 51%;
+    --muted: 44 100% 93%;
+    --muted-foreground: 202 16% 56%;
+    /* #839496 */
+    --accent: 38 93% 62%;
+    /* #b58900 */
+    --accent-foreground: 44 100% 97%;
+    --destructive: 352 79% 51%;
+    /* #dc322f */
+    --destructive-foreground: 44 100% 97%;
+    --border: 44 24% 87%;
+    /* #eee8d5 */
+    --input: 44 100% 93%;
+    --ring: 197 71% 51%;
+  }
+
+  .theme-monokai {
+    --background: 240 8% 15%;
+    /* #272822 */
+    --foreground: 240 8% 95%;
+    /* #F8F8F2 */
+    --card: 240 8% 18%;
+    --card-foreground: 240 8% 95%;
+    --popover: 240 8% 15%;
+    --popover-foreground: 240 8% 95%;
+    --primary: 348 100% 61%;
+    /* Pink */
+    --primary-foreground: 240 8% 15%;
+    --secondary: 240 8% 25%;
+    --secondary-foreground: 240 8% 95%;
+    --muted: 240 8% 25%;
+    --muted-foreground: 240 5% 55%;
+    --accent: 172 56% 54%;
+    /* Cyan */
+    --accent-foreground: 240 8% 15%;
+    --destructive: 348 100% 61%;
+    --destructive-foreground: 240 8% 15%;
+    --border: 240 8% 22%;
+    --input: 240 8% 25%;
+    --ring: 172 56% 54%;
+  }
+
 }
 
 @layer base {
@@ -301,9 +373,10 @@
 
   /* Additional forced styles for stubborn FullCalendar elements */
   .calendar-blueprint-theme {
+
     .fc-scrollgrid,
     .fc-scrollgrid-section,
-    .fc-scrollgrid-section > td {
+    .fc-scrollgrid-section>td {
       background-color: hsl(var(--card)) !important;
     }
 
@@ -315,12 +388,11 @@
 }
 
 @layer components {
+
   /* The new background grid pattern for the "Digital Blueprint" theme */
   .bg-grid-pattern {
-    background-image: radial-gradient(
-      hsl(var(--foreground)) / 0.1 1px,
-      transparent 1px
-    );
+    background-image: radial-gradient(hsl(var(--foreground)) / 0.1 1px,
+        transparent 1px);
     background-size: 20px 20px;
   }
 

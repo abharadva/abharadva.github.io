@@ -211,6 +211,7 @@ export interface SiteContent {
     description: string;
     profile_picture_url: string;
     show_profile_picture: boolean;
+    default_theme: "theme-blueprint" | "theme-matrix" | "theme-solarized-light" | "theme-monokai";
     logo: {
       main: string;
       highlight: string;

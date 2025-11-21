@@ -41,7 +41,7 @@ import {
   useGetSiteSettingsQuery,
   useUpdateSiteSettingsMutation,
 } from "@/store/api/adminApi";
-import type { SiteContent } from "@/types";
+import { Skeleton } from "../ui/skeleton";
 
 const socialLinkSchema = z.object({
   id: z.string(),
@@ -55,6 +55,7 @@ const settingsFormSchema = z.object({
   profile_data: z.object({
     name: z.string().min(1, "Name is required"),
     title: z.string().min(1, "Title is required"),
+    default_theme: z.enum(["theme-blueprint", "theme-matrix", "theme-solarized-light", "theme-monokai"]),
     description: z.string().min(1, "Hero description is required"),
     profile_picture_url: z
       .string()
@@ -110,6 +111,7 @@ const defaultValues: SettingsFormValues = {
     title: "",
     description: "",
     profile_picture_url: "",
+    default_theme: "theme-blueprint",
     show_profile_picture: true,
     logo: { main: "", highlight: "" },
     bio: [""],
@@ -140,6 +142,29 @@ const defaultValues: SettingsFormValues = {
   },
 };
 
+const SettingsSkeleton = () => (
+  <div className="space-y-6 max-w-6xl mx-auto">
+    <div className="flex justify-between items-center">
+      <div>
+        <Skeleton className="h-8 w-64" />
+        <Skeleton className="h-4 w-96 mt-2" />
+      </div>
+      <Skeleton className="h-10 w-40" />
+    </div>
+    <Separator />
+    <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 items-start">
+      <div className="lg:col-span-2 space-y-6">
+        <Skeleton className="h-64 w-full" />
+        <Skeleton className="h-80 w-full" />
+      </div>
+      <div className="lg:col-span-1 space-y-6">
+        <Skeleton className="h-48 w-full" />
+        <Skeleton className="h-72 w-full" />
+      </div>
+    </div>
+  </div>
+);
+
 export default function SiteSettingsManager() {
   const { data: settingsData, isLoading: isLoadingSettings } =
     useGetSiteSettingsQuery();
@@ -155,41 +180,64 @@ export default function SiteSettingsManager() {
     if (settingsData) {
       const { identity, settings } = settingsData;
 
-      const fetchedSocials = (identity.social_links as any[]) || [];
+      // This function ensures that any null values from the DB become empty strings
+      // to prevent controlled vs. uncontrolled input errors.
+      const nullsToStrings = (obj: any): any => {
+        if (obj === null || obj === undefined) return "";
+        if (typeof obj !== "object") return obj;
+        if (Array.isArray(obj)) return obj.map(nullsToStrings);
+
+        return Object.fromEntries(
+          Object.entries(obj).map(([key, value]) => [key, nullsToStrings(value)])
+        );
+      };
+
+      const cleanIdentity = nullsToStrings(identity);
+
+      const fetchedSocials = (cleanIdentity.social_links as any[]) || [];
       const mergedSocials = (defaultValues.social_links || []).map((def) => {
         const fetched = fetchedSocials.find((f) => f.id === def.id);
         return fetched ? { ...def, ...fetched } : def;
       });
 
+      // Correctly merge profile data, ensuring fetched data takes precedence.
       const mergedProfileData = {
         ...defaultValues.profile_data,
-        ...identity.profile_data,
-        bio: identity.profile_data.bio?.length
-          ? identity.profile_data.bio
-          : [""],
+        ...cleanIdentity.profile_data,
+        logo: {
+          ...defaultValues.profile_data.logo,
+          ...(cleanIdentity.profile_data.logo || {}),
+        },
         status_panel: {
           ...defaultValues.profile_data.status_panel,
-          ...identity.profile_data.status_panel,
+          ...(cleanIdentity.profile_data.status_panel || {}),
           currently_exploring: {
             ...defaultValues.profile_data.status_panel.currently_exploring,
-            ...identity.profile_data.status_panel.currently_exploring,
-            items: identity.profile_data.status_panel.currently_exploring.items
-              ?.length
-              ? identity.profile_data.status_panel.currently_exploring.items
-              : [""],
+            ...(cleanIdentity.profile_data.status_panel?.currently_exploring || {}),
+            items:
+              cleanIdentity.profile_data.status_panel?.currently_exploring?.items?.length
+                ? cleanIdentity.profile_data.status_panel.currently_exploring.items
+                : [""],
+          },
+          latestProject: {
+            ...defaultValues.profile_data.status_panel.latestProject,
+            ...(cleanIdentity.profile_data.status_panel?.latestProject || {}),
           },
         },
         github_projects_config: {
           ...defaultValues.profile_data.github_projects_config,
-          ...identity.profile_data.github_projects_config,
+          ...(cleanIdentity.profile_data.github_projects_config || {}),
         },
+        bio: cleanIdentity.profile_data.bio?.length
+          ? cleanIdentity.profile_data.bio
+          : [""],
       };
 
       form.reset({
         portfolio_mode: settings.portfolio_mode as "multi-page" | "single-page",
         profile_data: mergedProfileData,
         social_links: mergedSocials,
-        footer_data: identity.footer_data,
+        footer_data: cleanIdentity.footer_data || defaultValues.footer_data,
       });
     }
   }, [settingsData, form]);
@@ -208,11 +256,7 @@ export default function SiteSettingsManager() {
   };
 
   if (isLoadingSettings) {
-    return (
-      <div className="flex justify-center py-20">
-        <Loader2 className="size-8 animate-spin" />
-      </div>
-    );
+    return <SettingsSkeleton />;
   }
 
   return (
@@ -410,6 +454,42 @@ export default function SiteSettingsManager() {
 
           {/* RIGHT COLUMN */}
           <div className="lg:col-span-1 space-y-6 lg:sticky lg:top-24">
+            <Card>
+              <CardHeader>
+                <CardTitle>Theme</CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <FormField
+                  control={form.control}
+                  name="profile_data.default_theme"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Default Public Theme</FormLabel>
+                      <Select
+                        onValueChange={field.onChange}
+                        value={field.value}
+                      >
+                        <FormControl>
+                          <SelectTrigger>
+                            <SelectValue placeholder="Select a default theme" />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                          <SelectItem value="theme-blueprint">Blueprint</SelectItem>
+                          <SelectItem value="theme-matrix">Matrix</SelectItem>
+                          <SelectItem value="theme-solarized-light">Solarized Light</SelectItem>
+                          <SelectItem value="theme-monokai">Monokai</SelectItem>
+                        </SelectContent>
+                      </Select>
+                      <FormDescription>
+                        This will be the default theme for all public visitors.
+                      </FormDescription>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </CardContent>
+            </Card>
             <Card>
               <CardHeader>
                 <CardTitle>Social Links</CardTitle>

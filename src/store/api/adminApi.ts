@@ -18,6 +18,7 @@ import type {
   PortfolioItem,
   SiteContent,
 } from "@/types";
+import { publicApi } from "./publicApi";
 
 type NavLink = {
   id: string;
@@ -66,6 +67,7 @@ export const adminApi = createApi({
     "Calendar",
     "Dashboard",
     "MFA",
+    "SiteContent"
   ],
   endpoints: (builder) => ({
     // Auth & Security
@@ -302,9 +304,9 @@ export const adminApi = createApi({
       providesTags: (result) =>
         result
           ? [
-              ...result.map(({ id }) => ({ type: "AdminPosts" as const, id })),
-              { type: "AdminPosts", id: "LIST" },
-            ]
+            ...result.map(({ id }) => ({ type: "AdminPosts" as const, id })),
+            { type: "AdminPosts", id: "LIST" },
+          ]
           : [{ type: "AdminPosts", id: "LIST" }],
     }),
     addBlogPost: builder.mutation<BlogPost, Partial<BlogPost>>({
@@ -559,9 +561,9 @@ export const adminApi = createApi({
         const { id, ...updateData } = rec;
         const promise = id
           ? supabase
-              .from("recurring_transactions")
-              .update(updateData)
-              .eq("id", id)
+            .from("recurring_transactions")
+            .update(updateData)
+            .eq("id", id)
           : supabase.from("recurring_transactions").insert(updateData);
         const { data, error } = await promise.select().single();
         if (error) return { error };
@@ -834,7 +836,34 @@ export const adminApi = createApi({
           return { error: identityRes.error || settingsRes.error };
         return { data: undefined };
       },
-      invalidatesTags: ["SiteSettings", "Navigation"], // Invalidate nav in case mode changed
+      async onQueryStarted({ identity, settings }, { dispatch, queryFulfilled }) {
+        const patchResult = dispatch(
+          publicApi.util.updateQueryData(
+            "getSiteIdentity",
+            undefined,
+            (draft) => {
+              if (identity.profile_data) {
+                draft.profile_data = {
+                  ...draft.profile_data,
+                  ...identity.profile_data,
+                };
+              }
+              if (identity.social_links) {
+                draft.social_links = identity.social_links;
+              }
+              if (identity.footer_data) {
+                draft.footer_data = identity.footer_data;
+              }
+            },
+          ),
+        );
+        try {
+          await queryFulfilled;
+        } catch {
+          patchResult.undo();
+        }
+      },
+      invalidatesTags: ["SiteContent", "Navigation"],
     }),
     getNavLinksAdmin: builder.query<NavLink[], void>({
       queryFn: async () => {
@@ -981,18 +1010,21 @@ export const adminApi = createApi({
       },
       invalidatesTags: ["Assets"],
     }),
-    deleteAsset: builder.mutation<{ asset: StorageAsset }, StorageAsset>({
+    deleteAsset: builder.mutation<{ id: string }, StorageAsset>({
       queryFn: async (asset) => {
         const { error: storageError } = await supabase.storage
           .from(process.env.NEXT_PUBLIC_BUCKET_NAME || "blog-assets")
           .remove([asset.file_path]);
-        if (storageError) return { error: storageError };
+        // Don't fail the whole operation if storage deletion fails, but log it.
+        // The DB record is the source of truth for the app.
+        if (storageError) console.warn(`Could not delete asset from storage: ${storageError.message}`);
+
         const { error: dbError } = await supabase
           .from("storage_assets")
           .delete()
           .eq("id", asset.id);
         if (dbError) return { error: dbError };
-        return { data: { asset } };
+        return { data: { id: asset.id } }; // Return the ID for invalidation
       },
       invalidatesTags: ["Assets"],
     }),
