@@ -211,7 +211,40 @@ export interface SiteContent {
     description: string;
     profile_picture_url: string;
     show_profile_picture: boolean;
-    default_theme: "theme-blueprint" | "theme-matrix" | "theme-solarized-light" | "theme-monokai";
+    default_theme: "theme-blueprint" | "theme-matrix" | "theme-solarized-light" | "theme-monokai" |
+    "theme-cyberpunk" | "theme-ocean" | "theme-sunset" | "theme-forest" |
+    "theme-royal" | "theme-crimson" | "theme-arctic" | "theme-dracula" |
+    "theme-coffee" | "theme-violet" | "theme-vaporwave" | "theme-tokyo" | "theme-aurora" | "theme-candy" |
+    "theme-synthwave" | "theme-tropical" | "theme-cosmic" | "theme-sakura" |
+    "theme-gruvbox" | "theme-outrun" |
+    "theme-nord" | "theme-catppuccin-mocha" | "theme-catppuccin-latte" |
+    "theme-tokyo-night" | "theme-tokyo-storm" | "theme-kanagawa" |
+    "theme-rose-pine" | "theme-rose-pine-dawn" | "theme-onedark-pro" | "theme-nightfox" |
+    "theme-github-dark" | "theme-ayu-dark" | "theme-everforest-dark" |
+    "theme-material-palenight" | "theme-vesper" |
+    "theme-everforest-light" | "theme-github-light" | "theme-ayu-light" |
+    "theme-retrowave" | "theme-blade-runner" | "theme-terminal-green" | "theme-amber-crt" |
+    "theme-lavender" | "theme-midnight-blue" | "theme-autumn" | "theme-jade" | "theme-desert" |
+    "theme-hc-dark" | "theme-hc-light" |
+    "theme-paper" | "theme-charcoal" |
+    "theme-nebula" | "theme-neon-noir" | "theme-peacock" | "theme-flame" |
+    "theme-winter" | "theme-spring" | "theme-summer" |
+    "theme-corporate" | "theme-executive" |
+    "theme-razer" | "theme-discord" | "theme-steam" |
+    "theme-twitter-dark" | "theme-instagram" |
+    "theme-apple-dark" | "theme-microsoft" |
+    "theme-watermelon" | "theme-mint-chocolate" | "theme-bubblegum" |
+    "theme-gold-noir" | "theme-platinum" | "theme-rose-gold" | "theme-emerald-luxe" | "theme-sapphire" |
+    "theme-pastel-rainbow" | "theme-peach-cream" | "theme-cotton-candy" |
+    "theme-terracotta" | "theme-moss" |
+    "theme-galactic" | "theme-alien" | "theme-starlight" |
+    "theme-espresso" | "theme-matcha" | "theme-berry" |
+    "theme-neobrutalism-light" | "theme-neobrutalism-dark" |
+    "theme-neobrutalism-color" | "theme-neobrutalism-retro" |
+    "theme-neobrutalism-punk" |
+    "theme-glass-light" | "theme-glass-dark" | "theme-glass-aurora" |
+    "theme-glass-ocean" | "theme-glass-frost" | "theme-glass-sunset" |
+    "theme-glass-neon" | "theme-glass-mint";
     logo: {
       main: string;
       highlight: string;

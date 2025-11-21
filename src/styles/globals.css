@@ -122,6 +122,2708 @@
     --ring: 172 56% 54%;
   }
 
+  /* 1. Cyberpunk Neon - Vibrant pinks and purples with dark background */
+  .theme-cyberpunk {
+    --background: 280 40% 8%;
+    --foreground: 300 100% 95%;
+    --card: 280 35% 12%;
+    --card-foreground: 300 100% 95%;
+    --popover: 280 40% 8%;
+    --popover-foreground: 300 100% 95%;
+    --primary: 320 100% 60%;
+    /* Hot pink */
+    --primary-foreground: 280 40% 8%;
+    --secondary: 280 30% 18%;
+    --secondary-foreground: 300 100% 95%;
+    --muted: 280 30% 18%;
+    --muted-foreground: 280 20% 65%;
+    --accent: 280 100% 70%;
+    /* Purple */
+    --accent-foreground: 280 40% 8%;
+    --destructive: 0 84% 60%;
+    --destructive-foreground: 300 100% 95%;
+    --border: 280 30% 22%;
+    --input: 280 30% 18%;
+    --ring: 320 100% 60%;
+    --radius: 0.5rem;
+  }
+
+  /* 2. Ocean Deep - Deep blues and teals, calming underwater vibe */
+  .theme-ocean {
+    --background: 200 50% 8%;
+    --foreground: 190 30% 92%;
+    --card: 200 45% 12%;
+    --card-foreground: 190 30% 92%;
+    --popover: 200 50% 8%;
+    --popover-foreground: 190 30% 92%;
+    --primary: 180 80% 45%;
+    /* Teal */
+    --primary-foreground: 200 50% 8%;
+    --secondary: 200 40% 16%;
+    --secondary-foreground: 190 30% 92%;
+    --muted: 200 40% 16%;
+    --muted-foreground: 200 20% 60%;
+    --accent: 170 60% 55%;
+    /* Aqua */
+    --accent-foreground: 200 50% 8%;
+    --destructive: 0 84% 60%;
+    --destructive-foreground: 190 30% 92%;
+    --border: 200 40% 20%;
+    --input: 200 40% 16%;
+    --ring: 180 80% 45%;
+    --radius: 0.375rem;
+  }
+
+  /* 3. Sunset Blaze - Warm oranges and reds, evening sky aesthetic */
+  .theme-sunset {
+    --background: 25 40% 12%;
+    --foreground: 30 20% 95%;
+    --card: 25 35% 16%;
+    --card-foreground: 30 20% 95%;
+    --popover: 25 40% 12%;
+    --popover-foreground: 30 20% 95%;
+    --primary: 15 90% 55%;
+    /* Orange-red */
+    --primary-foreground: 25 40% 12%;
+    --secondary: 25 30% 20%;
+    --secondary-foreground: 30 20% 95%;
+    --muted: 25 30% 20%;
+    --muted-foreground: 25 15% 60%;
+    --accent: 35 85% 60%;
+    /* Golden orange */
+    --accent-foreground: 25 40% 12%;
+    --destructive: 0 84% 60%;
+    --destructive-foreground: 30 20% 95%;
+    --border: 25 30% 24%;
+    --input: 25 30% 20%;
+    --ring: 15 90% 55%;
+    --radius: 0.5rem;
+  }
+
+  /* 4. Forest Night - Deep greens with earthy tones */
+  .theme-forest {
+    --background: 140 30% 10%;
+    --foreground: 120 15% 90%;
+    --card: 140 25% 14%;
+    --card-foreground: 120 15% 90%;
+    --popover: 140 30% 10%;
+    --popover-foreground: 120 15% 90%;
+    --primary: 140 60% 50%;
+    /* Forest green */
+    --primary-foreground: 140 30% 10%;
+    --secondary: 140 20% 18%;
+    --secondary-foreground: 120 15% 90%;
+    --muted: 140 20% 18%;
+    --muted-foreground: 140 10% 60%;
+    --accent: 90 50% 55%;
+    /* Lime green */
+    --accent-foreground: 140 30% 10%;
+    --destructive: 0 84% 60%;
+    --destructive-foreground: 120 15% 90%;
+    --border: 140 20% 22%;
+    --input: 140 20% 18%;
+    --ring: 140 60% 50%;
+    --radius: 0.375rem;
+  }
+
+  /* 5. Royal Purple - Luxurious deep purples with gold accents */
+  .theme-royal {
+    --background: 270 50% 10%;
+    --foreground: 280 20% 95%;
+    --card: 270 45% 14%;
+    --card-foreground: 280 20% 95%;
+    --popover: 270 50% 10%;
+    --popover-foreground: 280 20% 95%;
+    --primary: 270 70% 60%;
+    /* Deep purple */
+    --primary-foreground: 270 50% 10%;
+    --secondary: 270 40% 18%;
+    --secondary-foreground: 280 20% 95%;
+    --muted: 270 40% 18%;
+    --muted-foreground: 270 20% 65%;
+    --accent: 45 90% 60%;
+    /* Gold */
+    --accent-foreground: 270 50% 10%;
+    --destructive: 0 84% 60%;
+    --destructive-foreground: 280 20% 95%;
+    --border: 270 40% 22%;
+    --input: 270 40% 18%;
+    --ring: 270 70% 60%;
+    --radius: 0.5rem;
+  }
+
+  /* 6. Midnight Crimson - Dark with blood red accents */
+  .theme-crimson {
+    --background: 0 20% 8%;
+    --foreground: 0 10% 92%;
+    --card: 0 18% 12%;
+    --card-foreground: 0 10% 92%;
+    --popover: 0 20% 8%;
+    --popover-foreground: 0 10% 92%;
+    --primary: 355 85% 50%;
+    /* Crimson red */
+    --primary-foreground: 0 20% 8%;
+    --secondary: 0 15% 16%;
+    --secondary-foreground: 0 10% 92%;
+    --muted: 0 15% 16%;
+    --muted-foreground: 0 8% 60%;
+    --accent: 10 80% 55%;
+    /* Bright red */
+    --accent-foreground: 0 20% 8%;
+    --destructive: 0 84% 60%;
+    --destructive-foreground: 0 10% 92%;
+    --border: 0 15% 20%;
+    --input: 0 15% 16%;
+    --ring: 355 85% 50%;
+    --radius: 0.375rem;
+  }
+
+  /* 7. Arctic Frost - Cool whites and icy blues */
+  .theme-arctic {
+    --background: 200 30% 95%;
+    --foreground: 210 30% 15%;
+    --card: 200 25% 98%;
+    --card-foreground: 210 30% 15%;
+    --popover: 200 30% 95%;
+    --popover-foreground: 210 30% 15%;
+    --primary: 195 75% 50%;
+    /* Ice blue */
+    --primary-foreground: 200 30% 95%;
+    --secondary: 200 20% 90%;
+    --secondary-foreground: 210 30% 15%;
+    --muted: 200 20% 90%;
+    --muted-foreground: 210 15% 45%;
+    --accent: 185 65% 55%;
+    /* Cyan */
+    --accent-foreground: 200 30% 95%;
+    --destructive: 0 84% 60%;
+    --destructive-foreground: 200 30% 95%;
+    --border: 200 20% 85%;
+    --input: 200 20% 90%;
+    --ring: 195 75% 50%;
+    --radius: 0.5rem;
+  }
+
+  /* 8. Dracula - Popular vampire-inspired theme */
+  .theme-dracula {
+    --background: 231 15% 18%;
+    /* #282a36 */
+    --foreground: 60 30% 96%;
+    /* #f8f8f2 */
+    --card: 232 14% 22%;
+    --card-foreground: 60 30% 96%;
+    --popover: 231 15% 18%;
+    --popover-foreground: 60 30% 96%;
+    --primary: 326 100% 74%;
+    /* Pink #ff79c6 */
+    --primary-foreground: 231 15% 18%;
+    --secondary: 232 14% 26%;
+    --secondary-foreground: 60 30% 96%;
+    --muted: 232 14% 26%;
+    --muted-foreground: 233 10% 60%;
+    --accent: 265 89% 78%;
+    /* Purple #bd93f9 */
+    --accent-foreground: 231 15% 18%;
+    --destructive: 0 100% 67%;
+    /* Red #ff5555 */
+    --destructive-foreground: 60 30% 96%;
+    --border: 232 14% 30%;
+    --input: 232 14% 26%;
+    --ring: 326 100% 74%;
+    --radius: 0.375rem;
+  }
+
+  /* 9. Coffee Shop - Warm browns and cream, cozy aesthetic */
+  .theme-coffee {
+    --background: 30 25% 92%;
+    --foreground: 25 30% 20%;
+    --card: 30 20% 96%;
+    --card-foreground: 25 30% 20%;
+    --popover: 30 25% 92%;
+    --popover-foreground: 25 30% 20%;
+    --primary: 25 60% 45%;
+    /* Coffee brown */
+    --primary-foreground: 30 25% 92%;
+    --secondary: 30 15% 88%;
+    --secondary-foreground: 25 30% 20%;
+    --muted: 30 15% 88%;
+    --muted-foreground: 25 15% 50%;
+    --accent: 35 70% 50%;
+    /* Caramel */
+    --accent-foreground: 30 25% 92%;
+    --destructive: 0 84% 60%;
+    --destructive-foreground: 30 25% 92%;
+    --border: 30 15% 82%;
+    --input: 30 15% 88%;
+    --ring: 25 60% 45%;
+    --radius: 0.5rem;
+  }
+
+  /* 10. Electric Violet - Vibrant purple with neon accents */
+  .theme-violet {
+    --background: 265 30% 10%;
+    --foreground: 270 20% 95%;
+    --card: 265 28% 14%;
+    --card-foreground: 270 20% 95%;
+    --popover: 265 30% 10%;
+    --popover-foreground: 270 20% 95%;
+    --primary: 270 90% 65%;
+    /* Bright violet */
+    --primary-foreground: 265 30% 10%;
+    --secondary: 265 25% 18%;
+    --secondary-foreground: 270 20% 95%;
+    --muted: 265 25% 18%;
+    --muted-foreground: 265 15% 65%;
+    --accent: 290 100% 70%;
+    /* Neon magenta */
+    --accent-foreground: 265 30% 10%;
+    --destructive: 0 84% 60%;
+    --destructive-foreground: 270 20% 95%;
+    --border: 265 25% 22%;
+    --input: 265 25% 18%;
+    --ring: 270 90% 65%;
+    --radius: 0.5rem;
+  }
+
+  /* 1. Vaporwave Dream - Retro 80s/90s aesthetic with pink, purple, and cyan */
+  .theme-vaporwave {
+    --background: 280 60% 12%;
+    --foreground: 180 100% 85%;
+    --card: 280 55% 16%;
+    --card-foreground: 180 100% 85%;
+    --popover: 280 60% 12%;
+    --popover-foreground: 180 100% 85%;
+    --primary: 320 100% 70%;
+    /* Hot pink */
+    --primary-foreground: 280 60% 12%;
+    --secondary: 280 50% 20%;
+    --secondary-foreground: 180 100% 85%;
+    --muted: 280 50% 20%;
+    --muted-foreground: 280 30% 70%;
+    --accent: 180 100% 60%;
+    /* Cyan */
+    --accent-foreground: 280 60% 12%;
+    --destructive: 0 84% 60%;
+    --destructive-foreground: 180 100% 85%;
+    --border: 300 70% 30%;
+    --input: 280 50% 20%;
+    --ring: 320 100% 70%;
+    --radius: 0.75rem;
+  }
+
+  /* 2. Neon Tokyo - Inspired by Japanese cyberpunk with multiple neon colors */
+  .theme-tokyo {
+    --background: 240 30% 8%;
+    --foreground: 50 100% 95%;
+    --card: 240 28% 12%;
+    --card-foreground: 50 100% 95%;
+    --popover: 240 30% 8%;
+    --popover-foreground: 50 100% 95%;
+    --primary: 340 100% 60%;
+    /* Neon pink */
+    --primary-foreground: 240 30% 8%;
+    --secondary: 240 25% 16%;
+    --secondary-foreground: 50 100% 95%;
+    --muted: 240 25% 16%;
+    --muted-foreground: 240 15% 65%;
+    --accent: 50 100% 55%;
+    /* Neon yellow */
+    --accent-foreground: 240 30% 8%;
+    --destructive: 0 100% 60%;
+    --destructive-foreground: 50 100% 95%;
+    --border: 280 60% 25%;
+    --input: 240 25% 16%;
+    --ring: 340 100% 60%;
+    --radius: 0.25rem;
+  }
+
+  /* 3. Aurora Borealis - Northern lights with greens, blues, and purples */
+  .theme-aurora {
+    --background: 220 40% 10%;
+    --foreground: 180 50% 95%;
+    --card: 220 35% 14%;
+    --card-foreground: 180 50% 95%;
+    --popover: 220 40% 10%;
+    --popover-foreground: 180 50% 95%;
+    --primary: 150 80% 50%;
+    /* Aurora green */
+    --primary-foreground: 220 40% 10%;
+    --secondary: 220 30% 18%;
+    --secondary-foreground: 180 50% 95%;
+    --muted: 220 30% 18%;
+    --muted-foreground: 220 20% 65%;
+    --accent: 280 70% 65%;
+    /* Aurora purple */
+    --accent-foreground: 220 40% 10%;
+    --destructive: 0 84% 60%;
+    --destructive-foreground: 180 50% 95%;
+    --border: 200 60% 25%;
+    --input: 220 30% 18%;
+    --ring: 150 80% 50%;
+    --radius: 0.5rem;
+  }
+
+  /* 4. Candy Pop - Sweet pastel colors with vibrant pops */
+  .theme-candy {
+    --background: 330 40% 95%;
+    --foreground: 340 50% 20%;
+    --card: 330 35% 98%;
+    --card-foreground: 340 50% 20%;
+    --popover: 330 40% 95%;
+    --popover-foreground: 340 50% 20%;
+    --primary: 340 85% 60%;
+    /* Candy pink */
+    --primary-foreground: 330 40% 95%;
+    --secondary: 330 30% 92%;
+    --secondary-foreground: 340 50% 20%;
+    --muted: 330 30% 92%;
+    --muted-foreground: 340 25% 50%;
+    --accent: 200 80% 65%;
+    /* Candy blue */
+    --accent-foreground: 330 40% 95%;
+    --destructive: 0 84% 60%;
+    --destructive-foreground: 330 40% 95%;
+    --border: 330 30% 85%;
+    --input: 330 30% 92%;
+    --ring: 340 85% 60%;
+    --radius: 1rem;
+  }
+
+  /* 5. Synthwave Sunset - Retro futuristic with pink, purple, and orange gradients */
+  .theme-synthwave {
+    --background: 270 50% 10%;
+    --foreground: 320 40% 95%;
+    --card: 270 45% 14%;
+    --card-foreground: 320 40% 95%;
+    --popover: 270 50% 10%;
+    --popover-foreground: 320 40% 95%;
+    --primary: 320 90% 60%;
+    /* Hot pink */
+    --primary-foreground: 270 50% 10%;
+    --secondary: 270 40% 18%;
+    --secondary-foreground: 320 40% 95%;
+    --muted: 270 40% 18%;
+    --muted-foreground: 270 25% 70%;
+    --accent: 25 100% 60%;
+    /* Sunset orange */
+    --accent-foreground: 270 50% 10%;
+    --destructive: 0 100% 65%;
+    --destructive-foreground: 320 40% 95%;
+    --border: 290 80% 30%;
+    --input: 270 40% 18%;
+    --ring: 320 90% 60%;
+    --radius: 0.375rem;
+  }
+
+  /* 6. Tropical Paradise - Vibrant greens, blues, and coral */
+  .theme-tropical {
+    --background: 180 40% 12%;
+    --foreground: 40 30% 95%;
+    --card: 180 35% 16%;
+    --card-foreground: 40 30% 95%;
+    --popover: 180 40% 12%;
+    --popover-foreground: 40 30% 95%;
+    --primary: 165 70% 50%;
+    /* Tropical teal */
+    --primary-foreground: 180 40% 12%;
+    --secondary: 180 30% 20%;
+    --secondary-foreground: 40 30% 95%;
+    --muted: 180 30% 20%;
+    --muted-foreground: 180 20% 65%;
+    --accent: 15 85% 65%;
+    /* Coral */
+    --accent-foreground: 180 40% 12%;
+    --destructive: 0 84% 60%;
+    --destructive-foreground: 40 30% 95%;
+    --border: 165 50% 25%;
+    --input: 180 30% 20%;
+    --ring: 165 70% 50%;
+    --radius: 0.5rem;
+  }
+
+  /* 7. Cosmic Space - Deep space with nebula colors */
+  .theme-cosmic {
+    --background: 260 60% 8%;
+    --foreground: 200 40% 92%;
+    --card: 260 55% 12%;
+    --card-foreground: 200 40% 92%;
+    --popover: 260 60% 8%;
+    --popover-foreground: 200 40% 92%;
+    --primary: 280 100% 65%;
+    /* Nebula purple */
+    --primary-foreground: 260 60% 8%;
+    --secondary: 260 50% 16%;
+    --secondary-foreground: 200 40% 92%;
+    --muted: 260 50% 16%;
+    --muted-foreground: 260 30% 65%;
+    --accent: 200 100% 60%;
+    /* Cosmic blue */
+    --accent-foreground: 260 60% 8%;
+    --destructive: 340 100% 60%;
+    --destructive-foreground: 200 40% 92%;
+    --border: 270 70% 22%;
+    --input: 260 50% 16%;
+    --ring: 280 100% 65%;
+    --radius: 0.5rem;
+  }
+
+  /* 8. Cherry Blossom - Soft pinks and warm spring colors */
+  .theme-sakura {
+    --background: 350 35% 94%;
+    --foreground: 340 40% 25%;
+    --card: 350 30% 97%;
+    --card-foreground: 340 40% 25%;
+    --popover: 350 35% 94%;
+    --popover-foreground: 340 40% 25%;
+    --primary: 340 70% 60%;
+    /* Sakura pink */
+    --primary-foreground: 350 35% 94%;
+    --secondary: 350 25% 90%;
+    --secondary-foreground: 340 40% 25%;
+    --muted: 350 25% 90%;
+    --muted-foreground: 340 20% 50%;
+    --accent: 20 80% 65%;
+    /* Peach */
+    --accent-foreground: 350 35% 94%;
+    --destructive: 0 84% 60%;
+    --destructive-foreground: 350 35% 94%;
+    --border: 350 25% 85%;
+    --input: 350 25% 90%;
+    --ring: 340 70% 60%;
+    --radius: 0.75rem;
+  }
+
+  /* 9. Gruvbox - Popular retro groove with warm earth tones and vibrant accents */
+  .theme-gruvbox {
+    --background: 35 20% 18%;
+    /* #282828 */
+    --foreground: 40 15% 85%;
+    /* #ebdbb2 */
+    --card: 35 18% 22%;
+    --card-foreground: 40 15% 85%;
+    --popover: 35 20% 18%;
+    --popover-foreground: 40 15% 85%;
+    --primary: 180 25% 50%;
+    /* Gruvbox aqua */
+    --primary-foreground: 35 20% 18%;
+    --secondary: 35 15% 26%;
+    --secondary-foreground: 40 15% 85%;
+    --muted: 35 15% 26%;
+    --muted-foreground: 35 10% 60%;
+    --accent: 40 60% 55%;
+    /* Gruvbox yellow */
+    --accent-foreground: 35 20% 18%;
+    --destructive: 0 60% 50%;
+    /* Gruvbox red */
+    --destructive-foreground: 40 15% 85%;
+    --border: 35 15% 30%;
+    --input: 35 15% 26%;
+    --ring: 180 25% 50%;
+    --radius: 0.375rem;
+  }
+
+  /* 10. Outrun - Bold 80s aesthetic with magenta, cyan, and yellow */
+  .theme-outrun {
+    --background: 0 0% 8%;
+    --foreground: 320 100% 95%;
+    --card: 0 0% 12%;
+    --card-foreground: 320 100% 95%;
+    --popover: 0 0% 8%;
+    --popover-foreground: 320 100% 95%;
+    --primary: 320 100% 60%;
+    /* Outrun magenta */
+    --primary-foreground: 0 0% 8%;
+    --secondary: 0 0% 16%;
+    --secondary-foreground: 320 100% 95%;
+    --muted: 0 0% 16%;
+    --muted-foreground: 0 0% 60%;
+    --accent: 180 100% 50%;
+    /* Electric cyan */
+    --accent-foreground: 0 0% 8%;
+    --destructive: 50 100% 50%;
+    /* Electric yellow */
+    --destructive-foreground: 0 0% 8%;
+    --border: 320 80% 25%;
+    --input: 0 0% 16%;
+    --ring: 320 100% 60%;
+    --radius: 0.25rem;
+  }
+
+  /* ========================================
+   ULTIMATE PREMIUM THEME COLLECTION 
+   50+ Carefully Crafted Themes
+   ======================================== */
+
+  /* ============ DEVELOPER FAVORITES ============ */
+
+  /* 1. Nord - Arctic-inspired elegance */
+  .theme-nord {
+    --background: 220 16% 22%;
+    /* #2E3440 */
+    --foreground: 220 17% 88%;
+    /* #ECEFF4 */
+    --card: 220 17% 26%;
+    --card-foreground: 220 17% 88%;
+    --popover: 220 16% 22%;
+    --popover-foreground: 220 17% 88%;
+    --primary: 193 43% 67%;
+    /* Nord Frost */
+    --primary-foreground: 220 16% 22%;
+    --secondary: 220 16% 30%;
+    --secondary-foreground: 220 17% 88%;
+    --muted: 220 16% 30%;
+    --muted-foreground: 220 14% 66%;
+    --accent: 179 25% 65%;
+    /* Frost green */
+    --accent-foreground: 220 16% 22%;
+    --destructive: 354 42% 56%;
+    --destructive-foreground: 220 17% 88%;
+    --border: 220 16% 36%;
+    --input: 220 16% 30%;
+    --ring: 193 43% 67%;
+    --radius: 0.375rem;
+  }
+
+  /* 2. Catppuccin Mocha - Soothing pastel dark */
+  .theme-catppuccin-mocha {
+    --background: 240 21% 15%;
+    /* #1e1e2e */
+    --foreground: 226 64% 88%;
+    /* #cdd6f4 */
+    --card: 240 23% 18%;
+    --card-foreground: 226 64% 88%;
+    --popover: 240 21% 15%;
+    --popover-foreground: 226 64% 88%;
+    --primary: 267 84% 81%;
+    /* Mauve */
+    --primary-foreground: 240 21% 15%;
+    --secondary: 240 19% 22%;
+    --secondary-foreground: 226 64% 88%;
+    --muted: 240 19% 22%;
+    --muted-foreground: 228 26% 65%;
+    --accent: 189 71% 73%;
+    /* Sky */
+    --accent-foreground: 240 21% 15%;
+    --destructive: 343 81% 75%;
+    --destructive-foreground: 240 21% 15%;
+    --border: 240 19% 26%;
+    --input: 240 19% 22%;
+    --ring: 267 84% 81%;
+    --radius: 0.5rem;
+  }
+
+  /* 3. Catppuccin Latte - Light pastel perfection */
+  .theme-catppuccin-latte {
+    --background: 220 23% 95%;
+    /* #eff1f5 */
+    --foreground: 234 16% 35%;
+    /* #4c4f69 */
+    --card: 220 21% 97%;
+    --card-foreground: 234 16% 35%;
+    --popover: 220 23% 95%;
+    --popover-foreground: 234 16% 35%;
+    --primary: 266 85% 58%;
+    /* Mauve */
+    --primary-foreground: 220 23% 95%;
+    --secondary: 220 17% 88%;
+    --secondary-foreground: 234 16% 35%;
+    --muted: 220 17% 88%;
+    --muted-foreground: 233 13% 54%;
+    --accent: 197 97% 46%;
+    /* Sapphire */
+    --accent-foreground: 220 23% 95%;
+    --destructive: 347 87% 44%;
+    --destructive-foreground: 220 23% 95%;
+    --border: 220 17% 82%;
+    --input: 220 17% 88%;
+    --ring: 266 85% 58%;
+    --radius: 0.5rem;
+  }
+
+  /* 4. Tokyo Night - Tokyo cityscape at night */
+  .theme-tokyo-night {
+    --background: 235 18% 15%;
+    /* #1a1b26 */
+    --foreground: 220 16% 76%;
+    /* #c0caf5 */
+    --card: 234 18% 18%;
+    --card-foreground: 220 16% 76%;
+    --popover: 235 18% 15%;
+    --popover-foreground: 220 16% 76%;
+    --primary: 217 92% 76%;
+    /* Blue */
+    --primary-foreground: 235 18% 15%;
+    --secondary: 234 17% 22%;
+    --secondary-foreground: 220 16% 76%;
+    --muted: 234 17% 22%;
+    --muted-foreground: 218 17% 58%;
+    --accent: 189 71% 73%;
+    /* Cyan */
+    --accent-foreground: 235 18% 15%;
+    --destructive: 0 73% 70%;
+    --destructive-foreground: 235 18% 15%;
+    --border: 234 17% 26%;
+    --input: 234 17% 22%;
+    --ring: 217 92% 76%;
+    --radius: 0.375rem;
+  }
+
+  /* 5. Tokyo Night Storm - Stormy variant */
+  .theme-tokyo-storm {
+    --background: 233 15% 17%;
+    /* #24283b */
+    --foreground: 220 16% 76%;
+    --card: 233 14% 21%;
+    --card-foreground: 220 16% 76%;
+    --popover: 233 15% 17%;
+    --popover-foreground: 220 16% 76%;
+    --primary: 189 60% 66%;
+    /* Storm blue */
+    --primary-foreground: 233 15% 17%;
+    --secondary: 233 13% 25%;
+    --secondary-foreground: 220 16% 76%;
+    --muted: 233 13% 25%;
+    --muted-foreground: 218 17% 58%;
+    --accent: 310 60% 70%;
+    /* Magenta */
+    --accent-foreground: 233 15% 17%;
+    --destructive: 0 73% 70%;
+    --destructive-foreground: 233 15% 17%;
+    --border: 233 13% 29%;
+    --input: 233 13% 25%;
+    --ring: 189 60% 66%;
+    --radius: 0.375rem;
+  }
+
+  /* 6. Kanagawa - Japanese wave painting inspired */
+  .theme-kanagawa {
+    --background: 223 37% 15%;
+    /* #1f1f28 */
+    --foreground: 36 20% 86%;
+    /* #dcd7ba */
+    --card: 223 37% 18%;
+    --card-foreground: 36 20% 86%;
+    --popover: 223 37% 15%;
+    --popover-foreground: 36 20% 86%;
+    --primary: 180 25% 50%;
+    /* Wave blue */
+    --primary-foreground: 223 37% 15%;
+    --secondary: 223 34% 22%;
+    --secondary-foreground: 36 20% 86%;
+    --muted: 223 34% 22%;
+    --muted-foreground: 40 12% 58%;
+    --accent: 10 47% 59%;
+    /* Autumn red */
+    --accent-foreground: 223 37% 15%;
+    --destructive: 0 60% 50%;
+    --destructive-foreground: 36 20% 86%;
+    --border: 223 34% 26%;
+    --input: 223 34% 22%;
+    --ring: 180 25% 50%;
+    --radius: 0.375rem;
+  }
+
+  /* 7. Rosé Pine - Natural elegance */
+  .theme-rose-pine {
+    --background: 249 22% 12%;
+    /* #191724 */
+    --foreground: 245 50% 91%;
+    /* #e0def4 */
+    --card: 249 22% 16%;
+    --card-foreground: 245 50% 91%;
+    --popover: 249 22% 12%;
+    --popover-foreground: 245 50% 91%;
+    --primary: 2 55% 83%;
+    /* Rose */
+    --primary-foreground: 249 22% 12%;
+    --secondary: 249 19% 20%;
+    --secondary-foreground: 245 50% 91%;
+    --muted: 249 19% 20%;
+    --muted-foreground: 248 25% 70%;
+    --accent: 189 43% 73%;
+    /* Pine */
+    --accent-foreground: 249 22% 12%;
+    --destructive: 0 59% 74%;
+    --destructive-foreground: 249 22% 12%;
+    --border: 249 19% 24%;
+    --input: 249 19% 20%;
+    --ring: 2 55% 83%;
+    --radius: 0.5rem;
+  }
+
+  /* 8. Rosé Pine Dawn - Light variant */
+  .theme-rose-pine-dawn {
+    --background: 35 100% 98%;
+    /* #faf4ed */
+    --foreground: 248 25% 18%;
+    /* #575279 */
+    --card: 33 38% 96%;
+    --card-foreground: 248 25% 18%;
+    --popover: 35 100% 98%;
+    --popover-foreground: 248 25% 18%;
+    --primary: 343 76% 68%;
+    /* Rose */
+    --primary-foreground: 35 100% 98%;
+    --secondary: 33 38% 92%;
+    --secondary-foreground: 248 25% 18%;
+    --muted: 33 38% 92%;
+    --muted-foreground: 249 12% 47%;
+    --accent: 35 81% 56%;
+    /* Gold */
+    --accent-foreground: 35 100% 98%;
+    --destructive: 0 59% 74%;
+    --destructive-foreground: 35 100% 98%;
+    --border: 33 38% 88%;
+    --input: 33 38% 92%;
+    --ring: 343 76% 68%;
+    --radius: 0.5rem;
+  }
+
+  /* 9. One Dark Pro - Atom's iconic theme */
+  .theme-onedark-pro {
+    --background: 220 13% 18%;
+    /* #282c34 */
+    --foreground: 219 14% 71%;
+    /* #abb2bf */
+    --card: 220 13% 22%;
+    --card-foreground: 219 14% 71%;
+    --popover: 220 13% 18%;
+    --popover-foreground: 219 14% 71%;
+    --primary: 207 82% 66%;
+    /* Blue */
+    --primary-foreground: 220 13% 18%;
+    --secondary: 220 12% 26%;
+    --secondary-foreground: 219 14% 71%;
+    --muted: 220 12% 26%;
+    --muted-foreground: 218 10% 55%;
+    --accent: 95 38% 62%;
+    /* Green */
+    --accent-foreground: 220 13% 18%;
+    --destructive: 355 65% 65%;
+    --destructive-foreground: 220 13% 18%;
+    --border: 220 12% 30%;
+    --input: 220 12% 26%;
+    --ring: 207 82% 66%;
+    --radius: 0.375rem;
+  }
+
+  /* 10. Nightfox - Carbonfox variant */
+  .theme-nightfox {
+    --background: 198 17% 11%;
+    /* #161616 */
+    --foreground: 200 9% 78%;
+    /* #b6b8bb */
+    --card: 198 17% 15%;
+    --card-foreground: 200 9% 78%;
+    --popover: 198 17% 11%;
+    --popover-foreground: 200 9% 78%;
+    --primary: 200 48% 62%;
+    /* Cyan */
+    --primary-foreground: 198 17% 11%;
+    --secondary: 198 15% 19%;
+    --secondary-foreground: 200 9% 78%;
+    --muted: 198 15% 19%;
+    --muted-foreground: 200 7% 60%;
+    --accent: 220 48% 62%;
+    /* Blue */
+    --accent-foreground: 198 17% 11%;
+    --destructive: 0 65% 65%;
+    --destructive-foreground: 200 9% 78%;
+    --border: 198 15% 23%;
+    --input: 198 15% 19%;
+    --ring: 200 48% 62%;
+    --radius: 0.375rem;
+  }
+
+  /* ============ MODERN & TRENDING ============ */
+
+  /* 11. GitHub Dark - GitHub's official dark mode */
+  .theme-github-dark {
+    --background: 210 11% 7%;
+    /* #0d1117 */
+    --foreground: 213 15% 78%;
+    /* #c9d1d9 */
+    --card: 210 11% 11%;
+    --card-foreground: 213 15% 78%;
+    --popover: 210 11% 7%;
+    --popover-foreground: 213 15% 78%;
+    --primary: 212 92% 45%;
+    /* GitHub blue */
+    --primary-foreground: 210 11% 7%;
+    --secondary: 210 10% 15%;
+    --secondary-foreground: 213 15% 78%;
+    --muted: 210 10% 15%;
+    --muted-foreground: 215 12% 60%;
+    --accent: 137 55% 55%;
+    /* GitHub green */
+    --accent-foreground: 210 11% 7%;
+    --destructive: 0 73% 60%;
+    --destructive-foreground: 213 15% 78%;
+    --border: 210 10% 19%;
+    --input: 210 10% 15%;
+    --ring: 212 92% 45%;
+    --radius: 0.375rem;
+  }
+
+  /* 12. Ayu Dark - Sublime's modern theme */
+  .theme-ayu-dark {
+    --background: 219 28% 12%;
+    /* #0f1419 */
+    --foreground: 48 30% 85%;
+    /* #e6e1cf */
+    --card: 219 28% 16%;
+    --card-foreground: 48 30% 85%;
+    --popover: 219 28% 12%;
+    --popover-foreground: 48 30% 85%;
+    --primary: 39 100% 57%;
+    /* Orange */
+    --primary-foreground: 219 28% 12%;
+    --secondary: 219 25% 20%;
+    --secondary-foreground: 48 30% 85%;
+    --muted: 219 25% 20%;
+    --muted-foreground: 48 15% 60%;
+    --accent: 187 47% 55%;
+    /* Teal */
+    --accent-foreground: 219 28% 12%;
+    --destructive: 355 65% 65%;
+    --destructive-foreground: 48 30% 85%;
+    --border: 219 25% 24%;
+    --input: 219 25% 20%;
+    --ring: 39 100% 57%;
+    --radius: 0.375rem;
+  }
+
+  /* 13. Everforest Dark - Forest-inspired serenity */
+  .theme-everforest-dark {
+    --background: 134 14% 16%;
+    /* #2b3339 */
+    --foreground: 40 13% 82%;
+    /* #d3c6aa */
+    --card: 134 14% 20%;
+    --card-foreground: 40 13% 82%;
+    --popover: 134 14% 16%;
+    --popover-foreground: 40 13% 82%;
+    --primary: 142 35% 58%;
+    /* Green */
+    --primary-foreground: 134 14% 16%;
+    --secondary: 134 12% 24%;
+    --secondary-foreground: 40 13% 82%;
+    --muted: 134 12% 24%;
+    --muted-foreground: 40 8% 65%;
+    --accent: 35 54% 65%;
+    /* Yellow */
+    --accent-foreground: 134 14% 16%;
+    --destructive: 0 60% 65%;
+    --destructive-foreground: 40 13% 82%;
+    --border: 134 12% 28%;
+    --input: 134 12% 24%;
+    --ring: 142 35% 58%;
+    --radius: 0.375rem;
+  }
+
+  /* 14. Material Palenight - Material Design dark */
+  .theme-material-palenight {
+    --background: 229 20% 14%;
+    /* #292d3e */
+    --foreground: 230 15% 79%;
+    /* #bfc7d5 */
+    --card: 229 20% 18%;
+    --card-foreground: 230 15% 79%;
+    --popover: 229 20% 14%;
+    --popover-foreground: 230 15% 79%;
+    --primary: 207 82% 66%;
+    /* Blue */
+    --primary-foreground: 229 20% 14%;
+    --secondary: 229 18% 22%;
+    --secondary-foreground: 230 15% 79%;
+    --muted: 229 18% 22%;
+    --muted-foreground: 230 10% 62%;
+    --accent: 267 70% 75%;
+    /* Purple */
+    --accent-foreground: 229 20% 14%;
+    --destructive: 0 73% 70%;
+    --destructive-foreground: 229 20% 14%;
+    --border: 229 18% 26%;
+    --input: 229 18% 22%;
+    --ring: 207 82% 66%;
+    --radius: 0.375rem;
+  }
+
+  /* 15. Vesper - Minimal elegance */
+  .theme-vesper {
+    --background: 0 0% 7%;
+    /* #101010 */
+    --foreground: 0 0% 80%;
+    /* #b7b7b7 */
+    --card: 0 0% 11%;
+    --card-foreground: 0 0% 80%;
+    --popover: 0 0% 7%;
+    --popover-foreground: 0 0% 80%;
+    --primary: 43 100% 65%;
+    /* Yellow */
+    --primary-foreground: 0 0% 7%;
+    --secondary: 0 0% 15%;
+    --secondary-foreground: 0 0% 80%;
+    --muted: 0 0% 15%;
+    --muted-foreground: 0 0% 60%;
+    --accent: 180 50% 60%;
+    /* Cyan */
+    --accent-foreground: 0 0% 7%;
+    --destructive: 0 65% 65%;
+    --destructive-foreground: 0 0% 80%;
+    --border: 0 0% 19%;
+    --input: 0 0% 15%;
+    --ring: 43 100% 65%;
+    --radius: 0.25rem;
+  }
+
+  /* ============ LIGHT THEMES ============ */
+
+  /* 16. Everforest Light - Peaceful forest light */
+  .theme-everforest-light {
+    --background: 35 21% 96%;
+    /* #fdf6e3 */
+    --foreground: 40 15% 30%;
+    /* #5c6a72 */
+    --card: 35 19% 98%;
+    --card-foreground: 40 15% 30%;
+    --popover: 35 21% 96%;
+    --popover-foreground: 40 15% 30%;
+    --primary: 142 40% 45%;
+    /* Green */
+    --primary-foreground: 35 21% 96%;
+    --secondary: 35 17% 92%;
+    --secondary-foreground: 40 15% 30%;
+    --muted: 35 17% 92%;
+    --muted-foreground: 40 10% 50%;
+    --accent: 35 60% 50%;
+    /* Orange */
+    --accent-foreground: 35 21% 96%;
+    --destructive: 0 60% 50%;
+    --destructive-foreground: 35 21% 96%;
+    --border: 35 17% 88%;
+    --input: 35 17% 92%;
+    --ring: 142 40% 45%;
+    --radius: 0.375rem;
+  }
+
+  /* 17. GitHub Light - Clean GitHub style */
+  .theme-github-light {
+    --background: 0 0% 100%;
+    /* #ffffff */
+    --foreground: 212 12% 15%;
+    /* #24292f */
+    --card: 210 17% 98%;
+    --card-foreground: 212 12% 15%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 212 12% 15%;
+    --primary: 212 92% 45%;
+    /* GitHub blue */
+    --primary-foreground: 0 0% 100%;
+    --secondary: 210 17% 95%;
+    --secondary-foreground: 212 12% 15%;
+    --muted: 210 17% 95%;
+    --muted-foreground: 213 10% 40%;
+    --accent: 137 55% 35%;
+    /* GitHub green */
+    --accent-foreground: 0 0% 100%;
+    --destructive: 0 73% 50%;
+    --destructive-foreground: 0 0% 100%;
+    --border: 210 17% 90%;
+    --input: 210 17% 95%;
+    --ring: 212 92% 45%;
+    --radius: 0.375rem;
+  }
+
+  /* 18. Ayu Light - Bright and clean */
+  .theme-ayu-light {
+    --background: 40 23% 97%;
+    /* #fafafa */
+    --foreground: 210 9% 31%;
+    /* #5c6166 */
+    --card: 40 21% 99%;
+    --card-foreground: 210 9% 31%;
+    --popover: 40 23% 97%;
+    --popover-foreground: 210 9% 31%;
+    --primary: 27 60% 50%;
+    /* Orange */
+    --primary-foreground: 40 23% 97%;
+    --secondary: 40 19% 93%;
+    --secondary-foreground: 210 9% 31%;
+    --muted: 40 19% 93%;
+    --muted-foreground: 210 7% 50%;
+    --accent: 197 71% 45%;
+    /* Blue */
+    --accent-foreground: 40 23% 97%;
+    --destructive: 0 73% 50%;
+    --destructive-foreground: 40 23% 97%;
+    --border: 40 19% 88%;
+    --input: 40 19% 93%;
+    --ring: 27 60% 50%;
+    --radius: 0.375rem;
+  }
+
+  /* ============ RETRO & VINTAGE ============ */
+
+  /* 19. Retro Wave - 80s nostalgia */
+  .theme-retrowave {
+    --background: 280 50% 10%;
+    --foreground: 320 100% 95%;
+    --card: 280 45% 14%;
+    --card-foreground: 320 100% 95%;
+    --popover: 280 50% 10%;
+    --popover-foreground: 320 100% 95%;
+    --primary: 320 100% 65%;
+    /* Hot pink */
+    --primary-foreground: 280 50% 10%;
+    --secondary: 280 40% 18%;
+    --secondary-foreground: 320 100% 95%;
+    --muted: 280 40% 18%;
+    --muted-foreground: 280 25% 70%;
+    --accent: 180 100% 55%;
+    /* Cyan */
+    --accent-foreground: 280 50% 10%;
+    --destructive: 50 100% 55%;
+    --destructive-foreground: 280 50% 10%;
+    --border: 300 60% 25%;
+    --input: 280 40% 18%;
+    --ring: 320 100% 65%;
+    --radius: 0.25rem;
+  }
+
+  /* 20. Blade Runner - Dystopian future */
+  .theme-blade-runner {
+    --background: 25 30% 8%;
+    --foreground: 30 40% 88%;
+    --card: 25 28% 12%;
+    --card-foreground: 30 40% 88%;
+    --popover: 25 30% 8%;
+    --popover-foreground: 30 40% 88%;
+    --primary: 15 100% 55%;
+    /* Orange */
+    --primary-foreground: 25 30% 8%;
+    --secondary: 25 25% 16%;
+    --secondary-foreground: 30 40% 88%;
+    --muted: 25 25% 16%;
+    --muted-foreground: 30 20% 65%;
+    --accent: 180 70% 50%;
+    /* Cyan */
+    --accent-foreground: 25 30% 8%;
+    --destructive: 0 85% 60%;
+    --destructive-foreground: 30 40% 88%;
+    --border: 25 25% 20%;
+    --input: 25 25% 16%;
+    --ring: 15 100% 55%;
+    --radius: 0.375rem;
+  }
+
+  /* 21. Terminal Green - Classic hacker aesthetic */
+  .theme-terminal-green {
+    --background: 0 0% 4%;
+    --foreground: 120 100% 70%;
+    --card: 0 0% 8%;
+    --card-foreground: 120 100% 70%;
+    --popover: 0 0% 4%;
+    --popover-foreground: 120 100% 70%;
+    --primary: 120 100% 50%;
+    /* Bright green */
+    --primary-foreground: 0 0% 4%;
+    --secondary: 0 0% 12%;
+    --secondary-foreground: 120 100% 70%;
+    --muted: 0 0% 12%;
+    --muted-foreground: 120 60% 50%;
+    --accent: 120 100% 40%;
+    /* Dark green */
+    --accent-foreground: 0 0% 4%;
+    --destructive: 0 100% 50%;
+    --destructive-foreground: 120 100% 70%;
+    --border: 120 40% 20%;
+    --input: 0 0% 12%;
+    --ring: 120 100% 50%;
+    --radius: 0rem;
+  }
+
+  /* 22. Amber CRT - Vintage terminal */
+  .theme-amber-crt {
+    --background: 30 20% 8%;
+    --foreground: 30 100% 70%;
+    --card: 30 18% 12%;
+    --card-foreground: 30 100% 70%;
+    --popover: 30 20% 8%;
+    --popover-foreground: 30 100% 70%;
+    --primary: 30 100% 60%;
+    /* Amber */
+    --primary-foreground: 30 20% 8%;
+    --secondary: 30 15% 16%;
+    --secondary-foreground: 30 100% 70%;
+    --muted: 30 15% 16%;
+    --muted-foreground: 30 60% 50%;
+    --accent: 35 100% 50%;
+    /* Orange */
+    --accent-foreground: 30 20% 8%;
+    --destructive: 0 100% 50%;
+    --destructive-foreground: 30 100% 70%;
+    --border: 30 40% 20%;
+    --input: 30 15% 16%;
+    --ring: 30 100% 60%;
+    --radius: 0rem;
+  }
+
+  /* ============ NATURE & ORGANIC ============ */
+
+  /* 23. Lavender Fields - Purple serenity */
+  .theme-lavender {
+    --background: 265 30% 94%;
+    --foreground: 270 30% 25%;
+    --card: 265 28% 97%;
+    --card-foreground: 270 30% 25%;
+    --popover: 265 30% 94%;
+    --popover-foreground: 270 30% 25%;
+    --primary: 270 60% 60%;
+    /* Lavender */
+    --primary-foreground: 265 30% 94%;
+    --secondary: 265 25% 90%;
+    --secondary-foreground: 270 30% 25%;
+    --muted: 265 25% 90%;
+    --muted-foreground: 270 15% 45%;
+    --accent: 290 70% 65%;
+    /* Purple */
+    --accent-foreground: 265 30% 94%;
+    --destructive: 0 60% 50%;
+    --destructive-foreground: 265 30% 94%;
+    --border: 265 25% 85%;
+    --input: 265 25% 90%;
+    --ring: 270 60% 60%;
+    --radius: 0.75rem;
+  }
+
+  /* 24. Midnight Blue - Deep ocean night */
+  .theme-midnight-blue {
+    --background: 220 40% 10%;
+    --foreground: 210 30% 88%;
+    --card: 220 38% 14%;
+    --card-foreground: 210 30% 88%;
+    --popover: 220 40% 10%;
+    --popover-foreground: 210 30% 88%;
+    --primary: 210 70% 55%;
+    /* Blue */
+    --primary-foreground: 220 40% 10%;
+    --secondary: 220 35% 18%;
+    --secondary-foreground: 210 30% 88%;
+    --muted: 220 35% 18%;
+    --muted-foreground: 210 20% 65%;
+    --accent: 195 80% 60%;
+    /* Cyan */
+    --accent-foreground: 220 40% 10%;
+    --destructive: 0 70% 60%;
+    --destructive-foreground: 210 30% 88%;
+    --border: 220 35% 22%;
+    --input: 220 35% 18%;
+    --ring: 210 70% 55%;
+    --radius: 0.375rem;
+  }
+
+  /* 25. Autumn Harvest - Warm fall colors */
+  .theme-autumn {
+    --background: 30 25% 14%;
+    --foreground: 30 20% 88%;
+    --card: 30 23% 18%;
+    --card-foreground: 30 20% 88%;
+    --popover: 30 25% 14%;
+    --popover-foreground: 30 20% 88%;
+    --primary: 25 80% 55%;
+    /* Orange */
+    --primary-foreground: 30 25% 14%;
+    --secondary: 30 20% 22%;
+    --secondary-foreground: 30 20% 88%;
+    --muted: 30 20% 22%;
+    --muted-foreground: 30 15% 65%;
+    --accent: 15 70% 50%;
+    /* Rust */
+    --accent-foreground: 30 25% 14%;
+    --destructive: 0 60% 55%;
+    --destructive-foreground: 30 20% 88%;
+    --border: 30 20% 26%;
+    --input: 30 20% 22%;
+    --ring: 25 80% 55%;
+    --radius: 0.5rem;
+  }
+
+  /* 26. Jade Garden - Asian-inspired green */
+  .theme-jade {
+    --background: 160 20% 12%;
+    --foreground: 150 15% 88%;
+    --card: 160 18% 16%;
+    --card-foreground: 150 15% 88%;
+    --popover: 160 20% 12%;
+    --popover-foreground: 150 15% 88%;
+    --primary: 160 60% 50%;
+    /* Jade green */
+    --primary-foreground: 160 20% 12%;
+    --secondary: 160 15% 20%;
+    --secondary-foreground: 150 15% 88%;
+    --muted: 160 15% 20%;
+    --muted-foreground: 150 10% 65%;
+    --accent: 45 70% 55%;
+    /* Gold */
+    --accent-foreground: 160 20% 12%;
+    --destructive: 0 70% 60%;
+    --destructive-foreground: 150 15% 88%;
+    --border: 160 15% 24%;
+    --input: 160 15% 20%;
+    --ring: 160 60% 50%;
+    --radius: 0.375rem;
+  }
+
+  /* 27. Desert Dusk - Sandy warm tones */
+  .theme-desert {
+    --background: 35 35% 15%;
+    --foreground: 30 25% 88%;
+    --card: 35 33% 19%;
+    --card-foreground: 30 25% 88%;
+    --popover: 35 35% 15%;
+    --popover-foreground: 30 25% 88%;
+    --primary: 35 70% 55%;
+    /* Sand */
+    --primary-foreground: 35 35% 15%;
+    --secondary: 35 30% 23%;
+    --secondary-foreground: 30 25% 88%;
+    --muted: 35 30% 23%;
+    --muted-foreground: 30 20% 65%;
+    --accent: 15 80% 50%;
+    /* Terracotta */
+    --accent-foreground: 35 35% 15%;
+    --destructive: 0 70% 55%;
+    --destructive-foreground: 30 25% 88%;
+    --border: 35 30% 27%;
+    --input: 35 30% 23%;
+    --ring: 35 70% 55%;
+    --radius: 0.5rem;
+  }
+
+  /* ============ HIGH CONTRAST ============ */
+
+  /* 28. High Contrast Dark - Maximum readability */
+  .theme-hc-dark {
+    --background: 0 0% 0%;
+    --foreground: 0 0% 100%;
+    --card: 0 0% 5%;
+    --card-foreground: 0 0% 100%;
+    --popover: 0 0% 0%;
+    --popover-foreground: 0 0% 100%;
+    --primary: 60 100% 50%;
+    /* Yellow */
+    --primary-foreground: 0 0% 0%;
+    --secondary: 0 0% 10%;
+    --secondary-foreground: 0 0% 100%;
+    --muted: 0 0% 10%;
+    --muted-foreground: 0 0% 80%;
+    --accent: 180 100% 50%;
+    /* Cyan */
+    --accent-foreground: 0 0% 0%;
+    --destructive: 0 100% 50%;
+    --destructive-foreground: 0 0% 100%;
+    --border: 0 0% 30%;
+    --input: 0 0% 10%;
+    --ring: 60 100% 50%;
+    --radius: 0.25rem;
+  }
+
+  /* 29. High Contrast Light - Maximum readability light */
+  .theme-hc-light {
+    --background: 0 0% 100%;
+    --foreground: 0 0% 0%;
+    --card: 0 0% 98%;
+    --card-foreground: 0 0% 0%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 0 0% 0%;
+    --primary: 210 100% 30%;
+    /* Dark blue */
+    --primary-foreground: 0 0% 100%;
+    --secondary: 0 0% 95%;
+    --secondary-foreground: 0 0% 0%;
+    --muted: 0 0% 95%;
+    --muted-foreground: 0 0% 30%;
+    --accent: 120 100% 25%;
+    /* Dark green */
+    --accent-foreground: 0 0% 100%;
+    --destructive: 0 100% 40%;
+    --destructive-foreground: 0 0% 100%;
+    --border: 0 0% 70%;
+    --input: 0 0% 95%;
+    --ring: 210 100% 30%;
+    --radius: 0.25rem;
+  }
+
+  /* ============ MODERN MINIMALIST ============ */
+
+  /* 30. Paper White - Ultra minimal light */
+  .theme-paper {
+    --background: 0 0% 99%;
+    --foreground: 0 0% 15%;
+    --card: 0 0% 100%;
+    --card-foreground: 0 0% 15%;
+    --popover: 0 0% 99%;
+    --popover-foreground: 0 0% 15%;
+    --primary: 0 0% 20%;
+    /* Almost black */
+    --primary-foreground: 0 0% 99%;
+    --secondary: 0 0% 96%;
+    --secondary-foreground: 0 0% 15%;
+    --muted: 0 0% 96%;
+    --muted-foreground: 0 0% 45%;
+    --accent: 0 0% 30%;
+    --accent-foreground: 0 0% 99%;
+    --destructive: 0 70% 45%;
+    --destructive-foreground: 0 0% 99%;
+    --border: 0 0% 90%;
+    --input: 0 0% 96%;
+    --ring: 0 0% 20%;
+    --radius: 0.5rem;
+  }
+
+  /* 31. Charcoal - Deep minimal dark */
+  .theme-charcoal {
+    --background: 0 0% 10%;
+    --foreground: 0 0% 92%;
+    --card: 0 0% 14%;
+    --card-foreground: 0 0% 92%;
+    --popover: 0 0% 10%;
+    --popover-foreground: 0 0% 92%;
+    --primary: 0 0% 80%;
+    /* Light gray */
+    --primary-foreground: 0 0% 10%;
+    --secondary: 0 0% 18%;
+    --secondary-foreground: 0 0% 92%;
+    --muted: 0 0% 18%;
+    --muted-foreground: 0 0% 60%;
+    --accent: 0 0% 70%;
+    --accent-foreground: 0 0% 10%;
+    --destructive: 0 70% 55%;
+    --destructive-foreground: 0 0% 92%;
+    --border: 0 0% 22%;
+    --input: 0 0% 18%;
+    --ring: 0 0% 80%;
+    --radius: 0.375rem;
+  }
+
+  /* ============ CREATIVE & ARTISTIC ============ */
+
+  /* 32. Nebula - Cosmic purple and blue */
+  .theme-nebula {
+    --background: 260 70% 10%;
+    --foreground: 280 30% 92%;
+    --card: 260 65% 14%;
+    --card-foreground: 280 30% 92%;
+    --popover: 260 70% 10%;
+    --popover-foreground: 280 30% 92%;
+    --primary: 280 90% 65%;
+    /* Nebula purple */
+    --primary-foreground: 260 70% 10%;
+    --secondary: 260 60% 18%;
+    --secondary-foreground: 280 30% 92%;
+    --muted: 260 60% 18%;
+    --muted-foreground: 280 20% 70%;
+    --accent: 210 100% 60%;
+    /* Bright blue */
+    --accent-foreground: 260 70% 10%;
+    --destructive: 340 90% 65%;
+    --destructive-foreground: 260 70% 10%;
+    --border: 260 60% 22%;
+    --input: 260 60% 18%;
+    --ring: 280 90% 65%;
+    --radius: 0.5rem;
+  }
+
+  /* 33. Neon Noir - Cyberpunk noir */
+  .theme-neon-noir {
+    --background: 0 0% 5%;
+    --foreground: 180 50% 90%;
+    --card: 0 0% 9%;
+    --card-foreground: 180 50% 90%;
+    --popover: 0 0% 5%;
+    --popover-foreground: 180 50% 90%;
+    --primary: 330 100% 60%;
+    /* Neon pink */
+    --primary-foreground: 0 0% 5%;
+    --secondary: 0 0% 13%;
+    --secondary-foreground: 180 50% 90%;
+    --muted: 0 0% 13%;
+    --muted-foreground: 180 30% 70%;
+    --accent: 180 100% 50%;
+    /* Neon cyan */
+    --accent-foreground: 0 0% 5%;
+    --destructive: 0 100% 60%;
+    --destructive-foreground: 180 50% 90%;
+    --border: 180 50% 20%;
+    --input: 0 0% 13%;
+    --ring: 330 100% 60%;
+    --radius: 0.25rem;
+  }
+
+  /* 34. Peacock - Vibrant teal and purple */
+  .theme-peacock {
+    --background: 190 40% 12%;
+    --foreground: 180 25% 90%;
+    --card: 190 38% 16%;
+    --card-foreground: 180 25% 90%;
+    --popover: 190 40% 12%;
+    --popover-foreground: 180 25% 90%;
+    --primary: 180 70% 50%;
+    /* Peacock teal */
+    --primary-foreground: 190 40% 12%;
+    --secondary: 190 35% 20%;
+    --secondary-foreground: 180 25% 90%;
+    --muted: 190 35% 20%;
+    --muted-foreground: 180 20% 70%;
+    --accent: 270 80% 60%;
+    /* Purple */
+    --accent-foreground: 190 40% 12%;
+    --destructive: 340 80% 60%;
+    --destructive-foreground: 180 25% 90%;
+    --border: 190 35% 24%;
+    --input: 190 35% 20%;
+    --ring: 180 70% 50%;
+    --radius: 0.5rem;
+  }
+
+  /* 35. Flame - Fiery red and orange */
+  .theme-flame {
+    --background: 15 40% 10%;
+    --foreground: 30 30% 92%;
+    --card: 15 38% 14%;
+    --card-foreground: 30 30% 92%;
+    --popover: 15 40% 10%;
+    --popover-foreground: 30 30% 92%;
+    --primary: 10 100% 55%;
+    /* Flame red */
+    --primary-foreground: 15 40% 10%;
+    --secondary: 15 35% 18%;
+    --secondary-foreground: 30 30% 92%;
+    --muted: 15 35% 18%;
+    --muted-foreground: 30 20% 70%;
+    --accent: 30 100% 50%;
+    /* Orange */
+    --accent-foreground: 15 40% 10%;
+    --destructive: 0 100% 60%;
+    --destructive-foreground: 30 30% 92%;
+    --border: 15 35% 22%;
+    --input: 15 35% 18%;
+    --ring: 10 100% 55%;
+    --radius: 0.375rem;
+  }
+
+  /* ============ SEASONAL ============ */
+
+  /* 36. Winter Frost - Cool icy theme */
+  .theme-winter {
+    --background: 200 35% 92%;
+    --foreground: 210 40% 20%;
+    --card: 200 30% 96%;
+    --card-foreground: 210 40% 20%;
+    --popover: 200 35% 92%;
+    --popover-foreground: 210 40% 20%;
+    --primary: 200 70% 50%;
+    /* Ice blue */
+    --primary-foreground: 200 35% 92%;
+    --secondary: 200 25% 88%;
+    --secondary-foreground: 210 40% 20%;
+    --muted: 200 25% 88%;
+    --muted-foreground: 210 20% 45%;
+    --accent: 190 60% 55%;
+    /* Cyan */
+    --accent-foreground: 200 35% 92%;
+    --destructive: 0 70% 55%;
+    --destructive-foreground: 200 35% 92%;
+    --border: 200 25% 82%;
+    --input: 200 25% 88%;
+    --ring: 200 70% 50%;
+    --radius: 0.5rem;
+  }
+
+  /* 37. Spring Meadow - Fresh green and yellow */
+  .theme-spring {
+    --background: 100 35% 94%;
+    --foreground: 140 30% 25%;
+    --card: 100 30% 97%;
+    --card-foreground: 140 30% 25%;
+    --popover: 100 35% 94%;
+    --popover-foreground: 140 30% 25%;
+    --primary: 130 50% 50%;
+    /* Fresh green */
+    --primary-foreground: 100 35% 94%;
+    --secondary: 100 25% 90%;
+    --secondary-foreground: 140 30% 25%;
+    --muted: 100 25% 90%;
+    --muted-foreground: 140 15% 45%;
+    --accent: 50 80% 55%;
+    /* Yellow */
+    --accent-foreground: 100 35% 94%;
+    --destructive: 0 70% 55%;
+    --destructive-foreground: 100 35% 94%;
+    --border: 100 25% 85%;
+    --input: 100 25% 90%;
+    --ring: 130 50% 50%;
+    --radius: 0.75rem;
+  }
+
+  /* 38. Summer Beach - Warm sandy theme */
+  .theme-summer {
+    --background: 45 45% 94%;
+    --foreground: 200 30% 25%;
+    --card: 45 40% 97%;
+    --card-foreground: 200 30% 25%;
+    --popover: 45 45% 94%;
+    --popover-foreground: 200 30% 25%;
+    --primary: 200 80% 50%;
+    /* Ocean blue */
+    --primary-foreground: 45 45% 94%;
+    --secondary: 45 35% 90%;
+    --secondary-foreground: 200 30% 25%;
+    --muted: 45 35% 90%;
+    --muted-foreground: 200 15% 45%;
+    --accent: 40 90% 55%;
+    /* Sandy yellow */
+    --accent-foreground: 45 45% 94%;
+    --destructive: 0 70% 55%;
+    --destructive-foreground: 45 45% 94%;
+    --border: 45 35% 85%;
+    --input: 45 35% 90%;
+    --ring: 200 80% 50%;
+    --radius: 0.75rem;
+  }
+
+  /* ============ PROFESSIONAL ============ */
+
+  /* 39. Corporate Blue - Professional standard */
+  .theme-corporate {
+    --background: 210 20% 10%;
+    --foreground: 210 15% 88%;
+    --card: 210 18% 14%;
+    --card-foreground: 210 15% 88%;
+    --popover: 210 20% 10%;
+    --popover-foreground: 210 15% 88%;
+    --primary: 210 90% 50%;
+    /* Corporate blue */
+    --primary-foreground: 210 20% 10%;
+    --secondary: 210 15% 18%;
+    --secondary-foreground: 210 15% 88%;
+    --muted: 210 15% 18%;
+    --muted-foreground: 210 10% 65%;
+    --accent: 200 80% 55%;
+    /* Light blue */
+    --accent-foreground: 210 20% 10%;
+    --destructive: 0 70% 55%;
+    --destructive-foreground: 210 15% 88%;
+    --border: 210 15% 22%;
+    --input: 210 15% 18%;
+    --ring: 210 90% 50%;
+    --radius: 0.25rem;
+  }
+
+  /* 40. Executive Gray - Sophisticated neutral */
+  .theme-executive {
+    --background: 0 0% 15%;
+    --foreground: 0 0% 90%;
+    --card: 0 0% 19%;
+    --card-foreground: 0 0% 90%;
+    --popover: 0 0% 15%;
+    --popover-foreground: 0 0% 90%;
+    --primary: 210 50% 50%;
+    /* Professional blue */
+    --primary-foreground: 0 0% 15%;
+    --secondary: 0 0% 23%;
+    --secondary-foreground: 0 0% 90%;
+    --muted: 0 0% 23%;
+    --muted-foreground: 0 0% 65%;
+    --accent: 30 60% 55%;
+    /* Gold accent */
+    --accent-foreground: 0 0% 15%;
+    --destructive: 0 70% 55%;
+    --destructive-foreground: 0 0% 90%;
+    --border: 0 0% 27%;
+    --input: 0 0% 23%;
+    --ring: 210 50% 50%;
+    --radius: 0.375rem;
+  }
+
+  /* ============ GAMING ============ */
+
+  /* 41. Razer Green - Gaming aesthetic */
+  .theme-razer {
+    --background: 0 0% 8%;
+    --foreground: 0 0% 92%;
+    --card: 0 0% 12%;
+    --card-foreground: 0 0% 92%;
+    --popover: 0 0% 8%;
+    --popover-foreground: 0 0% 92%;
+    --primary: 120 100% 40%;
+    /* Razer green */
+    --primary-foreground: 0 0% 8%;
+    --secondary: 0 0% 16%;
+    --secondary-foreground: 0 0% 92%;
+    --muted: 0 0% 16%;
+    --muted-foreground: 0 0% 60%;
+    --accent: 120 100% 30%;
+    --accent-foreground: 0 0% 92%;
+    --destructive: 0 100% 50%;
+    --destructive-foreground: 0 0% 92%;
+    --border: 120 50% 20%;
+    --input: 0 0% 16%;
+    --ring: 120 100% 40%;
+    --radius: 0.25rem;
+  }
+
+  /* 42. Discord - Popular chat app theme */
+  .theme-discord {
+    --background: 225 6% 13%;
+    /* #23272a */
+    --foreground: 210 11% 96%;
+    /* #dcddde */
+    --card: 225 7% 17%;
+    --card-foreground: 210 11% 96%;
+    --popover: 225 6% 13%;
+    --popover-foreground: 210 11% 96%;
+    --primary: 235 86% 65%;
+    /* Blurple */
+    --primary-foreground: 225 6% 13%;
+    --secondary: 225 6% 21%;
+    --secondary-foreground: 210 11% 96%;
+    --muted: 225 6% 21%;
+    --muted-foreground: 215 9% 72%;
+    --accent: 139 47% 60%;
+    /* Green */
+    --accent-foreground: 225 6% 13%;
+    --destructive: 359 82% 66%;
+    --destructive-foreground: 225 6% 13%;
+    --border: 225 6% 25%;
+    --input: 225 6% 21%;
+    --ring: 235 86% 65%;
+    --radius: 0.375rem;
+  }
+
+  /* 43. Steam - Gaming platform */
+  .theme-steam {
+    --background: 210 15% 12%;
+    --foreground: 210 10% 88%;
+    --card: 210 14% 16%;
+    --card-foreground: 210 10% 88%;
+    --popover: 210 15% 12%;
+    --popover-foreground: 210 10% 88%;
+    --primary: 200 70% 50%;
+    /* Steam blue */
+    --primary-foreground: 210 15% 12%;
+    --secondary: 210 12% 20%;
+    --secondary-foreground: 210 10% 88%;
+    --muted: 210 12% 20%;
+    --muted-foreground: 210 8% 65%;
+    --accent: 210 60% 55%;
+    --accent-foreground: 210 15% 12%;
+    --destructive: 0 70% 55%;
+    --destructive-foreground: 210 10% 88%;
+    --border: 210 12% 24%;
+    --input: 210 12% 20%;
+    --ring: 200 70% 50%;
+    --radius: 0.25rem;
+  }
+
+  /* ============ SOCIAL MEDIA INSPIRED ============ */
+
+  /* 44. Twitter/X Dark - Social media */
+  .theme-twitter-dark {
+    --background: 0 0% 0%;
+    --foreground: 0 0% 100%;
+    --card: 0 0% 6%;
+    --card-foreground: 0 0% 100%;
+    --popover: 0 0% 0%;
+    --popover-foreground: 0 0% 100%;
+    --primary: 203 89% 53%;
+    /* Twitter blue */
+    --primary-foreground: 0 0% 0%;
+    --secondary: 0 0% 12%;
+    --secondary-foreground: 0 0% 100%;
+    --muted: 0 0% 12%;
+    --muted-foreground: 0 0% 70%;
+    --accent: 203 89% 53%;
+    --accent-foreground: 0 0% 0%;
+    --destructive: 0 80% 60%;
+    --destructive-foreground: 0 0% 100%;
+    --border: 0 0% 20%;
+    --input: 0 0% 12%;
+    --ring: 203 89% 53%;
+    --radius: 0.75rem;
+  }
+
+  /* 45. Instagram Gradient - Social media */
+  .theme-instagram {
+    --background: 280 40% 12%;
+    --foreground: 0 0% 95%;
+    --card: 280 35% 16%;
+    --card-foreground: 0 0% 95%;
+    --popover: 280 40% 12%;
+    --popover-foreground: 0 0% 95%;
+    --primary: 320 100% 60%;
+    /* Instagram pink */
+    --primary-foreground: 280 40% 12%;
+    --secondary: 280 30% 20%;
+    --secondary-foreground: 0 0% 95%;
+    --muted: 280 30% 20%;
+    --muted-foreground: 280 15% 70%;
+    --accent: 30 100% 55%;
+    /* Instagram orange */
+    --accent-foreground: 280 40% 12%;
+    --destructive: 0 80% 60%;
+    --destructive-foreground: 0 0% 95%;
+    --border: 280 30% 24%;
+    --input: 280 30% 20%;
+    --ring: 320 100% 60%;
+    --radius: 0.5rem;
+  }
+
+  /* ============ TECH BRANDS ============ */
+
+  /* 46. Apple Dark - Sleek and modern */
+  .theme-apple-dark {
+    --background: 0 0% 7%;
+    --foreground: 0 0% 92%;
+    --card: 0 0% 11%;
+    --card-foreground: 0 0% 92%;
+    --popover: 0 0% 7%;
+    --popover-foreground: 0 0% 92%;
+    --primary: 211 100% 50%;
+    /* Apple blue */
+    --primary-foreground: 0 0% 7%;
+    --secondary: 0 0% 15%;
+    --secondary-foreground: 0 0% 92%;
+    --muted: 0 0% 15%;
+    --muted-foreground: 0 0% 65%;
+    --accent: 211 100% 50%;
+    --accent-foreground: 0 0% 7%;
+    --destructive: 0 80% 60%;
+    --destructive-foreground: 0 0% 92%;
+    --border: 0 0% 19%;
+    --input: 0 0% 15%;
+    --ring: 211 100% 50%;
+    --radius: 0.75rem;
+  }
+
+  /* 47. Microsoft - Professional modern */
+  .theme-microsoft {
+    --background: 210 20% 12%;
+    --foreground: 210 15% 90%;
+    --card: 210 18% 16%;
+    --card-foreground: 210 15% 90%;
+    --popover: 210 20% 12%;
+    --popover-foreground: 210 15% 90%;
+    --primary: 195 100% 45%;
+    /* Microsoft blue */
+    --primary-foreground: 210 20% 12%;
+    --secondary: 210 15% 20%;
+    --secondary-foreground: 210 15% 90%;
+    --muted: 210 15% 20%;
+    --muted-foreground: 210 10% 65%;
+    --accent: 195 100% 45%;
+    --accent-foreground: 210 20% 12%;
+    --destructive: 0 70% 55%;
+    --destructive-foreground: 210 15% 90%;
+    --border: 210 15% 24%;
+    --input: 210 15% 20%;
+    --ring: 195 100% 45%;
+    --radius: 0.25rem;
+  }
+
+  /* ============ ARTISTIC & UNIQUE ============ */
+
+  /* 48. Watermelon - Fun and fresh */
+  .theme-watermelon {
+    --background: 350 30% 14%;
+    --foreground: 140 40% 92%;
+    --card: 350 28% 18%;
+    --card-foreground: 140 40% 92%;
+    --popover: 350 30% 14%;
+    --popover-foreground: 140 40% 92%;
+    --primary: 350 85% 60%;
+    /* Watermelon pink */
+    --primary-foreground: 350 30% 14%;
+    --secondary: 350 25% 22%;
+    --secondary-foreground: 140 40% 92%;
+    --muted: 350 25% 22%;
+    --muted-foreground: 350 15% 70%;
+    --accent: 140 50% 50%;
+    /* Watermelon green */
+    --accent-foreground: 350 30% 14%;
+    --destructive: 0 85% 60%;
+    --destructive-foreground: 140 40% 92%;
+    --border: 350 25% 26%;
+    --input: 350 25% 22%;
+    --ring: 350 85% 60%;
+    --radius: 0.75rem;
+  }
+
+  /* 49. Mint Chocolate - Sweet combination */
+  .theme-mint-chocolate {
+    --background: 30 20% 12%;
+    --foreground: 160 30% 92%;
+    --card: 30 18% 16%;
+    --card-foreground: 160 30% 92%;
+    --popover: 30 20% 12%;
+    --popover-foreground: 160 30% 92%;
+    --primary: 160 60% 55%;
+    /* Mint */
+    --primary-foreground: 30 20% 12%;
+    --secondary: 30 15% 20%;
+    --secondary-foreground: 160 30% 92%;
+    --muted: 30 15% 20%;
+    --muted-foreground: 160 20% 70%;
+    --accent: 30 60% 45%;
+    /* Chocolate */
+    --accent-foreground: 160 30% 92%;
+    --destructive: 0 70% 55%;
+    --destructive-foreground: 160 30% 92%;
+    --border: 30 15% 24%;
+    --input: 30 15% 20%;
+    --ring: 160 60% 55%;
+    --radius: 0.5rem;
+  }
+
+  /* 50. Bubblegum - Sweet pink theme */
+  .theme-bubblegum {
+    --background: 330 40% 94%;
+    --foreground: 340 50% 25%;
+    --card: 330 35% 97%;
+    --card-foreground: 340 50% 25%;
+    --popover: 330 40% 94%;
+    --popover-foreground: 340 50% 25%;
+    --primary: 340 80% 65%;
+    /* Bubblegum pink */
+    --primary-foreground: 330 40% 94%;
+    --secondary: 330 30% 90%;
+    --secondary-foreground: 340 50% 25%;
+    --muted: 330 30% 90%;
+    --muted-foreground: 340 25% 50%;
+    --accent: 280 60% 70%;
+    /* Purple */
+    --accent-foreground: 330 40% 94%;
+    --destructive: 0 70% 55%;
+    --destructive-foreground: 330 40% 94%;
+    --border: 330 30% 85%;
+    --input: 330 30% 90%;
+    --ring: 340 80% 65%;
+    --radius: 1rem;
+  }
+
+  /* ============ LUXURY & PREMIUM ============ */
+
+  /* 51. Gold Noir - Luxurious dark with gold */
+  .theme-gold-noir {
+    --background: 0 0% 8%;
+    --foreground: 45 30% 92%;
+    --card: 0 0% 12%;
+    --card-foreground: 45 30% 92%;
+    --popover: 0 0% 8%;
+    --popover-foreground: 45 30% 92%;
+    --primary: 45 100% 50%;
+    /* Pure gold */
+    --primary-foreground: 0 0% 8%;
+    --secondary: 0 0% 16%;
+    --secondary-foreground: 45 30% 92%;
+    --muted: 0 0% 16%;
+    --muted-foreground: 45 20% 70%;
+    --accent: 40 90% 55%;
+    /* Amber */
+    --accent-foreground: 0 0% 8%;
+    --destructive: 0 80% 60%;
+    --destructive-foreground: 45 30% 92%;
+    --border: 45 50% 25%;
+    --input: 0 0% 16%;
+    --ring: 45 100% 50%;
+    --radius: 0.5rem;
+  }
+
+  /* 52. Platinum - Silver elegance */
+  .theme-platinum {
+    --background: 220 10% 12%;
+    --foreground: 220 15% 92%;
+    --card: 220 9% 16%;
+    --card-foreground: 220 15% 92%;
+    --popover: 220 10% 12%;
+    --popover-foreground: 220 15% 92%;
+    --primary: 220 15% 75%;
+    /* Platinum silver */
+    --primary-foreground: 220 10% 12%;
+    --secondary: 220 8% 20%;
+    --secondary-foreground: 220 15% 92%;
+    --muted: 220 8% 20%;
+    --muted-foreground: 220 10% 70%;
+    --accent: 200 50% 60%;
+    /* Light blue */
+    --accent-foreground: 220 10% 12%;
+    --destructive: 0 70% 60%;
+    --destructive-foreground: 220 15% 92%;
+    --border: 220 8% 24%;
+    --input: 220 8% 20%;
+    --ring: 220 15% 75%;
+    --radius: 0.375rem;
+  }
+
+  /* 53. Rose Gold - Elegant pink-gold */
+  .theme-rose-gold {
+    --background: 340 20% 94%;
+    --foreground: 340 40% 25%;
+    --card: 340 18% 97%;
+    --card-foreground: 340 40% 25%;
+    --popover: 340 20% 94%;
+    --popover-foreground: 340 40% 25%;
+    --primary: 340 60% 60%;
+    /* Rose gold */
+    --primary-foreground: 340 20% 94%;
+    --secondary: 340 15% 90%;
+    --secondary-foreground: 340 40% 25%;
+    --muted: 340 15% 90%;
+    --muted-foreground: 340 20% 50%;
+    --accent: 30 70% 55%;
+    /* Gold */
+    --accent-foreground: 340 20% 94%;
+    --destructive: 0 70% 55%;
+    --destructive-foreground: 340 20% 94%;
+    --border: 340 15% 85%;
+    --input: 340 15% 90%;
+    --ring: 340 60% 60%;
+    --radius: 0.75rem;
+  }
+
+  /* 54. Emerald Luxe - Rich green luxury */
+  .theme-emerald-luxe {
+    --background: 160 30% 10%;
+    --foreground: 150 25% 92%;
+    --card: 160 28% 14%;
+    --card-foreground: 150 25% 92%;
+    --popover: 160 30% 10%;
+    --popover-foreground: 150 25% 92%;
+    --primary: 160 70% 45%;
+    /* Emerald */
+    --primary-foreground: 160 30% 10%;
+    --secondary: 160 25% 18%;
+    --secondary-foreground: 150 25% 92%;
+    --muted: 160 25% 18%;
+    --muted-foreground: 150 20% 70%;
+    --accent: 45 90% 50%;
+    /* Gold accent */
+    --accent-foreground: 160 30% 10%;
+    --destructive: 0 70% 55%;
+    --destructive-foreground: 150 25% 92%;
+    --border: 160 25% 22%;
+    --input: 160 25% 18%;
+    --ring: 160 70% 45%;
+    --radius: 0.5rem;
+  }
+
+  /* 55. Sapphire Royal - Deep blue luxury */
+  .theme-sapphire {
+    --background: 220 50% 10%;
+    --foreground: 210 30% 92%;
+    --card: 220 45% 14%;
+    --card-foreground: 210 30% 92%;
+    --popover: 220 50% 10%;
+    --popover-foreground: 210 30% 92%;
+    --primary: 220 80% 50%;
+    /* Sapphire blue */
+    --primary-foreground: 220 50% 10%;
+    --secondary: 220 40% 18%;
+    --secondary-foreground: 210 30% 92%;
+    --muted: 220 40% 18%;
+    --muted-foreground: 210 25% 70%;
+    --accent: 45 85% 55%;
+    /* Gold */
+    --accent-foreground: 220 50% 10%;
+    --destructive: 0 75% 60%;
+    --destructive-foreground: 210 30% 92%;
+    --border: 220 40% 22%;
+    --input: 220 40% 18%;
+    --ring: 220 80% 50%;
+    --radius: 0.5rem;
+  }
+
+  /* ============ PASTEL DREAMS ============ */
+
+  /* 56. Pastel Rainbow - Soft multi-color */
+  .theme-pastel-rainbow {
+    --background: 270 30% 95%;
+    --foreground: 270 30% 25%;
+    --card: 270 25% 98%;
+    --card-foreground: 270 30% 25%;
+    --popover: 270 30% 95%;
+    --popover-foreground: 270 30% 25%;
+    --primary: 280 60% 70%;
+    /* Pastel purple */
+    --primary-foreground: 270 30% 95%;
+    --secondary: 270 20% 92%;
+    --secondary-foreground: 270 30% 25%;
+    --muted: 270 20% 92%;
+    --muted-foreground: 270 15% 50%;
+    --accent: 200 60% 75%;
+    /* Pastel blue */
+    --accent-foreground: 270 30% 95%;
+    --destructive: 0 60% 70%;
+    --destructive-foreground: 270 30% 95%;
+    --border: 270 20% 87%;
+    --input: 270 20% 92%;
+    --ring: 280 60% 70%;
+    --radius: 1rem;
+  }
+
+  /* 57. Peach Cream - Soft peachy tones */
+  .theme-peach-cream {
+    --background: 25 40% 96%;
+    --foreground: 25 30% 25%;
+    --card: 25 35% 98%;
+    --card-foreground: 25 30% 25%;
+    --popover: 25 40% 96%;
+    --popover-foreground: 25 30% 25%;
+    --primary: 20 70% 65%;
+    /* Peach */
+    --primary-foreground: 25 40% 96%;
+    --secondary: 25 30% 92%;
+    --secondary-foreground: 25 30% 25%;
+    --muted: 25 30% 92%;
+    --muted-foreground: 25 15% 50%;
+    --accent: 35 75% 60%;
+    /* Orange cream */
+    --accent-foreground: 25 40% 96%;
+    --destructive: 0 70% 60%;
+    --destructive-foreground: 25 40% 96%;
+    --border: 25 30% 88%;
+    --input: 25 30% 92%;
+    --ring: 20 70% 65%;
+    --radius: 0.75rem;
+  }
+
+  /* 58. Cotton Candy - Pink and blue pastel */
+  .theme-cotton-candy {
+    --background: 310 35% 95%;
+    --foreground: 310 40% 25%;
+    --card: 310 30% 98%;
+    --card-foreground: 310 40% 25%;
+    --popover: 310 35% 95%;
+    --popover-foreground: 310 40% 25%;
+    --primary: 320 60% 75%;
+    /* Cotton candy pink */
+    --primary-foreground: 310 35% 95%;
+    --secondary: 310 25% 92%;
+    --secondary-foreground: 310 40% 25%;
+    --muted: 310 25% 92%;
+    --muted-foreground: 310 20% 50%;
+    --accent: 200 60% 75%;
+    /* Cotton candy blue */
+    --accent-foreground: 310 35% 95%;
+    --destructive: 0 60% 65%;
+    --destructive-foreground: 310 35% 95%;
+    --border: 310 25% 88%;
+    --input: 310 25% 92%;
+    --ring: 320 60% 75%;
+    --radius: 1rem;
+  }
+
+  /* ============ EARTH TONES ============ */
+
+  /* 59. Terracotta - Warm clay tones */
+  .theme-terracotta {
+    --background: 15 30% 14%;
+    --foreground: 30 25% 90%;
+    --card: 15 28% 18%;
+    --card-foreground: 30 25% 90%;
+    --popover: 15 30% 14%;
+    --popover-foreground: 30 25% 90%;
+    --primary: 15 60% 50%;
+    /* Terracotta */
+    --primary-foreground: 15 30% 14%;
+    --secondary: 15 25% 22%;
+    --secondary-foreground: 30 25% 90%;
+    --muted: 15 25% 22%;
+    --muted-foreground: 30 20% 70%;
+    --accent: 35 55% 55%;
+    /* Clay orange */
+    --accent-foreground: 15 30% 14%;
+    --destructive: 0 70% 55%;
+    --destructive-foreground: 30 25% 90%;
+    --border: 15 25% 26%;
+    --input: 15 25% 22%;
+    --ring: 15 60% 50%;
+    --radius: 0.375rem;
+  }
+
+  /* 60. Moss - Natural green-gray */
+  .theme-moss {
+    --background: 120 15% 14%;
+    --foreground: 120 12% 88%;
+    --card: 120 14% 18%;
+    --card-foreground: 120 12% 88%;
+    --popover: 120 15% 14%;
+    --popover-foreground: 120 12% 88%;
+    --primary: 120 30% 45%;
+    /* Moss green */
+    --primary-foreground: 120 15% 14%;
+    --secondary: 120 12% 22%;
+    --secondary-foreground: 120 12% 88%;
+    --muted: 120 12% 22%;
+    --muted-foreground: 120 10% 65%;
+    --accent: 100 35% 50%;
+    /* Olive */
+    --accent-foreground: 120 15% 14%;
+    --destructive: 0 65% 55%;
+    --destructive-foreground: 120 12% 88%;
+    --border: 120 12% 26%;
+    --input: 120 12% 22%;
+    --ring: 120 30% 45%;
+    --radius: 0.375rem;
+  }
+
+  /* ============ COSMIC & SCI-FI ============ */
+
+  /* 61. Galactic Purple - Deep space purple */
+  .theme-galactic {
+    --background: 270 60% 8%;
+    --foreground: 270 30% 92%;
+    --card: 270 55% 12%;
+    --card-foreground: 270 30% 92%;
+    --popover: 270 60% 8%;
+    --popover-foreground: 270 30% 92%;
+    --primary: 280 90% 60%;
+    /* Galactic purple */
+    --primary-foreground: 270 60% 8%;
+    --secondary: 270 50% 16%;
+    --secondary-foreground: 270 30% 92%;
+    --muted: 270 50% 16%;
+    --muted-foreground: 270 25% 70%;
+    --accent: 310 100% 65%;
+    /* Magenta */
+    --accent-foreground: 270 60% 8%;
+    --destructive: 0 85% 65%;
+    --destructive-foreground: 270 30% 92%;
+    --border: 270 50% 20%;
+    --input: 270 50% 16%;
+    --ring: 280 90% 60%;
+    --radius: 0.5rem;
+  }
+
+  /* 62. Alien Green - Otherworldly green */
+  .theme-alien {
+    --background: 140 40% 8%;
+    --foreground: 120 40% 92%;
+    --card: 140 38% 12%;
+    --card-foreground: 120 40% 92%;
+    --popover: 140 40% 8%;
+    --popover-foreground: 120 40% 92%;
+    --primary: 140 100% 50%;
+    /* Alien green */
+    --primary-foreground: 140 40% 8%;
+    --secondary: 140 35% 16%;
+    --secondary-foreground: 120 40% 92%;
+    --muted: 140 35% 16%;
+    --muted-foreground: 120 30% 70%;
+    --accent: 160 90% 55%;
+    /* Teal */
+    --accent-foreground: 140 40% 8%;
+    --destructive: 0 85% 60%;
+    --destructive-foreground: 120 40% 92%;
+    --border: 140 35% 20%;
+    --input: 140 35% 16%;
+    --ring: 140 100% 50%;
+    --radius: 0.375rem;
+  }
+
+  /* 63. Starlight - Silver and blue cosmic */
+  .theme-starlight {
+    --background: 230 30% 10%;
+    --foreground: 210 40% 92%;
+    --card: 230 28% 14%;
+    --card-foreground: 210 40% 92%;
+    --popover: 230 30% 10%;
+    --popover-foreground: 210 40% 92%;
+    --primary: 210 100% 70%;
+    /* Bright blue */
+    --primary-foreground: 230 30% 10%;
+    --secondary: 230 25% 18%;
+    --secondary-foreground: 210 40% 92%;
+    --muted: 230 25% 18%;
+    --muted-foreground: 210 30% 70%;
+    --accent: 220 80% 75%;
+    /* Light blue */
+    --accent-foreground: 230 30% 10%;
+    --destructive: 0 80% 65%;
+    --destructive-foreground: 210 40% 92%;
+    --border: 230 25% 22%;
+    --input: 230 25% 18%;
+    --ring: 210 100% 70%;
+    --radius: 0.5rem;
+  }
+
+  /* ============ FOOD & BEVERAGE ============ */
+
+  /* 64. Espresso - Rich coffee brown */
+  .theme-espresso {
+    --background: 25 30% 12%;
+    --foreground: 30 25% 90%;
+    --card: 25 28% 16%;
+    --card-foreground: 30 25% 90%;
+    --popover: 25 30% 12%;
+    --popover-foreground: 30 25% 90%;
+    --primary: 30 50% 45%;
+    /* Coffee brown */
+    --primary-foreground: 25 30% 12%;
+    --secondary: 25 25% 20%;
+    --secondary-foreground: 30 25% 90%;
+    --muted: 25 25% 20%;
+    --muted-foreground: 30 20% 70%;
+    --accent: 35 60% 50%;
+    /* Caramel */
+    --accent-foreground: 25 30% 12%;
+    --destructive: 0 70% 55%;
+    --destructive-foreground: 30 25% 90%;
+    --border: 25 25% 24%;
+    --input: 25 25% 20%;
+    --ring: 30 50% 45%;
+    --radius: 0.375rem;
+  }
+
+  /* 65. Matcha - Green tea inspired */
+  .theme-matcha {
+    --background: 100 25% 92%;
+    --foreground: 140 30% 25%;
+    --card: 100 22% 96%;
+    --card-foreground: 140 30% 25%;
+    --popover: 100 25% 92%;
+    --popover-foreground: 140 30% 25%;
+    --primary: 120 40% 50%;
+    /* Matcha green */
+    --primary-foreground: 100 25% 92%;
+    --secondary: 100 20% 88%;
+    --secondary-foreground: 140 30% 25%;
+    --muted: 100 20% 88%;
+    --muted-foreground: 140 15% 50%;
+    --accent: 90 50% 55%;
+    /* Lime */
+    --accent-foreground: 100 25% 92%;
+    --destructive: 0 70% 55%;
+    --destructive-foreground: 100 25% 92%;
+    --border: 100 20% 83%;
+    --input: 100 20% 88%;
+    --ring: 120 40% 50%;
+    --radius: 0.75rem;
+  }
+
+  /* 66. Berry Blast - Mixed berry colors */
+  .theme-berry {
+    --background: 330 35% 12%;
+    --foreground: 330 30% 92%;
+    --card: 330 33% 16%;
+    --card-foreground: 330 30% 92%;
+    --popover: 330 35% 12%;
+    --popover-foreground: 330 30% 92%;
+    --primary: 340 70% 55%;
+    /* Berry red */
+    --primary-foreground: 330 35% 12%;
+    --secondary: 330 30% 20%;
+    --secondary-foreground: 330 30% 92%;
+    --muted: 330 30% 20%;
+    --muted-foreground: 330 25% 70%;
+    --accent: 280 65% 60%;
+    /* Purple berry */
+    --accent-foreground: 330 35% 12%;
+    --destructive: 0 75% 60%;
+    --destructive-foreground: 330 30% 92%;
+    --border: 330 30% 24%;
+    --input: 330 30% 20%;
+    --ring: 340 70% 55%;
+    --radius: 0.5rem;
+  }
+
+  /* ============ NEOBRUTALISM ============ */
+
+  /* 67. Neobrutalism Light - Bold, stark, high contrast */
+  .theme-neobrutalism-light {
+    --background: 0 0% 100%;
+    /* Pure white */
+    --foreground: 0 0% 0%;
+    /* Pure black */
+    --card: 0 0% 100%;
+    --card-foreground: 0 0% 0%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 0 0% 0%;
+    --primary: 0 0% 0%;
+    /* Black */
+    --primary-foreground: 0 0% 100%;
+    --secondary: 0 0% 95%;
+    --secondary-foreground: 0 0% 0%;
+    --muted: 0 0% 95%;
+    --muted-foreground: 0 0% 30%;
+    --accent: 45 100% 50%;
+    /* Bold yellow */
+    --accent-foreground: 0 0% 0%;
+    --destructive: 0 100% 50%;
+    /* Bold red */
+    --destructive-foreground: 0 0% 100%;
+    --border: 0 0% 0%;
+    /* Thick black borders */
+    --input: 0 0% 100%;
+    --ring: 0 0% 0%;
+    --radius: 0rem;
+    /* Sharp corners */
+  }
+
+  /* 68. Neobrutalism Dark - Inverted brutalism */
+  .theme-neobrutalism-dark {
+    --background: 0 0% 0%;
+    /* Pure black */
+    --foreground: 0 0% 100%;
+    /* Pure white */
+    --card: 0 0% 5%;
+    --card-foreground: 0 0% 100%;
+    --popover: 0 0% 0%;
+    --popover-foreground: 0 0% 100%;
+    --primary: 0 0% 100%;
+    /* White */
+    --primary-foreground: 0 0% 0%;
+    --secondary: 0 0% 10%;
+    --secondary-foreground: 0 0% 100%;
+    --muted: 0 0% 10%;
+    --muted-foreground: 0 0% 70%;
+    --accent: 320 100% 60%;
+    /* Hot pink */
+    --accent-foreground: 0 0% 0%;
+    --destructive: 120 100% 50%;
+    /* Neon green */
+    --destructive-foreground: 0 0% 0%;
+    --border: 0 0% 100%;
+    /* Thick white borders */
+    --input: 0 0% 5%;
+    --ring: 0 0% 100%;
+    --radius: 0rem;
+    /* Sharp corners */
+  }
+
+  /* 69. Neobrutalism Colorful - Bold primary colors */
+  .theme-neobrutalism-color {
+    --background: 50 100% 95%;
+    /* Light yellow */
+    --foreground: 0 0% 0%;
+    --card: 0 0% 100%;
+    --card-foreground: 0 0% 0%;
+    --popover: 50 100% 95%;
+    --popover-foreground: 0 0% 0%;
+    --primary: 220 100% 50%;
+    /* Bold blue */
+    --primary-foreground: 0 0% 100%;
+    --secondary: 50 100% 90%;
+    --secondary-foreground: 0 0% 0%;
+    --muted: 50 100% 90%;
+    --muted-foreground: 0 0% 30%;
+    --accent: 0 100% 50%;
+    /* Bold red */
+    --accent-foreground: 0 0% 100%;
+    --destructive: 120 100% 35%;
+    /* Bold green */
+    --destructive-foreground: 0 0% 100%;
+    --border: 0 0% 0%;
+    /* Thick black borders */
+    --input: 0 0% 100%;
+    --ring: 0 0% 0%;
+    --radius: 0rem;
+  }
+
+  /* 70. Neobrutalism Retro - 90s web aesthetic */
+  .theme-neobrutalism-retro {
+    --background: 180 100% 90%;
+    /* Cyan background */
+    --foreground: 0 0% 0%;
+    --card: 300 100% 90%;
+    /* Pink card */
+    --card-foreground: 0 0% 0%;
+    --popover: 180 100% 90%;
+    --popover-foreground: 0 0% 0%;
+    --primary: 280 100% 50%;
+    /* Purple */
+    --primary-foreground: 0 0% 100%;
+    --secondary: 60 100% 90%;
+    /* Yellow */
+    --secondary-foreground: 0 0% 0%;
+    --muted: 120 100% 90%;
+    /* Green */
+    --muted-foreground: 0 0% 0%;
+    --accent: 0 100% 50%;
+    /* Red */
+    --accent-foreground: 0 0% 100%;
+    --destructive: 30 100% 50%;
+    /* Orange */
+    --destructive-foreground: 0 0% 100%;
+    --border: 0 0% 0%;
+    /* Thick black borders */
+    --input: 0 0% 100%;
+    --ring: 0 0% 0%;
+    --radius: 0rem;
+  }
+
+  /* 71. Neobrutalism Punk - Rebellious attitude */
+  .theme-neobrutalism-punk {
+    --background: 0 0% 10%;
+    /* Dark background */
+    --foreground: 0 0% 100%;
+    --card: 0 0% 15%;
+    --card-foreground: 0 0% 100%;
+    --popover: 0 0% 10%;
+    --popover-foreground: 0 0% 100%;
+    --primary: 340 100% 60%;
+    /* Hot pink */
+    --primary-foreground: 0 0% 0%;
+    --secondary: 0 0% 20%;
+    --secondary-foreground: 0 0% 100%;
+    --muted: 0 0% 20%;
+    --muted-foreground: 0 0% 70%;
+    --accent: 120 100% 50%;
+    /* Neon green */
+    --accent-foreground: 0 0% 0%;
+    --destructive: 60 100% 50%;
+    /* Yellow */
+    --destructive-foreground: 0 0% 0%;
+    --border: 340 100% 60%;
+    /* Colored borders */
+    --input: 0 0% 15%;
+    --ring: 340 100% 60%;
+    --radius: 0rem;
+  }
+
+  /* ============ GLASSMORPHISM ============ */
+
+  /* 72. Glass Light - Frosted glass effect */
+  .theme-glass-light {
+    --background: 220 30% 96%;
+    /* Light backdrop */
+    --foreground: 220 30% 15%;
+    --card: 0 0% 100% / 0.7;
+    /* Semi-transparent */
+    --card-foreground: 220 30% 15%;
+    --popover: 0 0% 100% / 0.8;
+    --popover-foreground: 220 30% 15%;
+    --primary: 220 80% 60%;
+    /* Translucent blue */
+    --primary-foreground: 0 0% 100%;
+    --secondary: 220 20% 90% / 0.6;
+    --secondary-foreground: 220 30% 15%;
+    --muted: 220 20% 90% / 0.6;
+    --muted-foreground: 220 20% 40%;
+    --accent: 200 70% 65%;
+    /* Light blue */
+    --accent-foreground: 220 30% 15%;
+    --destructive: 0 70% 60%;
+    --destructive-foreground: 0 0% 100%;
+    --border: 220 20% 80% / 0.5;
+    /* Subtle borders */
+    --input: 0 0% 100% / 0.6;
+    --ring: 220 80% 60% / 0.6;
+    --radius: 1rem;
+    /* Rounded for glass effect */
+  }
+
+  /* 73. Glass Dark - Dark frosted glass */
+  .theme-glass-dark {
+    --background: 220 30% 8%;
+    /* Dark backdrop */
+    --foreground: 220 20% 92%;
+    --card: 220 20% 15% / 0.7;
+    /* Semi-transparent dark */
+    --card-foreground: 220 20% 92%;
+    --popover: 220 20% 12% / 0.8;
+    --popover-foreground: 220 20% 92%;
+    --primary: 200 90% 60%;
+    /* Glowing blue */
+    --primary-foreground: 220 30% 8%;
+    --secondary: 220 15% 20% / 0.6;
+    --secondary-foreground: 220 20% 92%;
+    --muted: 220 15% 20% / 0.6;
+    --muted-foreground: 220 15% 70%;
+    --accent: 180 80% 65%;
+    /* Cyan glow */
+    --accent-foreground: 220 30% 8%;
+    --destructive: 0 80% 65%;
+    --destructive-foreground: 220 30% 8%;
+    --border: 220 20% 30% / 0.4;
+    /* Subtle glass borders */
+    --input: 220 15% 20% / 0.6;
+    --ring: 200 90% 60% / 0.6;
+    --radius: 1rem;
+  }
+
+  /* 74. Glass Aurora - Colorful glass with aurora effect */
+  .theme-glass-aurora {
+    --background: 260 40% 10%;
+    /* Purple-dark backdrop */
+    --foreground: 280 30% 95%;
+    --card: 280 30% 20% / 0.6;
+    /* Purple glass */
+    --card-foreground: 280 30% 95%;
+    --popover: 280 30% 15% / 0.7;
+    --popover-foreground: 280 30% 95%;
+    --primary: 280 90% 70%;
+    /* Purple glow */
+    --primary-foreground: 260 40% 10%;
+    --secondary: 280 25% 25% / 0.5;
+    --secondary-foreground: 280 30% 95%;
+    --muted: 280 25% 25% / 0.5;
+    --muted-foreground: 280 20% 75%;
+    --accent: 320 100% 70%;
+    /* Pink glow */
+    --accent-foreground: 260 40% 10%;
+    --destructive: 200 100% 70%;
+    /* Cyan glow */
+    --destructive-foreground: 260 40% 10%;
+    --border: 280 50% 40% / 0.4;
+    --input: 280 25% 25% / 0.5;
+    --ring: 280 90% 70% / 0.6;
+    --radius: 1.25rem;
+  }
+
+  /* 75. Glass Ocean - Blue aquatic glass */
+  .theme-glass-ocean {
+    --background: 200 50% 10%;
+    /* Deep ocean */
+    --foreground: 190 40% 92%;
+    --card: 200 40% 20% / 0.6;
+    /* Ocean glass */
+    --card-foreground: 190 40% 92%;
+    --popover: 200 40% 15% / 0.7;
+    --popover-foreground: 190 40% 92%;
+    --primary: 190 80% 60%;
+    /* Aqua glow */
+    --primary-foreground: 200 50% 10%;
+    --secondary: 200 30% 25% / 0.5;
+    --secondary-foreground: 190 40% 92%;
+    --muted: 200 30% 25% / 0.5;
+    --muted-foreground: 190 30% 75%;
+    --accent: 180 90% 65%;
+    /* Cyan accent */
+    --accent-foreground: 200 50% 10%;
+    --destructive: 220 100% 70%;
+    /* Blue glow */
+    --destructive-foreground: 200 50% 10%;
+    --border: 200 50% 35% / 0.4;
+    --input: 200 30% 25% / 0.5;
+    --ring: 190 80% 60% / 0.6;
+    --radius: 1rem;
+  }
+
+  /* 76. Glass Frost - Icy frosted glass */
+  .theme-glass-frost {
+    --background: 200 40% 94%;
+    /* Icy background */
+    --foreground: 210 40% 20%;
+    --card: 200 30% 98% / 0.7;
+    /* Frosted white */
+    --card-foreground: 210 40% 20%;
+    --popover: 200 30% 97% / 0.8;
+    --popover-foreground: 210 40% 20%;
+    --primary: 195 75% 55%;
+    /* Ice blue */
+    --primary-foreground: 200 40% 94%;
+    --secondary: 200 20% 92% / 0.6;
+    --secondary-foreground: 210 40% 20%;
+    --muted: 200 20% 92% / 0.6;
+    --muted-foreground: 210 20% 45%;
+    --accent: 185 65% 60%;
+    /* Cyan */
+    --accent-foreground: 200 40% 94%;
+    --destructive: 0 70% 60%;
+    --destructive-foreground: 200 40% 94%;
+    --border: 200 25% 85% / 0.5;
+    --input: 200 20% 92% / 0.6;
+    --ring: 195 75% 55% / 0.6;
+    --radius: 1rem;
+  }
+
+  /* 77. Glass Sunset - Warm gradient glass */
+  .theme-glass-sunset {
+    --background: 20 40% 12%;
+    /* Dark warm backdrop */
+    --foreground: 30 30% 92%;
+    --card: 25 35% 20% / 0.6;
+    /* Warm glass */
+    --card-foreground: 30 30% 92%;
+    --popover: 25 35% 15% / 0.7;
+    --popover-foreground: 30 30% 92%;
+    --primary: 15 90% 60%;
+    /* Orange glow */
+    --primary-foreground: 20 40% 12%;
+    --secondary: 25 30% 25% / 0.5;
+    --secondary-foreground: 30 30% 92%;
+    --muted: 25 30% 25% / 0.5;
+    --muted-foreground: 30 25% 75%;
+    --accent: 340 85% 65%;
+    /* Pink-red glow */
+    --accent-foreground: 20 40% 12%;
+    --destructive: 0 90% 65%;
+    --destructive-foreground: 20 40% 12%;
+    --border: 25 50% 35% / 0.4;
+    --input: 25 30% 25% / 0.5;
+    --ring: 15 90% 60% / 0.6;
+    --radius: 1rem;
+  }
+
+  /* 78. Glass Neon - Neon-lit glass */
+  .theme-glass-neon {
+    --background: 0 0% 5%;
+    /* Near black */
+    --foreground: 0 0% 95%;
+    --card: 0 0% 12% / 0.7;
+    /* Dark glass */
+    --card-foreground: 0 0% 95%;
+    --popover: 0 0% 10% / 0.8;
+    --popover-foreground: 0 0% 95%;
+    --primary: 320 100% 65%;
+    /* Neon pink */
+    --primary-foreground: 0 0% 5%;
+    --secondary: 0 0% 18% / 0.6;
+    --secondary-foreground: 0 0% 95%;
+    --muted: 0 0% 18% / 0.6;
+    --muted-foreground: 0 0% 75%;
+    --accent: 180 100% 60%;
+    /* Neon cyan */
+    --accent-foreground: 0 0% 5%;
+    --destructive: 280 100% 65%;
+    /* Neon purple */
+    --destructive-foreground: 0 0% 5%;
+    --border: 320 80% 50% / 0.3;
+    /* Glowing borders */
+    --input: 0 0% 18% / 0.6;
+    --ring: 320 100% 65% / 0.7;
+    --radius: 1.25rem;
+  }
+
+  /* 79. Glass Mint - Minty fresh glass */
+  .theme-glass-mint {
+    --background: 160 30% 94%;
+    /* Mint background */
+    --foreground: 170 35% 20%;
+    --card: 160 25% 98% / 0.7;
+    /* Mint glass */
+    --card-foreground: 170 35% 20%;
+    --popover: 160 25% 97% / 0.8;
+    --popover-foreground: 170 35% 20%;
+    --primary: 165 60% 55%;
+    /* Mint green */
+    --primary-foreground: 160 30% 94%;
+    --secondary: 160 20% 92% / 0.6;
+    --secondary-foreground: 170 35% 20%;
+    --muted: 160 20% 92% / 0.6;
+    --muted-foreground: 170 20% 45%;
+    --accent: 150 55% 60%;
+    /* Teal */
+    --accent-foreground: 160 30% 94%;
+    --destructive: 0 70% 60%;
+    --destructive-foreground: 160 30% 94%;
+    --border: 160 25% 85% / 0.5;
+    --input: 160 20% 92% / 0.6;
+    --ring: 165 60% 55% / 0.6;
+    --radius: 1rem;
+  }
 }
 
 @layer base {
@@ -388,6 +3090,19 @@
 }
 
 @layer components {
+
+  [class*="theme-glass"] .bg-card,
+  [class*="theme-glass"] [class*="card"] {
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    background: rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+  }
+
+  [class*="theme-glass"] .bg-popover {
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+  }
 
   /* The new background grid pattern for the "Digital Blueprint" theme */
   .bg-grid-pattern {
