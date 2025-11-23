@@ -126,13 +126,14 @@ function ThemedApp({ Component, pageProps }: AppProps) {
   return (
     <main className={`${tahuFont.variable}`}>
       {!isAdminPage && <LearningSessionManager />}
-      <AnimatePresence mode="wait" initial={false} onExitComplete={() => window.scrollTo(0, 0)}>
+      <AnimatePresence mode="popLayout" initial={false}>
         <motion.div
           key={router.asPath}
           initial="initial"
           animate="animate"
           exit="exit"
           variants={pageVariants}
+          className="w-full" 
         >
           <Component {...pageProps} />
         </motion.div>
