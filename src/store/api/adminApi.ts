@@ -67,7 +67,7 @@ export const adminApi = createApi({
     "Calendar",
     "Dashboard",
     "MFA",
-    "SiteContent"
+    "SiteContent",
   ],
   endpoints: (builder) => ({
     // Auth & Security
@@ -304,9 +304,9 @@ export const adminApi = createApi({
       providesTags: (result) =>
         result
           ? [
-            ...result.map(({ id }) => ({ type: "AdminPosts" as const, id })),
-            { type: "AdminPosts", id: "LIST" },
-          ]
+              ...result.map(({ id }) => ({ type: "AdminPosts" as const, id })),
+              { type: "AdminPosts", id: "LIST" },
+            ]
           : [{ type: "AdminPosts", id: "LIST" }],
     }),
     addBlogPost: builder.mutation<BlogPost, Partial<BlogPost>>({
@@ -456,7 +456,7 @@ export const adminApi = createApi({
             if (existingTask) {
               Object.assign(existingTask, task);
             }
-          })
+          }),
         );
         try {
           await queryFulfilled;
@@ -577,9 +577,9 @@ export const adminApi = createApi({
         const { id, ...updateData } = rec;
         const promise = id
           ? supabase
-            .from("recurring_transactions")
-            .update(updateData)
-            .eq("id", id)
+              .from("recurring_transactions")
+              .update(updateData)
+              .eq("id", id)
           : supabase.from("recurring_transactions").insert(updateData);
         const { data, error } = await promise.select().single();
         if (error) return { error };
@@ -845,14 +845,22 @@ export const adminApi = createApi({
       },
       async onQueryStarted(updates, { dispatch, queryFulfilled }) {
         const patchResult = dispatch(
-          adminApi.util.updateQueryData("getSiteSettings", undefined, (draft) => {
-            Object.assign(draft, updates);
-          })
+          adminApi.util.updateQueryData(
+            "getSiteSettings",
+            undefined,
+            (draft) => {
+              Object.assign(draft, updates);
+            },
+          ),
         );
         dispatch(
-          publicApi.util.updateQueryData("getSiteIdentity", undefined, (draft) => {
-            Object.assign(draft, updates);
-          })
+          publicApi.util.updateQueryData(
+            "getSiteIdentity",
+            undefined,
+            (draft) => {
+              Object.assign(draft, updates);
+            },
+          ),
         );
 
         try {
@@ -1015,7 +1023,10 @@ export const adminApi = createApi({
           .remove([asset.file_path]);
         // Don't fail the whole operation if storage deletion fails, but log it.
         // The DB record is the source of truth for the app.
-        if (storageError) console.warn(`Could not delete asset from storage: ${storageError.message}`);
+        if (storageError)
+          console.warn(
+            `Could not delete asset from storage: ${storageError.message}`,
+          );
 
         const { error: dbError } = await supabase
           .from("storage_assets")

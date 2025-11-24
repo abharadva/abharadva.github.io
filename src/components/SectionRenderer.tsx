@@ -183,7 +183,8 @@ export default function SectionRenderer({ section }: SectionRendererProps) {
         }
         if (type === "markdown" && content) {
           return (
-            <div className="prose max-w-3xl mx-auto text-foreground 
+            <div
+              className="prose max-w-3xl mx-auto text-foreground 
               prose-headings:text-foreground 
               prose-p:text-foreground 
               prose-strong:text-foreground 

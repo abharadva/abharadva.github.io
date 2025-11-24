@@ -74,9 +74,9 @@ export const publicApi = createApi({
       providesTags: (result) =>
         result
           ? [
-            ...result.map(({ id }) => ({ type: "Posts" as const, id })),
-            { type: "Posts", id: "LIST" },
-          ]
+              ...result.map(({ id }) => ({ type: "Posts" as const, id })),
+              { type: "Posts", id: "LIST" },
+            ]
           : [{ type: "Posts", id: "LIST" }],
     }),
     getBlogPostBySlug: builder.query<BlogPost, string>({

@@ -811,7 +811,9 @@ const MonthlyDetailDialog = ({
                       <p
                         className={cn(
                           "font-bold text-sm",
-                          t.type === "earning" ? "text-chart-2" : "text-chart-5"
+                          t.type === "earning"
+                            ? "text-chart-2"
+                            : "text-chart-5",
                         )}
                       >
                         {t.type === "earning" ? "+" : "-"}${t.amount.toFixed(2)}
@@ -1181,7 +1183,7 @@ export default function FinanceManager() {
                   <div
                     className={cn(
                       "text-5xl font-bold",
-                      netIncome >= 0 ? "text-chart-2" : "text-chart-5"
+                      netIncome >= 0 ? "text-chart-2" : "text-chart-5",
                     )}
                   >
                     {netIncome >= 0 ? "+" : "-"}$
@@ -1190,7 +1192,8 @@ export default function FinanceManager() {
                   <div className="flex justify-around items-center pt-4 border-t">
                     <div className="text-center">
                       <p className="text-sm text-muted-foreground flex items-center gap-1">
-                        <TrendingUp className="size-4 text-chart-2" /> Total Earnings
+                        <TrendingUp className="size-4 text-chart-2" /> Total
+                        Earnings
                       </p>
                       <p className="text-2xl font-semibold">
                         ${totalEarnings.toFixed(2)}
@@ -1199,7 +1202,8 @@ export default function FinanceManager() {
                     <Separator orientation="vertical" className="h-12" />
                     <div className="text-center">
                       <p className="text-sm text-muted-foreground flex items-center gap-1">
-                        <TrendingDown className="size-4 text-chart-5" /> Total Expenses
+                        <TrendingDown className="size-4 text-chart-5" /> Total
+                        Expenses
                       </p>
                       <p className="text-2xl font-semibold">
                         ${totalExpenses.toFixed(2)}
@@ -1257,9 +1261,9 @@ export default function FinanceManager() {
                         goal.target_amount - goal.current_amount;
                       const remainingDays = goal.target_date
                         ? differenceInDays(
-                          new Date(goal.target_date),
-                          new Date(),
-                        )
+                            new Date(goal.target_date),
+                            new Date(),
+                          )
                         : null;
                       return (
                         <div
@@ -1394,7 +1398,9 @@ export default function FinanceManager() {
                         <p
                           className={cn(
                             "font-bold",
-                            t.type === "earning" ? "text-chart-2" : "text-chart-5"
+                            t.type === "earning"
+                              ? "text-chart-2"
+                              : "text-chart-5",
                           )}
                         >
                           {t.type === "earning" ? "+" : "-"}$
@@ -1482,7 +1488,9 @@ export default function FinanceManager() {
                           <TableCell
                             className={cn(
                               "text-right font-bold",
-                              t.type === "earning" ? "text-chart-2" : "text-chart-5"
+                              t.type === "earning"
+                                ? "text-chart-2"
+                                : "text-chart-5",
                             )}
                           >
                             {t.type === "earning" ? "+" : "-"}$
@@ -1590,7 +1598,7 @@ export default function FinanceManager() {
                         cursor = new Date(r.start_date);
                       const next =
                         r.last_processed_date &&
-                          isAfter(new Date(r.last_processed_date), new Date())
+                        isAfter(new Date(r.last_processed_date), new Date())
                           ? cursor
                           : getNextOccurrence(cursor, r);
                       nextDueDate = format(next, "MMM dd, yyyy");

@@ -144,7 +144,34 @@ function ThemedApp({ Component, pageProps }: AppProps) {
         "theme-glass-frost",
         "theme-glass-sunset",
         "theme-glass-neon",
-        "theme-glass-mint"
+        "theme-glass-mint",
+        "theme-pure-minimalist",
+        "theme-soft-grayscale",
+        "theme-monochrome-pro",
+        "theme-zen-white",
+        "theme-swiss-design",
+        "theme-midnight-dev",
+        "theme-carbon-fiber",
+        "theme-slate-pro",
+        "theme-obsidian-code",
+        "theme-graphite-studio",
+        "theme-coral-reef",
+        "theme-electric-lime",
+        "theme-magenta-burst",
+        "theme-tangerine-dream",
+        "theme-ruby-red",
+        "theme-quantum-blue",
+        "theme-holographic",
+        "theme-cyber-matrix",
+        "theme-neon-grid",
+        "theme-digital-lavender",
+        "theme-mocha-mousse",
+        "theme-verdant-green",
+        "theme-bamboo-forest",
+        "theme-desert-sand",
+        "theme-code-editor",
+        "theme-github-pro",
+        "theme-tokyo-dev",
       );
 
       if (
@@ -154,8 +181,7 @@ function ThemedApp({ Component, pageProps }: AppProps) {
         const colors = siteIdentity.profile_data.custom_theme_colors;
         const root = document.documentElement;
 
-        // Helper to convert Hex to HSL inline (simplistic version to avoid importing utils)
-        // In a real world, importing from utils is cleaner, but this ensures no dep cycle here
+        // Helper to convert Hex to HSL inline
         const hexToHslLocal = (hex: string) => {
           let r = 0,
             g = 0,
@@ -243,12 +269,15 @@ function ThemedApp({ Component, pageProps }: AppProps) {
       opacity: 0,
       y: -5,
       transition: { duration: 0.2, ease: "easeInOut" },
+      display: "none",
     },
   };
 
   return (
     <main className={`${tahuFont.variable}`}>
-      {!isAdminPage && <LearningSessionManager />}
+      {/* CHANGE HERE: Removed the !isAdminPage check so the manager runs everywhere */}
+      <LearningSessionManager />
+
       <AnimatePresence mode="popLayout" initial={false}>
         <motion.div
           key={router.asPath}
@@ -377,6 +406,33 @@ export default function App(props: AppProps) {
           "theme-glass-sunset",
           "theme-glass-neon",
           "theme-glass-mint",
+          "theme-pure-minimalist",
+          "theme-soft-grayscale",
+          "theme-monochrome-pro",
+          "theme-zen-white",
+          "theme-swiss-design",
+          "theme-midnight-dev",
+          "theme-carbon-fiber",
+          "theme-slate-pro",
+          "theme-obsidian-code",
+          "theme-graphite-studio",
+          "theme-coral-reef",
+          "theme-electric-lime",
+          "theme-magenta-burst",
+          "theme-tangerine-dream",
+          "theme-ruby-red",
+          "theme-quantum-blue",
+          "theme-holographic",
+          "theme-cyber-matrix",
+          "theme-neon-grid",
+          "theme-digital-lavender",
+          "theme-mocha-mousse",
+          "theme-verdant-green",
+          "theme-bamboo-forest",
+          "theme-desert-sand",
+          "theme-code-editor",
+          "theme-github-pro",
+          "theme-tokyo-dev",
           "theme-custom",
         ]}
       >

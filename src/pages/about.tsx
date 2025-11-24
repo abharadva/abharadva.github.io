@@ -62,7 +62,8 @@ export default function AboutPage() {
                     </AvatarFallback>
                   </Avatar>
                 )}
-                <div className="prose prose-lg max-w-none text-center sm:text-left
+                <div
+                  className="prose prose-lg max-w-none text-center sm:text-left
                   prose-p:text-muted-foreground
                   prose-headings:text-foreground
                   prose-strong:text-foreground

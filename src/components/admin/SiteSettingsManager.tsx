@@ -56,14 +56,16 @@ const settingsFormSchema = z.object({
     name: z.string().min(1, "Name is required"),
     title: z.string().min(1, "Title is required"),
     default_theme: z.string(),
-    custom_theme_colors: z.object({
-      background: z.string().default("#0f172a"),
-      foreground: z.string().default("#e2e8f0"),
-      primary: z.string().default("#0ea5e9"),
-      secondary: z.string().default("#1e293b"),
-      accent: z.string().default("#38bdf8"),
-      card: z.string().default("#1e293b"),
-    }).optional(),
+    custom_theme_colors: z
+      .object({
+        background: z.string().default("#0f172a"),
+        foreground: z.string().default("#e2e8f0"),
+        primary: z.string().default("#0ea5e9"),
+        secondary: z.string().default("#1e293b"),
+        accent: z.string().default("#38bdf8"),
+        card: z.string().default("#1e293b"),
+      })
+      .optional(),
     description: z.string().min(1, "Hero description is required"),
     profile_picture_url: z
       .string()
@@ -201,7 +203,10 @@ export default function SiteSettingsManager() {
         if (Array.isArray(obj)) return obj.map(nullsToStrings);
 
         return Object.fromEntries(
-          Object.entries(obj).map(([key, value]) => [key, nullsToStrings(value)])
+          Object.entries(obj).map(([key, value]) => [
+            key,
+            nullsToStrings(value),
+          ]),
         );
       };
 
@@ -214,7 +219,8 @@ export default function SiteSettingsManager() {
       });
 
       // Manual deep merge for colors to avoid "" overriding valid defaults
-      const fetchedColors = cleanIdentity.profile_data.custom_theme_colors || {};
+      const fetchedColors =
+        cleanIdentity.profile_data.custom_theme_colors || {};
       const defaultColors = defaultValues.profile_data.custom_theme_colors!;
 
       const mergedColors = {
@@ -245,7 +251,7 @@ export default function SiteSettingsManager() {
             items: cleanIdentity.profile_data.status_panel?.currently_exploring
               ?.items?.length
               ? cleanIdentity.profile_data.status_panel.currently_exploring
-                .items
+                  .items
               : [""],
           },
           latestProject: {
@@ -811,6 +817,87 @@ export default function SiteSettingsManager() {
                               </SelectItem>
                               <SelectItem value="theme-glass-mint">
                                 Glass Mint
+                              </SelectItem>
+                              <SelectItem value="theme-pure-minimalist">
+                                Pure Minimalist
+                              </SelectItem>
+                              <SelectItem value="theme-soft-grayscale">
+                                Soft Gray Scale
+                              </SelectItem>
+                              <SelectItem value="theme-monochrome-pro">
+                                Monochrome Professional
+                              </SelectItem>
+                              <SelectItem value="theme-zen-white">
+                                Zen White
+                              </SelectItem>
+                              <SelectItem value="theme-swiss-design">
+                                Swiss Design
+                              </SelectItem>
+                              <SelectItem value="theme-midnight-dev">
+                                Midnight Developer
+                              </SelectItem>
+                              <SelectItem value="theme-carbon-fiber">
+                                Carbon Fiber
+                              </SelectItem>
+                              <SelectItem value="theme-slate-pro">
+                                Slate Professional
+                              </SelectItem>
+                              <SelectItem value="theme-obsidian-code">
+                                Obsidian Code
+                              </SelectItem>
+                              <SelectItem value="theme-graphite-studio">
+                                Graphite Studio
+                              </SelectItem>
+                              <SelectItem value="theme-coral-reef">
+                                Coral Reef
+                              </SelectItem>
+                              <SelectItem value="theme-electric-lime">
+                                Electric Lime
+                              </SelectItem>
+                              <SelectItem value="theme-magenta-burst">
+                                Magenta Burst
+                              </SelectItem>
+                              <SelectItem value="theme-tangerine-dream">
+                                Tangerine Dream
+                              </SelectItem>
+                              <SelectItem value="theme-ruby-red">
+                                Ruby Red
+                              </SelectItem>
+                              <SelectItem value="theme-quantum-blue">
+                                Quantum Blue
+                              </SelectItem>
+                              <SelectItem value="theme-holographic">
+                                Holographic
+                              </SelectItem>
+                              <SelectItem value="theme-cyber-matrix">
+                                Cyber Matrix
+                              </SelectItem>
+                              <SelectItem value="theme-neon-grid">
+                                Neon Grid
+                              </SelectItem>
+                              <SelectItem value="theme-digital-lavender">
+                                Digital Lavender
+                              </SelectItem>
+                              <SelectItem value="theme-mocha-mousse">
+                                Mocha Mousse
+                              </SelectItem>
+                              <SelectItem value="theme-verdant-green">
+                                Verdant Green
+                              </SelectItem>
+                              <SelectItem value="theme-bamboo-forest">
+                                Bamboo Forest
+                              </SelectItem>
+                              <SelectItem value="theme-desert-sand">
+                                Desert Sand
+                              </SelectItem>
+                              <SelectItem value="theme-code-editor">
+                                Code Editor Dark
+                              </SelectItem>
+                              <SelectItem value="theme-github-pro">
+                                GitHub Professional
+                              </SelectItem>
+                              <SelectItem value="theme-tokyo-dev">
+                                Tokyo Night Dev
                               </SelectItem>
                             </SelectContent>
                           </Select>

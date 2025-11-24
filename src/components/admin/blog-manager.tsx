@@ -19,11 +19,40 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Card, CardContent } from "@/components/ui/card";
-import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Edit, Trash2, Eye, Loader2, Plus, FileText } from "lucide-react";
+import {
+  Edit,
+  Trash2,
+  Eye,
+  Loader2,
+  Plus,
+  MoreHorizontal,
+  FileText,
+  Calendar,
+  ExternalLink,
+  ImageIcon,
+  Search,
+} from "lucide-react";
 import { toast } from "sonner";
+import { format } from "date-fns";
+import { getStorageUrl } from "@/lib/utils";
 
 interface BlogManagerProps {
   startInCreateMode?: boolean;
@@ -42,12 +71,9 @@ export default function BlogManager({
   >("all");
 
   const { data: posts = [], isLoading, error } = useGetAdminBlogPostsQuery();
-  const [addBlogPost, { isLoading: isAdding }] = useAddBlogPostMutation();
-  const [updateBlogPost, { isLoading: isUpdating }] =
-    useUpdateBlogPostMutation();
-  const [deleteBlogPost, { isLoading: isDeleting }] =
-    useDeleteBlogPostMutation();
-  const isMutating = isAdding || isUpdating || isDeleting;
+  const [addBlogPost] = useAddBlogPostMutation();
+  const [updateBlogPost] = useUpdateBlogPostMutation();
+  const [deleteBlogPost] = useDeleteBlogPostMutation();
 
   useEffect(() => {
     if (startInCreateMode) {
@@ -72,10 +98,12 @@ export default function BlogManager({
     setIsCreating(true);
     setEditingPost(null);
   };
+
   const handleEditPost = (post: BlogPost) => {
     setEditingPost(post);
     setIsCreating(false);
   };
+
   const handleCancel = () => {
     setIsCreating(false);
     setEditingPost(null);
@@ -84,7 +112,7 @@ export default function BlogManager({
   const handleDeletePost = async (post: BlogPost) => {
     if (
       !confirm(
-        "Are you sure you want to delete this post? This action cannot be undone.",
+        `Are you sure you want to delete "${post.title}"? This action cannot be undone.`,
       )
     )
       return;
@@ -135,143 +163,200 @@ export default function BlogManager({
   }
 
   return (
-    <div className="space-y-6">
-      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+    <div className="space-y-6 h-full flex flex-col">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
-          <h2 className="text-2xl font-bold">Blog Manager</h2>
+          <h2 className="text-2xl font-bold tracking-tight">Blog Manager</h2>
           <p className="text-muted-foreground">
-            Create, edit, and manage your blog posts.
+            Manage, create, and publish your content.
           </p>
         </div>
-        <Button onClick={handleCreatePost}>
-          <Plus className="mr-2 size-4" />
-          Create New Post
+        <Button onClick={handleCreatePost} size="sm" className="h-9">
+          <Plus className="mr-2 size-4" /> Create Post
         </Button>
       </div>
-      {!!error && (
-        <Alert variant="destructive">
-          <AlertTitle>Error</AlertTitle>
-          <AlertDescription>
-            {error && typeof error === "object" && "message" in error
-              ? String((error as { message: unknown }).message)
-              : "Failed to load posts"}
-          </AlertDescription>
-        </Alert>
-      )}
-      <Card>
-        <CardContent className="flex flex-col gap-4 p-4 sm:flex-row">
-          <Input
-            type="text"
-            placeholder="Search posts by title..."
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-            className="flex-1"
-          />
-          <Select
-            value={filterStatus}
-            onValueChange={(v) => setFilterStatus(v as any)}
-          >
-            <SelectTrigger className="w-full sm:w-[180px]">
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">All Posts</SelectItem>
-              <SelectItem value="published">Published</SelectItem>
-              <SelectItem value="draft">Drafts</SelectItem>
-            </SelectContent>
-          </Select>
-        </CardContent>
-      </Card>
 
-      {isLoading ? (
-        <div className="flex justify-center py-10">
-          <Loader2 className="size-8 animate-spin text-muted-foreground" />
-        </div>
-      ) : filteredPosts.length === 0 ? (
-        <div className="py-12 text-center text-muted-foreground">
-          <FileText className="mx-auto size-12" />
-          <h3 className="mt-4 text-lg font-semibold">No posts found</h3>
-          <p>Try adjusting your filters or create a new post.</p>
-        </div>
-      ) : (
-        <div className="space-y-4">
-          <AnimatePresence>
-            {filteredPosts.map((post) => (
-              <motion.div
-                key={post.id}
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                exit={{ opacity: 0 }}
-                transition={{ duration: 0.2 }}
+      <Card className="flex-1 flex flex-col overflow-hidden">
+        <CardHeader className="border-b p-4 space-y-0">
+          <div className="flex flex-col sm:flex-row gap-4 justify-between items-center">
+            <div className="relative w-full sm:w-72">
+              <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+              <Input
+                placeholder="Search posts..."
+                className="pl-9 bg-background"
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+              />
+            </div>
+            <div className="flex gap-2 w-full sm:w-auto">
+              <Select
+                value={filterStatus}
+                onValueChange={(v) => setFilterStatus(v as any)}
               >
-                <Card>
-                  <CardContent className="p-4 flex flex-col gap-4 md:flex-row md:items-start md:justify-between">
-                    <div className="min-w-0 flex-1 md:mr-4">
-                      <div className="mb-2 flex items-center space-x-3">
-                        <h3
-                          className="truncate text-lg font-bold"
-                          title={post.title}
-                        >
-                          {post.title}
-                        </h3>
+                <SelectTrigger className="w-full sm:w-[140px]">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">All Status</SelectItem>
+                  <SelectItem value="published">Published</SelectItem>
+                  <SelectItem value="draft">Drafts</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
+        </CardHeader>
+
+        <CardContent className="p-0 flex-1 overflow-auto bg-background/50">
+          {isLoading ? (
+            <div className="flex h-64 items-center justify-center">
+              <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+            </div>
+          ) : filteredPosts.length === 0 ? (
+            <div className="flex h-64 flex-col items-center justify-center text-muted-foreground">
+              <FileText className="h-12 w-12 mb-4 opacity-20" />
+              <p>No posts found.</p>
+            </div>
+          ) : (
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead className="w-[60px]">Image</TableHead>
+                  <TableHead>Title</TableHead>
+                  <TableHead>Status</TableHead>
+                  <TableHead className="hidden md:table-cell">Views</TableHead>
+                  <TableHead className="hidden md:table-cell">Date</TableHead>
+                  <TableHead className="text-right">Actions</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                <AnimatePresence>
+                  {filteredPosts.map((post) => (
+                    <TableRow
+                      key={post.id}
+                      className="group hover:bg-secondary/40"
+                    >
+                      <TableCell>
+                        <div className="h-10 w-10 rounded-md border bg-secondary/50 overflow-hidden flex items-center justify-center">
+                          {post.cover_image_url ? (
+                            <img
+                              src={post.cover_image_url}
+                              alt=""
+                              className="h-full w-full object-cover"
+                            />
+                          ) : (
+                            <ImageIcon className="h-4 w-4 text-muted-foreground opacity-50" />
+                          )}
+                        </div>
+                      </TableCell>
+                      <TableCell className="font-medium">
+                        <div className="flex flex-col">
+                          <span className="truncate max-w-[200px] sm:max-w-[300px]">
+                            {post.title}
+                          </span>
+                          <span className="text-xs text-muted-foreground font-mono">
+                            /{post.slug}
+                          </span>
+                        </div>
+                      </TableCell>
+                      <TableCell>
                         <Badge
                           variant={post.published ? "default" : "secondary"}
+                          className={
+                            post.published
+                              ? "bg-primary/15 text-primary hover:bg-primary/25 border-primary/20"
+                              : ""
+                          }
                         >
                           {post.published ? "Published" : "Draft"}
                         </Badge>
-                      </div>
-                      <p className="mb-3 line-clamp-2 text-sm text-muted-foreground">
-                        {post.excerpt || (
-                          <span className="italic">No excerpt.</span>
-                        )}
-                      </p>
-                      <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-muted-foreground">
-                        <span>
-                          Created:{" "}
-                          {new Date(post.created_at || "").toLocaleDateString()}
-                        </span>
-                        <span>Slug: /{post.slug}</span>
-                        <span className="flex items-center gap-1">
-                          <Eye className="size-3" /> {post.views || 0}
-                        </span>
-                      </div>
-                    </div>
-                    <div className="flex w-full shrink-0 flex-col gap-2 sm:w-auto sm:flex-row sm:items-center">
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={() => togglePostStatus(post)}
-                        disabled={isMutating}
-                      >
-                        {isUpdating ? (
-                          <Loader2 className="mr-2 size-4 animate-spin" />
-                        ) : null}{" "}
-                        {post.published ? "Unpublish" : "Publish"}
-                      </Button>
-                      <Button
-                        variant="secondary"
-                        size="sm"
-                        onClick={() => handleEditPost(post)}
-                        disabled={isMutating}
-                      >
-                        <Edit className="mr-2 size-4" /> Edit
-                      </Button>
-                      <Button
-                        variant="destructive"
-                        size="sm"
-                        onClick={() => handleDeletePost(post)}
-                        disabled={isDeleting}
-                      >
-                        <Trash2 className="mr-2 size-4" /> Delete
-                      </Button>
-                    </div>
-                  </CardContent>
-                </Card>
-              </motion.div>
-            ))}
-          </AnimatePresence>
-        </div>
-      )}
+                      </TableCell>
+                      <TableCell className="hidden md:table-cell font-mono text-sm">
+                        {post.views?.toLocaleString() || 0}
+                      </TableCell>
+                      <TableCell className="hidden md:table-cell text-sm text-muted-foreground">
+                        <div className="flex items-center gap-2">
+                          <Calendar className="h-3 w-3" />
+                          {format(
+                            new Date(post.updated_at || new Date()),
+                            "MMM dd, yyyy",
+                          )}
+                        </div>
+                      </TableCell>
+                      <TableCell className="text-right">
+                        <div className="flex items-center justify-end gap-2">
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            className="h-8 w-8 opacity-0 group-hover:opacity-100 transition-opacity"
+                            onClick={() => handleEditPost(post)}
+                          >
+                            <Edit className="h-4 w-4" />
+                            <span className="sr-only">Edit</span>
+                          </Button>
+
+                          <DropdownMenu>
+                            <DropdownMenuTrigger asChild>
+                              <Button
+                                variant="ghost"
+                                size="icon"
+                                className="h-8 w-8"
+                              >
+                                <MoreHorizontal className="h-4 w-4" />
+                                <span className="sr-only">Menu</span>
+                              </Button>
+                            </DropdownMenuTrigger>
+                            <DropdownMenuContent align="end">
+                              <DropdownMenuLabel>Actions</DropdownMenuLabel>
+                              <DropdownMenuItem
+                                onClick={() => handleEditPost(post)}
+                              >
+                                <Edit className="mr-2 h-4 w-4" /> Edit
+                              </DropdownMenuItem>
+                              <DropdownMenuItem
+                                onClick={() => togglePostStatus(post)}
+                              >
+                                {post.published ? (
+                                  <>
+                                    <FileText className="mr-2 h-4 w-4" />{" "}
+                                    Unpublish
+                                  </>
+                                ) : (
+                                  <>
+                                    <Eye className="mr-2 h-4 w-4" /> Publish
+                                  </>
+                                )}
+                              </DropdownMenuItem>
+                              {post.published && (
+                                <DropdownMenuItem asChild>
+                                  <a
+                                    href={`/blog/view?slug=${post.slug}`}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                  >
+                                    <ExternalLink className="mr-2 h-4 w-4" />{" "}
+                                    View Live
+                                  </a>
+                                </DropdownMenuItem>
+                              )}
+                              <DropdownMenuSeparator />
+                              <DropdownMenuItem
+                                className="text-destructive focus:text-destructive"
+                                onClick={() => handleDeletePost(post)}
+                              >
+                                <Trash2 className="mr-2 h-4 w-4" /> Delete
+                              </DropdownMenuItem>
+                            </DropdownMenuContent>
+                          </DropdownMenu>
+                        </div>
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </AnimatePresence>
+              </TableBody>
+            </Table>
+          )}
+        </CardContent>
+      </Card>
     </div>
   );
 }

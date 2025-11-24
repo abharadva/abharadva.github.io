@@ -80,7 +80,8 @@ export default function FeaturedProject({
           </a>
         </h3>
         <div className="my-4 rounded-md bg-card p-6 shadow-md border border-border">
-          <div className="prose prose-sm max-w-none text-muted-foreground
+          <div
+            className="prose prose-sm max-w-none text-muted-foreground
             prose-p:text-muted-foreground
             prose-a:text-primary hover:prose-a:text-primary/80
             prose-strong:text-foreground

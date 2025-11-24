@@ -8,7 +8,11 @@ import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Timer, Play, Square, Loader2, X } from "lucide-react";
 import { toast } from "sonner";
-import { useAppSelector } from "@/store/hooks";
+import { useAppDispatch, useAppSelector } from "@/store/hooks";
+import {
+  sessionStarted,
+  sessionStopped,
+} from "@/store/slices/learningSessionSlice";
 import {
   useAddLearningSessionMutation,
   useUpdateLearningSessionMutation,
@@ -32,6 +36,7 @@ const formatTime = (seconds: number) => {
 
 export default function SessionTracker({ topic }: SessionTrackerProps) {
   const [journalNotes, setJournalNotes] = useState("");
+  const dispatch = useAppDispatch();
   const { activeSession, elapsedTime } = useAppSelector(
     (state) => state.learningSession,
   );
@@ -54,13 +59,18 @@ export default function SessionTracker({ topic }: SessionTrackerProps) {
       return;
     }
     try {
-      await startSessionMutation({
+      // 1. Call API
+      const newSession = await startSessionMutation({
         topic_id: topic.id,
         start_time: new Date().toISOString(),
       }).unwrap();
-      // Logic is now in LearningSessionManager via Redux listener, just show toast
+
+      // 2. Update Redux State (This triggers the LearningSessionManager)
+      dispatch(sessionStarted(newSession));
+
       toast.success(`Session started for "${topic.title}"`);
     } catch (err) {
+      console.error(err);
       toast.error("Failed to start session");
     }
   };
@@ -82,6 +92,10 @@ export default function SessionTracker({ topic }: SessionTrackerProps) {
         duration_minutes,
         journal_notes: journalNotes || null,
       }).unwrap();
+
+      // Stop local timer
+      dispatch(sessionStopped());
+
       toast.success(`Session saved! Duration: ${duration_minutes} min.`);
       setJournalNotes("");
     } catch (err) {
@@ -99,6 +113,10 @@ export default function SessionTracker({ topic }: SessionTrackerProps) {
       return;
     try {
       await cancelSessionMutation(activeSession.id).unwrap();
+
+      // Stop local timer
+      dispatch(sessionStopped());
+
       toast.warning("Session cancelled and deleted.");
       setJournalNotes("");
     } catch (err) {

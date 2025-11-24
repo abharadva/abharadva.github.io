@@ -94,7 +94,8 @@ const PostMeta = ({
 };
 
 const PostContent = ({ content }: { content: string }) => (
-  <div className="prose max-w-none text-foreground 
+  <div
+    className="prose max-w-none text-foreground 
     prose-headings:text-foreground 
     prose-p:text-foreground 
     prose-strong:font-bold prose-strong:text-foreground 

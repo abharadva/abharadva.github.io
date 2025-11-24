@@ -418,14 +418,14 @@ export default function CommandCalendar({
       start_time:
         eventToEdit.start && !(eventToEdit.start instanceof Array)
           ? formatISO(
-            new Date(eventToEdit.start as string | number | Date),
-          ).slice(0, 16)
+              new Date(eventToEdit.start as string | number | Date),
+            ).slice(0, 16)
           : "",
       end_time:
         eventToEdit.end && !(eventToEdit.end instanceof Array)
           ? formatISO(
-            new Date(eventToEdit.end as string | number | Date),
-          ).slice(0, 16)
+              new Date(eventToEdit.end as string | number | Date),
+            ).slice(0, 16)
           : "",
       is_all_day: !!eventToEdit.allDay,
     });
@@ -452,10 +452,10 @@ export default function CommandCalendar({
       const iconClass = isEvent
         ? ""
         : cn({
-          "text-destructive": priority === "high",
-          "text-chart-3": priority === "medium",
-          "text-primary": priority === "low",
-        });
+            "text-destructive": priority === "high",
+            "text-chart-3": priority === "medium",
+            "text-primary": priority === "low",
+          });
 
       return (
         <div className="flex w-full items-center gap-2 overflow-hidden p-1 text-xs text-foreground">
