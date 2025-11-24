@@ -62,7 +62,12 @@ export default function AboutPage() {
                     </AvatarFallback>
                   </Avatar>
                 )}
-                <div className="prose prose-lg dark:prose-invert max-w-none text-center sm:text-left">
+                <div className="prose prose-lg max-w-none text-center sm:text-left
+                  prose-p:text-muted-foreground
+                  prose-headings:text-foreground
+                  prose-strong:text-foreground
+                  prose-a:text-primary hover:prose-a:text-primary/80"
+                >
                   {content.profile_data.bio.map((paragraph, index) => (
                     <ReactMarkdown key={index}>{paragraph}</ReactMarkdown>
                   ))}

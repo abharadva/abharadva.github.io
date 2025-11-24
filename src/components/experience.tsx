@@ -115,7 +115,12 @@ export default function Experience({
                     )}
                     {exp.description && (
                       <div
-                        className={`prose prose-sm dark:prose-invert mt-3 max-w-none text-muted-foreground prose-ul:list-none prose-li:mb-2 ${index % 2 === 0 ? "text-right prose-ul:text-right prose-li:text-right" : "text-left"}`}
+                        className={`mt-3 max-w-none text-muted-foreground prose prose-sm 
+                          prose-p:text-muted-foreground
+                          prose-strong:text-foreground
+                          prose-a:text-primary hover:prose-a:underline
+                          prose-ul:list-none prose-li:mb-2
+                          ${index % 2 === 0 ? "text-right prose-ul:text-right prose-li:text-right" : "text-left"}`}
                       >
                         <ReactMarkdown remarkPlugins={[remarkGfm]}>
                           {exp.description}

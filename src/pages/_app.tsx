@@ -106,6 +106,7 @@ function ThemedApp({ Component, pageProps }: AppProps) {
         "theme-neobrutalism-light", "theme-neobrutalism-dark",
         "theme-neobrutalism-color", "theme-neobrutalism-retro",
         "theme-neobrutalism-punk",
+        "theme-neo-brutal", "theme-neo-brutal-dark",
 
         // Glassmorphism
         "theme-glass-light", "theme-glass-dark", "theme-glass-aurora",
@@ -220,6 +221,7 @@ export default function App(props: AppProps) {
           "theme-neobrutalism-light", "theme-neobrutalism-dark",
           "theme-neobrutalism-color", "theme-neobrutalism-retro",
           "theme-neobrutalism-punk",
+          "theme-neo-brutal", "theme-neo-brutal-dark",
 
           // Glassmorphism
           "theme-glass-light", "theme-glass-dark", "theme-glass-aurora",

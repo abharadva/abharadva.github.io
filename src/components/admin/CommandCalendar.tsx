@@ -130,7 +130,7 @@ const CalendarPopoverContent: React.FC<{
     event.extendedProps || {};
   const isEarning = transactionType === "earning";
   const sign = isEarning ? "+" : "-";
-  const amountColor = isEarning ? "text-green-500" : "text-red-500";
+  const amountColor = isEarning ? "text-chart-2" : "text-chart-5";
 
   return (
     <PopoverContent className="w-80">
@@ -418,14 +418,14 @@ export default function CommandCalendar({
       start_time:
         eventToEdit.start && !(eventToEdit.start instanceof Array)
           ? formatISO(
-              new Date(eventToEdit.start as string | number | Date),
-            ).slice(0, 16)
+            new Date(eventToEdit.start as string | number | Date),
+          ).slice(0, 16)
           : "",
       end_time:
         eventToEdit.end && !(eventToEdit.end instanceof Array)
           ? formatISO(
-              new Date(eventToEdit.end as string | number | Date),
-            ).slice(0, 16)
+            new Date(eventToEdit.end as string | number | Date),
+          ).slice(0, 16)
           : "",
       is_all_day: !!eventToEdit.allDay,
     });
@@ -452,10 +452,10 @@ export default function CommandCalendar({
       const iconClass = isEvent
         ? ""
         : cn({
-            "text-destructive": priority === "high",
-            "text-yellow-400": priority === "medium",
-            "text-blue-400": priority === "low",
-          });
+          "text-destructive": priority === "high",
+          "text-chart-3": priority === "medium",
+          "text-primary": priority === "low",
+        });
 
       return (
         <div className="flex w-full items-center gap-2 overflow-hidden p-1 text-xs text-foreground">
@@ -471,8 +471,8 @@ export default function CommandCalendar({
       const isForecast = type === "forecast";
       const isEarning = transactionType === "earning";
       const sign = isEarning ? "+" : "-";
-      const amountColor = isEarning ? "text-green-400" : "text-red-400";
-      const iconColor = isEarning ? "bg-green-400" : "bg-red-400";
+      const amountColor = isEarning ? "text-chart-2" : "text-chart-5";
+      const iconColor = isEarning ? "bg-chart-2" : "bg-chart-5";
       return (
         <div
           className={cn(
@@ -505,7 +505,7 @@ export default function CommandCalendar({
   return (
     <div
       ref={calendarContainerRef}
-      className="relative rounded-lg border bg-card p-4 calendar-blueprint-theme"
+      className="relative rounded-lg border bg-card p-4 themed-calendar"
     >
       {isLoading && (
         <div className="absolute inset-0 z-10 flex items-center justify-center bg-card/80 backdrop-blur-sm rounded-lg">

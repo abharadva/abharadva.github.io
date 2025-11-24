@@ -79,8 +79,13 @@ export default function FeaturedProject({
             {project.title}
           </a>
         </h3>
-        <div className="my-4 rounded-md bg-card p-6 shadow-md">
-          <div className="prose prose-sm prose-ul:list-none prose-ul:p-0 dark:prose-invert max-w-none text-muted-foreground">
+        <div className="my-4 rounded-md bg-card p-6 shadow-md border border-border">
+          <div className="prose prose-sm max-w-none text-muted-foreground
+            prose-p:text-muted-foreground
+            prose-a:text-primary hover:prose-a:text-primary/80
+            prose-strong:text-foreground
+            prose-ul:list-none prose-ul:p-0"
+          >
             <ReactMarkdown remarkPlugins={[remarkGfm]}>
               {descriptionWithoutGithub}
             </ReactMarkdown>

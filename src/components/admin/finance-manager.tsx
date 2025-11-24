@@ -156,13 +156,13 @@ const chartConfig = {
   expense: { label: "Expenses", color: "hsl(var(--chart-5))" },
 };
 const COLORS = [
-  "#0088FE",
-  "#00C49F",
-  "#FFBB28",
-  "#FF8042",
-  "#8884d8",
-  "#82ca9d",
-  "#ffc658",
+  "hsl(var(--chart-1))",
+  "hsl(var(--chart-2))",
+  "hsl(var(--chart-3))",
+  "hsl(var(--chart-4))",
+  "hsl(var(--chart-5))",
+  "hsl(var(--primary))",
+  "hsl(var(--accent))",
 ];
 type DialogState = {
   type: "transaction" | "recurring" | "goal" | "addFunds" | null;
@@ -371,7 +371,7 @@ const CategoriesTab = ({
                         {format(new Date(t.date), "MMM dd, yyyy")}
                       </p>
                     </div>
-                    <p className="font-bold text-sm text-red-500">
+                    <p className="font-bold text-sm text-chart-5">
                       -${t.amount.toFixed(2)}
                     </p>
                   </div>
@@ -811,9 +811,7 @@ const MonthlyDetailDialog = ({
                       <p
                         className={cn(
                           "font-bold text-sm",
-                          t.type === "earning"
-                            ? "text-green-500"
-                            : "text-red-500",
+                          t.type === "earning" ? "text-chart-2" : "text-chart-5"
                         )}
                       >
                         {t.type === "earning" ? "+" : "-"}${t.amount.toFixed(2)}
@@ -1181,7 +1179,10 @@ export default function FinanceManager() {
                 </CardHeader>
                 <CardContent className="space-y-6">
                   <div
-                    className={`text-5xl font-bold ${netIncome >= 0 ? "text-green-600" : "text-red-600"}`}
+                    className={cn(
+                      "text-5xl font-bold",
+                      netIncome >= 0 ? "text-chart-2" : "text-chart-5"
+                    )}
                   >
                     {netIncome >= 0 ? "+" : "-"}$
                     {Math.abs(netIncome).toFixed(2)}
@@ -1189,8 +1190,7 @@ export default function FinanceManager() {
                   <div className="flex justify-around items-center pt-4 border-t">
                     <div className="text-center">
                       <p className="text-sm text-muted-foreground flex items-center gap-1">
-                        <TrendingUp className="size-4 text-green-500" /> Total
-                        Earnings
+                        <TrendingUp className="size-4 text-chart-2" /> Total Earnings
                       </p>
                       <p className="text-2xl font-semibold">
                         ${totalEarnings.toFixed(2)}
@@ -1199,8 +1199,7 @@ export default function FinanceManager() {
                     <Separator orientation="vertical" className="h-12" />
                     <div className="text-center">
                       <p className="text-sm text-muted-foreground flex items-center gap-1">
-                        <TrendingDown className="size-4 text-red-500" /> Total
-                        Expenses
+                        <TrendingDown className="size-4 text-chart-5" /> Total Expenses
                       </p>
                       <p className="text-2xl font-semibold">
                         ${totalExpenses.toFixed(2)}
@@ -1258,9 +1257,9 @@ export default function FinanceManager() {
                         goal.target_amount - goal.current_amount;
                       const remainingDays = goal.target_date
                         ? differenceInDays(
-                            new Date(goal.target_date),
-                            new Date(),
-                          )
+                          new Date(goal.target_date),
+                          new Date(),
+                        )
                         : null;
                       return (
                         <div
@@ -1393,7 +1392,10 @@ export default function FinanceManager() {
                           </p>
                         </div>
                         <p
-                          className={`font-bold ${t.type === "earning" ? "text-green-600" : "text-red-600"}`}
+                          className={cn(
+                            "font-bold",
+                            t.type === "earning" ? "text-chart-2" : "text-chart-5"
+                          )}
                         >
                           {t.type === "earning" ? "+" : "-"}$
                           {t.amount.toFixed(2)}
@@ -1478,7 +1480,10 @@ export default function FinanceManager() {
                           </TableCell>
                           <TableCell>{t.category || "–"}</TableCell>
                           <TableCell
-                            className={`text-right font-bold ${t.type === "earning" ? "text-green-600" : "text-red-600"}`}
+                            className={cn(
+                              "text-right font-bold",
+                              t.type === "earning" ? "text-chart-2" : "text-chart-5"
+                            )}
                           >
                             {t.type === "earning" ? "+" : "-"}$
                             {t.amount.toFixed(2)}
@@ -1585,7 +1590,7 @@ export default function FinanceManager() {
                         cursor = new Date(r.start_date);
                       const next =
                         r.last_processed_date &&
-                        isAfter(new Date(r.last_processed_date), new Date())
+                          isAfter(new Date(r.last_processed_date), new Date())
                           ? cursor
                           : getNextOccurrence(cursor, r);
                       nextDueDate = format(next, "MMM dd, yyyy");
@@ -1600,8 +1605,8 @@ export default function FinanceManager() {
                         <TableCell
                           className={
                             r.type === "earning"
-                              ? "text-green-600"
-                              : "text-red-600"
+                              ? "text-chart-2"
+                              : "text-chart-5"
                           }
                         >
                           ${r.amount.toFixed(2)}

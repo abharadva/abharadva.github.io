@@ -242,6 +242,7 @@ export interface SiteContent {
     "theme-neobrutalism-light" | "theme-neobrutalism-dark" |
     "theme-neobrutalism-color" | "theme-neobrutalism-retro" |
     "theme-neobrutalism-punk" |
+    "theme-neo-brutal" | "theme-neo-brutal-dark" |
     "theme-glass-light" | "theme-glass-dark" | "theme-glass-aurora" |
     "theme-glass-ocean" | "theme-glass-frost" | "theme-glass-sunset" |
     "theme-glass-neon" | "theme-glass-mint";

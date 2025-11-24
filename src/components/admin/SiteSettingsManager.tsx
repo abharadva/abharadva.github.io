@@ -124,7 +124,7 @@ const settingsFormSchema = z.object({
       "theme-neobrutalism-light", "theme-neobrutalism-dark",
       "theme-neobrutalism-color", "theme-neobrutalism-retro",
       "theme-neobrutalism-punk",
-
+      "theme-neo-brutal", "theme-neo-brutal-dark",
       // Glassmorphism
       "theme-glass-light", "theme-glass-dark", "theme-glass-aurora",
       "theme-glass-ocean", "theme-glass-frost", "theme-glass-sunset",
@@ -644,6 +644,8 @@ export default function SiteSettingsManager() {
                           <SelectItem value="theme-neobrutalism-color">Neobrutalism Colorful</SelectItem>
                           <SelectItem value="theme-neobrutalism-retro">Neobrutalism Retro</SelectItem>
                           <SelectItem value="theme-neobrutalism-punk">Neobrutalism Punk</SelectItem>
+                          <SelectItem value="theme-neo-brutal">Neo Brutal (XC)</SelectItem>
+                          <SelectItem value="theme-neo-brutal-dark">Neo Brutal Dark (XC)</SelectItem>
                           <SelectItem value="theme-glass-light">Glass Light</SelectItem>
                           <SelectItem value="theme-glass-dark">Glass Dark</SelectItem>
                           <SelectItem value="theme-glass-aurora">Glass Aurora</SelectItem>

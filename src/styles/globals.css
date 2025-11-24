@@ -11,8 +11,15 @@
     --primary: 200 100% 50%;
     --primary-foreground: 220 20% 5%;
     --radius: 0.375rem;
+    /* Default Chart Colors */
+    --chart-1: 200 80% 60%;
+    --chart-2: 160 60% 55%;
+    --chart-3: 30 80% 65%;
+    --chart-4: 280 65% 70%;
+    --chart-5: 340 75% 65%;
   }
 
+  /* Default / Blueprint Theme */
   .theme-blueprint {
     --background: 220 20% 5%;
     --foreground: 210 20% 90%;
@@ -41,6 +48,7 @@
     --chart-5: 340 75% 65%;
   }
 
+  /* Matrix Theme */
   .theme-matrix {
     --background: 0 0% 2%;
     /* Near black */
@@ -64,8 +72,14 @@
     --border: 120 20% 15%;
     --input: 120 20% 12%;
     --ring: 120 100% 50%;
+    --chart-1: var(--primary);
+    --chart-2: var(--accent);
+    --chart-3: var(--foreground);
+    --chart-4: var(--muted-foreground);
+    --chart-5: var(--destructive);
   }
 
+  /* Solarized Light */
   .theme-solarized-light {
     --background: 44 100% 97%;
     /* #fdf6e3 */
@@ -94,8 +108,14 @@
     /* #eee8d5 */
     --input: 44 100% 93%;
     --ring: 197 71% 51%;
+    --chart-1: var(--primary);
+    --chart-2: var(--accent);
+    --chart-3: var(--foreground);
+    --chart-4: var(--muted-foreground);
+    --chart-5: var(--destructive);
   }
 
+  /* Monokai */
   .theme-monokai {
     --background: 240 8% 15%;
     /* #272822 */
@@ -120,6 +140,11 @@
     --border: 240 8% 22%;
     --input: 240 8% 25%;
     --ring: 172 56% 54%;
+    --chart-1: var(--primary);
+    --chart-2: var(--accent);
+    --chart-3: var(--foreground);
+    --chart-4: var(--muted-foreground);
+    --chart-5: var(--destructive);
   }
 
   /* 1. Cyberpunk Neon - Vibrant pinks and purples with dark background */
@@ -146,6 +171,11 @@
     --input: 280 30% 18%;
     --ring: 320 100% 60%;
     --radius: 0.5rem;
+    --chart-1: var(--primary);
+    --chart-2: var(--accent);
+    --chart-3: var(--foreground);
+    --chart-4: var(--muted-foreground);
+    --chart-5: var(--destructive);
   }
 
   /* 2. Ocean Deep - Deep blues and teals, calming underwater vibe */
@@ -172,6 +202,11 @@
     --input: 200 40% 16%;
     --ring: 180 80% 45%;
     --radius: 0.375rem;
+    --chart-1: var(--primary);
+    --chart-2: var(--accent);
+    --chart-3: var(--foreground);
+    --chart-4: var(--muted-foreground);
+    --chart-5: var(--destructive);
   }
 
   /* 3. Sunset Blaze - Warm oranges and reds, evening sky aesthetic */
@@ -198,6 +233,11 @@
     --input: 25 30% 20%;
     --ring: 15 90% 55%;
     --radius: 0.5rem;
+    --chart-1: var(--primary);
+    --chart-2: var(--accent);
+    --chart-3: var(--foreground);
+    --chart-4: var(--muted-foreground);
+    --chart-5: var(--destructive);
   }
 
   /* 4. Forest Night - Deep greens with earthy tones */
@@ -224,6 +264,11 @@
     --input: 140 20% 18%;
     --ring: 140 60% 50%;
     --radius: 0.375rem;
+    --chart-1: var(--primary);
+    --chart-2: var(--accent);
+    --chart-3: var(--foreground);
+    --chart-4: var(--muted-foreground);
+    --chart-5: var(--destructive);
   }
 
   /* 5. Royal Purple - Luxurious deep purples with gold accents */
@@ -250,6 +295,11 @@
     --input: 270 40% 18%;
     --ring: 270 70% 60%;
     --radius: 0.5rem;
+    --chart-1: var(--primary);
+    --chart-2: var(--accent);
+    --chart-3: var(--foreground);
+    --chart-4: var(--muted-foreground);
+    --chart-5: var(--destructive);
   }
 
   /* 6. Midnight Crimson - Dark with blood red accents */
@@ -276,6 +326,11 @@
     --input: 0 15% 16%;
     --ring: 355 85% 50%;
     --radius: 0.375rem;
+    --chart-1: var(--primary);
+    --chart-2: var(--accent);
+    --chart-3: var(--foreground);
+    --chart-4: var(--muted-foreground);
+    --chart-5: var(--destructive);
   }
 
   /* 7. Arctic Frost - Cool whites and icy blues */
@@ -302,6 +357,11 @@
     --input: 200 20% 90%;
     --ring: 195 75% 50%;
     --radius: 0.5rem;
+    --chart-1: var(--primary);
+    --chart-2: var(--accent);
+    --chart-3: var(--foreground);
+    --chart-4: var(--muted-foreground);
+    --chart-5: var(--destructive);
   }
 
   /* 8. Dracula - Popular vampire-inspired theme */
@@ -331,6 +391,11 @@
     --input: 232 14% 26%;
     --ring: 326 100% 74%;
     --radius: 0.375rem;
+    --chart-1: var(--primary);
+    --chart-2: var(--accent);
+    --chart-3: var(--foreground);
+    --chart-4: var(--muted-foreground);
+    --chart-5: var(--destructive);
   }
 
   /* 9. Coffee Shop - Warm browns and cream, cozy aesthetic */
@@ -357,6 +422,11 @@
     --input: 30 15% 88%;
     --ring: 25 60% 45%;
     --radius: 0.5rem;
+    --chart-1: var(--primary);
+    --chart-2: var(--accent);
+    --chart-3: var(--foreground);
+    --chart-4: var(--muted-foreground);
+    --chart-5: var(--destructive);
   }
 
   /* 10. Electric Violet - Vibrant purple with neon accents */
@@ -383,6 +453,11 @@
     --input: 265 25% 18%;
     --ring: 270 90% 65%;
     --radius: 0.5rem;
+    --chart-1: var(--primary);
+    --chart-2: var(--accent);
+    --chart-3: var(--foreground);
+    --chart-4: var(--muted-foreground);
+    --chart-5: var(--destructive);
   }
 
   /* 1. Vaporwave Dream - Retro 80s/90s aesthetic with pink, purple, and cyan */
@@ -409,6 +484,11 @@
     --input: 280 50% 20%;
     --ring: 320 100% 70%;
     --radius: 0.75rem;
+    --chart-1: var(--primary);
+    --chart-2: var(--accent);
+    --chart-3: var(--foreground);
+    --chart-4: var(--muted-foreground);
+    --chart-5: var(--destructive);
   }
 
   /* 2. Neon Tokyo - Inspired by Japanese cyberpunk with multiple neon colors */
@@ -435,6 +515,11 @@
     --input: 240 25% 16%;
     --ring: 340 100% 60%;
     --radius: 0.25rem;
+    --chart-1: var(--primary);
+    --chart-2: var(--accent);
+    --chart-3: var(--foreground);
+    --chart-4: var(--muted-foreground);
+    --chart-5: var(--destructive);
   }
 
   /* 3. Aurora Borealis - Northern lights with greens, blues, and purples */
@@ -461,6 +546,11 @@
     --input: 220 30% 18%;
     --ring: 150 80% 50%;
     --radius: 0.5rem;
+    --chart-1: var(--primary);
+    --chart-2: var(--accent);
+    --chart-3: var(--foreground);
+    --chart-4: var(--muted-foreground);
+    --chart-5: var(--destructive);
   }
 
   /* 4. Candy Pop - Sweet pastel colors with vibrant pops */
@@ -487,6 +577,11 @@
     --input: 330 30% 92%;
     --ring: 340 85% 60%;
     --radius: 1rem;
+    --chart-1: var(--primary);
+    --chart-2: var(--accent);
+    --chart-3: var(--foreground);
+    --chart-4: var(--muted-foreground);
+    --chart-5: var(--destructive);
   }
 
   /* 5. Synthwave Sunset - Retro futuristic with pink, purple, and orange gradients */
@@ -513,6 +608,11 @@
     --input: 270 40% 18%;
     --ring: 320 90% 60%;
     --radius: 0.375rem;
+    --chart-1: var(--primary);
+    --chart-2: var(--accent);
+    --chart-3: var(--foreground);
+    --chart-4: var(--muted-foreground);
+    --chart-5: var(--destructive);
   }
 
   /* 6. Tropical Paradise - Vibrant greens, blues, and coral */
@@ -539,6 +639,11 @@
     --input: 180 30% 20%;
     --ring: 165 70% 50%;
     --radius: 0.5rem;
+    --chart-1: var(--primary);
+    --chart-2: var(--accent);
+    --chart-3: var(--foreground);
+    --chart-4: var(--muted-foreground);
+    --chart-5: var(--destructive);
   }
 
   /* 7. Cosmic Space - Deep space with nebula colors */
@@ -565,6 +670,11 @@
     --input: 260 50% 16%;
     --ring: 280 100% 65%;
     --radius: 0.5rem;
+    --chart-1: var(--primary);
+    --chart-2: var(--accent);
+    --chart-3: var(--foreground);
+    --chart-4: var(--muted-foreground);
+    --chart-5: var(--destructive);
   }
 
   /* 8. Cherry Blossom - Soft pinks and warm spring colors */
@@ -591,6 +701,11 @@
     --input: 350 25% 90%;
     --ring: 340 70% 60%;
     --radius: 0.75rem;
+    --chart-1: var(--primary);
+    --chart-2: var(--accent);
+    --chart-3: var(--foreground);
+    --chart-4: var(--muted-foreground);
+    --chart-5: var(--destructive);
   }
 
   /* 9. Gruvbox - Popular retro groove with warm earth tones and vibrant accents */
@@ -620,6 +735,11 @@
     --input: 35 15% 26%;
     --ring: 180 25% 50%;
     --radius: 0.375rem;
+    --chart-1: var(--primary);
+    --chart-2: var(--accent);
+    --chart-3: var(--foreground);
+    --chart-4: var(--muted-foreground);
+    --chart-5: var(--destructive);
   }
 
   /* 10. Outrun - Bold 80s aesthetic with magenta, cyan, and yellow */
@@ -647,6 +767,11 @@
     --input: 0 0% 16%;
     --ring: 320 100% 60%;
     --radius: 0.25rem;
+    --chart-1: var(--primary);
+    --chart-2: var(--accent);
+    --chart-3: var(--foreground);
+    --chart-4: var(--muted-foreground);
+    --chart-5: var(--destructive);
   }
 
   /* ========================================
@@ -682,6 +807,11 @@
     --input: 220 16% 30%;
     --ring: 193 43% 67%;
     --radius: 0.375rem;
+    --chart-1: var(--primary);
+    --chart-2: var(--accent);
+    --chart-3: var(--foreground);
+    --chart-4: var(--muted-foreground);
+    --chart-5: var(--destructive);
   }
 
   /* 2. Catppuccin Mocha - Soothing pastel dark */
@@ -710,6 +840,11 @@
     --input: 240 19% 22%;
     --ring: 267 84% 81%;
     --radius: 0.5rem;
+    --chart-1: var(--primary);
+    --chart-2: var(--accent);
+    --chart-3: var(--foreground);
+    --chart-4: var(--muted-foreground);
+    --chart-5: var(--destructive);
   }
 
   /* 3. Catppuccin Latte - Light pastel perfection */
@@ -738,6 +873,11 @@
     --input: 220 17% 88%;
     --ring: 266 85% 58%;
     --radius: 0.5rem;
+    --chart-1: var(--primary);
+    --chart-2: var(--accent);
+    --chart-3: var(--foreground);
+    --chart-4: var(--muted-foreground);
+    --chart-5: var(--destructive);
   }
 
   /* 4. Tokyo Night - Tokyo cityscape at night */
@@ -766,6 +906,11 @@
     --input: 234 17% 22%;
     --ring: 217 92% 76%;
     --radius: 0.375rem;
+    --chart-1: var(--primary);
+    --chart-2: var(--accent);
+    --chart-3: var(--foreground);
+    --chart-4: var(--muted-foreground);
+    --chart-5: var(--destructive);
   }
 
   /* 5. Tokyo Night Storm - Stormy variant */
@@ -793,6 +938,11 @@
     --input: 233 13% 25%;
     --ring: 189 60% 66%;
     --radius: 0.375rem;
+    --chart-1: var(--primary);
+    --chart-2: var(--accent);
+    --chart-3: var(--foreground);
+    --chart-4: var(--muted-foreground);
+    --chart-5: var(--destructive);
   }
 
   /* 6. Kanagawa - Japanese wave painting inspired */
@@ -821,6 +971,11 @@
     --input: 223 34% 22%;
     --ring: 180 25% 50%;
     --radius: 0.375rem;
+    --chart-1: var(--primary);
+    --chart-2: var(--accent);
+    --chart-3: var(--foreground);
+    --chart-4: var(--muted-foreground);
+    --chart-5: var(--destructive);
   }
 
   /* 7. Rosé Pine - Natural elegance */
@@ -849,6 +1004,11 @@
     --input: 249 19% 20%;
     --ring: 2 55% 83%;
     --radius: 0.5rem;
+    --chart-1: var(--primary);
+    --chart-2: var(--accent);
+    --chart-3: var(--foreground);
+    --chart-4: var(--muted-foreground);
+    --chart-5: var(--destructive);
   }
 
   /* 8. Rosé Pine Dawn - Light variant */
@@ -877,6 +1037,11 @@
     --input: 33 38% 92%;
     --ring: 343 76% 68%;
     --radius: 0.5rem;
+    --chart-1: var(--primary);
+    --chart-2: var(--accent);
+    --chart-3: var(--foreground);
+    --chart-4: var(--muted-foreground);
+    --chart-5: var(--destructive);
   }
 
   /* 9. One Dark Pro - Atom's iconic theme */
@@ -905,6 +1070,11 @@
     --input: 220 12% 26%;
     --ring: 207 82% 66%;
     --radius: 0.375rem;
+    --chart-1: var(--primary);
+    --chart-2: var(--accent);
+    --chart-3: var(--foreground);
+    --chart-4: var(--muted-foreground);
+    --chart-5: var(--destructive);
   }
 
   /* 10. Nightfox - Carbonfox variant */
@@ -933,6 +1103,11 @@
     --input: 198 15% 19%;
     --ring: 200 48% 62%;
     --radius: 0.375rem;
+    --chart-1: var(--primary);
+    --chart-2: var(--accent);
+    --chart-3: var(--foreground);
+    --chart-4: var(--muted-foreground);
+    --chart-5: var(--destructive);
   }
 
   /* ============ MODERN & TRENDING ============ */
@@ -963,6 +1138,11 @@
     --input: 210 10% 15%;
     --ring: 212 92% 45%;
     --radius: 0.375rem;
+    --chart-1: var(--primary);
+    --chart-2: var(--accent);
+    --chart-3: var(--foreground);
+    --chart-4: var(--muted-foreground);
+    --chart-5: var(--destructive);
   }
 
   /* 12. Ayu Dark - Sublime's modern theme */
@@ -991,6 +1171,11 @@
     --input: 219 25% 20%;
     --ring: 39 100% 57%;
     --radius: 0.375rem;
+    --chart-1: var(--primary);
+    --chart-2: var(--accent);
+    --chart-3: var(--foreground);
+    --chart-4: var(--muted-foreground);
+    --chart-5: var(--destructive);
   }
 
   /* 13. Everforest Dark - Forest-inspired serenity */
@@ -1019,6 +1204,11 @@
     --input: 134 12% 24%;
     --ring: 142 35% 58%;
     --radius: 0.375rem;
+    --chart-1: var(--primary);
+    --chart-2: var(--accent);
+    --chart-3: var(--foreground);
+    --chart-4: var(--muted-foreground);
+    --chart-5: var(--destructive);
   }
 
   /* 14. Material Palenight - Material Design dark */
@@ -1047,6 +1237,11 @@
     --input: 229 18% 22%;
     --ring: 207 82% 66%;
     --radius: 0.375rem;
+    --chart-1: var(--primary);
+    --chart-2: var(--accent);
+    --chart-3: var(--foreground);
+    --chart-4: var(--muted-foreground);
+    --chart-5: var(--destructive);
   }
 
   /* 15. Vesper - Minimal elegance */
@@ -1075,6 +1270,11 @@
     --input: 0 0% 15%;
     --ring: 43 100% 65%;
     --radius: 0.25rem;
+    --chart-1: var(--primary);
+    --chart-2: var(--accent);
+    --chart-3: var(--foreground);
+    --chart-4: var(--muted-foreground);
+    --chart-5: var(--destructive);
   }
 
   /* ============ LIGHT THEMES ============ */
@@ -1105,6 +1305,11 @@
     --input: 35 17% 92%;
     --ring: 142 40% 45%;
     --radius: 0.375rem;
+    --chart-1: var(--primary);
+    --chart-2: var(--accent);
+    --chart-3: var(--foreground);
+    --chart-4: var(--muted-foreground);
+    --chart-5: var(--destructive);
   }
 
   /* 17. GitHub Light - Clean GitHub style */
@@ -1133,6 +1338,11 @@
     --input: 210 17% 95%;
     --ring: 212 92% 45%;
     --radius: 0.375rem;
+    --chart-1: var(--primary);
+    --chart-2: var(--accent);
+    --chart-3: var(--foreground);
+    --chart-4: var(--muted-foreground);
+    --chart-5: var(--destructive);
   }
 
   /* 18. Ayu Light - Bright and clean */
@@ -1161,6 +1371,11 @@
     --input: 40 19% 93%;
     --ring: 27 60% 50%;
     --radius: 0.375rem;
+    --chart-1: var(--primary);
+    --chart-2: var(--accent);
+    --chart-3: var(--foreground);
+    --chart-4: var(--muted-foreground);
+    --chart-5: var(--destructive);
   }
 
   /* ============ RETRO & VINTAGE ============ */
@@ -1189,6 +1404,11 @@
     --input: 280 40% 18%;
     --ring: 320 100% 65%;
     --radius: 0.25rem;
+    --chart-1: var(--primary);
+    --chart-2: var(--accent);
+    --chart-3: var(--foreground);
+    --chart-4: var(--muted-foreground);
+    --chart-5: var(--destructive);
   }
 
   /* 20. Blade Runner - Dystopian future */
@@ -1215,6 +1435,11 @@
     --input: 25 25% 16%;
     --ring: 15 100% 55%;
     --radius: 0.375rem;
+    --chart-1: var(--primary);
+    --chart-2: var(--accent);
+    --chart-3: var(--foreground);
+    --chart-4: var(--muted-foreground);
+    --chart-5: var(--destructive);
   }
 
   /* 21. Terminal Green - Classic hacker aesthetic */
@@ -1241,6 +1466,11 @@
     --input: 0 0% 12%;
     --ring: 120 100% 50%;
     --radius: 0rem;
+    --chart-1: var(--primary);
+    --chart-2: var(--accent);
+    --chart-3: var(--foreground);
+    --chart-4: var(--muted-foreground);
+    --chart-5: var(--destructive);
   }
 
   /* 22. Amber CRT - Vintage terminal */
@@ -1267,6 +1497,11 @@
     --input: 30 15% 16%;
     --ring: 30 100% 60%;
     --radius: 0rem;
+    --chart-1: var(--primary);
+    --chart-2: var(--accent);
+    --chart-3: var(--foreground);
+    --chart-4: var(--muted-foreground);
+    --chart-5: var(--destructive);
   }
 
   /* ============ NATURE & ORGANIC ============ */
@@ -1295,6 +1530,11 @@
     --input: 265 25% 90%;
     --ring: 270 60% 60%;
     --radius: 0.75rem;
+    --chart-1: var(--primary);
+    --chart-2: var(--accent);
+    --chart-3: var(--foreground);
+    --chart-4: var(--muted-foreground);
+    --chart-5: var(--destructive);
   }
 
   /* 24. Midnight Blue - Deep ocean night */
@@ -1321,6 +1561,11 @@
     --input: 220 35% 18%;
     --ring: 210 70% 55%;
     --radius: 0.375rem;
+    --chart-1: var(--primary);
+    --chart-2: var(--accent);
+    --chart-3: var(--foreground);
+    --chart-4: var(--muted-foreground);
+    --chart-5: var(--destructive);
   }
 
   /* 25. Autumn Harvest - Warm fall colors */
@@ -1347,6 +1592,11 @@
     --input: 30 20% 22%;
     --ring: 25 80% 55%;
     --radius: 0.5rem;
+    --chart-1: var(--primary);
+    --chart-2: var(--accent);
+    --chart-3: var(--foreground);
+    --chart-4: var(--muted-foreground);
+    --chart-5: var(--destructive);
   }
 
   /* 26. Jade Garden - Asian-inspired green */
@@ -1373,6 +1623,11 @@
     --input: 160 15% 20%;
     --ring: 160 60% 50%;
     --radius: 0.375rem;
+    --chart-1: var(--primary);
+    --chart-2: var(--accent);
+    --chart-3: var(--foreground);
+    --chart-4: var(--muted-foreground);
+    --chart-5: var(--destructive);
   }
 
   /* 27. Desert Dusk - Sandy warm tones */
@@ -1399,6 +1654,11 @@
     --input: 35 30% 23%;
     --ring: 35 70% 55%;
     --radius: 0.5rem;
+    --chart-1: var(--primary);
+    --chart-2: var(--accent);
+    --chart-3: var(--foreground);
+    --chart-4: var(--muted-foreground);
+    --chart-5: var(--destructive);
   }
 
   /* ============ HIGH CONTRAST ============ */
@@ -1427,6 +1687,11 @@
     --input: 0 0% 10%;
     --ring: 60 100% 50%;
     --radius: 0.25rem;
+    --chart-1: var(--primary);
+    --chart-2: var(--accent);
+    --chart-3: var(--foreground);
+    --chart-4: var(--muted-foreground);
+    --chart-5: var(--destructive);
   }
 
   /* 29. High Contrast Light - Maximum readability light */
@@ -1453,6 +1718,11 @@
     --input: 0 0% 95%;
     --ring: 210 100% 30%;
     --radius: 0.25rem;
+    --chart-1: var(--primary);
+    --chart-2: var(--accent);
+    --chart-3: var(--foreground);
+    --chart-4: var(--muted-foreground);
+    --chart-5: var(--destructive);
   }
 
   /* ============ MODERN MINIMALIST ============ */
@@ -1480,6 +1750,11 @@
     --input: 0 0% 96%;
     --ring: 0 0% 20%;
     --radius: 0.5rem;
+    --chart-1: var(--primary);
+    --chart-2: var(--accent);
+    --chart-3: var(--foreground);
+    --chart-4: var(--muted-foreground);
+    --chart-5: var(--destructive);
   }
 
   /* 31. Charcoal - Deep minimal dark */
@@ -1505,6 +1780,11 @@
     --input: 0 0% 18%;
     --ring: 0 0% 80%;
     --radius: 0.375rem;
+    --chart-1: var(--primary);
+    --chart-2: var(--accent);
+    --chart-3: var(--foreground);
+    --chart-4: var(--muted-foreground);
+    --chart-5: var(--destructive);
   }
 
   /* ============ CREATIVE & ARTISTIC ============ */
@@ -1533,6 +1813,11 @@
     --input: 260 60% 18%;
     --ring: 280 90% 65%;
     --radius: 0.5rem;
+    --chart-1: var(--primary);
+    --chart-2: var(--accent);
+    --chart-3: var(--foreground);
+    --chart-4: var(--muted-foreground);
+    --chart-5: var(--destructive);
   }
 
   /* 33. Neon Noir - Cyberpunk noir */
@@ -1559,6 +1844,11 @@
     --input: 0 0% 13%;
     --ring: 330 100% 60%;
     --radius: 0.25rem;
+    --chart-1: var(--primary);
+    --chart-2: var(--accent);
+    --chart-3: var(--foreground);
+    --chart-4: var(--muted-foreground);
+    --chart-5: var(--destructive);
   }
 
   /* 34. Peacock - Vibrant teal and purple */
@@ -1585,6 +1875,11 @@
     --input: 190 35% 20%;
     --ring: 180 70% 50%;
     --radius: 0.5rem;
+    --chart-1: var(--primary);
+    --chart-2: var(--accent);
+    --chart-3: var(--foreground);
+    --chart-4: var(--muted-foreground);
+    --chart-5: var(--destructive);
   }
 
   /* 35. Flame - Fiery red and orange */
@@ -1611,6 +1906,11 @@
     --input: 15 35% 18%;
     --ring: 10 100% 55%;
     --radius: 0.375rem;
+    --chart-1: var(--primary);
+    --chart-2: var(--accent);
+    --chart-3: var(--foreground);
+    --chart-4: var(--muted-foreground);
+    --chart-5: var(--destructive);
   }
 
   /* ============ SEASONAL ============ */
@@ -1639,6 +1939,11 @@
     --input: 200 25% 88%;
     --ring: 200 70% 50%;
     --radius: 0.5rem;
+    --chart-1: var(--primary);
+    --chart-2: var(--accent);
+    --chart-3: var(--foreground);
+    --chart-4: var(--muted-foreground);
+    --chart-5: var(--destructive);
   }
 
   /* 37. Spring Meadow - Fresh green and yellow */
@@ -1665,6 +1970,11 @@
     --input: 100 25% 90%;
     --ring: 130 50% 50%;
     --radius: 0.75rem;
+    --chart-1: var(--primary);
+    --chart-2: var(--accent);
+    --chart-3: var(--foreground);
+    --chart-4: var(--muted-foreground);
+    --chart-5: var(--destructive);
   }
 
   /* 38. Summer Beach - Warm sandy theme */
@@ -1691,6 +2001,11 @@
     --input: 45 35% 90%;
     --ring: 200 80% 50%;
     --radius: 0.75rem;
+    --chart-1: var(--primary);
+    --chart-2: var(--accent);
+    --chart-3: var(--foreground);
+    --chart-4: var(--muted-foreground);
+    --chart-5: var(--destructive);
   }
 
   /* ============ PROFESSIONAL ============ */
@@ -1719,6 +2034,11 @@
     --input: 210 15% 18%;
     --ring: 210 90% 50%;
     --radius: 0.25rem;
+    --chart-1: var(--primary);
+    --chart-2: var(--accent);
+    --chart-3: var(--foreground);
+    --chart-4: var(--muted-foreground);
+    --chart-5: var(--destructive);
   }
 
   /* 40. Executive Gray - Sophisticated neutral */
@@ -1745,6 +2065,11 @@
     --input: 0 0% 23%;
     --ring: 210 50% 50%;
     --radius: 0.375rem;
+    --chart-1: var(--primary);
+    --chart-2: var(--accent);
+    --chart-3: var(--foreground);
+    --chart-4: var(--muted-foreground);
+    --chart-5: var(--destructive);
   }
 
   /* ============ GAMING ============ */
@@ -1772,6 +2097,11 @@
     --input: 0 0% 16%;
     --ring: 120 100% 40%;
     --radius: 0.25rem;
+    --chart-1: var(--primary);
+    --chart-2: var(--accent);
+    --chart-3: var(--foreground);
+    --chart-4: var(--muted-foreground);
+    --chart-5: var(--destructive);
   }
 
   /* 42. Discord - Popular chat app theme */
@@ -1800,6 +2130,11 @@
     --input: 225 6% 21%;
     --ring: 235 86% 65%;
     --radius: 0.375rem;
+    --chart-1: var(--primary);
+    --chart-2: var(--accent);
+    --chart-3: var(--foreground);
+    --chart-4: var(--muted-foreground);
+    --chart-5: var(--destructive);
   }
 
   /* 43. Steam - Gaming platform */
@@ -1825,6 +2160,11 @@
     --input: 210 12% 20%;
     --ring: 200 70% 50%;
     --radius: 0.25rem;
+    --chart-1: var(--primary);
+    --chart-2: var(--accent);
+    --chart-3: var(--foreground);
+    --chart-4: var(--muted-foreground);
+    --chart-5: var(--destructive);
   }
 
   /* ============ SOCIAL MEDIA INSPIRED ============ */
@@ -1852,6 +2192,11 @@
     --input: 0 0% 12%;
     --ring: 203 89% 53%;
     --radius: 0.75rem;
+    --chart-1: var(--primary);
+    --chart-2: var(--accent);
+    --chart-3: var(--foreground);
+    --chart-4: var(--muted-foreground);
+    --chart-5: var(--destructive);
   }
 
   /* 45. Instagram Gradient - Social media */
@@ -1878,6 +2223,11 @@
     --input: 280 30% 20%;
     --ring: 320 100% 60%;
     --radius: 0.5rem;
+    --chart-1: var(--primary);
+    --chart-2: var(--accent);
+    --chart-3: var(--foreground);
+    --chart-4: var(--muted-foreground);
+    --chart-5: var(--destructive);
   }
 
   /* ============ TECH BRANDS ============ */
@@ -1905,6 +2255,11 @@
     --input: 0 0% 15%;
     --ring: 211 100% 50%;
     --radius: 0.75rem;
+    --chart-1: var(--primary);
+    --chart-2: var(--accent);
+    --chart-3: var(--foreground);
+    --chart-4: var(--muted-foreground);
+    --chart-5: var(--destructive);
   }
 
   /* 47. Microsoft - Professional modern */
@@ -1930,6 +2285,11 @@
     --input: 210 15% 20%;
     --ring: 195 100% 45%;
     --radius: 0.25rem;
+    --chart-1: var(--primary);
+    --chart-2: var(--accent);
+    --chart-3: var(--foreground);
+    --chart-4: var(--muted-foreground);
+    --chart-5: var(--destructive);
   }
 
   /* ============ ARTISTIC & UNIQUE ============ */
@@ -1958,6 +2318,11 @@
     --input: 350 25% 22%;
     --ring: 350 85% 60%;
     --radius: 0.75rem;
+    --chart-1: var(--primary);
+    --chart-2: var(--accent);
+    --chart-3: var(--foreground);
+    --chart-4: var(--muted-foreground);
+    --chart-5: var(--destructive);
   }
 
   /* 49. Mint Chocolate - Sweet combination */
@@ -1984,6 +2349,11 @@
     --input: 30 15% 20%;
     --ring: 160 60% 55%;
     --radius: 0.5rem;
+    --chart-1: var(--primary);
+    --chart-2: var(--accent);
+    --chart-3: var(--foreground);
+    --chart-4: var(--muted-foreground);
+    --chart-5: var(--destructive);
   }
 
   /* 50. Bubblegum - Sweet pink theme */
@@ -2010,6 +2380,11 @@
     --input: 330 30% 90%;
     --ring: 340 80% 65%;
     --radius: 1rem;
+    --chart-1: var(--primary);
+    --chart-2: var(--accent);
+    --chart-3: var(--foreground);
+    --chart-4: var(--muted-foreground);
+    --chart-5: var(--destructive);
   }
 
   /* ============ LUXURY & PREMIUM ============ */
@@ -2038,6 +2413,11 @@
     --input: 0 0% 16%;
     --ring: 45 100% 50%;
     --radius: 0.5rem;
+    --chart-1: var(--primary);
+    --chart-2: var(--accent);
+    --chart-3: var(--foreground);
+    --chart-4: var(--muted-foreground);
+    --chart-5: var(--destructive);
   }
 
   /* 52. Platinum - Silver elegance */
@@ -2064,6 +2444,11 @@
     --input: 220 8% 20%;
     --ring: 220 15% 75%;
     --radius: 0.375rem;
+    --chart-1: var(--primary);
+    --chart-2: var(--accent);
+    --chart-3: var(--foreground);
+    --chart-4: var(--muted-foreground);
+    --chart-5: var(--destructive);
   }
 
   /* 53. Rose Gold - Elegant pink-gold */
@@ -2090,6 +2475,11 @@
     --input: 340 15% 90%;
     --ring: 340 60% 60%;
     --radius: 0.75rem;
+    --chart-1: var(--primary);
+    --chart-2: var(--accent);
+    --chart-3: var(--foreground);
+    --chart-4: var(--muted-foreground);
+    --chart-5: var(--destructive);
   }
 
   /* 54. Emerald Luxe - Rich green luxury */
@@ -2116,6 +2506,11 @@
     --input: 160 25% 18%;
     --ring: 160 70% 45%;
     --radius: 0.5rem;
+    --chart-1: var(--primary);
+    --chart-2: var(--accent);
+    --chart-3: var(--foreground);
+    --chart-4: var(--muted-foreground);
+    --chart-5: var(--destructive);
   }
 
   /* 55. Sapphire Royal - Deep blue luxury */
@@ -2142,6 +2537,11 @@
     --input: 220 40% 18%;
     --ring: 220 80% 50%;
     --radius: 0.5rem;
+    --chart-1: var(--primary);
+    --chart-2: var(--accent);
+    --chart-3: var(--foreground);
+    --chart-4: var(--muted-foreground);
+    --chart-5: var(--destructive);
   }
 
   /* ============ PASTEL DREAMS ============ */
@@ -2170,6 +2570,11 @@
     --input: 270 20% 92%;
     --ring: 280 60% 70%;
     --radius: 1rem;
+    --chart-1: var(--primary);
+    --chart-2: var(--accent);
+    --chart-3: var(--foreground);
+    --chart-4: var(--muted-foreground);
+    --chart-5: var(--destructive);
   }
 
   /* 57. Peach Cream - Soft peachy tones */
@@ -2196,6 +2601,11 @@
     --input: 25 30% 92%;
     --ring: 20 70% 65%;
     --radius: 0.75rem;
+    --chart-1: var(--primary);
+    --chart-2: var(--accent);
+    --chart-3: var(--foreground);
+    --chart-4: var(--muted-foreground);
+    --chart-5: var(--destructive);
   }
 
   /* 58. Cotton Candy - Pink and blue pastel */
@@ -2222,6 +2632,11 @@
     --input: 310 25% 92%;
     --ring: 320 60% 75%;
     --radius: 1rem;
+    --chart-1: var(--primary);
+    --chart-2: var(--accent);
+    --chart-3: var(--foreground);
+    --chart-4: var(--muted-foreground);
+    --chart-5: var(--destructive);
   }
 
   /* ============ EARTH TONES ============ */
@@ -2250,6 +2665,11 @@
     --input: 15 25% 22%;
     --ring: 15 60% 50%;
     --radius: 0.375rem;
+    --chart-1: var(--primary);
+    --chart-2: var(--accent);
+    --chart-3: var(--foreground);
+    --chart-4: var(--muted-foreground);
+    --chart-5: var(--destructive);
   }
 
   /* 60. Moss - Natural green-gray */
@@ -2276,6 +2696,11 @@
     --input: 120 12% 22%;
     --ring: 120 30% 45%;
     --radius: 0.375rem;
+    --chart-1: var(--primary);
+    --chart-2: var(--accent);
+    --chart-3: var(--foreground);
+    --chart-4: var(--muted-foreground);
+    --chart-5: var(--destructive);
   }
 
   /* ============ COSMIC & SCI-FI ============ */
@@ -2304,6 +2729,11 @@
     --input: 270 50% 16%;
     --ring: 280 90% 60%;
     --radius: 0.5rem;
+    --chart-1: var(--primary);
+    --chart-2: var(--accent);
+    --chart-3: var(--foreground);
+    --chart-4: var(--muted-foreground);
+    --chart-5: var(--destructive);
   }
 
   /* 62. Alien Green - Otherworldly green */
@@ -2330,6 +2760,11 @@
     --input: 140 35% 16%;
     --ring: 140 100% 50%;
     --radius: 0.375rem;
+    --chart-1: var(--primary);
+    --chart-2: var(--accent);
+    --chart-3: var(--foreground);
+    --chart-4: var(--muted-foreground);
+    --chart-5: var(--destructive);
   }
 
   /* 63. Starlight - Silver and blue cosmic */
@@ -2356,6 +2791,11 @@
     --input: 230 25% 18%;
     --ring: 210 100% 70%;
     --radius: 0.5rem;
+    --chart-1: var(--primary);
+    --chart-2: var(--accent);
+    --chart-3: var(--foreground);
+    --chart-4: var(--muted-foreground);
+    --chart-5: var(--destructive);
   }
 
   /* ============ FOOD & BEVERAGE ============ */
@@ -2384,6 +2824,11 @@
     --input: 25 25% 20%;
     --ring: 30 50% 45%;
     --radius: 0.375rem;
+    --chart-1: var(--primary);
+    --chart-2: var(--accent);
+    --chart-3: var(--foreground);
+    --chart-4: var(--muted-foreground);
+    --chart-5: var(--destructive);
   }
 
   /* 65. Matcha - Green tea inspired */
@@ -2410,6 +2855,11 @@
     --input: 100 20% 88%;
     --ring: 120 40% 50%;
     --radius: 0.75rem;
+    --chart-1: var(--primary);
+    --chart-2: var(--accent);
+    --chart-3: var(--foreground);
+    --chart-4: var(--muted-foreground);
+    --chart-5: var(--destructive);
   }
 
   /* 66. Berry Blast - Mixed berry colors */
@@ -2436,6 +2886,11 @@
     --input: 330 30% 20%;
     --ring: 340 70% 55%;
     --radius: 0.5rem;
+    --chart-1: var(--primary);
+    --chart-2: var(--accent);
+    --chart-3: var(--foreground);
+    --chart-4: var(--muted-foreground);
+    --chart-5: var(--destructive);
   }
 
   /* ============ NEOBRUTALISM ============ */
@@ -2469,6 +2924,11 @@
     --ring: 0 0% 0%;
     --radius: 0rem;
     /* Sharp corners */
+    --chart-1: var(--primary);
+    --chart-2: var(--accent);
+    --chart-3: var(--foreground);
+    --chart-4: var(--muted-foreground);
+    --chart-5: var(--destructive);
   }
 
   /* 68. Neobrutalism Dark - Inverted brutalism */
@@ -2500,6 +2960,11 @@
     --ring: 0 0% 100%;
     --radius: 0rem;
     /* Sharp corners */
+    --chart-1: var(--primary);
+    --chart-2: var(--accent);
+    --chart-3: var(--foreground);
+    --chart-4: var(--muted-foreground);
+    --chart-5: var(--destructive);
   }
 
   /* 69. Neobrutalism Colorful - Bold primary colors */
@@ -2529,6 +2994,11 @@
     --input: 0 0% 100%;
     --ring: 0 0% 0%;
     --radius: 0rem;
+    --chart-1: var(--primary);
+    --chart-2: var(--accent);
+    --chart-3: var(--foreground);
+    --chart-4: var(--muted-foreground);
+    --chart-5: var(--destructive);
   }
 
   /* 70. Neobrutalism Retro - 90s web aesthetic */
@@ -2561,6 +3031,11 @@
     --input: 0 0% 100%;
     --ring: 0 0% 0%;
     --radius: 0rem;
+    --chart-1: var(--primary);
+    --chart-2: var(--accent);
+    --chart-3: var(--foreground);
+    --chart-4: var(--muted-foreground);
+    --chart-5: var(--destructive);
   }
 
   /* 71. Neobrutalism Punk - Rebellious attitude */
@@ -2590,6 +3065,11 @@
     --input: 0 0% 15%;
     --ring: 340 100% 60%;
     --radius: 0rem;
+    --chart-1: var(--primary);
+    --chart-2: var(--accent);
+    --chart-3: var(--foreground);
+    --chart-4: var(--muted-foreground);
+    --chart-5: var(--destructive);
   }
 
   /* ============ GLASSMORPHISM ============ */
@@ -2622,6 +3102,15 @@
     --ring: 220 80% 60% / 0.6;
     --radius: 1rem;
     /* Rounded for glass effect */
+
+    --glass-opacity: 0.7;
+    --glass-blur: 12px;
+    --glass-border-opacity: 0.5;
+    --chart-1: var(--primary);
+    --chart-2: var(--accent);
+    --chart-3: var(--foreground);
+    --chart-4: var(--muted-foreground);
+    --chart-5: var(--destructive);
   }
 
   /* 73. Glass Dark - Dark frosted glass */
@@ -2651,6 +3140,14 @@
     --input: 220 15% 20% / 0.6;
     --ring: 200 90% 60% / 0.6;
     --radius: 1rem;
+    --glass-opacity: 0.6;
+    --glass-blur: 16px;
+    --glass-border-opacity: 0.4;
+    --chart-1: var(--primary);
+    --chart-2: var(--accent);
+    --chart-3: var(--foreground);
+    --chart-4: var(--muted-foreground);
+    --chart-5: var(--destructive);
   }
 
   /* 74. Glass Aurora - Colorful glass with aurora effect */
@@ -2680,6 +3177,11 @@
     --input: 280 25% 25% / 0.5;
     --ring: 280 90% 70% / 0.6;
     --radius: 1.25rem;
+    --chart-1: var(--primary);
+    --chart-2: var(--accent);
+    --chart-3: var(--foreground);
+    --chart-4: var(--muted-foreground);
+    --chart-5: var(--destructive);
   }
 
   /* 75. Glass Ocean - Blue aquatic glass */
@@ -2709,6 +3211,11 @@
     --input: 200 30% 25% / 0.5;
     --ring: 190 80% 60% / 0.6;
     --radius: 1rem;
+    --chart-1: var(--primary);
+    --chart-2: var(--accent);
+    --chart-3: var(--foreground);
+    --chart-4: var(--muted-foreground);
+    --chart-5: var(--destructive);
   }
 
   /* 76. Glass Frost - Icy frosted glass */
@@ -2737,6 +3244,11 @@
     --input: 200 20% 92% / 0.6;
     --ring: 195 75% 55% / 0.6;
     --radius: 1rem;
+    --chart-1: var(--primary);
+    --chart-2: var(--accent);
+    --chart-3: var(--foreground);
+    --chart-4: var(--muted-foreground);
+    --chart-5: var(--destructive);
   }
 
   /* 77. Glass Sunset - Warm gradient glass */
@@ -2765,6 +3277,11 @@
     --input: 25 30% 25% / 0.5;
     --ring: 15 90% 60% / 0.6;
     --radius: 1rem;
+    --chart-1: var(--primary);
+    --chart-2: var(--accent);
+    --chart-3: var(--foreground);
+    --chart-4: var(--muted-foreground);
+    --chart-5: var(--destructive);
   }
 
   /* 78. Glass Neon - Neon-lit glass */
@@ -2795,6 +3312,11 @@
     --input: 0 0% 18% / 0.6;
     --ring: 320 100% 65% / 0.7;
     --radius: 1.25rem;
+    --chart-1: var(--primary);
+    --chart-2: var(--accent);
+    --chart-3: var(--foreground);
+    --chart-4: var(--muted-foreground);
+    --chart-5: var(--destructive);
   }
 
   /* 79. Glass Mint - Minty fresh glass */
@@ -2823,6 +3345,69 @@
     --input: 160 20% 92% / 0.6;
     --ring: 165 60% 55% / 0.6;
     --radius: 1rem;
+    --chart-1: var(--primary);
+    --chart-2: var(--accent);
+    --chart-3: var(--foreground);
+    --chart-4: var(--muted-foreground);
+    --chart-5: var(--destructive);
+  }
+
+  /* 80. Neo Brutal (Custom Light) */
+  .theme-neo-brutal {
+    --background: 220 13% 96%;
+    --foreground: 240 10% 3.9%;
+    --card: 0 0% 100%;
+    --card-foreground: 240 10% 3.9%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 240 10% 3.9%;
+    --primary: 240 10% 3.9%;
+    --primary-foreground: 0 0% 100%;
+    --secondary: 50 100% 60%;
+    --secondary-foreground: 240 10% 3.9%;
+    --muted: 220 9% 86%;
+    --muted-foreground: 240 5% 45.1%;
+    --accent: 250 70% 60%;
+    --accent-foreground: 0 0% 100%;
+    --destructive: 0 84.2% 60.2%;
+    --destructive-foreground: 0 0% 100%;
+    --border: 240 10% 3.9%;
+    --input: 240 10% 3.9%;
+    --ring: 250 70% 60%;
+    --radius: 0rem;
+    --chart-1: 12 76% 61%;
+    --chart-2: 173 58% 39%;
+    --chart-3: 197 37% 24%;
+    --chart-4: 43 74% 66%;
+    --chart-5: 27 87% 67%;
+  }
+
+  /* 81. Neo Brutal Dark (Custom) */
+  .theme-neo-brutal-dark {
+    --background: 240 10% 3.9%;
+    --foreground: 0 0% 98%;
+    --card: 240 10% 3.9%;
+    --card-foreground: 0 0% 98%;
+    --popover: 240 10% 3.9%;
+    --popover-foreground: 0 0% 98%;
+    --primary: 0 0% 98%;
+    --primary-foreground: 240 10% 3.9%;
+    --secondary: 50 100% 50%;
+    --secondary-foreground: 240 10% 3.9%;
+    --muted: 240 3.7% 15.9%;
+    --muted-foreground: 0 0% 63.9%;
+    --accent: 250 70% 70%;
+    --accent-foreground: 240 10% 3.9%;
+    --destructive: 0 72.2% 50.6%;
+    --destructive-foreground: 0 0% 98%;
+    --border: 0 0% 90%;
+    --input: 0 0% 90%;
+    --ring: 250 70% 70%;
+    --radius: 0rem;
+    --chart-1: 12 76% 71%;
+    --chart-2: 173 58% 49%;
+    --chart-3: 197 37% 34%;
+    --chart-4: 43 74% 76%;
+    --chart-5: 27 87% 77%;
   }
 }
 
@@ -2849,9 +3434,8 @@
     @apply font-mono font-semibold;
   }
 
-  /* --- FullCalendar Theming --- */
-  /* This block applies the "Digital Blueprint" theme to the calendar component */
-  .calendar-blueprint-theme .fc {
+  /* FullCalendar Theming */
+  .themed-calendar .fc {
     /* General colors */
     --fc-border-color: hsl(var(--border));
     --fc-daygrid-event-dot-width: 6px;
@@ -2931,7 +3515,7 @@
       @apply text-muted-foreground/40;
     }
 
-    /* --- EVENT STYLING OVERHAUL --- */
+    /* EVENT STYLING OVERHAUL */
 
     /* Remove default event background/border - we control it in the render function */
     .fc-event {
@@ -3075,10 +3659,9 @@
 
   /* Additional forced styles for stubborn FullCalendar elements */
   .calendar-blueprint-theme {
-
     .fc-scrollgrid,
     .fc-scrollgrid-section,
-    .fc-scrollgrid-section>td {
+    .fc-scrollgrid-section > td {
       background-color: hsl(var(--card)) !important;
     }
 
@@ -3090,7 +3673,6 @@
 }
 
 @layer components {
-
   [class*="theme-glass"] .bg-card,
   [class*="theme-glass"] [class*="card"] {
     backdrop-filter: blur(12px);
@@ -3106,8 +3688,10 @@
 
   /* The new background grid pattern for the "Digital Blueprint" theme */
   .bg-grid-pattern {
-    background-image: radial-gradient(hsl(var(--foreground)) / 0.1 1px,
-        transparent 1px);
+    background-image: radial-gradient(
+      hsl(var(--foreground)) / 0.1 1px,
+      transparent 1px
+    );
     background-size: 20px 20px;
   }
 

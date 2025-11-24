@@ -94,7 +94,21 @@ const PostMeta = ({
 };
 
 const PostContent = ({ content }: { content: string }) => (
-  <div className="prose dark:prose-invert max-w-none prose-p:text-foreground/80 prose-headings:text-foreground prose-a:text-primary hover:prose-a:text-primary/80 prose-strong:text-foreground">
+  <div className="prose max-w-none text-foreground 
+    prose-headings:text-foreground 
+    prose-p:text-foreground 
+    prose-strong:font-bold prose-strong:text-foreground 
+    prose-ul:text-foreground 
+    prose-ol:text-foreground 
+    prose-li:text-foreground 
+    prose-blockquote:border-l-primary prose-blockquote:text-muted-foreground 
+    prose-a:font-medium prose-a:text-primary hover:prose-a:text-primary/80 
+    prose-code:rounded prose-code:bg-muted prose-code:px-1 prose-code:py-0.5 prose-code:font-mono prose-code:text-foreground prose-code:before:content-none prose-code:after:content-none 
+    prose-pre:bg-card prose-pre:border prose-pre:border-border prose-pre:text-card-foreground
+    prose-th:text-foreground prose-td:text-muted-foreground
+    prose-hr:border-border
+    prose-img:rounded-lg prose-img:border prose-img:border-border"
+  >
     <ReactMarkdown
       remarkPlugins={[remarkGfm]}
       rehypePlugins={[rehypeRaw, rehypePrism]}

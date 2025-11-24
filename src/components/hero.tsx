@@ -122,7 +122,10 @@ export default function Hero() {
 
         <motion.div
           variants={itemVariants}
-          className="prose prose-lg dark:prose-invert mt-8 max-w-xl text-muted-foreground"
+          className="mt-8 max-w-xl prose prose-lg text-muted-foreground
+            prose-p:text-muted-foreground
+            prose-a:text-primary hover:prose-a:text-primary/80
+            prose-strong:text-foreground font-medium"
         >
           <ReactMarkdown>{hero.description}</ReactMarkdown>
         </motion.div>
@@ -166,8 +169,8 @@ export default function Hero() {
           <div className="mt-4 space-y-4">
             <div className="flex items-center gap-3">
               <span className="relative flex h-3 w-3">
-                <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-green-400 opacity-75"></span>
-                <span className="relative inline-flex h-3 w-3 rounded-full bg-green-500"></span>
+                <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-chart-2 opacity-75"></span>
+                <span className="relative inline-flex h-3 w-3 rounded-full bg-chart-2"></span>
               </span>
               <p className="text-sm">{status_panel.availability}</p>
             </div>

@@ -44,7 +44,10 @@ export default function Footer() {
     <footer className="w-full border-t border-border/50 py-16 text-sm text-muted-foreground">
       <Container>
         <div className="flex flex-col items-center justify-between gap-8 md:flex-row">
-          <div className="prose prose-sm dark:prose-invert text-center text-muted-foreground md:text-left [&_p]:m-0">
+          <div className="text-center text-muted-foreground md:text-left [&_p]:m-0 prose prose-sm 
+            prose-p:text-muted-foreground 
+            prose-a:text-primary hover:prose-a:underline"
+          >
             <p>
               &copy; {currentYear} {profile_data.name}.
             </p>

@@ -100,7 +100,7 @@ export default function AdvancedMarkdownEditor({
           direction="horizontal"
           className="h-full w-full rounded-b-lg"
         >
-          <ResizablePanel defaultSize={50}>
+          <ResizablePanel defaultSize={80}>
             <Textarea
               value={value}
               onChange={(e) => onChange(e.target.value)}
@@ -110,9 +110,19 @@ export default function AdvancedMarkdownEditor({
             />
           </ResizablePanel>
           <ResizableHandle withHandle />
-          <ResizablePanel defaultSize={50}>
+          <ResizablePanel defaultSize={20}>
             <div
-              className="prose dark:prose-invert max-w-none h-full overflow-y-auto p-4"
+              className="h-full overflow-y-auto p-4 bg-background/50
+                prose max-w-none text-foreground 
+                prose-headings:text-foreground 
+                prose-p:text-foreground 
+                prose-strong:text-foreground 
+                prose-ul:text-foreground 
+                prose-ol:text-foreground 
+                prose-blockquote:border-l-primary prose-blockquote:text-muted-foreground
+                prose-a:text-primary
+                prose-code:bg-muted prose-code:text-foreground prose-code:rounded prose-code:px-1
+                prose-img:rounded-md prose-img:border prose-img:border-border"
               style={{ height: editorHeight }}
             >
               <ReactMarkdown

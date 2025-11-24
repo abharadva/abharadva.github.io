@@ -141,9 +141,9 @@ const TaskCard = ({
   onDragStart: (e: DragEvent<HTMLDivElement>) => void;
 }) => {
   const priorityClasses: Record<Priority, string> = {
-    low: "bg-blue-500/20 text-blue-400",
-    medium: "bg-yellow-500/20 text-yellow-400",
-    high: "bg-red-500/20 text-red-400",
+    low: "bg-primary/10 text-primary", 
+    medium: "bg-chart-3/15 text-chart-3", 
+    high: "bg-destructive/15 text-destructive", 
   };
 
   return (

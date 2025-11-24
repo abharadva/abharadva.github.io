@@ -183,7 +183,17 @@ export default function SectionRenderer({ section }: SectionRendererProps) {
         }
         if (type === "markdown" && content) {
           return (
-            <div className="prose dark:prose-invert max-w-3xl mx-auto">
+            <div className="prose max-w-3xl mx-auto text-foreground 
+              prose-headings:text-foreground 
+              prose-p:text-foreground 
+              prose-strong:text-foreground 
+              prose-ul:text-foreground 
+              prose-ol:text-foreground 
+              prose-blockquote:border-l-primary prose-blockquote:text-muted-foreground
+              prose-a:text-primary hover:prose-a:text-primary/80
+              prose-code:bg-muted prose-code:text-foreground prose-code:rounded prose-code:px-1
+              prose-hr:border-border"
+            >
               <ReactMarkdown remarkPlugins={[remarkGfm]}>
                 {content}
               </ReactMarkdown>
