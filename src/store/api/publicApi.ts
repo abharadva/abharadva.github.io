@@ -9,7 +9,6 @@ import type {
 } from "@/types";
 
 type NavLink = { label: string; href: string };
-type SiteSettings = { portfolio_mode: "multi-page" | "single-page" };
 
 export const publicApi = createApi({
   reducerPath: "publicApi",
@@ -36,8 +35,8 @@ export const publicApi = createApi({
     }),
     getNavLinks: builder.query<NavLink[], void>({
       queryFn: async () => {
-        const [settingsRes, linksRes] = await Promise.all([
-          supabase.from("site_settings").select("portfolio_mode").single(),
+        const [identityRes, linksRes] = await Promise.all([
+          supabase.from("site_identity").select("portfolio_mode").single(),
           supabase
             .from("navigation_links")
             .select("label, href")
@@ -47,7 +46,7 @@ export const publicApi = createApi({
 
         if (linksRes.error) return { error: linksRes.error };
 
-        const portfolioMode = settingsRes.data?.portfolio_mode || "multi-page";
+        const portfolioMode = identityRes.data?.portfolio_mode || "multi-page";
         let finalLinks = linksRes.data || [];
 
         if (portfolioMode === "single-page") {
@@ -60,7 +59,7 @@ export const publicApi = createApi({
         }
         return { data: finalLinks };
       },
-      providesTags: ["Navigation", "SiteSettings"],
+      providesTags: ["Navigation", "SiteContent"],
     }),
     getPublishedBlogPosts: builder.query<BlogPost[], void>({
       queryFn: async () => {
@@ -75,9 +74,9 @@ export const publicApi = createApi({
       providesTags: (result) =>
         result
           ? [
-              ...result.map(({ id }) => ({ type: "Posts" as const, id })),
-              { type: "Posts", id: "LIST" },
-            ]
+            ...result.map(({ id }) => ({ type: "Posts" as const, id })),
+            { type: "Posts", id: "LIST" },
+          ]
           : [{ type: "Posts", id: "LIST" }],
     }),
     getBlogPostBySlug: builder.query<BlogPost, string>({

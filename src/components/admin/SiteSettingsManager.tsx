@@ -1,4 +1,3 @@
-// src/components/admin/SiteSettingsManager.tsx
 "use client";
 
 import React, { useEffect } from "react";
@@ -42,6 +41,7 @@ import {
   useUpdateSiteSettingsMutation,
 } from "@/store/api/adminApi";
 import { Skeleton } from "../ui/skeleton";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 const socialLinkSchema = z.object({
   id: z.string(),
@@ -55,81 +55,15 @@ const settingsFormSchema = z.object({
   profile_data: z.object({
     name: z.string().min(1, "Name is required"),
     title: z.string().min(1, "Title is required"),
-    default_theme: z.enum(["theme-blueprint", "theme-matrix", "theme-solarized-light", "theme-monokai",
-      "theme-cyberpunk", "theme-ocean", "theme-sunset", "theme-forest",
-      "theme-royal", "theme-crimson", "theme-arctic", "theme-dracula",
-      "theme-coffee", "theme-violet", "theme-vaporwave", "theme-tokyo", "theme-aurora", "theme-candy",
-      "theme-synthwave", "theme-tropical", "theme-cosmic", "theme-sakura",
-      "theme-gruvbox", "theme-outrun",
-      // Developer Favorites
-      "theme-nord", "theme-catppuccin-mocha", "theme-catppuccin-latte",
-      "theme-tokyo-night", "theme-tokyo-storm", "theme-kanagawa",
-      "theme-rose-pine", "theme-rose-pine-dawn", "theme-onedark-pro", "theme-nightfox",
-
-      // Modern & Trending
-      "theme-github-dark", "theme-ayu-dark", "theme-everforest-dark",
-      "theme-material-palenight", "theme-vesper",
-
-      // Light Themes
-      "theme-everforest-light", "theme-github-light", "theme-ayu-light",
-
-      // Retro & Vintage
-      "theme-retrowave", "theme-blade-runner", "theme-terminal-green", "theme-amber-crt",
-
-      // Nature & Organic
-      "theme-lavender", "theme-midnight-blue", "theme-autumn", "theme-jade", "theme-desert",
-
-      // High Contrast
-      "theme-hc-dark", "theme-hc-light",
-
-      // Minimalist
-      "theme-paper", "theme-charcoal",
-
-      // Creative
-      "theme-nebula", "theme-neon-noir", "theme-peacock", "theme-flame",
-
-      // Seasonal
-      "theme-winter", "theme-spring", "theme-summer",
-
-      // Professional
-      "theme-corporate", "theme-executive",
-
-      // Gaming
-      "theme-razer", "theme-discord", "theme-steam",
-
-      // Social Media
-      "theme-twitter-dark", "theme-instagram",
-
-      // Tech Brands
-      "theme-apple-dark", "theme-microsoft",
-
-      // Artistic
-      "theme-watermelon", "theme-mint-chocolate", "theme-bubblegum",
-
-      // Luxury
-      "theme-gold-noir", "theme-platinum", "theme-rose-gold", "theme-emerald-luxe", "theme-sapphire",
-
-      // Pastel
-      "theme-pastel-rainbow", "theme-peach-cream", "theme-cotton-candy",
-
-      // Earth Tones
-      "theme-terracotta", "theme-moss",
-
-      // Cosmic
-      "theme-galactic", "theme-alien", "theme-starlight",
-
-      // Food & Beverage
-      "theme-espresso", "theme-matcha", "theme-berry",
-      // Neobrutalism
-      "theme-neobrutalism-light", "theme-neobrutalism-dark",
-      "theme-neobrutalism-color", "theme-neobrutalism-retro",
-      "theme-neobrutalism-punk",
-      "theme-neo-brutal", "theme-neo-brutal-dark",
-      // Glassmorphism
-      "theme-glass-light", "theme-glass-dark", "theme-glass-aurora",
-      "theme-glass-ocean", "theme-glass-frost", "theme-glass-sunset",
-      "theme-glass-neon", "theme-glass-mint",
-    ]),
+    default_theme: z.string(),
+    custom_theme_colors: z.object({
+      background: z.string().default("#0f172a"),
+      foreground: z.string().default("#e2e8f0"),
+      primary: z.string().default("#0ea5e9"),
+      secondary: z.string().default("#1e293b"),
+      accent: z.string().default("#38bdf8"),
+      card: z.string().default("#1e293b"),
+    }).optional(),
     description: z.string().min(1, "Hero description is required"),
     profile_picture_url: z
       .string()
@@ -186,6 +120,14 @@ const defaultValues: SettingsFormValues = {
     description: "",
     profile_picture_url: "",
     default_theme: "theme-blueprint",
+    custom_theme_colors: {
+      background: "#0f172a",
+      foreground: "#e2e8f0",
+      primary: "#0ea5e9",
+      secondary: "#1e293b",
+      accent: "#38bdf8",
+      card: "#1e293b",
+    },
     show_profile_picture: true,
     logo: { main: "", highlight: "" },
     bio: [""],
@@ -252,10 +194,7 @@ export default function SiteSettingsManager() {
 
   useEffect(() => {
     if (settingsData) {
-      const { identity, settings } = settingsData;
-
-      // This function ensures that any null values from the DB become empty strings
-      // to prevent controlled vs. uncontrolled input errors.
+      // Converts nulls to empty strings to satisfy Controlled Inputs
       const nullsToStrings = (obj: any): any => {
         if (obj === null || obj === undefined) return "";
         if (typeof obj !== "object") return obj;
@@ -266,7 +205,7 @@ export default function SiteSettingsManager() {
         );
       };
 
-      const cleanIdentity = nullsToStrings(identity);
+      const cleanIdentity = nullsToStrings(settingsData);
 
       const fetchedSocials = (cleanIdentity.social_links as any[]) || [];
       const mergedSocials = (defaultValues.social_links || []).map((def) => {
@@ -274,10 +213,24 @@ export default function SiteSettingsManager() {
         return fetched ? { ...def, ...fetched } : def;
       });
 
-      // Correctly merge profile data, ensuring fetched data takes precedence.
+      // Manual deep merge for colors to avoid "" overriding valid defaults
+      const fetchedColors = cleanIdentity.profile_data.custom_theme_colors || {};
+      const defaultColors = defaultValues.profile_data.custom_theme_colors!;
+
+      const mergedColors = {
+        background: fetchedColors.background || defaultColors.background,
+        foreground: fetchedColors.foreground || defaultColors.foreground,
+        primary: fetchedColors.primary || defaultColors.primary,
+        secondary: fetchedColors.secondary || defaultColors.secondary,
+        accent: fetchedColors.accent || defaultColors.accent,
+        card: fetchedColors.card || defaultColors.card,
+      };
+
       const mergedProfileData = {
         ...defaultValues.profile_data,
         ...cleanIdentity.profile_data,
+        // Use our manually merged colors object
+        custom_theme_colors: mergedColors,
         logo: {
           ...defaultValues.profile_data.logo,
           ...(cleanIdentity.profile_data.logo || {}),
@@ -287,11 +240,13 @@ export default function SiteSettingsManager() {
           ...(cleanIdentity.profile_data.status_panel || {}),
           currently_exploring: {
             ...defaultValues.profile_data.status_panel.currently_exploring,
-            ...(cleanIdentity.profile_data.status_panel?.currently_exploring || {}),
-            items:
-              cleanIdentity.profile_data.status_panel?.currently_exploring?.items?.length
-                ? cleanIdentity.profile_data.status_panel.currently_exploring.items
-                : [""],
+            ...(cleanIdentity.profile_data.status_panel?.currently_exploring ||
+              {}),
+            items: cleanIdentity.profile_data.status_panel?.currently_exploring
+              ?.items?.length
+              ? cleanIdentity.profile_data.status_panel.currently_exploring
+                .items
+              : [""],
           },
           latestProject: {
             ...defaultValues.profile_data.status_panel.latestProject,
@@ -308,7 +263,7 @@ export default function SiteSettingsManager() {
       };
 
       form.reset({
-        portfolio_mode: settings.portfolio_mode as "multi-page" | "single-page",
+        portfolio_mode: settingsData.portfolio_mode || "multi-page",
         profile_data: mergedProfileData,
         social_links: mergedSocials,
         footer_data: cleanIdentity.footer_data || defaultValues.footer_data,
@@ -318,11 +273,11 @@ export default function SiteSettingsManager() {
 
   const onSubmit = async (values: SettingsFormValues) => {
     const { portfolio_mode, ...identityValues } = values;
+
+    // Ensure type compatibility by type-casting if necessary,
+    // though with the updated types, Partial<SiteContent> should match.
     try {
-      await updateSiteSettings({
-        identity: identityValues,
-        settings: { portfolio_mode },
-      }).unwrap();
+      await updateSiteSettings(values).unwrap();
       toast.success("Site settings updated successfully!");
     } catch (err: any) {
       toast.error("Failed to save settings", { description: err.message });
@@ -530,139 +485,453 @@ export default function SiteSettingsManager() {
           <div className="lg:col-span-1 space-y-6 lg:sticky lg:top-24">
             <Card>
               <CardHeader>
-                <CardTitle>Theme</CardTitle>
+                <CardTitle>Theme Settings</CardTitle>
               </CardHeader>
-              <CardContent className="space-y-4">
-                <FormField
-                  control={form.control}
-                  name="profile_data.default_theme"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Default Public Theme</FormLabel>
-                      <Select
-                        onValueChange={field.onChange}
-                        value={field.value}
+              <CardContent>
+                <Tabs defaultValue="presets">
+                  <TabsList className="grid w-full grid-cols-2 mb-4">
+                    <TabsTrigger value="presets">Presets</TabsTrigger>
+                    <TabsTrigger value="custom">Custom Builder</TabsTrigger>
+                  </TabsList>
+
+                  <TabsContent value="presets" className="space-y-4">
+                    <FormField
+                      control={form.control}
+                      name="profile_data.default_theme"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Select Preset</FormLabel>
+                          <Select
+                            onValueChange={field.onChange}
+                            value={field.value}
+                          >
+                            <FormControl>
+                              <SelectTrigger>
+                                <SelectValue placeholder="Select a theme" />
+                              </SelectTrigger>
+                            </FormControl>
+                            <SelectContent>
+                              <SelectItem value="theme-blueprint">
+                                Blueprint
+                              </SelectItem>
+                              <SelectItem value="theme-matrix">
+                                Matrix
+                              </SelectItem>
+                              <SelectItem value="theme-solarized-light">
+                                Solarized Light
+                              </SelectItem>
+                              <SelectItem value="theme-monokai">
+                                Monokai
+                              </SelectItem>
+                              <SelectItem value="theme-cyberpunk">
+                                Cyberpunk Neon
+                              </SelectItem>
+                              <SelectItem value="theme-ocean">
+                                Ocean Deep
+                              </SelectItem>
+                              <SelectItem value="theme-sunset">
+                                Sunset Blaze
+                              </SelectItem>
+                              <SelectItem value="theme-forest">
+                                Forest Night
+                              </SelectItem>
+                              <SelectItem value="theme-royal">
+                                Royal Purple
+                              </SelectItem>
+                              <SelectItem value="theme-crimson">
+                                Midnight Crimson
+                              </SelectItem>
+                              <SelectItem value="theme-arctic">
+                                Arctic Frost
+                              </SelectItem>
+                              <SelectItem value="theme-dracula">
+                                Dracula
+                              </SelectItem>
+                              <SelectItem value="theme-coffee">
+                                Coffee Shop
+                              </SelectItem>
+                              <SelectItem value="theme-violet">
+                                Electric Violet
+                              </SelectItem>
+                              <SelectItem value="theme-vaporwave">
+                                Vaporwave Dream
+                              </SelectItem>
+                              <SelectItem value="theme-tokyo">
+                                Neon Tokyo
+                              </SelectItem>
+                              <SelectItem value="theme-aurora">
+                                Aurora Borealis
+                              </SelectItem>
+                              <SelectItem value="theme-candy">
+                                Candy Pop
+                              </SelectItem>
+                              <SelectItem value="theme-synthwave">
+                                Synthwave Sunset
+                              </SelectItem>
+                              <SelectItem value="theme-tropical">
+                                Tropical Paradise
+                              </SelectItem>
+                              <SelectItem value="theme-cosmic">
+                                Cosmic Space
+                              </SelectItem>
+                              <SelectItem value="theme-sakura">
+                                Cherry Blossom
+                              </SelectItem>
+                              <SelectItem value="theme-gruvbox">
+                                Gruvbox
+                              </SelectItem>
+                              <SelectItem value="theme-outrun">
+                                Outrun
+                              </SelectItem>
+                              <SelectItem value="theme-nord">Nord</SelectItem>
+                              <SelectItem value="theme-catppuccin-mocha">
+                                Catppuccin Mocha
+                              </SelectItem>
+                              <SelectItem value="theme-catppuccin-latte">
+                                Catppuccin Latte
+                              </SelectItem>
+                              <SelectItem value="theme-tokyo-night">
+                                Tokyo Night
+                              </SelectItem>
+                              <SelectItem value="theme-tokyo-storm">
+                                Tokyo Night Storm
+                              </SelectItem>
+                              <SelectItem value="theme-kanagawa">
+                                Kanagawa
+                              </SelectItem>
+                              <SelectItem value="theme-rose-pine">
+                                Rosé Pine
+                              </SelectItem>
+                              <SelectItem value="theme-rose-pine-dawn">
+                                Rosé Pine Dawn
+                              </SelectItem>
+                              <SelectItem value="theme-onedark-pro">
+                                One Dark Pro
+                              </SelectItem>
+                              <SelectItem value="theme-nightfox">
+                                Nightfox
+                              </SelectItem>
+                              <SelectItem value="theme-github-dark">
+                                GitHub Dark
+                              </SelectItem>
+                              <SelectItem value="theme-ayu-dark">
+                                Ayu Dark
+                              </SelectItem>
+                              <SelectItem value="theme-everforest-dark">
+                                Everforest Dark
+                              </SelectItem>
+                              <SelectItem value="theme-material-palenight">
+                                Material Palenight
+                              </SelectItem>
+                              <SelectItem value="theme-vesper">
+                                Vesper
+                              </SelectItem>
+                              <SelectItem value="theme-everforest-light">
+                                Everforest Light
+                              </SelectItem>
+                              <SelectItem value="theme-github-light">
+                                GitHub Light
+                              </SelectItem>
+                              <SelectItem value="theme-ayu-light">
+                                Ayu Light
+                              </SelectItem>
+                              <SelectItem value="theme-retrowave">
+                                Retro Wave
+                              </SelectItem>
+                              <SelectItem value="theme-blade-runner">
+                                Blade Runner
+                              </SelectItem>
+                              <SelectItem value="theme-terminal-green">
+                                Terminal Green
+                              </SelectItem>
+                              <SelectItem value="theme-amber-crt">
+                                Amber CRT
+                              </SelectItem>
+                              <SelectItem value="theme-lavender">
+                                Lavender Fields
+                              </SelectItem>
+                              <SelectItem value="theme-midnight-blue">
+                                Midnight Blue
+                              </SelectItem>
+                              <SelectItem value="theme-autumn">
+                                Autumn Harvest
+                              </SelectItem>
+                              <SelectItem value="theme-jade">
+                                Jade Garden
+                              </SelectItem>
+                              <SelectItem value="theme-desert">
+                                Desert Dusk
+                              </SelectItem>
+                              <SelectItem value="theme-hc-dark">
+                                High Contrast Dark
+                              </SelectItem>
+                              <SelectItem value="theme-hc-light">
+                                High Contrast Light
+                              </SelectItem>
+                              <SelectItem value="theme-paper">
+                                Paper White
+                              </SelectItem>
+                              <SelectItem value="theme-charcoal">
+                                Charcoal
+                              </SelectItem>
+                              <SelectItem value="theme-nebula">
+                                Nebula
+                              </SelectItem>
+                              <SelectItem value="theme-neon-noir">
+                                Neon Noir
+                              </SelectItem>
+                              <SelectItem value="theme-peacock">
+                                Peacock
+                              </SelectItem>
+                              <SelectItem value="theme-flame">Flame</SelectItem>
+                              <SelectItem value="theme-winter">
+                                Winter Frost
+                              </SelectItem>
+                              <SelectItem value="theme-spring">
+                                Spring Meadow
+                              </SelectItem>
+                              <SelectItem value="theme-summer">
+                                Summer Beach
+                              </SelectItem>
+                              <SelectItem value="theme-corporate">
+                                Corporate Blue
+                              </SelectItem>
+                              <SelectItem value="theme-executive">
+                                Executive Gray
+                              </SelectItem>
+                              <SelectItem value="theme-razer">
+                                Razer Green
+                              </SelectItem>
+                              <SelectItem value="theme-discord">
+                                Discord
+                              </SelectItem>
+                              <SelectItem value="theme-steam">Steam</SelectItem>
+                              <SelectItem value="theme-twitter-dark">
+                                Twitter/X Dark
+                              </SelectItem>
+                              <SelectItem value="theme-instagram">
+                                Instagram Gradient
+                              </SelectItem>
+                              <SelectItem value="theme-apple-dark">
+                                Apple Dark
+                              </SelectItem>
+                              <SelectItem value="theme-microsoft">
+                                Microsoft
+                              </SelectItem>
+                              <SelectItem value="theme-watermelon">
+                                Watermelon
+                              </SelectItem>
+                              <SelectItem value="theme-mint-chocolate">
+                                Mint Chocolate
+                              </SelectItem>
+                              <SelectItem value="theme-bubblegum">
+                                Bubblegum
+                              </SelectItem>
+                              <SelectItem value="theme-gold-noir">
+                                Gold Noir
+                              </SelectItem>
+                              <SelectItem value="theme-platinum">
+                                Platinum
+                              </SelectItem>
+                              <SelectItem value="theme-rose-gold">
+                                Rose Gold
+                              </SelectItem>
+                              <SelectItem value="theme-emerald-luxe">
+                                Emerald Luxe
+                              </SelectItem>
+                              <SelectItem value="theme-sapphire">
+                                Sapphire Royal
+                              </SelectItem>
+                              <SelectItem value="theme-pastel-rainbow">
+                                Pastel Rainbow
+                              </SelectItem>
+                              <SelectItem value="theme-peach-cream">
+                                Peach Cream
+                              </SelectItem>
+                              <SelectItem value="theme-cotton-candy">
+                                Cotton Candy
+                              </SelectItem>
+                              <SelectItem value="theme-terracotta">
+                                Terracotta
+                              </SelectItem>
+                              <SelectItem value="theme-moss">Moss</SelectItem>
+                              <SelectItem value="theme-galactic">
+                                Galactic Purple
+                              </SelectItem>
+                              <SelectItem value="theme-alien">
+                                Alien Green
+                              </SelectItem>
+                              <SelectItem value="theme-starlight">
+                                Starlight
+                              </SelectItem>
+                              <SelectItem value="theme-espresso">
+                                Espresso
+                              </SelectItem>
+                              <SelectItem value="theme-matcha">
+                                Matcha
+                              </SelectItem>
+                              <SelectItem value="theme-berry">
+                                Berry Blast
+                              </SelectItem>
+                              <SelectItem value="theme-neobrutalism-light">
+                                Neobrutalism Light
+                              </SelectItem>
+                              <SelectItem value="theme-neobrutalism-dark">
+                                Neobrutalism Dark
+                              </SelectItem>
+                              <SelectItem value="theme-neobrutalism-color">
+                                Neobrutalism Colorful
+                              </SelectItem>
+                              <SelectItem value="theme-neobrutalism-retro">
+                                Neobrutalism Retro
+                              </SelectItem>
+                              <SelectItem value="theme-neobrutalism-punk">
+                                Neobrutalism Punk
+                              </SelectItem>
+                              <SelectItem value="theme-glass-light">
+                                Glass Light
+                              </SelectItem>
+                              <SelectItem value="theme-glass-dark">
+                                Glass Dark
+                              </SelectItem>
+                              <SelectItem value="theme-glass-aurora">
+                                Glass Aurora
+                              </SelectItem>
+                              <SelectItem value="theme-glass-ocean">
+                                Glass Ocean
+                              </SelectItem>
+                              <SelectItem value="theme-glass-frost">
+                                Glass Frost
+                              </SelectItem>
+                              <SelectItem value="theme-glass-sunset">
+                                Glass Sunset
+                              </SelectItem>
+                              <SelectItem value="theme-glass-neon">
+                                Glass Neon
+                              </SelectItem>
+                              <SelectItem value="theme-glass-mint">
+                                Glass Mint
+                              </SelectItem>
+                            </SelectContent>
+                          </Select>
+                          <FormDescription>
+                            Uses a pre-defined color palette.
+                          </FormDescription>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                  </TabsContent>
+
+                  <TabsContent value="custom" className="space-y-4">
+                    <div className="flex items-center justify-between rounded-lg border p-3 bg-secondary/30">
+                      <Label
+                        className="cursor-pointer"
+                        onClick={() =>
+                          form.setValue(
+                            "profile_data.default_theme",
+                            "theme-custom",
+                          )
+                        }
                       >
-                        <FormControl>
-                          <SelectTrigger>
-                            <SelectValue placeholder="Select a default theme" />
-                          </SelectTrigger>
-                        </FormControl>
-                        <SelectContent>
-                          <SelectItem value="theme-blueprint">Blueprint</SelectItem>
-                          <SelectItem value="theme-matrix">Matrix</SelectItem>
-                          <SelectItem value="theme-solarized-light">Solarized Light</SelectItem>
-                          <SelectItem value="theme-monokai">Monokai</SelectItem>
-                          <SelectItem value="theme-cyberpunk">Cyberpunk Neon</SelectItem>
-                          <SelectItem value="theme-ocean">Ocean Deep</SelectItem>
-                          <SelectItem value="theme-sunset">Sunset Blaze</SelectItem>
-                          <SelectItem value="theme-forest">Forest Night</SelectItem>
-                          <SelectItem value="theme-royal">Royal Purple</SelectItem>
-                          <SelectItem value="theme-crimson">Midnight Crimson</SelectItem>
-                          <SelectItem value="theme-arctic">Arctic Frost</SelectItem>
-                          <SelectItem value="theme-dracula">Dracula</SelectItem>
-                          <SelectItem value="theme-coffee">Coffee Shop</SelectItem>
-                          <SelectItem value="theme-violet">Electric Violet</SelectItem>
-                          <SelectItem value="theme-vaporwave">Vaporwave Dream</SelectItem>
-                          <SelectItem value="theme-tokyo">Neon Tokyo</SelectItem>
-                          <SelectItem value="theme-aurora">Aurora Borealis</SelectItem>
-                          <SelectItem value="theme-candy">Candy Pop</SelectItem>
-                          <SelectItem value="theme-synthwave">Synthwave Sunset</SelectItem>
-                          <SelectItem value="theme-tropical">Tropical Paradise</SelectItem>
-                          <SelectItem value="theme-cosmic">Cosmic Space</SelectItem>
-                          <SelectItem value="theme-sakura">Cherry Blossom</SelectItem>
-                          <SelectItem value="theme-gruvbox">Gruvbox</SelectItem>
-                          <SelectItem value="theme-outrun">Outrun</SelectItem> 
-                          <SelectItem value="theme-nord">Nord</SelectItem>
-                          <SelectItem value="theme-catppuccin-mocha">Catppuccin Mocha</SelectItem>
-                          <SelectItem value="theme-catppuccin-latte">Catppuccin Latte</SelectItem>
-                          <SelectItem value="theme-tokyo-night">Tokyo Night</SelectItem>
-                          <SelectItem value="theme-tokyo-storm">Tokyo Night Storm</SelectItem>
-                          <SelectItem value="theme-kanagawa">Kanagawa</SelectItem>
-                          <SelectItem value="theme-rose-pine">Rosé Pine</SelectItem>
-                          <SelectItem value="theme-rose-pine-dawn">Rosé Pine Dawn</SelectItem>
-                          <SelectItem value="theme-onedark-pro">One Dark Pro</SelectItem>
-                          <SelectItem value="theme-nightfox">Nightfox</SelectItem>
-                          <SelectItem value="theme-github-dark">GitHub Dark</SelectItem>
-                          <SelectItem value="theme-ayu-dark">Ayu Dark</SelectItem>
-                          <SelectItem value="theme-everforest-dark">Everforest Dark</SelectItem>
-                          <SelectItem value="theme-material-palenight">Material Palenight</SelectItem>
-                          <SelectItem value="theme-vesper">Vesper</SelectItem>
-                          <SelectItem value="theme-everforest-light">Everforest Light</SelectItem>
-                          <SelectItem value="theme-github-light">GitHub Light</SelectItem>
-                          <SelectItem value="theme-ayu-light">Ayu Light</SelectItem>
-                          <SelectItem value="theme-retrowave">Retro Wave</SelectItem>
-                          <SelectItem value="theme-blade-runner">Blade Runner</SelectItem>
-                          <SelectItem value="theme-terminal-green">Terminal Green</SelectItem>
-                          <SelectItem value="theme-amber-crt">Amber CRT</SelectItem>
-                          <SelectItem value="theme-lavender">Lavender Fields</SelectItem>
-                          <SelectItem value="theme-midnight-blue">Midnight Blue</SelectItem>
-                          <SelectItem value="theme-autumn">Autumn Harvest</SelectItem>
-                          <SelectItem value="theme-jade">Jade Garden</SelectItem>
-                          <SelectItem value="theme-desert">Desert Dusk</SelectItem>
-                          <SelectItem value="theme-hc-dark">High Contrast Dark</SelectItem>
-                          <SelectItem value="theme-hc-light">High Contrast Light</SelectItem>
-                          <SelectItem value="theme-paper">Paper White</SelectItem>
-                          <SelectItem value="theme-charcoal">Charcoal</SelectItem>
-                          <SelectItem value="theme-nebula">Nebula</SelectItem>
-                          <SelectItem value="theme-neon-noir">Neon Noir</SelectItem>
-                          <SelectItem value="theme-peacock">Peacock</SelectItem>
-                          <SelectItem value="theme-flame">Flame</SelectItem>
-                          <SelectItem value="theme-winter">Winter Frost</SelectItem>
-                          <SelectItem value="theme-spring">Spring Meadow</SelectItem>
-                          <SelectItem value="theme-summer">Summer Beach</SelectItem>
-                          <SelectItem value="theme-corporate">Corporate Blue</SelectItem>
-                          <SelectItem value="theme-executive">Executive Gray</SelectItem>
-                          <SelectItem value="theme-razer">Razer Green</SelectItem>
-                          <SelectItem value="theme-discord">Discord</SelectItem>
-                          <SelectItem value="theme-steam">Steam</SelectItem>
-                          <SelectItem value="theme-twitter-dark">Twitter/X Dark</SelectItem>
-                          <SelectItem value="theme-instagram">Instagram Gradient</SelectItem>
-                          <SelectItem value="theme-apple-dark">Apple Dark</SelectItem>
-                          <SelectItem value="theme-microsoft">Microsoft</SelectItem>
-                          <SelectItem value="theme-watermelon">Watermelon</SelectItem>
-                          <SelectItem value="theme-mint-chocolate">Mint Chocolate</SelectItem>
-                          <SelectItem value="theme-bubblegum">Bubblegum</SelectItem>
-                          <SelectItem value="theme-gold-noir">Gold Noir</SelectItem>
-                          <SelectItem value="theme-platinum">Platinum</SelectItem>
-                          <SelectItem value="theme-rose-gold">Rose Gold</SelectItem>
-                          <SelectItem value="theme-emerald-luxe">Emerald Luxe</SelectItem>
-                          <SelectItem value="theme-sapphire">Sapphire Royal</SelectItem>
-                          <SelectItem value="theme-pastel-rainbow">Pastel Rainbow</SelectItem>
-                          <SelectItem value="theme-peach-cream">Peach Cream</SelectItem>
-                          <SelectItem value="theme-cotton-candy">Cotton Candy</SelectItem>
-                          <SelectItem value="theme-terracotta">Terracotta</SelectItem>
-                          <SelectItem value="theme-moss">Moss</SelectItem>
-                          <SelectItem value="theme-galactic">Galactic Purple</SelectItem>
-                          <SelectItem value="theme-alien">Alien Green</SelectItem>
-                          <SelectItem value="theme-starlight">Starlight</SelectItem>
-                          <SelectItem value="theme-espresso">Espresso</SelectItem>
-                          <SelectItem value="theme-matcha">Matchatheme</SelectItem>
-                          <SelectItem value="theme-berry">Berry Blast</SelectItem>
-                          <SelectItem value="theme-neobrutalism-light">Neobrutalism Light</SelectItem>
-                          <SelectItem value="theme-neobrutalism-dark">Neobrutalism Dark</SelectItem>
-                          <SelectItem value="theme-neobrutalism-color">Neobrutalism Colorful</SelectItem>
-                          <SelectItem value="theme-neobrutalism-retro">Neobrutalism Retro</SelectItem>
-                          <SelectItem value="theme-neobrutalism-punk">Neobrutalism Punk</SelectItem>
-                          <SelectItem value="theme-neo-brutal">Neo Brutal (XC)</SelectItem>
-                          <SelectItem value="theme-neo-brutal-dark">Neo Brutal Dark (XC)</SelectItem>
-                          <SelectItem value="theme-glass-light">Glass Light</SelectItem>
-                          <SelectItem value="theme-glass-dark">Glass Dark</SelectItem>
-                          <SelectItem value="theme-glass-aurora">Glass Aurora</SelectItem>
-                          <SelectItem value="theme-glass-ocean">Glass Ocean</SelectItem>
-                          <SelectItem value="theme-glass-frost">Glass Frost</SelectItem>
-                          <SelectItem value="theme-glass-sunset">Glass Sunset</SelectItem>
-                          <SelectItem value="theme-glass-neon">Glass Neon</SelectItem>
-                          <SelectItem value="theme-glass-mint">Glass Mint</SelectItem>
-                        </SelectContent>
-                      </Select>
-                      <FormDescription>
-                        This will be the default theme for all public visitors.
-                      </FormDescription>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
+                        Enable Custom Theme
+                      </Label>
+                      <Switch
+                        checked={
+                          form.watch("profile_data.default_theme") ===
+                          "theme-custom"
+                        }
+                        onCheckedChange={(c) => {
+                          if (c)
+                            form.setValue(
+                              "profile_data.default_theme",
+                              "theme-custom",
+                            );
+                          else
+                            form.setValue(
+                              "profile_data.default_theme",
+                              "theme-blueprint",
+                            );
+                        }}
+                      />
+                    </div>
+
+                    <div className="grid grid-cols-2 gap-4">
+                      {[
+                        "background",
+                        "foreground",
+                        "primary",
+                        "secondary",
+                        "accent",
+                        "card",
+                      ].map((colorKey) => (
+                        <FormField
+                          key={colorKey}
+                          control={form.control}
+                          name={
+                            `profile_data.custom_theme_colors.${colorKey}` as any
+                          }
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel className="capitalize">
+                                {colorKey}
+                              </FormLabel>
+                              <div className="flex gap-2">
+                                <div className="relative w-10 h-10 rounded-md border overflow-hidden shrink-0">
+                                  <input
+                                    type="color"
+                                    className="absolute inset-0 w-16 h-16 -top-2 -left-2 cursor-pointer"
+                                    {...field}
+                                  />
+                                </div>
+                                <FormControl>
+                                  <Input
+                                    {...field}
+                                    className="font-mono text-xs"
+                                  />
+                                </FormControl>
+                              </div>
+                            </FormItem>
+                          )}
+                        />
+                      ))}
+                    </div>
+
+                    {/* Live Preview Box */}
+                    <div
+                      className="mt-4 p-4 rounded-lg border shadow-lg"
+                      style={{
+                        backgroundColor: form.watch(
+                          "profile_data.custom_theme_colors.background",
+                        ),
+                        color: form.watch(
+                          "profile_data.custom_theme_colors.foreground",
+                        ),
+                        borderColor: form.watch(
+                          "profile_data.custom_theme_colors.secondary",
+                        ),
+                      }}
+                    >
+                      <h4 className="font-bold text-lg mb-2">Preview</h4>
+                      <p className="mb-3 text-sm opacity-80">
+                        This is how your custom theme looks.
+                      </p>
+                      <button
+                        className="px-4 py-2 rounded-md text-sm font-medium"
+                        style={{
+                          backgroundColor: form.watch(
+                            "profile_data.custom_theme_colors.primary",
+                          ),
+                          color: form.watch(
+                            "profile_data.custom_theme_colors.background",
+                          ),
+                        }}
+                      >
+                        Primary Button
+                      </button>
+                    </div>
+                  </TabsContent>
+                </Tabs>
               </CardContent>
             </Card>
             <Card>

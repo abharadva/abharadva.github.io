@@ -59,21 +59,6 @@ $$ language 'plpgsql';
 
 -- ========= SITE CONFIGURATION & IDENTITY =========
 
--- Table for global site settings (will only ever have one row)
-CREATE TABLE IF NOT EXISTS site_settings (
-  id INT PRIMARY KEY DEFAULT 1,
-  user_id UUID REFERENCES auth.users(id) ON DELETE CASCADE DEFAULT auth.uid(),
-  portfolio_mode TEXT NOT NULL DEFAULT 'multi-page' CHECK (portfolio_mode IN ('multi-page', 'single-page')),
-  updated_at TIMESTAMPTZ DEFAULT now(),
-  CONSTRAINT single_row_check CHECK (id = 1)
-);
-ALTER TABLE site_settings ENABLE ROW LEVEL SECURITY;
-DROP POLICY IF EXISTS "Admin can manage site settings" ON site_settings;
-CREATE POLICY "Admin can manage site settings" ON site_settings FOR ALL USING (auth.uid() = user_id) WITH CHECK (auth.uid() = user_id);
-DROP POLICY IF EXISTS "Public can read site settings" ON site_settings;
-CREATE POLICY "Public can read site settings" ON site_settings FOR SELECT USING (true);
-INSERT INTO site_settings (id, portfolio_mode) VALUES (1, 'multi-page') ON CONFLICT (id) DO NOTHING;
-
 -- Table for global site identity and configuration.
 CREATE TABLE IF NOT EXISTS site_identity (
   id INT PRIMARY KEY DEFAULT 1,
@@ -81,6 +66,7 @@ CREATE TABLE IF NOT EXISTS site_identity (
   profile_data JSONB,
   social_links JSONB,
   footer_data JSONB,
+  portfolio_mode TEXT,
   updated_at TIMESTAMPTZ DEFAULT now(),
   CONSTRAINT single_row_enforcement CHECK (id = 1)
 );
@@ -91,7 +77,7 @@ DROP POLICY IF EXISTS "Public can read site identity" ON site_identity;
 CREATE POLICY "Public can read site identity" ON site_identity FOR SELECT USING (true);
 DROP TRIGGER IF EXISTS update_site_identity_updated_at ON site_identity;
 CREATE TRIGGER update_site_identity_updated_at BEFORE UPDATE ON site_identity FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
-INSERT INTO site_identity (id, profile_data, social_links, footer_data)
+INSERT INTO site_identity (id, profile_data, social_links, footer_data, portfolio_mode)
 VALUES (1,
   '{
     "name": "Your Name",
@@ -127,7 +113,8 @@ VALUES (1,
     {"id": "linkedin", "label": "LinkedIn", "url": "https://www.linkedin.com/in/your-profile", "is_visible": true},
     {"id": "email", "label": "Email", "url": "mailto:your-email@example.com", "is_visible": true}
   ]',
-  '{ "copyright_text": "Crafted with Next.js & Supabase. Deployed on GitHub Pages." }'
+  '{ "copyright_text": "Crafted with Next.js & Supabase. Deployed on GitHub Pages." }',
+  'multi-page'
 ) ON CONFLICT (id) DO UPDATE SET
   profile_data = EXCLUDED.profile_data,
   social_links = EXCLUDED.social_links,

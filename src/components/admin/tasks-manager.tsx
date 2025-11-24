@@ -1,4 +1,3 @@
-// src/components/admin/tasks-manager.tsx
 "use client";
 import { useState, FormEvent, DragEvent } from "react";
 import { motion, AnimatePresence } from "framer-motion";
@@ -37,6 +36,8 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Card, CardContent } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
 import { toast } from "sonner";
+import { useIsMobile } from "@/hooks/use-mobile";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 type Priority = "low" | "medium" | "high";
 type Status = "todo" | "inprogress" | "done";
@@ -141,9 +142,9 @@ const TaskCard = ({
   onDragStart: (e: DragEvent<HTMLDivElement>) => void;
 }) => {
   const priorityClasses: Record<Priority, string> = {
-    low: "bg-primary/10 text-primary", 
-    medium: "bg-chart-3/15 text-chart-3", 
-    high: "bg-destructive/15 text-destructive", 
+    low: "bg-primary/10 text-primary",
+    medium: "bg-chart-3/15 text-chart-3",
+    high: "bg-destructive/15 text-destructive",
   };
 
   return (
@@ -215,6 +216,7 @@ export default function TaskManager() {
   const [title, setTitle] = useState("");
   const [dueDate, setDueDate] = useState("");
   const [priority, setPriority] = useState<Priority>("medium");
+  const isMobile = useIsMobile();
 
   const { data: tasks = [], isLoading, error } = useGetTasksQuery();
   const [addTask, { isLoading: isAdding }] = useAddTaskMutation();
@@ -394,40 +396,77 @@ export default function TaskManager() {
             : "An unknown error occurred."}
         </p>
       )}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        {KANBAN_COLUMNS.map((column) => (
-          <div
-            key={column.id}
-            onDragOver={(e) => handleDragOver(e, column.id)}
-            onDragLeave={handleDragLeave}
-            onDrop={(e) => handleDrop(e, column.id)}
-            className={cn(
-              "rounded-lg border-2 border-dashed bg-secondary/20 p-3 transition-colors",
-              dragOverColumn === column.id && "border-primary bg-primary/10",
-            )}
-          >
-            <h3 className="mb-4 border-b pb-2 text-lg font-bold">
-              {column.title} (
-              {tasks.filter((t) => t.status === column.id).length})
-            </h3>
-            <div className="space-y-3 min-h-[200px]">
-              <AnimatePresence>
-                {tasks
-                  .filter((t) => t.status === column.id)
-                  .map((task) => (
-                    <TaskCard
-                      key={task.id}
-                      task={task}
-                      onDragStart={(e) => handleDragStart(e, task.id)}
-                      onEdit={() => handleOpenDialog(task)}
-                      onDelete={() => handleDeleteTask(task.id)}
-                    />
-                  ))}
-              </AnimatePresence>
+
+      {isMobile && !isLoading ? (
+        <Tabs defaultValue="todo" className="w-full">
+          <TabsList className="grid w-full grid-cols-3 mb-4">
+            {KANBAN_COLUMNS.map((col) => (
+              <TabsTrigger key={col.id} value={col.id}>
+                {col.title} ({tasks.filter((t) => t.status === col.id).length})
+              </TabsTrigger>
+            ))}
+          </TabsList>
+          {KANBAN_COLUMNS.map((column) => (
+            <TabsContent key={column.id} value={column.id}>
+              <div className="space-y-3 min-h-[300px] rounded-lg border border-dashed bg-secondary/20 p-3">
+                <AnimatePresence>
+                  {tasks
+                    .filter((t) => t.status === column.id)
+                    .map((task) => (
+                      <TaskCard
+                        key={task.id}
+                        task={task}
+                        onDragStart={() => {}}
+                        onEdit={() => handleOpenDialog(task)}
+                        onDelete={() => handleDeleteTask(task.id)}
+                      />
+                    ))}
+                </AnimatePresence>
+                {tasks.filter((t) => t.status === column.id).length === 0 && (
+                  <div className="text-center text-muted-foreground py-8">
+                    No tasks in {column.title}
+                  </div>
+                )}
+              </div>
+            </TabsContent>
+          ))}
+        </Tabs>
+      ) : (
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          {KANBAN_COLUMNS.map((column) => (
+            <div
+              key={column.id}
+              onDragOver={(e) => handleDragOver(e, column.id)}
+              onDragLeave={handleDragLeave}
+              onDrop={(e) => handleDrop(e, column.id)}
+              className={cn(
+                "rounded-lg border-2 border-dashed bg-secondary/20 p-3 transition-colors",
+                dragOverColumn === column.id && "border-primary bg-primary/10",
+              )}
+            >
+              <h3 className="mb-4 border-b pb-2 text-lg font-bold">
+                {column.title} (
+                {tasks.filter((t) => t.status === column.id).length})
+              </h3>
+              <div className="space-y-3 min-h-[200px]">
+                <AnimatePresence>
+                  {tasks
+                    .filter((t) => t.status === column.id)
+                    .map((task) => (
+                      <TaskCard
+                        key={task.id}
+                        task={task}
+                        onDragStart={(e) => handleDragStart(e, task.id)}
+                        onEdit={() => handleOpenDialog(task)}
+                        onDelete={() => handleDeleteTask(task.id)}
+                      />
+                    ))}
+                </AnimatePresence>
+              </div>
             </div>
-          </div>
-        ))}
-      </div>
+          ))}
+        </div>
+      )}
     </div>
   );
 }

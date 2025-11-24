@@ -448,6 +448,22 @@ export const adminApi = createApi({
         if (error) return { error };
         return { data };
       },
+      // Optimistic Update Logic
+      async onQueryStarted(task, { dispatch, queryFulfilled }) {
+        const patchResult = dispatch(
+          adminApi.util.updateQueryData("getTasks", undefined, (draft) => {
+            const existingTask = draft.find((t) => t.id === task.id);
+            if (existingTask) {
+              Object.assign(existingTask, task);
+            }
+          })
+        );
+        try {
+          await queryFulfilled;
+        } catch {
+          patchResult.undo();
+        }
+      },
       invalidatesTags: ["Tasks", "Calendar"],
     }),
     deleteTask: builder.mutation<{ id: string }, string>({
@@ -803,60 +819,42 @@ export const adminApi = createApi({
     }),
 
     // Site Settings & Content
-    getSiteSettings: builder.query<
-      { identity: SiteContent; settings: { portfolio_mode: string } },
-      void
-    >({
+    getSiteSettings: builder.query<SiteContent, void>({
       queryFn: async () => {
-        const [identityRes, settingsRes] = await Promise.all([
-          supabase.from("site_identity").select("*").single(),
-          supabase.from("site_settings").select("portfolio_mode").single(),
-        ]);
-        if (identityRes.error || settingsRes.error)
-          return { error: identityRes.error || settingsRes.error };
-        return {
-          data: {
-            identity: identityRes.data as SiteContent,
-            settings: settingsRes.data,
-          },
-        };
+        // Single query now
+        const { data, error } = await supabase
+          .from("site_identity")
+          .select("*")
+          .single();
+
+        if (error) return { error };
+        return { data: data as SiteContent };
       },
-      providesTags: ["SiteSettings"],
+      providesTags: ["SiteContent"],
     }),
-    updateSiteSettings: builder.mutation<
-      void,
-      { identity: Partial<SiteContent>; settings: { portfolio_mode: string } }
-    >({
-      queryFn: async ({ identity, settings }) => {
-        const [identityRes, settingsRes] = await Promise.all([
-          supabase.from("site_identity").update(identity).eq("id", 1),
-          supabase.from("site_settings").update(settings).eq("id", 1),
-        ]);
-        if (identityRes.error || settingsRes.error)
-          return { error: identityRes.error || settingsRes.error };
+
+    updateSiteSettings: builder.mutation<void, Partial<SiteContent>>({
+      queryFn: async (updates) => {
+        const { error } = await supabase
+          .from("site_identity")
+          .update(updates)
+          .eq("id", 1);
+
+        if (error) return { error };
         return { data: undefined };
       },
-      async onQueryStarted({ identity, settings }, { dispatch, queryFulfilled }) {
+      async onQueryStarted(updates, { dispatch, queryFulfilled }) {
         const patchResult = dispatch(
-          publicApi.util.updateQueryData(
-            "getSiteIdentity",
-            undefined,
-            (draft) => {
-              if (identity.profile_data) {
-                draft.profile_data = {
-                  ...draft.profile_data,
-                  ...identity.profile_data,
-                };
-              }
-              if (identity.social_links) {
-                draft.social_links = identity.social_links;
-              }
-              if (identity.footer_data) {
-                draft.footer_data = identity.footer_data;
-              }
-            },
-          ),
+          adminApi.util.updateQueryData("getSiteSettings", undefined, (draft) => {
+            Object.assign(draft, updates);
+          })
         );
+        dispatch(
+          publicApi.util.updateQueryData("getSiteIdentity", undefined, (draft) => {
+            Object.assign(draft, updates);
+          })
+        );
+
         try {
           await queryFulfilled;
         } catch {
