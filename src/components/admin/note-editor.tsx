@@ -15,6 +15,7 @@ import {
 } from "../ui/card";
 import { Label } from "../ui/label";
 import { Loader2 } from "lucide-react";
+import { SheetDescription, SheetHeader, SheetTitle } from "../ui/sheet";
 
 interface NoteEditorProps {
   note: Note | null;
@@ -66,50 +67,50 @@ export default function NoteEditor({
     <motion.div
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
-      className="mx-auto max-w-4xl"
     >
-      <form onSubmit={handleSubmit}>
-        <Card>
-          <CardHeader>
-            <CardTitle>{note?.id ? "Edit Note" : "Create New Note"}</CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-6">
-            <div>
-              <Label htmlFor="title">Title (Optional)</Label>
-              <Input
-                id="title"
-                value={formData.title}
-                onChange={(e) =>
-                  setFormData((prev) => ({ ...prev, title: e.target.value }))
-                }
-                placeholder="A title for your note"
-              />
-            </div>
-            <div>
-              <Label htmlFor="content">Content</Label>
-              <Textarea
-                id="content"
-                value={formData.content}
-                onChange={(e) =>
-                  setFormData((prev) => ({ ...prev, content: e.target.value }))
-                }
-                placeholder="Jot down your thoughts..."
-                rows={10}
-              />
-            </div>
-            <div>
-              <Label htmlFor="tags">Tags (comma-separated)</Label>
-              <Input
-                id="tags"
-                value={formData.tags}
-                onChange={(e) =>
-                  setFormData((prev) => ({ ...prev, tags: e.target.value }))
-                }
-                placeholder="idea, to-do, reminder"
-              />
-            </div>
-          </CardContent>
-          <CardFooter className="flex justify-end gap-3">
+      <div className="h-full">
+        <SheetHeader>
+          <SheetTitle>{note?.id ? "Edit Note" : "Create New Note"}</SheetTitle>
+          <SheetDescription>Organize your knowledge into broad categories.</SheetDescription>
+        </SheetHeader>
+        <form
+          className="h-full space-y-6 pt-6"
+          onSubmit={handleSubmit}>
+          <div className="">
+            <Label htmlFor="title">Title (Optional)</Label>
+            <Input
+              id="title"
+              value={formData.title}
+              onChange={(e) =>
+                setFormData((prev) => ({ ...prev, title: e.target.value }))
+              }
+              placeholder="A title for your note"
+            />
+          </div>
+          <div>
+            <Label htmlFor="content">Content</Label>
+            <Textarea
+              id="content"
+              value={formData.content}
+              onChange={(e) =>
+                setFormData((prev) => ({ ...prev, content: e.target.value }))
+              }
+              placeholder="Jot down your thoughts..."
+              rows={10}
+            />
+          </div>
+          <div>
+            <Label htmlFor="tags">Tags (comma-separated)</Label>
+            <Input
+              id="tags"
+              value={formData.tags}
+              onChange={(e) =>
+                setFormData((prev) => ({ ...prev, tags: e.target.value }))
+              }
+              placeholder="idea, to-do, reminder"
+            />
+          </div>
+          <div className="flex justify-end gap-3 pt-4">
             <Button
               type="button"
               variant="outline"
@@ -127,9 +128,9 @@ export default function NoteEditor({
                 "Save Note"
               )}
             </Button>
-          </CardFooter>
-        </Card>
-      </form>
+          </div>
+        </form>
+      </div>
     </motion.div>
   );
 }

@@ -3,8 +3,6 @@ import { PropsWithChildren, useEffect, useState } from "react";
 import Container from "./container";
 import Header from "./header";
 import Footer from "./footer";
-import { Toaster as SonnerToaster } from "@/components/ui/sonner";
-import { Toaster as ShadcnToaster } from "@/components/ui/toaster";
 import MobileHeader from "./mobile-header";
 import { motion } from "framer-motion";
 
@@ -40,8 +38,6 @@ export default function Layout({ children, isAdmin = false }: LayoutProps) {
         </Head>
         <div className="font-sans">
           {children}
-          <SonnerToaster />
-          <ShadcnToaster />
         </div>
       </>
     );
@@ -103,8 +99,6 @@ export default function Layout({ children, isAdmin = false }: LayoutProps) {
           <Container>{children}</Container>
         </main>
         <Footer />
-        <SonnerToaster />
-        <ShadcnToaster />
       </div>
     </>
   );

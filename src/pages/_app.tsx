@@ -12,6 +12,8 @@ import { store } from "@/store/store";
 import { LearningSessionManager } from "@/components/LearningSessionManager";
 import { useGetSiteIdentityQuery } from "@/store/api/publicApi";
 import React, { useEffect } from "react";
+import { Toaster as SonnerToaster } from "@/components/ui/sonner";
+import { Toaster as ShadcnToaster } from "@/components/ui/toaster";
 
 const tahuFont = localFont({
   src: "./fonts/Tahu.woff2",
@@ -31,7 +33,6 @@ function ThemedApp({ Component, pageProps }: AppProps) {
     ? dbTheme
     : `theme-${dbTheme || "blueprint"}`;
 
-  // Apply theme to document directly - bypass next-themes issues
   useEffect(() => {
     if (typeof window === "undefined") return;
 
@@ -181,7 +182,6 @@ function ThemedApp({ Component, pageProps }: AppProps) {
         const colors = siteIdentity.profile_data.custom_theme_colors;
         const root = document.documentElement;
 
-        // Helper to convert Hex to HSL inline
         const hexToHslLocal = (hex: string) => {
           let r = 0,
             g = 0,
@@ -227,28 +227,14 @@ function ThemedApp({ Component, pageProps }: AppProps) {
         setStyle("secondary", colors.secondary);
         setStyle("accent", colors.accent);
         setStyle("card", colors.card);
-        // Map others to these base colors for simplicity
         setStyle("popover", colors.background);
         setStyle("muted", colors.secondary);
         setStyle("border", colors.secondary);
         setStyle("input", colors.secondary);
         setStyle("ring", colors.primary);
       } else {
-        // Clean up inline styles if switching back to preset
         const root = document.documentElement;
-        [
-          "background",
-          "foreground",
-          "primary",
-          "secondary",
-          "accent",
-          "card",
-          "popover",
-          "muted",
-          "border",
-          "input",
-          "ring",
-        ].forEach((k) => {
+        ["background", "foreground", "primary", "secondary", "accent", "card", "popover", "muted", "border", "input", "ring"].forEach((k) => {
           root.style.removeProperty(`--${k}`);
         });
       }
@@ -269,15 +255,12 @@ function ThemedApp({ Component, pageProps }: AppProps) {
       opacity: 0,
       y: -5,
       transition: { duration: 0.2, ease: "easeInOut" },
-      display: "none",
     },
   };
 
   return (
     <main className={`${tahuFont.variable}`}>
-      {/* CHANGE HERE: Removed the !isAdminPage check so the manager runs everywhere */}
       <LearningSessionManager />
-
       <AnimatePresence mode="popLayout" initial={false}>
         <motion.div
           key={router.asPath}
@@ -290,6 +273,8 @@ function ThemedApp({ Component, pageProps }: AppProps) {
           <Component {...pageProps} />
         </motion.div>
       </AnimatePresence>
+      <SonnerToaster />
+      <ShadcnToaster />
     </main>
   );
 }

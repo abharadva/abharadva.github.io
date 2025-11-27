@@ -1,25 +1,22 @@
 // src/components/admin/NavigationManager.tsx
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, DragEvent } from "react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
-import { Loader2, Plus, Edit, Trash2, Eye, EyeOff } from "lucide-react";
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogClose,
-} from "@/components/ui/dialog";
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
+import { Loader2, Plus, Edit, Trash2, GripVertical } from "lucide-react";
+import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetDescription } from "@/components/ui/sheet";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Switch } from "@/components/ui/switch";
 import {
   useGetNavLinksAdminQuery,
   useSaveNavLinkMutation,
   useDeleteNavLinkMutation,
+  useUpdateSectionOrderMutation,
 } from "@/store/api/adminApi";
+import { cn } from "@/lib/utils";
 
 type NavLink = {
   id: string;
@@ -39,18 +36,9 @@ const LinkForm = ({
   onCancel: () => void;
 }) => {
   const [formData, setFormData] = useState({
-    label: "",
-    href: "",
-    display_order: 0,
+    label: link?.label || "",
+    href: link?.href || "",
   });
-
-  useEffect(() => {
-    setFormData({
-      label: link?.label || "",
-      href: link?.href || "",
-      display_order: link?.display_order || 0,
-    });
-  }, [link]);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -58,8 +46,8 @@ const LinkForm = ({
   };
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-4">
-      <div>
+    <form onSubmit={handleSubmit} className="space-y-4 pt-6">
+      <div className="space-y-1">
         <Label htmlFor="label">Label</Label>
         <Input
           id="label"
@@ -68,9 +56,10 @@ const LinkForm = ({
             setFormData((f) => ({ ...f, label: e.target.value }))
           }
           required
+          autoFocus
         />
       </div>
-      <div>
+      <div className="space-y-1">
         <Label htmlFor="href">Path (e.g., /about)</Label>
         <Input
           id="href"
@@ -79,26 +68,10 @@ const LinkForm = ({
           required
         />
       </div>
-      <div>
-        <Label htmlFor="display_order">Display Order</Label>
-        <Input
-          id="display_order"
-          type="number"
-          value={formData.display_order}
-          onChange={(e) =>
-            setFormData((f) => ({
-              ...f,
-              display_order: parseInt(e.target.value, 10) || 0,
-            }))
-          }
-        />
-      </div>
       <div className="flex justify-end gap-2 pt-4">
-        <DialogClose asChild>
-          <Button type="button" variant="ghost">
-            Cancel
-          </Button>
-        </DialogClose>
+        <Button type="button" variant="ghost" onClick={onCancel}>
+          Cancel
+        </Button>
         <Button type="submit">Save Link</Button>
       </div>
     </form>
@@ -107,18 +80,24 @@ const LinkForm = ({
 
 export default function NavigationManager() {
   const [editingLink, setEditingLink] = useState<NavLink | null>(null);
-  const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [isSheetOpen, setIsSheetOpen] = useState(false);
+  const [localLinks, setLocalLinks] = useState<NavLink[]>([]);
+  const [draggedLinkId, setDraggedLinkId] = useState<string | null>(null);
 
   const { data: links = [], isLoading } = useGetNavLinksAdminQuery();
   const [saveNavLink, { isLoading: isSaving }] = useSaveNavLinkMutation();
-  const [deleteNavLink, { isLoading: isDeleting }] = useDeleteNavLinkMutation();
-  const [updateNavLinkVisibility] = useSaveNavLinkMutation(); // Re-use for visibility toggle
+  const [deleteNavLink] = useDeleteNavLinkMutation();
+  const [updateOrder] = useUpdateSectionOrderMutation(); // Re-using this for nav links
+
+  useEffect(() => {
+    setLocalLinks(links);
+  }, [links]);
 
   const handleSave = async (data: Partial<NavLink>) => {
     try {
       await saveNavLink(data).unwrap();
       toast.success("Navigation link saved.");
-      setIsDialogOpen(false);
+      setIsSheetOpen(false);
     } catch (err: any) {
       toast.error("Failed to save link", { description: err.message });
     }
@@ -136,10 +115,7 @@ export default function NavigationManager() {
 
   const handleToggleVisibility = async (link: NavLink) => {
     try {
-      await updateNavLinkVisibility({
-        id: link.id,
-        is_visible: !link.is_visible,
-      }).unwrap();
+      await saveNavLink({ id: link.id, is_visible: !link.is_visible }).unwrap();
       toast.success(
         `"${link.label}" is now ${!link.is_visible ? "visible" : "hidden"}.`,
       );
@@ -148,25 +124,70 @@ export default function NavigationManager() {
     }
   };
 
+  const handleDragStart = (e: DragEvent<HTMLDivElement>, linkId: string) => {
+    setDraggedLinkId(linkId);
+    e.dataTransfer.effectAllowed = "move";
+  };
+
+  const handleDragOver = (e: DragEvent<HTMLDivElement>) => {
+    e.preventDefault();
+  };
+
+  const handleDrop = async (targetLinkId: string) => {
+    if (!draggedLinkId || draggedLinkId === targetLinkId) return;
+
+    const reorderedLinks = [...localLinks];
+    const draggedIndex = reorderedLinks.findIndex((l) => l.id === draggedLinkId);
+    const targetIndex = reorderedLinks.findIndex((l) => l.id === targetLinkId);
+
+    const [draggedItem] = reorderedLinks.splice(draggedIndex, 1);
+    reorderedLinks.splice(targetIndex, 0, draggedItem);
+    
+    setLocalLinks(reorderedLinks);
+    setDraggedLinkId(null);
+
+    const linkIdsInNewOrder = reorderedLinks.map((l) => l.id);
+    
+    try {
+        // We need a specific RPC for nav links, or a generic one
+        // Let's assume we have a generic `update_display_order` RPC
+        // If not, you'd need to create one:
+        // CREATE OR REPLACE FUNCTION update_navigation_order(link_ids UUID[]) ...
+        // For now, let's update them one-by-one. It's less efficient but works without DB changes.
+        const updatePromises = reorderedLinks.map((link, index) => 
+            saveNavLink({ id: link.id, display_order: index })
+        );
+        await Promise.all(updatePromises);
+        toast.success("Navigation order saved.");
+    } catch {
+      toast.error("Failed to save new order.");
+      setLocalLinks(links); // Revert on failure
+    }
+  };
+  
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
           <h2 className="text-2xl font-bold">Navigation Manager</h2>
           <p className="text-muted-foreground">
-            Manage the main navigation links for your site.
+            Manage and reorder the main navigation links for your site.
           </p>
         </div>
         <Button
           onClick={() => {
             setEditingLink(null);
-            setIsDialogOpen(true);
+            setIsSheetOpen(true);
           }}
         >
           <Plus className="mr-2 size-4" /> Add Link
         </Button>
       </div>
       <Card>
+        <CardHeader>
+           <CardTitle>Menu Items</CardTitle>
+           <CardDescription>Drag and drop to reorder links.</CardDescription>
+        </CardHeader>
         <CardContent className="p-4">
           {isLoading ? (
             <div className="flex justify-center p-8">
@@ -174,35 +195,34 @@ export default function NavigationManager() {
             </div>
           ) : (
             <div className="space-y-2">
-              {links.map((link) => (
+              {localLinks.map((link) => (
                 <div
                   key={link.id}
-                  className="flex items-center gap-2 rounded-md p-2 hover:bg-secondary"
+                  draggable
+                  onDragStart={(e) => handleDragStart(e, link.id)}
+                  onDrop={() => handleDrop(link.id)}
+                  onDragOver={handleDragOver}
+                  className={cn(
+                    "flex items-center gap-2 rounded-md p-2 border bg-card transition-all",
+                    draggedLinkId === link.id && "opacity-50 scale-95"
+                  )}
                 >
-                  <span className="flex-1 font-medium">
-                    {link.label} ({link.href})
-                  </span>
-                  <span className="text-sm text-muted-foreground">
-                    Order: {link.display_order}
-                  </span>
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    onClick={() => handleToggleVisibility(link)}
-                    title={link.is_visible ? "Hide" : "Show"}
-                  >
-                    {link.is_visible ? (
-                      <Eye className="size-4" />
-                    ) : (
-                      <EyeOff className="size-4 text-muted-foreground" />
-                    )}
-                  </Button>
+                  <GripVertical className="size-5 text-muted-foreground cursor-grab" />
+                  <div className="flex-1">
+                    <p className="font-medium">{link.label}</p>
+                    <p className="text-xs text-muted-foreground font-mono">{link.href}</p>
+                  </div>
+                  <Switch
+                    checked={link.is_visible}
+                    onCheckedChange={() => handleToggleVisibility(link)}
+                    aria-label="Toggle visibility"
+                  />
                   <Button
                     variant="ghost"
                     size="icon"
                     onClick={() => {
                       setEditingLink(link);
-                      setIsDialogOpen(true);
+                      setIsSheetOpen(true);
                     }}
                   >
                     <Edit className="size-4" />
@@ -221,20 +241,23 @@ export default function NavigationManager() {
           )}
         </CardContent>
       </Card>
-      <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>
+      <Sheet open={isSheetOpen} onOpenChange={setIsSheetOpen}>
+        <SheetContent>
+          <SheetHeader>
+            <SheetTitle>
               {editingLink ? "Edit" : "Add"} Navigation Link
-            </DialogTitle>
-          </DialogHeader>
+            </SheetTitle>
+            <SheetDescription>
+              This link will appear in your site's main navigation bar.
+            </SheetDescription>
+          </SheetHeader>
           <LinkForm
             link={editingLink}
             onSave={handleSave}
-            onCancel={() => setIsDialogOpen(false)}
+            onCancel={() => setIsSheetOpen(false)}
           />
-        </DialogContent>
-      </Dialog>
+        </SheetContent>
+      </Sheet>
     </div>
   );
 }

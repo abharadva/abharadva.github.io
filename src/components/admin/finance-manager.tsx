@@ -1,6 +1,6 @@
 // src/components/admin/finance-manager.tsx
 "use client";
-import React, { useState, useEffect, useMemo, FormEvent } from "react";
+import React, { useState, useMemo, FormEvent } from "react";
 import type { FinancialGoal, RecurringTransaction, Transaction } from "@/types";
 import { DateRange } from "react-day-picker";
 import {
@@ -60,6 +60,12 @@ import {
   PieChart,
   Cell,
   ResponsiveContainer,
+  Line,
+  LineChart,
+  Tooltip as RechartsTooltip,
+  ReferenceLine,
+  RadialBar,
+  RadialBarChart
 } from "recharts";
 import {
   Edit,
@@ -79,6 +85,7 @@ import {
   X as XIcon,
   HandCoins,
   MoreVertical,
+  MoreHorizontal,
 } from "lucide-react";
 import {
   Table,
@@ -130,7 +137,7 @@ import { Badge } from "../ui/badge";
 import { cn } from "@/lib/utils";
 import { ScrollArea } from "../ui/scroll-area";
 import { Progress } from "../ui/progress";
-import { Sheet, SheetContent, SheetHeader, SheetTitle } from "../ui/sheet";
+import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle } from "../ui/sheet";
 import {
   useGetFinancialDataQuery,
   useDeleteTransactionMutation,
@@ -140,6 +147,7 @@ import {
   useManageCategoryMutation,
 } from "@/store/api/adminApi";
 import { getNextOccurrence } from "@/lib/utils";
+import LoadingSpinner from "./LoadingSpinner";
 
 // --- DYNAMIC IMPORTS ---
 const Calendar = dynamic(
@@ -472,72 +480,111 @@ const CategoriesTab = ({
   );
 };
 
-// --- EXISTING COMPONENTS (NO CHANGES) ---
-const AnalyticsTab = ({
-  transactions,
-  allYears,
-}: {
-  transactions: Transaction[];
-  allYears: number[];
-}) => {
-  const [analyticsYear, setAnalyticsYear] = useState(new Date().getFullYear());
-  const [selectedMonthData, setSelectedMonthData] = useState<{
-    month: string;
-    year: number;
-  } | null>(null);
-
-  const yearTransactions = useMemo(() => {
-    return transactions.filter(
-      (t) => new Date(t.date).getFullYear() === analyticsYear,
-    );
-  }, [transactions, analyticsYear]);
-
-  const annualStats = useMemo(() => {
-    let totalIncome = 0;
-    let totalExpenses = 0;
-    const expenseByCategory: Record<string, number> = {};
-
-    yearTransactions.forEach((t) => {
-      if (t.type === "earning") {
-        totalIncome += t.amount;
-      } else {
-        totalExpenses += t.amount;
-        const category = t.category || "Uncategorized";
-        expenseByCategory[category] =
-          (expenseByCategory[category] || 0) + t.amount;
+const MonthlyDetailSheet = ({ month, year, transactions, onClose }: { month: string; year: number; transactions: Transaction[]; onClose: () => void; }) => {
+  const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
+  const monthTransactions = useMemo(() => transactions.filter((t) => format(new Date(t.date), "MMM") === month), [transactions, month]);
+  const { totalIncome, totalExpenses, expenseByCategory } = useMemo(() => {
+    let income = 0, expenses = 0;
+    const categoryMap: Record<string, number> = {};
+    monthTransactions.forEach((t) => {
+      if (t.type === "earning") income += t.amount;
+      else {
+        expenses += t.amount;
+        const cat = t.category || "Uncategorized";
+        categoryMap[cat] = (categoryMap[cat] || 0) + t.amount;
       }
     });
-    const topCategory = Object.entries(expenseByCategory).sort(
-      (a, b) => b[1] - a[1],
-    )[0];
+    const expenseData = Object.entries(categoryMap).map(([name, value], index) => ({ name, value, fill: COLORS[index % COLORS.length] })).sort((a, b) => b.value - a.value);
+    return { totalIncome: income, totalExpenses: expenses, expenseByCategory: expenseData };
+  }, [monthTransactions]);
+  const filteredTransactions = useMemo(() => selectedCategory ? monthTransactions.filter((t) => (t.category || "Uncategorized") === selectedCategory) : monthTransactions, [monthTransactions, selectedCategory]);
 
-    return {
-      totalIncome,
-      totalExpenses,
-      netIncome: totalIncome - totalExpenses,
-      avgMonthlyExpense: totalExpenses / 12,
-      topExpenseCategory: topCategory
-        ? `${topCategory[0]} ($${topCategory[1].toFixed(2)})`
-        : "N/A",
-    };
-  }, [yearTransactions]);
+  return (
+    <Sheet open={true} onOpenChange={(open) => !open && onClose()}>
+      <SheetContent className="sm:max-w-xl">
+        <SheetHeader>
+          <SheetTitle>Financial Details for {month}, {year}</SheetTitle>
+        </SheetHeader>
+        <ScrollArea className="h-[calc(100vh-8rem)] pr-4 mt-4">
+          <div className="grid grid-cols-2 gap-4 my-4">
+            <StatCard title="Income" value={`$${totalIncome.toFixed(2)}`} icon={<TrendingUp />} />
+            <StatCard title="Expenses" value={`$${totalExpenses.toFixed(2)}`} icon={<TrendingDown />} />
+          </div>
+          <h4 className="font-semibold mb-2">Expense Breakdown</h4>
+          <ChartContainer config={{}} className="h-64 w-full -ml-4">
+            <ResponsiveContainer>
+              <PieChart>
+                <Pie data={expenseByCategory} dataKey="value" nameKey="name" cx="50%" cy="50%" innerRadius={40} outerRadius={70} onClick={(d) => setSelectedCategory(selectedCategory === d.name ? null : d.name)} className="cursor-pointer">{expenseByCategory.map((e, i) => (<Cell key={`cell-${i}`} fill={e.fill} stroke={selectedCategory === e.name ? "hsl(var(--primary))" : ""} strokeWidth={2} />))}</Pie>
+                <RechartsTooltip content={<ChartTooltipContent nameKey="name" />} />
+              </PieChart>
+            </ResponsiveContainer>
+          </ChartContainer>
+          <div className="flex justify-between items-center my-4">
+            <h4 className="font-semibold">{selectedCategory ? `Transactions in "${selectedCategory}"` : "All Transactions"}</h4>
+            {selectedCategory && <Button variant="ghost" size="sm" onClick={() => setSelectedCategory(null)}>
+              <XIcon className="mr-2 size-4" />Clear</Button>}
+          </div>
+          <div className="space-y-3">{filteredTransactions.length > 0 ? (filteredTransactions.map((t) => (
+            <div key={t.id} className="flex items-center justify-between p-2 rounded-md hover:bg-secondary">
+              <div>
+                <p className="font-medium">{t.description}</p>
+                <div className="flex items-center gap-2">
+                  <p className="text-xs text-muted-foreground">{format(new Date(t.date), "MMM dd")}</p>{t.category && <Badge variant="outline">{t.category}</Badge>}</div>
+              </div>
+              <p className={cn("font-bold text-sm", t.type === "earning" ? "text-chart-2" : "text-chart-5")}>{t.type === "earning" ? "+" : "-"}${t.amount.toFixed(2)}</p>
+            </div>))) : <p className="text-center text-muted-foreground py-10">No transactions.</p>}
+          </div>
+        </ScrollArea>
+      </SheetContent>
+    </Sheet>
+  );
+};
 
-  const monthlyChartData = useMemo(() => {
-    const monthlyData: Record<string, { income: number; expenses: number }> =
-      {};
-    for (const t of yearTransactions) {
+const AnalyticsTab = ({ transactions, allYears, allCategories }: { transactions: Transaction[]; allYears: number[]; allCategories: string[] }) => {
+  const [analyticsYear, setAnalyticsYear] = useState(new Date().getFullYear());
+  const [selectedMonthData, setSelectedMonthData] = useState<{ month: string; year: number } | null>(null);
+  const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
+
+  const yearTransactions = useMemo(() => transactions.filter(t => new Date(t.date).getFullYear() === analyticsYear), [transactions, analyticsYear]);
+
+  const { annualStats, monthlyChartData, expenseByCategory } = useMemo(() => {
+    let totalIncome = 0, totalExpenses = 0;
+    const categoryMap: Record<string, { total: number, count: number }> = {};
+    const monthlyData: Record<string, { income: number; expenses: number }> = {};
+
+    yearTransactions.forEach(t => {
       const month = format(new Date(t.date), "MMM");
       if (!monthlyData[month]) monthlyData[month] = { income: 0, expenses: 0 };
-      if (t.type === "earning") monthlyData[month].income += t.amount;
-      else monthlyData[month].expenses += t.amount;
-    }
-    const allMonths = Array.from({ length: 12 }, (_, i) =>
-      format(new Date(analyticsYear, i), "MMM"),
-    );
-    return allMonths.map((month) => ({
-      month,
-      ...(monthlyData[month] || { income: 0, expenses: 0 }),
-    }));
+
+      if (t.type === 'earning') {
+        totalIncome += t.amount;
+        monthlyData[month].income += t.amount;
+      } else {
+        totalExpenses += t.amount;
+        monthlyData[month].expenses += t.amount;
+        const category = t.category || "Uncategorized";
+        if (!categoryMap[category]) categoryMap[category] = { total: 0, count: 0 };
+        categoryMap[category].total += t.amount;
+        categoryMap[category].count += 1;
+      }
+    });
+
+    const topCategory = Object.entries(categoryMap).sort((a, b) => b[1].total - a[1].total)[0];
+    const allMonths = Array.from({ length: 12 }, (_, i) => format(new Date(analyticsYear, i), "MMM"));
+    const chartData = allMonths.map(month => ({ month, ...(monthlyData[month] || { income: 0, expenses: 0 }) }));
+
+    const categoryData = Object.entries(categoryMap)
+      .map(([name, { total, count }], index) => ({ name, total, count, avg: total / count, fill: COLORS[index % COLORS.length] }))
+      .sort((a, b) => b.total - a.total);
+
+    return {
+      annualStats: {
+        totalIncome, totalExpenses, netIncome: totalIncome - totalExpenses,
+        topExpenseCategory: topCategory ? `${topCategory[0]} ($${topCategory[1].total.toFixed(2)})` : "N/A",
+      },
+      monthlyChartData: chartData,
+      expenseByCategory: categoryData
+    };
   }, [yearTransactions, analyticsYear]);
 
   const handleBarClick = (data: any) => {
@@ -553,102 +600,85 @@ const AnalyticsTab = ({
         <CardHeader className="flex-row items-center justify-between">
           <div>
             <CardTitle>Annual Report</CardTitle>
-            <CardDescription>
-              Interactive financial summary for the selected year.
-            </CardDescription>
+            <CardDescription>Interactive financial summary for the selected year.</CardDescription>
           </div>
-          <Select
-            value={String(analyticsYear)}
-            onValueChange={(v) => setAnalyticsYear(Number(v))}
-          >
+          <Select value={String(analyticsYear)} onValueChange={(v) => setAnalyticsYear(Number(v))}>
             <SelectTrigger className="w-[120px]">
-              <SelectValue placeholder="Select Year" />
+              <SelectValue />
             </SelectTrigger>
-            <SelectContent>
-              {allYears.map((year) => (
-                <SelectItem key={year} value={String(year)}>
-                  {year}
-                </SelectItem>
-              ))}
-            </SelectContent>
+            <SelectContent>{allYears.map((year) => <SelectItem key={year} value={String(year)}>{year}</SelectItem>)}</SelectContent>
           </Select>
         </CardHeader>
         <CardContent className="space-y-6">
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-            <StatCard
-              title="Total Income"
-              value={`$${annualStats.totalIncome.toFixed(2)}`}
-              icon={<ArrowUp className="size-5 text-green-500" />}
-            />
-            <StatCard
-              title="Total Expenses"
-              value={`$${annualStats.totalExpenses.toFixed(2)}`}
-              icon={<ArrowDown className="size-5 text-red-500" />}
-            />
-            <StatCard
-              title="Net Income"
-              value={`${annualStats.netIncome < 0 ? "-" : ""}$${Math.abs(annualStats.netIncome).toFixed(2)}`}
-              className={
-                annualStats.netIncome < 0 ? "text-red-500" : "text-green-500"
-              }
-              icon={<HandCoins className="size-5" />}
-            />
-            <StatCard
-              title="Top Expense"
-              value={annualStats.topExpenseCategory}
-              helpText="Category with highest spending"
-            />
+            <StatCard title="Total Income" value={`$${annualStats.totalIncome.toFixed(2)}`} icon={<ArrowUp />} />
+            <StatCard title="Total Expenses" value={`$${annualStats.totalExpenses.toFixed(2)}`} icon={<ArrowDown />} />
+            <StatCard title="Net Income" value={`${annualStats.netIncome < 0 ? "-" : ""}$${Math.abs(annualStats.netIncome).toFixed(2)}`} className={annualStats.netIncome < 0 ? "text-red-500" : "text-green-500"} icon={<HandCoins />} />
+            <StatCard title="Top Expense" value={annualStats.topExpenseCategory} />
           </div>
           <div>
             <h3 className="text-lg font-semibold mb-4">Monthly Cash Flow</h3>
-            <p className="text-sm text-muted-foreground mb-4 -mt-3">
-              Click on a month's bar for a detailed breakdown.
-            </p>
+            <p className="text-sm text-muted-foreground mb-4 -mt-3">Click on a month's bar for a detailed breakdown.</p>
             <ChartContainer config={chartConfig} className="h-72 w-full">
               <BarChart data={monthlyChartData} onClick={handleBarClick}>
                 <CartesianGrid vertical={false} strokeDasharray="3 3" />
-                <XAxis
-                  dataKey="month"
-                  tickLine={false}
-                  axisLine={false}
-                  tickMargin={8}
-                />
-                <YAxis
-                  tickFormatter={(value) => `$${value / 1000}k`}
-                  tickLine={false}
-                  axisLine={false}
-                  tickMargin={8}
-                />
+                <XAxis dataKey="month" tickLine={false} axisLine={false} tickMargin={8} />
+                <YAxis tickFormatter={(value) => `$${value / 1000}k`} tickLine={false} axisLine={false} tickMargin={8} />
                 <ChartTooltip content={<ChartTooltipContent />} />
                 <ChartLegend content={<ChartLegendContent />} />
-                <Bar
-                  dataKey="income"
-                  name="Income"
-                  fill="var(--color-earning)"
-                  radius={[4, 4, 0, 0]}
-                  className="cursor-pointer"
-                />
-                <Bar
-                  dataKey="expenses"
-                  name="Expenses"
-                  fill="var(--color-expense)"
-                  radius={[4, 4, 0, 0]}
-                  className="cursor-pointer"
-                />
+                <Bar dataKey="income" name="Income" fill="var(--color-earning)" radius={[4, 4, 0, 0]} className="cursor-pointer" />
+                <Bar dataKey="expenses" name="Expenses" fill="var(--color-expense)" radius={[4, 4, 0, 0]} className="cursor-pointer" />
               </BarChart>
             </ChartContainer>
           </div>
         </CardContent>
       </Card>
+      <Card>
+        <CardHeader>
+          <CardTitle>Category Deep Dive</CardTitle>
+          <CardDescription>Explore spending habits across categories for the selected year.</CardDescription>
+        </CardHeader>
+        <CardContent className="grid grid-cols-1 md:grid-cols-5 gap-6">
+          <div className="md:col-span-2">
+            <ChartContainer config={{}} className="h-64 w-full">
+              <ResponsiveContainer>
+                <PieChart>
+                  <Pie data={expenseByCategory} dataKey="total" nameKey="name" cx="50%" cy="50%" innerRadius={50} outerRadius={80} onClick={(data) => setSelectedCategory(selectedCategory === data.name ? null : data.name)} className="cursor-pointer">
+                    {expenseByCategory.map((entry, index) => (<Cell key={`cell-${index}`} fill={entry.fill} stroke={selectedCategory === entry.name ? "hsl(var(--primary))" : ""} strokeWidth={3} />))}
+                  </Pie>
+                  <RechartsTooltip content={<ChartTooltipContent nameKey="name" />} />
+                  <ChartLegend content={<ChartLegendContent />} />
+                </PieChart>
+              </ResponsiveContainer>
+            </ChartContainer>
+          </div>
+          <div className="md:col-span-3">
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>Category</TableHead>
+                  <TableHead className="text-right">Total</TableHead>
+                  <TableHead className="text-right hidden sm:table-cell">Count</TableHead>
+                  <TableHead className="text-right hidden sm:table-cell">Avg.</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {expenseByCategory.filter(c => selectedCategory ? c.name === selectedCategory : true).map(cat => (
+                  <TableRow key={cat.name}>
+                    <TableCell className="font-medium flex items-center gap-2">
+                      <div className="h-2 w-2 rounded-full" style={{ backgroundColor: cat.fill }} />{cat.name}</TableCell>
+                    <TableCell className="text-right font-mono">${cat.total.toFixed(2)}</TableCell>
+                    <TableCell className="text-right hidden sm:table-cell">{cat.count}</TableCell>
+                    <TableCell className="text-right hidden sm:table-cell font-mono">${cat.avg.toFixed(2)}</TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </div>
+        </CardContent>
+      </Card>
 
-      {selectedMonthData && (
-        <MonthlyDetailDialog
-          month={selectedMonthData.month}
-          year={selectedMonthData.year}
-          transactions={yearTransactions}
-          onClose={() => setSelectedMonthData(null)}
-        />
-      )}
+      {selectedMonthData && <MonthlyDetailSheet month={selectedMonthData.month} year={selectedMonthData.year} transactions={yearTransactions} onClose={() => setSelectedMonthData(null)} />}
     </div>
   );
 };
@@ -868,19 +898,13 @@ const GoalCard = ({
             <CardTitle className="leading-tight">{goal.name}</CardTitle>
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  className="-mr-2 -mt-2 size-7 text-muted-foreground"
-                >
-                  <Edit className="size-4" />
+                <Button variant="ghost" size="icon" className="h-8 w-8">
+                  <MoreHorizontal className="size-4" />
                 </Button>
               </DropdownMenuTrigger>
-              <DropdownMenuContent>
-                <DropdownMenuItem onClick={onEdit}>Edit Goal</DropdownMenuItem>
-                <DropdownMenuItem className="text-red-500" onClick={onDelete}>
-                  Delete Goal
-                </DropdownMenuItem>
+              <DropdownMenuContent align="end">
+                <DropdownMenuItem onSelect={onEdit}> <Edit className="mr-2 size-4" /> Edit</DropdownMenuItem>
+                <DropdownMenuItem className="text-destructive" onSelect={onDelete}> <Trash2 className="mr-2 size-4" /> Delete</DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
           </div>
@@ -932,13 +956,35 @@ const GoalCard = ({
   );
 };
 
+const CustomForecastTooltip = ({ active, payload, label }: any) => {
+  if (active && payload && payload.length) {
+    const data = payload[0].payload;
+    return (
+      <div className="rounded-lg border bg-background p-3 shadow-sm text-sm">
+        <p className="font-bold mb-1">{label}</p>
+        <p className={cn("font-mono", data.balance >= 0 ? "text-green-500" : "text-red-500")}>
+          Projected Balance: ${data.balance.toFixed(2)}
+        </p>
+        {data.events.length > 0 && (
+          <div className="mt-2 border-t pt-2 space-y-1">
+            {data.events.map((event: string, index: number) => (
+              <p key={index} className="text-xs text-muted-foreground">{event}</p>
+            ))}
+          </div>
+        )}
+      </div>
+    );
+  }
+  return null;
+};
+
 export default function FinanceManager() {
   const [searchTerm, setSearchTerm] = useState("");
   const [date, setDate] = useState<DateRange | undefined>({
     from: startOfMonth(new Date()),
     to: new Date(),
   });
-  const [dialogState, setDialogState] = useState<DialogState>({ type: null });
+  const [sheetState, setSheetState] = useState<DialogState>({ type: null });
 
   const { data: financialData, isLoading, error } = useGetFinancialDataQuery();
   const [deleteTransaction] = useDeleteTransactionMutation();
@@ -976,7 +1022,7 @@ export default function FinanceManager() {
         }
       }
       const expenseData = Object.entries(categoryMap)
-        .map(([name, value]) => ({ name, value }))
+        .map(([name, value], index) => ({ name, value, fill: COLORS[Math.floor(index % COLORS.length)] }))
         .sort((a, b) => b.value - a.value);
       return {
         totalEarnings: earnings,
@@ -1004,76 +1050,52 @@ export default function FinanceManager() {
     return Array.from(years).sort((a, b) => b - a);
   }, [transactions]);
 
-  const cashFlowData = useMemo(() => {
-    const monthlyData: Record<string, { earning: number; expense: number }> =
-      {};
-    const sixMonthsAgo = subMonths(new Date(), 5);
-    const relevantTransactions = transactions.filter(
-      (t) => new Date(t.date) >= startOfMonth(sixMonthsAgo),
-    );
-    for (const t of relevantTransactions) {
-      const month = format(new Date(t.date), "MMM yy");
-      if (!monthlyData[month]) monthlyData[month] = { earning: 0, expense: 0 };
-      if (t.type === "earning") monthlyData[month].earning += t.amount;
-      else monthlyData[month].expense += t.amount;
-    }
-    return Object.entries(monthlyData)
-      .map(([name, values]) => ({ name, ...values }))
-      .slice(-6);
-  }, [transactions]);
-
-  const forecast = useMemo(() => {
-    const upcomingTransactions: {
-      description: string;
-      amount: number;
-      type: "earning" | "expense";
-      date: Date;
-    }[] = [];
+  const forecastData = useMemo(() => {
     const today = new Date();
-    const next30Days = addDays(today, 30);
+    const forecastDays = 30;
+    const endDate = addDays(today, forecastDays);
+    const dailyChanges: Record<string, { change: number; events: string[] }> = {};
     recurring.forEach((rule) => {
-      let cursor = rule.last_processed_date
-        ? new Date(rule.last_processed_date)
-        : new Date(rule.start_date);
-      if (isBefore(cursor, new Date(rule.start_date))) {
-        cursor = new Date(rule.start_date);
-      }
+      let cursor = rule.last_processed_date ? new Date(rule.last_processed_date) : new Date(rule.start_date);
+      if (isBefore(cursor, new Date(rule.start_date))) { cursor = new Date(rule.start_date); }
       let nextOccurrence = new Date(cursor);
-      if (
-        rule.last_processed_date &&
-        (isAfter(nextOccurrence, today) || isSameDay(nextOccurrence, today))
-      ) {
-        /* First candidate */
-      } else {
-        nextOccurrence = getNextOccurrence(cursor, rule);
-      }
+      if (rule.last_processed_date && (isAfter(nextOccurrence, today) || isSameDay(nextOccurrence, today))) { /* First candidate */ }
+      else { nextOccurrence = getNextOccurrence(cursor, rule); }
       const ruleEndDate = rule.end_date ? new Date(rule.end_date) : null;
-      while (isBefore(nextOccurrence, next30Days)) {
+      while (isBefore(nextOccurrence, endDate)) {
         if (ruleEndDate && isAfter(nextOccurrence, ruleEndDate)) break;
-        if (
-          isAfter(nextOccurrence, today) ||
-          isSameDay(nextOccurrence, today)
-        ) {
-          upcomingTransactions.push({
-            description: rule.description,
-            amount: rule.amount,
-            type: rule.type,
-            date: nextOccurrence,
-          });
+        if (isAfter(nextOccurrence, today) || isSameDay(nextOccurrence, today)) {
+          const dayStr = format(nextOccurrence, "yyyy-MM-dd");
+          if (!dailyChanges[dayStr]) { dailyChanges[dayStr] = { change: 0, events: [] }; }
+          const amount = rule.type === 'earning' ? rule.amount : -rule.amount;
+          dailyChanges[dayStr].change += amount;
+          dailyChanges[dayStr].events.push(`${rule.type === 'earning' ? '+' : '-'}$${rule.amount.toFixed(2)}: ${rule.description}`);
         }
         nextOccurrence = getNextOccurrence(nextOccurrence, rule);
       }
     });
-    return {
-      upcomingTransactions: upcomingTransactions.sort(
-        (a, b) => a.date.getTime() - b.date.getTime(),
-      ),
-    };
+    let cumulativeBalance = 0;
+    return Array.from({ length: forecastDays + 1 }, (_, i) => {
+      const date = addDays(today, i);
+      const dayStr = format(date, "yyyy-MM-dd");
+      const dayChange = dailyChanges[dayStr]?.change || 0;
+      cumulativeBalance += dayChange;
+      return { date: format(date, "MMM d"), balance: cumulativeBalance, events: dailyChanges[dayStr]?.events || [] };
+    });
   }, [recurring]);
 
-  const handleSaveSuccess = () => {
-    setDialogState({ type: null });
-  };
+  const primaryGoal = useMemo(() => {
+    if (goals.length === 0) return null;
+    // Create a shallow copy before sorting
+    const sortedGoals = [...goals].sort((a, b) =>
+      (a.target_date || "z").localeCompare(b.target_date || "z")
+    );
+    return sortedGoals[0];
+  }, [goals]);
+
+  const goalProgress = primaryGoal ? (primaryGoal.current_amount / primaryGoal.target_amount) * 100 : 0;
+  const handleOpenSheet = (type: NonNullable<DialogState['type']>, data?: any) => setSheetState({ type, data });
+  const handleCloseSheet = () => setSheetState({ type: null });
 
   const handleDelete = async (
     type: "transactions" | "recurring_transactions" | "financial_goals",
@@ -1096,21 +1118,11 @@ export default function FinanceManager() {
     }
   };
 
-  const handleDuplicateTransaction = (transaction: Transaction) => {
-    const { id, created_at, updated_at, ...duplicatableData } = transaction;
-    const newTransactionData = {
-      ...duplicatableData,
-      date: new Date().toISOString().split("T")[0],
-      description: `${transaction.description} (Copy)`,
-    };
-    setDialogState({ type: "transaction", data: newTransactionData });
-  };
-
   const handleAddFunds = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     const formData = new FormData(e.currentTarget);
     const amount = parseFloat(formData.get("amount") as string);
-    const goal = dialogState.data as FinancialGoal;
+    const goal = sheetState.data as FinancialGoal;
     if (!amount || amount <= 0 || !goal) {
       toast.error("Invalid amount provided.");
       return;
@@ -1119,345 +1131,215 @@ export default function FinanceManager() {
     try {
       await addFundsToGoal({ goal, amount }).unwrap();
       toast.success(`$${amount.toFixed(2)} added to "${goal.name}"`);
-      handleSaveSuccess();
+      handleCloseSheet();
     } catch (err: any) {
       toast.error("Failed to add funds", { description: err.message });
     }
   };
+
+  if (isLoading) return <LoadingSpinner />;
+  if (error) return <p>Error loading data.</p>;
 
   return (
     <div className="space-y-6">
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
           <h2 className="text-2xl font-bold">Finance Command Center</h2>
-          <p className="text-muted-foreground">
-            Strategic overview, planning, and transaction management.
-          </p>
+          <p className="text-muted-foreground">Strategic overview, planning, and transaction management.</p>
         </div>
-        <Menubar>
-          <MenubarMenu>
-            <MenubarTrigger>
-              <Plus className="size-4" />
-            </MenubarTrigger>
-            <MenubarContent>
-              <MenubarItem
-                onSelect={() => setDialogState({ type: "transaction" })}
-              >
-                <Plus className="mr-2 size-4" /> New Transaction
-              </MenubarItem>
-              <MenubarItem
-                onSelect={() => setDialogState({ type: "recurring" })}
-              >
-                <Repeat className="mr-2 size-4" /> New Recurring
-              </MenubarItem>
-              <MenubarItem onSelect={() => setDialogState({ type: "goal" })}>
-                <Target className="mr-2 size-4" /> New Goal
-              </MenubarItem>
-            </MenubarContent>
-          </MenubarMenu>
-        </Menubar>
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button>
+              <Plus className="mr-2 size-4" /> Quick Add</Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end">
+            <DropdownMenuItem onSelect={() => handleOpenSheet("transaction")}>
+              <Plus className="mr-2 size-4" /> New Transaction</DropdownMenuItem>
+            <DropdownMenuItem onSelect={() => handleOpenSheet("recurring")}>
+              <Repeat className="mr-2 size-4" /> New Recurring</DropdownMenuItem>
+            <DropdownMenuItem onSelect={() => handleOpenSheet("goal")}>
+              <Target className="mr-2 size-4" /> New Goal</DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
       </div>
       <Tabs defaultValue="dashboard">
-        <TabsList className="grid w-full grid-cols-6">
+        <TabsList className="grid w-full grid-cols-2 md:grid-cols-5">
           <TabsTrigger value="dashboard">Dashboard</TabsTrigger>
           <TabsTrigger value="transactions">Transactions</TabsTrigger>
-          <TabsTrigger value="categories">Categories</TabsTrigger>
           <TabsTrigger value="recurring">Recurring</TabsTrigger>
           <TabsTrigger value="goals">Goals</TabsTrigger>
           <TabsTrigger value="analytics">Analytics</TabsTrigger>
         </TabsList>
 
         <TabsContent value="dashboard" className="mt-6 space-y-6">
-          <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
-            <div className="lg:col-span-2 space-y-6">
-              <Card>
-                <CardHeader>
-                  <CardTitle>Net Income Overview</CardTitle>
-                  <CardDescription>
-                    Total earnings minus total expenses for the selected period:{" "}
-                    {date?.from ? format(date.from, "LLL dd, y") : "..."} -{" "}
-                    {date?.to ? format(date.to, "LLL dd, y") : "..."}
-                  </CardDescription>
-                </CardHeader>
-                <CardContent className="space-y-6">
-                  <div
-                    className={cn(
-                      "text-5xl font-bold",
-                      netIncome >= 0 ? "text-chart-2" : "text-chart-5",
-                    )}
-                  >
-                    {netIncome >= 0 ? "+" : "-"}$
-                    {Math.abs(netIncome).toFixed(2)}
-                  </div>
-                  <div className="flex justify-around items-center pt-4 border-t">
-                    <div className="text-center">
-                      <p className="text-sm text-muted-foreground flex items-center gap-1">
-                        <TrendingUp className="size-4 text-chart-2" /> Total
-                        Earnings
-                      </p>
-                      <p className="text-2xl font-semibold">
-                        ${totalEarnings.toFixed(2)}
-                      </p>
-                    </div>
-                    <Separator orientation="vertical" className="h-12" />
-                    <div className="text-center">
-                      <p className="text-sm text-muted-foreground flex items-center gap-1">
-                        <TrendingDown className="size-4 text-chart-5" /> Total
-                        Expenses
-                      </p>
-                      <p className="text-2xl font-semibold">
-                        ${totalExpenses.toFixed(2)}
-                      </p>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-              <Card>
-                <CardHeader>
-                  <CardTitle>Cash Flow (Last 6 Months)</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <ChartContainer config={chartConfig} className="h-64 w-full">
-                    <BarChart data={cashFlowData}>
-                      <CartesianGrid vertical={false} />
-                      <XAxis
-                        dataKey="name"
-                        tickLine={false}
-                        axisLine={false}
-                        tickMargin={8}
-                      />
-                      <YAxis tickLine={false} axisLine={false} tickMargin={8} />
-                      <ChartTooltip content={<ChartTooltipContent />} />
-                      <ChartLegend content={<ChartLegendContent />} />
-                      <Bar
-                        dataKey="earning"
-                        fill="var(--color-earning)"
-                        radius={4}
-                      />
-                      <Bar
-                        dataKey="expense"
-                        fill="var(--color-expense)"
-                        radius={4}
-                      />
-                    </BarChart>
-                  </ChartContainer>
-                </CardContent>
-              </Card>
-              <Card>
-                <CardHeader>
-                  <CardTitle>Goals at a Glance</CardTitle>
-                  <CardDescription>
-                    A summary of your active financial targets.
-                  </CardDescription>
-                </CardHeader>
-                <CardContent className="space-y-6">
-                  {goals.length > 0 ? (
-                    goals.map((goal) => {
-                      const progress = Math.min(
-                        (goal.current_amount / goal.target_amount) * 100,
-                        100,
-                      );
-                      const remainingAmount =
-                        goal.target_amount - goal.current_amount;
-                      const remainingDays = goal.target_date
-                        ? differenceInDays(
-                            new Date(goal.target_date),
-                            new Date(),
-                          )
-                        : null;
-                      return (
-                        <div
-                          key={goal.id}
-                          className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4"
-                        >
-                          <div className="flex-grow">
-                            <p className="font-semibold">{goal.name}</p>
-                            <p className="text-sm text-muted-foreground">
-                              ${goal.current_amount.toLocaleString()} / $
-                              {goal.target_amount.toLocaleString()}
-                            </p>
-                          </div>
-                          <div className="flex items-center gap-4 w-full sm:w-auto">
-                            <TooltipProvider delayDuration={100}>
-                              <Tooltip>
-                                <TooltipTrigger asChild>
-                                  <div className="relative h-6 w-28 rounded-full bg-muted overflow-hidden">
-                                    <motion.div
-                                      className="absolute left-0 top-0 h-full rounded-full bg-primary"
-                                      initial={{ width: 0 }}
-                                      animate={{ width: `${progress}%` }}
-                                      transition={{
-                                        duration: 0.8,
-                                        ease: "easeOut",
-                                      }}
-                                    />
-                                    <span className="absolute inset-0 flex items-center justify-center text-xs font-bold text-primary-foreground">
-                                      {progress.toFixed(0)}%
-                                    </span>
-                                  </div>
-                                </TooltipTrigger>
-                                {remainingDays !== null && (
-                                  <TooltipContent>
-                                    <p>
-                                      {remainingDays < 0
-                                        ? `${Math.abs(remainingDays)} days overdue`
-                                        : `${remainingDays} days remaining`}
-                                    </p>
-                                  </TooltipContent>
-                                )}
-                              </Tooltip>
-                            </TooltipProvider>
-                            <div className="text-right w-24">
-                              <p className="text-xs text-muted-foreground">
-                                Remaining
-                              </p>
-                              <p className="font-bold text-base">
-                                $
-                                {remainingAmount > 0
-                                  ? remainingAmount.toLocaleString()
-                                  : 0}
-                              </p>
-                            </div>
-                          </div>
-                        </div>
-                      );
-                    })
-                  ) : (
-                    <p className="text-muted-foreground text-sm py-4 text-center">
-                      No goals set. Create one in the 'Goals' tab to see
-                      progress here.
-                    </p>
-                  )}
-                </CardContent>
-                {goals.length > 0 && (
-                  <CardFooter>
-                    <p className="text-xs text-muted-foreground">
-                      Manage your goals in the 'Goals' tab.
-                    </p>
-                  </CardFooter>
-                )}
-              </Card>
-            </div>
-            <div className="lg:col-span-1 space-y-6">
-              <Card>
-                <CardHeader>
-                  <CardTitle>Expense Breakdown</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  {expenseByCategory.length > 0 ? (
-                    <ChartContainer config={{}} className="h-64 w-full">
-                      <PieChart>
-                        <Pie
-                          data={expenseByCategory}
-                          dataKey="value"
-                          nameKey="name"
-                          cx="50%"
-                          cy="50%"
-                          innerRadius={50}
-                          outerRadius={80}
-                        >
-                          {expenseByCategory.map((_, index) => (
-                            <Cell
-                              key={`cell-${index}`}
-                              fill={COLORS[index % COLORS.length]}
-                            />
-                          ))}
-                        </Pie>
-                        <ChartTooltip
-                          content={<ChartTooltipContent nameKey="name" />}
-                        />
-                      </PieChart>
+          <Card className="col-span-1 lg:col-span-3">
+            <CardHeader>
+              <CardTitle>Overview for Selected Period</CardTitle>
+              <CardDescription>
+                {date?.from ? (date.to ? `${format(date.from, "LLL dd, y")} - ${format(date.to, "LLL dd, y")}` : format(date.from, "LLL dd, y")) : "All time"}
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="grid grid-cols-1 sm:grid-cols-3 gap-6">
+              <div className="flex flex-col justify-center items-center p-4 border rounded-lg">
+                <p className="text-sm text-muted-foreground">Net Income</p>
+                <p className={cn("text-4xl font-bold tracking-tighter", netIncome >= 0 ? "text-green-500" : "text-red-500")}>
+                  {netIncome >= 0 ? "+" : "-"}${Math.abs(netIncome).toFixed(2)}
+                </p>
+              </div>
+              <div className="flex flex-col justify-center items-center p-4 border rounded-lg bg-secondary/30">
+                <p className="text-sm text-muted-foreground">Total Earnings</p>
+                <p className="text-2xl font-semibold text-green-500">${totalEarnings.toFixed(2)}</p>
+              </div>
+              <div className="flex flex-col justify-center items-center p-4 border rounded-lg bg-secondary/30">
+                <p className="text-sm text-muted-foreground">Total Expenses</p>
+                <p className="text-2xl font-semibold text-red-500">${totalExpenses.toFixed(2)}</p>
+              </div>
+            </CardContent>
+          </Card>
+
+          <div className="grid grid-cols-1 lg:grid-cols-8 gap-6">
+            <Card className="lg:col-span-4">
+              <CardHeader>
+                <CardTitle>30-Day Cash Flow Forecast</CardTitle>
+                <CardDescription>Projected change based on recurring transactions.</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                  <div className="md:col-span-2">
+                    <ChartContainer config={{}} className="h-48 w-full">
+                      <ResponsiveContainer>
+                        <LineChart data={forecastData} margin={{ top: 5, right: 10, left: -25, bottom: 5 }}>
+                          <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border)/0.5)" />
+                          <XAxis dataKey="date" tick={{ fill: "hsl(var(--muted-foreground))", fontSize: 12 }} tickLine={false} axisLine={false} />
+                          <YAxis tickFormatter={(value) => `$${value}`} tick={{ fill: "hsl(var(--muted-foreground))", fontSize: 12 }} tickLine={false} axisLine={false} />
+                          <RechartsTooltip content={<CustomForecastTooltip />} />
+                          <ReferenceLine y={0} stroke="hsl(var(--border))" strokeDasharray="3 3" />
+                          <Line type="monotone" dataKey="balance" stroke="hsl(var(--primary))" strokeWidth={2} dot={false} />
+                        </LineChart>
+                      </ResponsiveContainer>
                     </ChartContainer>
-                  ) : (
-                    <div className="flex h-64 items-center justify-center">
-                      <p className="text-muted-foreground text-center">
-                        No expense data for this period.
-                      </p>
-                    </div>
-                  )}
-                </CardContent>
-              </Card>
-              <Card>
-                <CardHeader>
-                  <CardTitle>Upcoming in 30 Days</CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-3">
-                  {forecast.upcomingTransactions.length > 0 ? (
-                    forecast.upcomingTransactions.map((t, i) => (
-                      <div
-                        key={i}
-                        className="flex justify-between items-center text-sm"
-                      >
-                        <div>
-                          <p className="font-semibold">{t.description}</p>
-                          <p className="text-xs text-muted-foreground">
-                            Due in {differenceInDays(t.date, new Date())} days (
-                            {format(t.date, "MMM dd")})
-                          </p>
+                  </div>
+                  <div className="md:col-span-1 space-y-2">
+                    <h4 className="text-sm font-semibold text-muted-foreground">Upcoming</h4>
+                    {forecastData.flatMap(d => d.events).slice(0, 3).map((event, i) => (
+                      <p key={i} className="text-xs truncate">{event}</p>
+                    ))}
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+
+            <Card className="lg:col-span-2">
+              <CardHeader>
+                <CardTitle>Goals at a Glance</CardTitle>
+              </CardHeader>
+              <CardContent>
+                {goals.length > 0 ? (
+                  <div className="space-y-4">
+                    {goals.slice(0, 3).map((goal) => {
+                      const progress = Math.min((goal.current_amount / goal.target_amount) * 100, 100);
+                      return (
+                        <div key={goal.id} className="group cursor-pointer" onClick={() => (document.querySelector('button[value="goals"]') as HTMLButtonElement)?.click()}>
+                          <div className="flex justify-between text-xs font-medium text-muted-foreground mb-1">
+                            <span className="truncate group-hover:text-primary">{goal.name}</span>
+                            <span>{progress.toFixed(0)}%</span>
+                          </div>
+                          <Progress value={progress} className="h-2" />
+                          <div className="flex justify-between text-xs text-muted-foreground mt-1">
+                            <span>${goal.current_amount.toLocaleString()}</span>
+                            <span>${goal.target_amount.toLocaleString()}</span>
+                          </div>
                         </div>
-                        <p
-                          className={cn(
-                            "font-bold",
-                            t.type === "earning"
-                              ? "text-chart-2"
-                              : "text-chart-5",
-                          )}
-                        >
-                          {t.type === "earning" ? "+" : "-"}$
-                          {t.amount.toFixed(2)}
-                        </p>
-                      </div>
-                    ))
-                  ) : (
-                    <p className="text-sm text-muted-foreground text-center py-8">
-                      No upcoming recurring transactions.
-                    </p>
-                  )}
-                </CardContent>
-              </Card>
-            </div>
+                      )
+                    })}
+                  </div>
+                ) : (
+                  <div className="text-center py-8">
+                    <Target className="mx-auto size-8 text-muted-foreground opacity-50 mb-2" />
+                    <p className="text-sm text-muted-foreground">No goals set yet.</p>
+                    <Button variant="link" size="sm" className="p-0 h-auto mt-1" onClick={() => handleOpenSheet("goal")}>Create a goal</Button>
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+
+            <Card className="lg:col-span-2">
+              <CardHeader>
+                <CardTitle>Top Expense Categories</CardTitle>
+              </CardHeader>
+              <CardContent className="flex justify-center items-center">
+                <ChartContainer config={{}} className="h-48 w-full">
+                  <ResponsiveContainer>
+                    <RadialBarChart innerRadius="30%" outerRadius="100%" data={expenseByCategory.slice(0, 5)} startAngle={180} endAngle={-180}>
+                      <RadialBar dataKey="value" background cornerRadius={10}>{expenseByCategory.map((entry, index) => (<Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />))}</RadialBar>
+                      <RechartsTooltip
+                        content={({ active, payload }) => {
+                          if (active && payload?.length) {
+                            const { name, value } = payload[0].payload;
+
+                            return (
+                              <div className="p-2 border bg-popover rounded-md shadow-sm text-sm">
+                                <p className="font-bold">
+                                  {name}: ${value.toFixed(2)}
+                                </p>
+                              </div>
+                            );
+                          }
+                          return null;
+                        }}
+                      />
+                    </RadialBarChart>
+                  </ResponsiveContainer>
+                </ChartContainer>
+              </CardContent>
+            </Card>
           </div>
+
+          <Card>
+            <CardHeader>
+              <CardTitle>Recent Transactions</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <Table>
+                <TableBody>
+                  {filteredTransactions.slice(0, 5).map(t => (
+                    <TableRow key={t.id}>
+                      <TableCell className="w-10">
+                        <div className={cn("flex h-8 w-8 items-center justify-center rounded-full", t.type === 'earning' ? 'bg-green-500/10' : 'bg-red-500/10')}>
+                          {t.type === 'earning' ? <TrendingUp className="size-4 text-green-500" /> : <TrendingDown className="size-4 text-red-500" />}
+                        </div>
+                      </TableCell>
+                      <TableCell>
+                        <p className="font-medium">{t.description}</p>
+                        <p className="text-xs text-muted-foreground">{format(new Date(t.date), "MMM dd, yyyy")}</p>
+                      </TableCell>
+                      <TableCell className="text-right font-mono font-semibold">
+                        {t.type === 'earning' ? '+' : '-'}${t.amount.toFixed(2)}
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </CardContent>
+          </Card>
         </TabsContent>
-        {/* Transactions Tab - No changes */}
+
         <TabsContent value="transactions" className="mt-6 space-y-4">
           <Card>
             <CardContent className="flex flex-col gap-4 p-4 sm:flex-row sm:items-center">
               <div className="relative flex-grow">
                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-muted-foreground" />
-                <Input
-                  placeholder="Search descriptions..."
-                  className="pl-10"
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                />
+                <Input placeholder="Search descriptions..." className="pl-10" value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} />
               </div>
               <Popover>
                 <PopoverTrigger asChild>
-                  <Button
-                    variant="outline"
-                    className="w-full justify-start text-left font-normal sm:w-auto"
-                  >
+                  <Button variant="outline" className="w-full justify-start text-left font-normal sm:w-auto">
                     <CalendarIcon className="mr-2 size-4" />
-                    {date?.from ? (
-                      date.to ? (
-                        `${format(date.from, "LLL dd, y")} - ${format(date.to, "LLL dd, y")}`
-                      ) : (
-                        format(date.from, "LLL dd, y")
-                      )
-                    ) : (
-                      <span>Pick a date range</span>
-                    )}
+                    {date?.from ? (date.to ? `${format(date.from, "LLL dd, y")} - ${format(date.to, "LLL dd, y")}` : format(date.from, "LLL dd, y")) : (<span>Pick a date range</span>)}
                   </Button>
                 </PopoverTrigger>
                 <PopoverContent className="w-auto p-0" align="start">
-                  <Calendar
-                    initialFocus
-                    mode="range"
-                    defaultMonth={date?.from}
-                    selected={date}
-                    onSelect={setDate}
-                    numberOfMonths={2}
-                  />
+                  <Calendar initialFocus mode="range" defaultMonth={date?.from} selected={date} onSelect={setDate} numberOfMonths={2} />
                 </PopoverContent>
               </Popover>
             </CardContent>
@@ -1468,70 +1350,42 @@ export default function FinanceManager() {
                 <TableRow>
                   <TableHead>Date</TableHead>
                   <TableHead>Description</TableHead>
-                  <TableHead>Category</TableHead>
+                  <TableHead className="hidden md:table-cell">Category</TableHead>
                   <TableHead className="text-right">Amount</TableHead>
+                  <TableHead className="w-[80px] text-right">Actions</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {filteredTransactions.length > 0 ? (
-                  filteredTransactions.map((t) => (
-                    <ContextMenu key={t.id}>
-                      <ContextMenuTrigger asChild>
-                        <TableRow>
-                          <TableCell>
-                            {format(new Date(t.date), "MMM dd, yyyy")}
-                          </TableCell>
-                          <TableCell className="font-medium">
-                            {t.description}
-                          </TableCell>
-                          <TableCell>{t.category || "–"}</TableCell>
-                          <TableCell
-                            className={cn(
-                              "text-right font-bold",
-                              t.type === "earning"
-                                ? "text-chart-2"
-                                : "text-chart-5",
-                            )}
-                          >
-                            {t.type === "earning" ? "+" : "-"}$
-                            {t.amount.toFixed(2)}
-                          </TableCell>
-                        </TableRow>
-                      </ContextMenuTrigger>
-                      <ContextMenuContent className="w-48">
-                        <ContextMenuItem
-                          onSelect={() =>
-                            setDialogState({ type: "transaction", data: t })
-                          }
-                        >
-                          <Edit className="mr-2 size-4" /> Edit
-                        </ContextMenuItem>
-                        <ContextMenuItem
-                          onSelect={() => handleDuplicateTransaction(t)}
-                        >
-                          <Copy className="mr-2 size-4" /> Duplicate
-                        </ContextMenuItem>
-                        <ContextMenuSeparator />
-                        <ContextMenuItem
-                          className="text-destructive focus:bg-destructive/10 focus:text-destructive"
-                          onSelect={() =>
-                            handleDelete(
-                              "transactions",
-                              t.id,
-                              "Are you sure you want to delete this transaction?",
-                            )
-                          }
-                        >
-                          <Trash2 className="mr-2 size-4" /> Delete
-                        </ContextMenuItem>
-                      </ContextMenuContent>
-                    </ContextMenu>
-                  ))
-                ) : (
-                  <TableRow>
-                    <TableCell colSpan={4} className="h-24 text-center">
-                      No transactions found for the selected filters.
+                {filteredTransactions.length > 0 ? (filteredTransactions.map((t) => (
+                  <TableRow key={t.id} className="group">
+                    <TableCell className="text-xs text-muted-foreground">{format(new Date(t.date), "MMM dd, yyyy")}</TableCell>
+                    <TableCell className="font-medium flex items-center gap-2">
+                      {t.type === 'earning' ? <TrendingUp className="size-4 text-green-500 shrink-0" /> : <TrendingDown className="size-4 text-red-500 shrink-0" />}
+                      {t.description}
                     </TableCell>
+                    <TableCell className="hidden md:table-cell">
+                      <Badge variant="outline">{t.category || "–"}</Badge>
+                    </TableCell>
+                    <TableCell className={cn("text-right font-semibold font-mono", t.type === "earning" ? "text-green-500" : "text-red-500")}>
+                      {t.type === "earning" ? "+" : "-"}${t.amount.toFixed(2)}
+                    </TableCell>
+                    <TableCell className="text-right">
+                      <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                          <Button variant="ghost" size="icon" className="h-8 w-8 opacity-0 group-hover:opacity-100">
+                            <MoreHorizontal className="size-4" />
+                          </Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align="end">
+                          <DropdownMenuItem onSelect={() => handleOpenSheet('transaction', t)}> <Edit className="mr-2 size-4" /> Edit</DropdownMenuItem>
+                          <DropdownMenuItem className="text-destructive" onSelect={() => handleDelete("transactions", t.id, `Delete transaction "${t.description}"?`)}> <Trash2 className="mr-2 size-4" /> Delete</DropdownMenuItem>
+                        </DropdownMenuContent>
+                      </DropdownMenu>
+                    </TableCell>
+                  </TableRow>
+                ))) : (
+                  <TableRow>
+                    <TableCell colSpan={5} className="h-24 text-center">No transactions found.</TableCell>
                   </TableRow>
                 )}
               </TableBody>
@@ -1539,22 +1393,11 @@ export default function FinanceManager() {
           </Card>
         </TabsContent>
 
-        <TabsContent value="categories" className="mt-6">
-          <CategoriesTab
-            transactions={filteredTransactions}
-            totalExpenses={totalExpenses}
-            allCategories={allCategories}
-          />
-        </TabsContent>
-
         <TabsContent value="recurring">
           <Card>
             <CardHeader>
               <CardTitle>Recurring Transactions</CardTitle>
-              <CardDescription>
-                Automate your regular income and expenses to forecast cash flow.
-                Due transactions are logged automatically.
-              </CardDescription>
+              <CardDescription>Automate your regular income and expenses to forecast cash flow.</CardDescription>
             </CardHeader>
             <CardContent>
               <Table>
@@ -1564,99 +1407,52 @@ export default function FinanceManager() {
                     <TableHead>Amount</TableHead>
                     <TableHead>Schedule</TableHead>
                     <TableHead>Next Due</TableHead>
-                    <TableHead className="text-center">Actions</TableHead>
+                    <TableHead className="text-right">Actions</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
                   {recurring.map((r) => {
                     let schedule: string = r.frequency;
-                    if (
-                      (r.frequency === "weekly" ||
-                        r.frequency === "bi-weekly") &&
-                      r.occurrence_day !== null &&
-                      r.occurrence_day !== undefined
-                    ) {
-                      const days = [
-                        "Sun",
-                        "Mon",
-                        "Tue",
-                        "Wed",
-                        "Thu",
-                        "Fri",
-                        "Sat",
-                      ];
+                    if ((r.frequency === "weekly" || r.frequency === "bi-weekly") && r.occurrence_day !== null && r.occurrence_day !== undefined) {
+                      const days = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
                       schedule = `${r.frequency} on ${days[r.occurrence_day]}`;
                     } else if (r.frequency === "monthly" && r.occurrence_day) {
                       schedule = `monthly on the ${r.occurrence_day}th`;
                     }
                     let nextDueDate = "N/A";
                     try {
-                      let cursor = r.last_processed_date
-                        ? new Date(r.last_processed_date)
-                        : new Date(r.start_date);
-                      if (isBefore(cursor, new Date(r.start_date)))
-                        cursor = new Date(r.start_date);
-                      const next =
-                        r.last_processed_date &&
-                        isAfter(new Date(r.last_processed_date), new Date())
-                          ? cursor
-                          : getNextOccurrence(cursor, r);
+                      let cursor = r.last_processed_date ? new Date(r.last_processed_date) : new Date(r.start_date);
+                      if (isBefore(cursor, new Date(r.start_date))) cursor = new Date(r.start_date);
+                      const next = r.last_processed_date && isAfter(new Date(r.last_processed_date), new Date()) ? cursor : getNextOccurrence(cursor, r);
                       nextDueDate = format(next, "MMM dd, yyyy");
-                    } catch (e) {
-                      console.error("Date calculation error", e);
-                    }
+                    } catch (e) { console.error("Date calculation error", e); }
                     return (
                       <TableRow key={r.id}>
-                        <TableCell className="font-medium">
-                          {r.description}
-                        </TableCell>
-                        <TableCell
-                          className={
-                            r.type === "earning"
-                              ? "text-chart-2"
-                              : "text-chart-5"
-                          }
-                        >
-                          ${r.amount.toFixed(2)}
-                        </TableCell>
+                        <TableCell className="font-medium">{r.description}</TableCell>
+                        <TableCell className={r.type === "earning" ? "text-green-500" : "text-red-500"}>${r.amount.toFixed(2)}</TableCell>
                         <TableCell className="capitalize">{schedule}</TableCell>
                         <TableCell>{nextDueDate}</TableCell>
-                        <TableCell className="text-center">
-                          <Button
-                            variant="ghost"
-                            size="icon"
-                            className="size-8"
-                            onClick={() =>
-                              setDialogState({ type: "recurring", data: r })
-                            }
-                          >
-                            <Edit className="size-4" />
-                          </Button>
-                          <Button
-                            variant="ghost"
-                            size="icon"
-                            className="size-8 hover:bg-destructive/10 hover:text-destructive"
-                            onClick={() =>
-                              handleDelete(
-                                "recurring_transactions",
-                                r.id,
-                                `Delete rule "${r.description}"?`,
-                              )
-                            }
-                          >
-                            <Trash2 className="size-4" />
-                          </Button>
+                        <TableCell className="text-right">
+                          <DropdownMenu>
+                            <DropdownMenuTrigger asChild>
+                              <Button variant="ghost" size="icon" className="h-8 w-8">
+                                <MoreHorizontal className="size-4" />
+                              </Button>
+                            </DropdownMenuTrigger>
+                            <DropdownMenuContent align="end">
+                              <DropdownMenuItem onSelect={() => handleOpenSheet('recurring', r)}>
+                                <Edit className="mr-2 size-4" />Edit</DropdownMenuItem>
+                              <DropdownMenuItem className="text-destructive" onSelect={() => handleDelete("recurring_transactions", r.id, `Delete rule "${r.description}"?`)}>
+                                <Trash2 className="mr-2 size-4" />Delete</DropdownMenuItem>
+                            </DropdownMenuContent>
+                          </DropdownMenu>
                         </TableCell>
                       </TableRow>
                     );
-                  })}{" "}
-                  {recurring.length === 0 && (
-                    <TableRow>
-                      <TableCell colSpan={5} className="h-24 text-center">
-                        No recurring transaction rules found.
-                      </TableCell>
-                    </TableRow>
-                  )}
+                  })}
+                  {recurring.length === 0 && <TableRow>
+                    <TableCell colSpan={5} className="h-24 text-center">No recurring transaction rules found.</TableCell>
+                  </TableRow>}
                 </TableBody>
               </Table>
             </CardContent>
@@ -1666,123 +1462,57 @@ export default function FinanceManager() {
           <Card>
             <CardHeader>
               <CardTitle>Financial Goals</CardTitle>
-              <CardDescription>
-                Set targets and track your progress towards them.
-              </CardDescription>
+              <CardDescription>Set targets and track your progress towards them.</CardDescription>
             </CardHeader>
             <CardContent className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-              {goals.map((goal) => (
-                <GoalCard
-                  key={goal.id}
-                  goal={goal}
-                  onAddFunds={() =>
-                    setDialogState({ type: "addFunds", data: goal })
-                  }
-                  onEdit={() => setDialogState({ type: "goal", data: goal })}
-                  onDelete={() =>
-                    handleDelete(
-                      "financial_goals",
-                      goal.id,
-                      `Delete goal "${goal.name}"?`,
-                    )
-                  }
-                />
-              ))}{" "}
-              {goals.length === 0 && (
-                <p className="text-muted-foreground col-span-full text-center py-12">
-                  No goals set yet. Click "New Goal" to start planning.
-                </p>
-              )}
+              {goals.map((goal) => (<GoalCard key={goal.id} goal={goal} onAddFunds={() => handleOpenSheet("addFunds", goal)} onEdit={() => handleOpenSheet("goal", goal)} onDelete={() => handleDelete("financial_goals", goal.id, `Delete goal "${goal.name}"?`)} />))}
+              {goals.length === 0 && <p className="text-muted-foreground col-span-full text-center py-12">No goals set yet. Click "Quick Add" to start planning.</p>}
             </CardContent>
           </Card>
         </TabsContent>
+
         <TabsContent value="analytics" className="mt-6">
-          <AnalyticsTab
-            transactions={transactions}
-            allYears={allYearsWithData}
-          />
+          <AnalyticsTab transactions={transactions} allYears={allYearsWithData} allCategories={allCategories} />
         </TabsContent>
       </Tabs>
-      <Dialog
-        open={!!dialogState.type}
-        onOpenChange={(open) => !open && setDialogState({ type: null })}
-      >
-        <DialogContent>
-          {dialogState.type === "transaction" && (
-            <>
-              <DialogHeader>
-                <DialogTitle>
-                  {dialogState.data?.id ? "Edit" : "Add"} Transaction
-                </DialogTitle>
-              </DialogHeader>
-              <TransactionForm
-                transaction={dialogState.data}
-                onSuccess={handleSaveSuccess}
-                categories={allCategories}
-              />
-            </>
-          )}
-          {dialogState.type === "recurring" && (
-            <>
-              <DialogHeader>
-                <DialogTitle>
-                  {dialogState.data ? "Edit" : "Create"} Recurring Rule
-                </DialogTitle>
-              </DialogHeader>
-              <RecurringTransactionForm
-                recurringTransaction={dialogState.data}
-                onSuccess={handleSaveSuccess}
-              />
-            </>
-          )}
-          {dialogState.type === "goal" && (
-            <>
-              <DialogHeader>
-                <DialogTitle>
-                  {dialogState.data ? "Edit" : "Create"} Financial Goal
-                </DialogTitle>
-              </DialogHeader>
-              <FinancialGoalForm
-                goal={dialogState.data}
-                onSuccess={handleSaveSuccess}
-              />
-            </>
-          )}
-          {dialogState.type === "addFunds" && (
-            <>
-              <DialogHeader>
-                <DialogTitle>
-                  Add Funds to "{dialogState.data?.name}"
-                </DialogTitle>
-              </DialogHeader>
-              <form onSubmit={handleAddFunds} className="space-y-4 pt-4">
-                <div>
-                  <Label htmlFor="add-funds-amount">Amount</Label>
-                  <Input
-                    id="add-funds-amount"
-                    name="amount"
-                    type="number"
-                    step="1"
-                    required
-                    autoFocus
-                  />
-                </div>
-                <div className="flex justify-end gap-2">
-                  <DialogClose asChild>
-                    <Button type="button" variant="ghost">
-                      Cancel
-                    </Button>
-                  </DialogClose>
-                  <Button type="submit">Confirm Contribution</Button>
-                </div>
-              </form>
-            </>
-          )}
-        </DialogContent>
-      </Dialog>
+
+      <Sheet open={!!sheetState.type} onOpenChange={(open) => !open && handleCloseSheet()}>
+        <SheetContent className="sm:max-w-lg">
+          {sheetState.type === 'transaction' && (<> <SheetHeader>
+            <SheetTitle>{sheetState.data?.id ? "Edit" : "Add"} Transaction</SheetTitle>
+            <SheetDescription>Track your earnings or expenses.</SheetDescription>
+          </SheetHeader>
+            <TransactionForm transaction={sheetState.data} onSuccess={handleCloseSheet} categories={allCategories} />
+          </>)}
+          {sheetState.type === 'recurring' && (<> <SheetHeader>
+            <SheetTitle>{sheetState.data ? "Edit" : "Create"} Recurring Rule</SheetTitle>
+            <SheetDescription>Automate your regular income and expenses.</SheetDescription>
+          </SheetHeader>
+            <RecurringTransactionForm recurringTransaction={sheetState.data} onSuccess={handleCloseSheet} />
+          </>)}
+          {sheetState.type === 'goal' && (<> <SheetHeader>
+            <SheetTitle>{sheetState.data ? "Edit" : "Create"} Financial Goal</SheetTitle>
+            <SheetDescription>Set a target and track your progress.</SheetDescription>
+          </SheetHeader>
+            <FinancialGoalForm goal={sheetState.data} onSuccess={handleCloseSheet} />
+          </>)}
+          {sheetState.type === "addFunds" && (<>
+            <SheetHeader>
+              <SheetTitle>Add Funds to "{sheetState.data?.name}"</SheetTitle>
+            </SheetHeader>
+            <form onSubmit={handleAddFunds} className="space-y-4 pt-4">
+              <div>
+                <Label htmlFor="add-funds-amount">Amount</Label>
+                <Input id="add-funds-amount" name="amount" type="number" step="1" required autoFocus />
+              </div>
+              <div className="flex justify-end gap-2">
+                <Button type="button" variant="ghost" onClick={handleCloseSheet}>Cancel</Button>
+                <Button type="submit">Confirm Contribution</Button>
+              </div>
+            </form>
+          </>)}
+        </SheetContent>
+      </Sheet>
     </div>
   );
 }
-
-// NOTE: Only the logic section of FinanceManager and the CategoriesTab call are shown.
-// The sub-components and the main JSX structure remain identical to your version.

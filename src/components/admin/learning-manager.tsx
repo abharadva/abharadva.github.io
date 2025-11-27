@@ -2,18 +2,13 @@
 "use client";
 
 import { useState } from "react";
-import type { LearningSubject, LearningTopic } from "@/types";
+import type { LearningSubject, LearningTopic, LearningSession } from "@/types";
 import { Plus, BrainCircuit, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import SubjectTopicTree from "./learning/SubjectTopicTree";
 import TopicEditor from "./learning/TopicEditor";
 import LearningDashboard from "./learning/LearningDashboard";
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
+import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetDescription } from "@/components/ui/sheet";
 import SubjectForm from "./learning/SubjectForm";
 import TopicForm from "./learning/TopicForm";
 import { toast } from "sonner";
@@ -23,8 +18,9 @@ import {
   useDeleteTopicMutation,
 } from "@/store/api/adminApi";
 import { useAppSelector } from "@/store/hooks";
+import { ResizableHandle, ResizablePanel, ResizablePanelGroup } from "../ui/resizable";
 
-type DialogState =
+type SheetState =
   | { type: "create-subject" }
   | { type: "edit-subject"; data: LearningSubject }
   | { type: "create-topic"; subjectId: string }
@@ -33,7 +29,7 @@ type DialogState =
 
 export default function LearningManager() {
   const [activeTopic, setActiveTopic] = useState<LearningTopic | null>(null);
-  const [dialogState, setDialogState] = useState<DialogState>(null);
+  const [sheetState, setSheetState] = useState<SheetState>(null);
 
   const { data, isLoading } = useGetLearningDataQuery();
   const { activeSession } = useAppSelector((state) => state.learningSession);
@@ -52,7 +48,7 @@ export default function LearningManager() {
     setActiveTopic(null);
   };
   const handleSaveSuccess = () => {
-    setDialogState(null);
+    setSheetState(null);
   };
 
   const handleDelete = async (type: "subject" | "topic", id: string) => {
@@ -96,106 +92,110 @@ export default function LearningManager() {
               Track subjects, topics, and learning sessions.
             </p>
           </div>
-          <Button onClick={() => setDialogState({ type: "create-subject" })}>
+          <Button onClick={() => setSheetState({ type: "create-subject" })}>
             <Plus className="mr-2 size-4" />
             New Subject
           </Button>
         </div>
-        <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
-          <aside className="lg:col-span-1">
-            <div className="p-4 rounded-lg border bg-card/50 sticky top-28">
-              <SubjectTopicTree
-                subjects={subjects}
-                topics={topics}
-                activeTopicId={activeTopic?.id}
-                activeSession={activeSession}
-                onSelectTopic={handleSelectTopic}
-                onCreateSubject={() =>
-                  setDialogState({ type: "create-subject" })
-                }
-                onEditSubject={(subject) =>
-                  setDialogState({ type: "edit-subject", data: subject })
-                }
-                onDeleteSubject={(id) => handleDelete("subject", id)}
-                onCreateTopic={(subjectId) =>
-                  setDialogState({ type: "create-topic", subjectId })
-                }
-                onEditTopic={(topic) =>
-                  setDialogState({ type: "edit-topic", data: topic })
-                }
-                onDeleteTopic={(id) => handleDelete("topic", id)}
-              />
-            </div>
-          </aside>
-          <main className="lg:col-span-3">
-            {activeTopic ? (
-              <TopicEditor
-                key={activeTopic.id}
-                topic={activeTopic}
-                onBack={handleDeselectTopic}
-                onTopicUpdate={(updatedTopic) => {
-                  if (activeTopic?.id === updatedTopic.id) {
-                    setActiveTopic(updatedTopic);
-                  }
-                }}
-              />
-            ) : (
-              <LearningDashboard sessions={sessions} topics={topics} />
-            )}
-          </main>
-        </div>
+        
+        <ResizablePanelGroup direction="horizontal" className="h-[calc(100vh-12rem)] rounded-lg border">
+            <ResizablePanel defaultSize={25} minSize={20} maxSize={35} className="p-4">
+                 <SubjectTopicTree
+                    subjects={subjects}
+                    topics={topics}
+                    activeTopicId={activeTopic?.id}
+                    activeSession={activeSession}
+                    onSelectTopic={handleSelectTopic}
+                    onCreateSubject={() =>
+                    setSheetState({ type: "create-subject" })
+                    }
+                    onEditSubject={(subject) =>
+                    setSheetState({ type: "edit-subject", data: subject })
+                    }
+                    onDeleteSubject={(id) => handleDelete("subject", id)}
+                    onCreateTopic={(subjectId) =>
+                    setSheetState({ type: "create-topic", subjectId })
+                    }
+                    onEditTopic={(topic) =>
+                    setSheetState({ type: "edit-topic", data: topic })
+                    }
+                    onDeleteTopic={(id) => handleDelete("topic", id)}
+                />
+            </ResizablePanel>
+            <ResizableHandle withHandle />
+            <ResizablePanel defaultSize={75}>
+                 <div className="p-6 h-full overflow-y-auto">
+                    {activeTopic ? (
+                    <TopicEditor
+                        key={activeTopic.id}
+                        topic={activeTopic}
+                        onBack={handleDeselectTopic}
+                        onTopicUpdate={(updatedTopic) => {
+                        if (activeTopic?.id === updatedTopic.id) {
+                            setActiveTopic(updatedTopic);
+                        }
+                        }}
+                    />
+                    ) : (
+                    <LearningDashboard sessions={sessions} topics={topics} />
+                    )}
+                 </div>
+            </ResizablePanel>
+        </ResizablePanelGroup>
       </div>
-      <Dialog
-        open={!!dialogState}
-        onOpenChange={(open) => !open && setDialogState(null)}
-      >
-        <DialogContent>
-          {dialogState?.type === "create-subject" && (
+
+      <Sheet open={!!sheetState} onOpenChange={(open) => !open && setSheetState(null)}>
+        <SheetContent>
+          {sheetState?.type === "create-subject" && (
             <>
-              <DialogHeader>
-                <DialogTitle>Create New Subject</DialogTitle>
-              </DialogHeader>
+              <SheetHeader>
+                <SheetTitle>Create New Subject</SheetTitle>
+                <SheetDescription>Organize your knowledge into broad categories.</SheetDescription>
+              </SheetHeader>
               <SubjectForm subject={null} onSuccess={handleSaveSuccess} />
             </>
           )}
-          {dialogState?.type === "edit-subject" && (
+          {sheetState?.type === "edit-subject" && (
             <>
-              <DialogHeader>
-                <DialogTitle>Edit Subject</DialogTitle>
-              </DialogHeader>
+              <SheetHeader>
+                <SheetTitle>Edit Subject</SheetTitle>
+                <SheetDescription>Update the details for this subject.</SheetDescription>
+              </SheetHeader>
               <SubjectForm
-                subject={dialogState.data}
+                subject={sheetState.data}
                 onSuccess={handleSaveSuccess}
               />
             </>
           )}
-          {dialogState?.type === "create-topic" && (
+          {sheetState?.type === "create-topic" && (
             <>
-              <DialogHeader>
-                <DialogTitle>Create New Topic</DialogTitle>
-              </DialogHeader>
+              <SheetHeader>
+                <SheetTitle>Create New Topic</SheetTitle>
+                <SheetDescription>Add a new topic to learn within a subject.</SheetDescription>
+              </SheetHeader>
               <TopicForm
                 topic={null}
                 subjects={subjects}
-                defaultSubjectId={dialogState.subjectId}
+                defaultSubjectId={sheetState.subjectId}
                 onSuccess={handleSaveSuccess}
               />
             </>
           )}
-          {dialogState?.type === "edit-topic" && (
+          {sheetState?.type === "edit-topic" && (
             <>
-              <DialogHeader>
-                <DialogTitle>Edit Topic</DialogTitle>
-              </DialogHeader>
+              <SheetHeader>
+                <SheetTitle>Edit Topic</SheetTitle>
+                <SheetDescription>Update the details for this topic.</SheetDescription>
+              </SheetHeader>
               <TopicForm
-                topic={dialogState.data}
+                topic={sheetState.data}
                 subjects={subjects}
                 onSuccess={handleSaveSuccess}
               />
             </>
           )}
-        </DialogContent>
-      </Dialog>
+        </SheetContent>
+      </Sheet>
     </>
   );
 }

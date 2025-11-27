@@ -52,7 +52,7 @@ import {
 } from "lucide-react";
 import { toast } from "sonner";
 import { format } from "date-fns";
-import { getStorageUrl } from "@/lib/utils";
+import { cn } from "@/lib/utils";
 
 interface BlogManagerProps {
   startInCreateMode?: boolean;
@@ -146,7 +146,9 @@ export default function BlogManager({
         published: !post.published,
         published_at: !post.published ? new Date().toISOString() : null,
       }).unwrap();
-      toast.success(`Post ${!post.published ? "published" : "unpublished"}.`);
+      toast.success(
+        `Post ${!post.published ? "published" : "unpublished"}.`,
+      );
     } catch (err: any) {
       toast.error("Failed to update status", { description: err.message });
     }
@@ -231,8 +233,13 @@ export default function BlogManager({
               <TableBody>
                 <AnimatePresence>
                   {filteredPosts.map((post) => (
-                    <TableRow
+                    <motion.tr
                       key={post.id}
+                      layout
+                      initial={{ opacity: 0 }}
+                      animate={{ opacity: 1 }}
+                      exit={{ opacity: 0 }}
+                      transition={{ duration: 0.2 }}
                       className="group hover:bg-secondary/40"
                     >
                       <TableCell>
@@ -278,7 +285,7 @@ export default function BlogManager({
                           <Calendar className="h-3 w-3" />
                           {format(
                             new Date(post.updated_at || new Date()),
-                            "MMM dd, yyyy",
+                            "MMM dd, yyyy"
                           )}
                         </div>
                       </TableCell>
@@ -307,18 +314,13 @@ export default function BlogManager({
                             </DropdownMenuTrigger>
                             <DropdownMenuContent align="end">
                               <DropdownMenuLabel>Actions</DropdownMenuLabel>
-                              <DropdownMenuItem
-                                onClick={() => handleEditPost(post)}
-                              >
+                              <DropdownMenuItem onClick={() => handleEditPost(post)}>
                                 <Edit className="mr-2 h-4 w-4" /> Edit
                               </DropdownMenuItem>
-                              <DropdownMenuItem
-                                onClick={() => togglePostStatus(post)}
-                              >
+                              <DropdownMenuItem onClick={() => togglePostStatus(post)}>
                                 {post.published ? (
                                   <>
-                                    <FileText className="mr-2 h-4 w-4" />{" "}
-                                    Unpublish
+                                    <FileText className="mr-2 h-4 w-4" /> Unpublish
                                   </>
                                 ) : (
                                   <>
@@ -349,7 +351,7 @@ export default function BlogManager({
                           </DropdownMenu>
                         </div>
                       </TableCell>
-                    </TableRow>
+                    </motion.tr>
                   ))}
                 </AnimatePresence>
               </TableBody>

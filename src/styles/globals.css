@@ -4043,7 +4043,7 @@
     --fc-neutral-bg-color: hsl(var(--card));
 
     /* Set the background for the entire calendar */
-    background-color: hsl(var(--card));
+    /* background-color: hsl(var(--card)); */
 
     /* Toolbar buttons to match shadcn/ui "outline" variant */
     .fc-button {
@@ -4257,9 +4257,10 @@
 
   /* Additional forced styles for stubborn FullCalendar elements */
   .calendar-blueprint-theme {
+
     .fc-scrollgrid,
     .fc-scrollgrid-section,
-    .fc-scrollgrid-section > td {
+    .fc-scrollgrid-section>td {
       background-color: hsl(var(--card)) !important;
     }
 
@@ -4271,6 +4272,7 @@
 }
 
 @layer components {
+
   [class*="theme-glass"] .bg-card,
   [class*="theme-glass"] [class*="card"] {
     backdrop-filter: blur(12px);
@@ -4286,10 +4288,8 @@
 
   /* The new background grid pattern for the "Digital Blueprint" theme */
   .bg-grid-pattern {
-    background-image: radial-gradient(
-      hsl(var(--foreground)) / 0.1 1px,
-      transparent 1px
-    );
+    background-image: radial-gradient(hsl(var(--foreground)) / 0.1 1px,
+        transparent 1px);
     background-size: 20px 20px;
   }
 
@@ -4316,6 +4316,7 @@
    ============================================ */
 
 @layer base {
+
   /* Ensure all text elements use theme colors by default */
   article,
   .markdown,
@@ -4517,6 +4518,7 @@
    ============================================ */
 
 @layer components {
+
   /* Wrapper class for react-markdown content */
   .react-markdown {
     @apply text-foreground;
