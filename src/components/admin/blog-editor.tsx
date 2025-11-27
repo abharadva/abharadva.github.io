@@ -60,6 +60,7 @@ export default function BlogEditor({
     content: "",
     tags: "",
     published: false,
+    show_toc: true,
     cover_image_url: "",
     internal_notes: "",
   };
@@ -82,6 +83,7 @@ export default function BlogEditor({
         content: post.content || "",
         tags: post.tags?.join(", ") || "",
         published: post.published ?? false,
+        show_toc: post.show_toc ?? true,
         cover_image_url: post.cover_image_url || "",
         internal_notes: post.internal_notes || "",
       });
@@ -141,6 +143,7 @@ export default function BlogEditor({
       content: formData.content,
       tags: tagsArray.length > 0 ? tagsArray : null,
       published: formData.published,
+      show_toc: formData.show_toc,
       cover_image_url: formData.cover_image_url || null,
       internal_notes: formData.internal_notes || null,
     };
@@ -283,6 +286,21 @@ export default function BlogEditor({
                       checked={formData.published}
                       onCheckedChange={(checked) =>
                         setFormData((prev) => ({ ...prev, published: checked }))
+                      }
+                    />
+                  </div>
+
+                  <div className="flex flex-row items-center justify-between rounded-lg border p-4 shadow-sm">
+                    <div className="space-y-0.5">
+                      <Label className="text-base">Show Table of Contents</Label>
+                      <p className="text-xs text-muted-foreground">
+                        Display a sticky sidebar with content headings.
+                      </p>
+                    </div>
+                    <Switch
+                      checked={formData.show_toc}
+                      onCheckedChange={(checked) =>
+                        setFormData((prev) => ({ ...prev, show_toc: checked }))
                       }
                     />
                   </div>
@@ -486,9 +504,7 @@ export default function BlogEditor({
         </div>
       </div>
 
-      {/* Main Editor Area */}
       <div className="flex-1 flex flex-col max-w-5xl mx-auto w-full mt-6 space-y-6">
-        {/* Title Input - Styled seamlessly */}
         <div className="px-1">
           <Input
             id="title"
@@ -508,7 +524,6 @@ export default function BlogEditor({
           )}
         </div>
 
-        {/* Editor Component */}
         <div className="flex-1 min-h-[500px] rounded-lg border bg-card shadow-sm overflow-hidden relative">
           {isUploading && (
             <div className="absolute top-2 right-2 z-20 bg-background/80 backdrop-blur px-3 py-1 rounded-full text-xs font-medium flex items-center border shadow-sm">
@@ -526,7 +541,6 @@ export default function BlogEditor({
             minHeight="100%"
           />
 
-          {/* Hidden input for content images */}
           <input
             type="file"
             ref={contentImageInputRef}

@@ -179,7 +179,7 @@ export function AdminLayout({ children }: { children: ReactNode }) {
       {/* Global Quick Add FAB */}
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
-          <Button className="fixed bottom-6 right-6 h-14 w-14 rounded-full shadow-lg" size="icon">
+          <Button className="fixed bottom-6 right-6 h-14 w-14 rounded-full shadow-lg z-10" size="icon">
             <Plus className="h-6 w-6" />
             <span className="sr-only">Quick Add</span>
           </Button>

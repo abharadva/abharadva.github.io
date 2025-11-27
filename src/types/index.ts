@@ -43,6 +43,7 @@ export interface BlogPost {
   cover_image_url?: string | null;
   published?: boolean;
   published_at?: string | null;
+  show_toc: boolean;
   tags?: string[] | null;
   views?: number;
   internal_notes?: string | null;

@@ -8,7 +8,7 @@ import Link from "next/link";
 import { motion } from "framer-motion";
 import Layout from "@/components/layout";
 import { config as appConfig } from "@/lib/config";
-import { formatDate } from "@/lib/utils";
+import { cn, formatDate } from "@/lib/utils";
 import { Eye, Clock, Linkedin, ChevronRight, Calendar, FileText, Mail } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
@@ -257,10 +257,9 @@ export default function BlogPostViewPage() {
           transition={{ duration: 0.4 }}
           className="container mx-auto px-4 max-w-7xl"
         >
-          <div className="grid grid-cols-1 gap-10 lg:grid-cols-12 lg:gap-16">
+          <div className={cn("grid grid-cols-1 gap-12", post.show_toc && "lg:grid-cols-12")}>
 
-            {/* Main Content Column */}
-            <div className="lg:col-span-8">
+            <div data-toc={post.show_toc} className={cn(post.show_toc ? "lg:col-span-8" : "lg:col-span-1")}>
               <PostBreadcrumb post={post} />
 
               <h1 className="mt-4 text-4xl font-bold tracking-tight text-foreground md:text-5xl lg:text-6xl lg:leading-[1.1]">
@@ -300,70 +299,20 @@ export default function BlogPostViewPage() {
               />
             </div>
 
-            <aside className="hidden lg:col-span-4 lg:block">
-              <div className="sticky top-28 space-y-8">
-                {/* Table of Contents Widget */}
-                {post.content && (
-                  <div className="p-1"> {/* Small padding for focus rings/shadows if needed */}
-                    <TableOfContents content={post.content} />
-                  </div>
-                )}
-              </div>
-            </aside>
+            {post.show_toc && (
+              <aside className="hidden lg:col-span-4 lg:block">
+                <div className="sticky top-28 space-y-8">
+                  {post.content && (
+                    <div className="p-1">
+                      <TableOfContents content={post.content} />
+                    </div>
+                  )}
+                </div>
+              </aside>
+            )}
 
           </div>
         </motion.article>
-        <motion.section
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          transition={{ duration: 0.6 }}
-          className="my-24 px-4"
-        >
-          <div className="relative overflow-hidden rounded-2xl border border-border bg-card p-8 md:p-16 text-center shadow-2xl">
-            {/* Background Gradient Mesh */}
-            <div className="absolute inset-0 opacity-10 bg-[radial-gradient(ellipse_at_top_right,_var(--tw-gradient-stops))] from-primary via-transparent to-transparent" />
-
-            <div className="relative z-10 max-w-3xl mx-auto">
-              <h2 className="text-4xl font-black tracking-tighter text-foreground md:text-5xl mb-6">
-                Ready to bring your ideas to life?
-              </h2>
-
-              <p className="mx-auto mb-10 text-lg text-muted-foreground leading-relaxed max-w-2xl">
-                Whether you need a modern web application, a design system overhaul, or just want to chat about the latest tech—I'm currently available for freelance projects and open to new opportunities.
-              </p>
-
-              <div className="flex flex-col items-center justify-center gap-4 sm:flex-row">
-                <Button size="lg" className="w-full sm:w-auto h-12 px-8 text-base" asChild>
-                  <a href={'/'}>
-                    <Mail className="mr-2 h-5 w-5" />
-                    Start a Conversation
-                  </a>
-                </Button>
-
-                <Button size="lg" variant="outline" className="w-full sm:w-auto h-12 px-8 text-base" asChild>
-                  {/* Replace '#' with your actual resume URL or Calendly link */}
-                  <Link href="/about">
-                    <FileText className="mr-2 h-5 w-5" />
-                    View Resume
-                  </Link>
-                </Button>
-              </div>
-
-              <div className="mt-10 flex items-center justify-center gap-6 text-sm text-muted-foreground">
-                <div className="flex items-center gap-2">
-                  <div className="h-2 w-2 rounded-full bg-green-500 animate-pulse" />
-                  <span>Available for new projects</span>
-                </div>
-                <span className="hidden sm:inline text-border">|</span>
-                <div className="hidden sm:flex items-center gap-2 hover:text-primary transition-colors">
-                  <Calendar className="h-4 w-4" />
-                  <a href="#" className="underline underline-offset-4">Book a 15-min intro call</a>
-                </div>
-              </div>
-            </div>
-          </div>
-        </motion.section>
       </main>
     </Layout>
   );

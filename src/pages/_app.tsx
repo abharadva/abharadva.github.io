@@ -255,6 +255,7 @@ function ThemedApp({ Component, pageProps }: AppProps) {
       opacity: 0,
       y: -5,
       transition: { duration: 0.2, ease: "easeInOut" },
+      display: "none",
     },
   };
 
