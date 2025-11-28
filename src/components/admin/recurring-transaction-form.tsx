@@ -1,5 +1,6 @@
 // src/components/admin/recurring-transaction-form.tsx
 "use client";
+import React, { useEffect } from "react";
 import type { RecurringTransaction } from "@/types";
 import { useSaveRecurringMutation } from "@/store/api/adminApi";
 import { Button } from "@/components/ui/button";
@@ -24,6 +25,7 @@ import {
   FormItem,
   FormLabel,
   FormMessage,
+  FormDescription,
 } from "@/components/ui/form";
 import { toast } from "sonner";
 import { Loader2 } from "lucide-react";
@@ -35,8 +37,8 @@ const recurringSchema = z.object({
   category: z.string().optional(),
   frequency: z.enum(["daily", "weekly", "bi-weekly", "monthly", "yearly"]),
   start_date: z.string().min(1, "Start date is required"),
-  end_date: z.string().optional(),
-  occurrence_day: z.coerce.number().optional(),
+  end_date: z.string().optional().nullable(),
+  occurrence_day: z.coerce.number().optional().nullable(),
 });
 type RecurringFormValues = z.infer<typeof recurringSchema>;
 
@@ -61,27 +63,23 @@ export default function RecurringTransactionForm({
       start_date:
         recurringTransaction?.start_date ||
         new Date().toISOString().split("T")[0],
-      end_date: recurringTransaction?.end_date || "",
-      occurrence_day: recurringTransaction?.occurrence_day || undefined,
+      end_date: recurringTransaction?.end_date || null,
+      occurrence_day: recurringTransaction?.occurrence_day,
     },
   });
 
   const frequency = form.watch("frequency");
 
-  const handleSubmit = async (values: RecurringFormValues) => {
-    let dataToSave = {
-      ...values,
-      end_date: values.end_date || null,
-      category: values.category || null,
-      occurrence_day: values.occurrence_day || null,
-    };
-    if (dataToSave.frequency === "daily" || dataToSave.frequency === "yearly") {
-      dataToSave.occurrence_day = null;
+  useEffect(() => {
+    if (frequency === 'daily' || frequency === 'yearly' || frequency === 'bi-weekly') {
+      form.setValue('occurrence_day', null);
     }
+  }, [frequency, form]);
 
+  const handleSubmit = async (values: RecurringFormValues) => {
     try {
       await saveRecurring({
-        ...dataToSave,
+        ...values,
         id: recurringTransaction?.id,
       }).unwrap();
       toast.success(`Recurring rule "${values.description}" saved.`);
@@ -131,7 +129,7 @@ export default function RecurringTransactionForm({
               <FormItem>
                 <FormLabel>Category</FormLabel>
                 <FormControl>
-                  <Input {...field} />
+                  <Input {...field} value={field.value ?? ""} />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -188,7 +186,7 @@ export default function RecurringTransactionForm({
                   <SelectContent>
                     <SelectItem value="daily">Daily</SelectItem>
                     <SelectItem value="weekly">Weekly</SelectItem>
-                    <SelectItem value="bi-weekly">Bi-weekly</SelectItem>
+                    <SelectItem value="bi-weekly">Bi-weekly (Every 2 Weeks)</SelectItem>
                     <SelectItem value="monthly">Monthly</SelectItem>
                     <SelectItem value="yearly">Yearly</SelectItem>
                   </SelectContent>
@@ -198,7 +196,7 @@ export default function RecurringTransactionForm({
             )}
           />
           <AnimatePresence>
-            {(frequency === "weekly" || frequency === "bi-weekly") && (
+            {frequency === "weekly" && (
               <motion.div
                 initial={{ opacity: 0, y: -10 }}
                 animate={{ opacity: 1, y: 0 }}
@@ -212,7 +210,7 @@ export default function RecurringTransactionForm({
                       <FormLabel>Day of Week</FormLabel>
                       <Select
                         onValueChange={(v) => field.onChange(parseInt(v))}
-                        defaultValue={String(field.value)}
+                        defaultValue={field.value !== null && field.value !== undefined ? String(field.value) : undefined}
                       >
                         <FormControl>
                           <SelectTrigger>
@@ -246,7 +244,7 @@ export default function RecurringTransactionForm({
                   name="occurrence_day"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Date of Month (1-31)</FormLabel>
+                      <FormLabel>Date of Month</FormLabel>
                       <FormControl>
                         <Input
                           type="number"
@@ -254,8 +252,9 @@ export default function RecurringTransactionForm({
                           max="31"
                           placeholder="e.g., 15"
                           {...field}
+                          value={field.value ?? ""}
                           onChange={(e) =>
-                            field.onChange(parseInt(e.target.value))
+                            field.onChange(e.target.value ? parseInt(e.target.value) : null)
                           }
                         />
                       </FormControl>
@@ -289,7 +288,7 @@ export default function RecurringTransactionForm({
               <FormItem>
                 <FormLabel>End Date (Optional)</FormLabel>
                 <FormControl>
-                  <Input type="date" {...field} />
+                  <Input type="date" {...field} value={field.value || undefined} />
                 </FormControl>
                 <FormMessage />
               </FormItem>

@@ -1,3 +1,5 @@
+// src/lib/utils.ts
+
 import { RecurringTransaction } from "@/types";
 import { clsx, type ClassValue } from "clsx";
 import { twMerge } from "tailwind-merge";
@@ -8,6 +10,8 @@ import {
   addYears,
   nextDay,
   setDate,
+  isAfter,
+  isSameDay,
 } from "date-fns";
 import { supabase } from "@/supabase/client";
 
@@ -25,15 +29,23 @@ export function cn(...inputs: ClassValue[]): string {
   return twMerge(clsx(inputs));
 }
 
+export function parseLocalDate(dateStr: string): Date {
+  if (!dateStr) return new Date();
+  const [year, month, day] = dateStr.split("-").map(Number);
+  return new Date(year, month - 1, day);
+}
+
 export function formatDate(
   dateInput: Date | string | number,
   options?: Intl.DateTimeFormatOptions,
 ): string {
-  const date = new Date(dateInput);
+  // Always parse with local date to prevent timezone shifts on display
+  const date = dateInput instanceof Date ? dateInput : parseLocalDate(dateInput.toString());
   const defaultOptions: Intl.DateTimeFormatOptions = {
     year: "numeric",
     month: "long",
     day: "numeric",
+    timeZone: "UTC", // Display the date as is, without local timezone conversion
     ...options,
   };
   return date.toLocaleDateString(undefined, defaultOptions);
@@ -52,32 +64,44 @@ export function slugify(text: string): string {
     .replace(/-+$/, "");
 }
 
-export function parseLocalDate(dateStr: string): Date {
-  if (!dateStr) return new Date();
-  // Split string to avoid UTC interpretation by Date.parse
-  const parts = dateStr.split('-');
-  const year = parseInt(parts[0], 10);
-  const month = parseInt(parts[1], 10) - 1; // JS months are 0-11
-  const day = parseInt(parts[2], 10);
-  return new Date(year, month, day);
-}
-
 export const getNextOccurrence = (
   cursor: Date,
   rule: RecurringTransaction,
 ): Date => {
   const current = new Date(cursor);
+
   switch (rule.frequency) {
     case "daily":
       return addDays(current, 1);
+
     case "weekly":
+      if (rule.occurrence_day != null && rule.occurrence_day >= 0 && rule.occurrence_day <= 6) {
+        return nextDay(current, rule.occurrence_day as any);
+      }
       return addWeeks(current, 1);
+
     case "bi-weekly":
       return addWeeks(current, 2);
-    case "monthly":
+
+    case "monthly": {
+      if (rule.occurrence_day && rule.occurrence_day >= 1 && rule.occurrence_day <= 31) {
+        let candidate = setDate(current, rule.occurrence_day);
+        if (isAfter(candidate, current) || isSameDay(candidate, current)) {
+          if (isSameDay(candidate, current)) {
+            let nextMonth = addMonths(current, 1);
+            return setDate(nextMonth, rule.occurrence_day);
+          }
+          return candidate;
+        }
+        let nextMonth = addMonths(current, 1);
+        return setDate(nextMonth, rule.occurrence_day);
+      }
       return addMonths(current, 1);
+    }
+
     case "yearly":
       return addYears(current, 1);
+
     default:
       return addDays(current, 1);
   }

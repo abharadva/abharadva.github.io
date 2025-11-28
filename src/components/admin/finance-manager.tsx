@@ -1453,16 +1453,15 @@ export default function FinanceManager() {
             />
           </div>
 
-          <div className="grid grid-cols-1 lg:grid-cols-8 gap-6">
+          <div className="grid grid-cols-1 lg:grid-cols-8 gap-6 ">
             <Card className="lg:col-span-4">
               <CardHeader>
                 <CardTitle>30-Day Cash Flow Forecast</CardTitle>
                 <CardDescription>Projected change based on recurring transactions.</CardDescription>
               </CardHeader>
               <CardContent>
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                  <div className="md:col-span-2">
-                    <ChartContainer config={{}} className="h-48 w-full">
+                  <div className="">
+                    <ChartContainer config={{}} className="max-h-[300px] w-full">
                       <ResponsiveContainer>
                         <LineChart data={forecastData} margin={{ top: 5, right: 10, left: -25, bottom: 5 }}>
                           <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border)/0.5)" />
@@ -1475,13 +1474,6 @@ export default function FinanceManager() {
                       </ResponsiveContainer>
                     </ChartContainer>
                   </div>
-                  <div className="md:col-span-1 space-y-2">
-                    <h4 className="text-sm font-semibold text-muted-foreground">Upcoming</h4>
-                    {forecastData.flatMap(d => d.events).slice(0, 3).map((event, i) => (
-                      <p key={i} className="text-xs truncate">{event}</p>
-                    ))}
-                  </div>
-                </div>
               </CardContent>
             </Card>
 
@@ -1493,7 +1485,7 @@ export default function FinanceManager() {
                 </CardTitle>
                 <CardDescription>Confirm recurring items to log them as transactions.</CardDescription>
               </CardHeader>
-              <CardContent className="max-h-[350px] overflow-y-auto pr-2">
+              <CardContent className="max-h-[300px] overflow-y-auto pr-2">
                 <UpcomingRecurringList
                   recurring={recurring}
                   onConfirm={handleConfirmRecurring}
