@@ -13,6 +13,8 @@ import {
   isAfter,
   isSameDay,
   startOfDay,
+  endOfYear,
+  startOfYear,
 } from "date-fns";
 import { Button } from "@/components/ui/button";
 import {
@@ -554,23 +556,124 @@ const MonthlyDetailSheet = ({ month, year, transactions, onClose }: { month: str
   );
 };
 
-const AnalyticsTab = ({ transactions, allYears, allCategories }: { transactions: Transaction[]; allYears: number[]; allCategories: string[] }) => {
+const AnnualCumulativeTooltip = ({ active, payload, label }: any) => {
+  if (active && payload && payload.length) {
+    const data = payload[0].payload;
+    return (
+      <div className="rounded-lg border bg-background p-3 shadow-sm text-sm">
+        <p className="font-bold mb-1">{label}</p>
+        <p className={cn("font-mono", data.balance >= 0 ? "text-green-500" : "text-red-500")}>
+          End Balance: ${data.balance.toFixed(2)}
+        </p>
+        <Separator className="my-2" />
+        <div className="space-y-1 text-xs">
+          <p className="text-green-500">Earnings: ${data.income.toFixed(2)}</p>
+          <p className="text-red-500">Expenses: ${data.expenses.toFixed(2)}</p>
+          <p className="font-semibold">Net Change: ${data.netChange.toFixed(2)}</p>
+        </div>
+      </div>
+    );
+  }
+  return null;
+};
+
+const AnalyticsTab = ({
+  transactions,
+  allYears,
+  allCategories,
+  recurring,
+}: {
+  transactions: Transaction[];
+  allYears: number[];
+  allCategories: string[];
+  recurring: RecurringTransaction[];
+}) => {
   const [analyticsYear, setAnalyticsYear] = useState(new Date().getFullYear());
-  const [selectedMonthData, setSelectedMonthData] = useState<{ month: string; year: number } | null>(null);
+  const [selectedMonthData, setSelectedMonthData] = useState<{
+    month: string;
+    year: number;
+  } | null>(null);
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
 
-  const yearTransactions = useMemo(() => {
-    // Using parseLocalDate for correct year grouping
-    return transactions.filter(t => parseLocalDate(t.date).getFullYear() === analyticsYear)
-  }, [transactions, analyticsYear]);
+  const yearTransactions = useMemo(
+    () =>
+      transactions.filter(
+        (t) => parseLocalDate(t.date).getFullYear() === analyticsYear,
+      ),
+    [transactions, analyticsYear],
+  );
 
+  const annualCumulativeData = useMemo(() => {
+    const yearStartDate = startOfYear(new Date(analyticsYear, 0, 1));
+
+    // Calculate starting balance from all previous transactions
+    const startingBalance = transactions
+      .filter(t => isBefore(parseLocalDate(t.date), yearStartDate))
+      .reduce((acc, t) => acc + (t.type === 'earning' ? t.amount : -t.amount), 0);
+
+    const allMonths = Array.from({ length: 12 }, (_, i) => ({
+      month: format(new Date(analyticsYear, i), "MMM"),
+      income: 0,
+      expenses: 0,
+    }));
+
+    // Add actual transactions for the year
+    yearTransactions.forEach(t => {
+      const monthIndex = parseLocalDate(t.date).getMonth();
+      if (t.type === 'earning') {
+        allMonths[monthIndex].income += t.amount;
+      } else {
+        allMonths[monthIndex].expenses += t.amount;
+      }
+    });
+
+    // Add projected recurring transactions for the year
+    recurring.forEach(rule => {
+      let nextDate = rule.last_processed_date ? getNextOccurrence(parseLocalDate(rule.last_processed_date), rule) : parseLocalDate(rule.start_date);
+      while (isBefore(nextDate, startOfYear(new Date(analyticsYear, 0, 1)))) {
+        nextDate = getNextOccurrence(nextDate, rule);
+      }
+
+      let safety = 0;
+      while (isBefore(nextDate, endOfYear(new Date(analyticsYear, 0, 1))) && safety < 100) {
+        const ruleEndDate = rule.end_date ? parseLocalDate(rule.end_date) : null;
+        if (ruleEndDate && isAfter(nextDate, ruleEndDate)) break;
+
+        // Check if this projected transaction was already logged
+        const alreadyLogged = yearTransactions.some(t =>
+          t.recurring_transaction_id === rule.id &&
+          isSameDay(parseLocalDate(t.date), nextDate)
+        );
+
+        if (!alreadyLogged) {
+          const monthIndex = nextDate.getMonth();
+          if (rule.type === 'earning') {
+            allMonths[monthIndex].income += rule.amount;
+          } else {
+            allMonths[monthIndex].expenses += rule.amount;
+          }
+        }
+        nextDate = getNextOccurrence(nextDate, rule);
+        safety++;
+      }
+    });
+
+    let cumulativeBalance = startingBalance;
+    return allMonths.map(monthData => {
+      const netChange = monthData.income - monthData.expenses;
+      cumulativeBalance += netChange;
+      return { ...monthData, netChange, balance: cumulativeBalance };
+    });
+
+  }, [analyticsYear, transactions, recurring]);
+
+  // ... (rest of AnalyticsTab remains the same)
   const { annualStats, monthlyChartData, expenseByCategory } = useMemo(() => {
     let totalIncome = 0, totalExpenses = 0;
     const categoryMap: Record<string, { total: number, count: number }> = {};
     const monthlyData: Record<string, { income: number; expenses: number }> = {};
 
     yearTransactions.forEach(t => {
-      // Using parseLocalDate for correct month grouping
       const month = format(parseLocalDate(t.date), "MMM");
       if (!monthlyData[month]) monthlyData[month] = { income: 0, expenses: 0 };
 
@@ -651,6 +754,38 @@ const AnalyticsTab = ({ transactions, allYears, allCategories }: { transactions:
           </div>
         </CardContent>
       </Card>
+
+      <Card>
+        <CardHeader>
+          <CardTitle>Annual Cumulative Balance</CardTitle>
+          <CardDescription>
+            Projected year-end balance including recurring transactions.
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <ChartContainer config={{}} className="h-72 w-full">
+            <LineChart
+              data={annualCumulativeData}
+              margin={{ top: 5, right: 20, left: -10, bottom: 5 }}
+            >
+              <CartesianGrid strokeDasharray="3 3" />
+              <XAxis dataKey="month" />
+              <YAxis tickFormatter={(value) => `$${value / 1000}k`} />
+              <RechartsTooltip content={<AnnualCumulativeTooltip />} />
+              <ChartLegend content={<ChartLegendContent />} />
+              <ReferenceLine y={0} stroke="hsl(var(--destructive))" strokeDasharray="3 3" />
+              <Line
+                type="monotone"
+                dataKey="balance"
+                stroke="hsl(var(--primary))"
+                strokeWidth={2}
+                dot={false}
+              />
+            </LineChart>
+          </ChartContainer>
+        </CardContent>
+      </Card>
+
       <Card>
         <CardHeader>
           <CardTitle>Category Deep Dive</CardTitle>
@@ -1460,20 +1595,20 @@ export default function FinanceManager() {
                 <CardDescription>Projected change based on recurring transactions.</CardDescription>
               </CardHeader>
               <CardContent>
-                  <div className="">
-                    <ChartContainer config={{}} className="max-h-[300px] w-full">
-                      <ResponsiveContainer>
-                        <LineChart data={forecastData} margin={{ top: 5, right: 10, left: -25, bottom: 5 }}>
-                          <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border)/0.5)" />
-                          <XAxis dataKey="date" tick={{ fill: "hsl(var(--muted-foreground))", fontSize: 12 }} tickLine={false} axisLine={false} />
-                          <YAxis tickFormatter={(value) => `$${value}`} tick={{ fill: "hsl(var(--muted-foreground))", fontSize: 12 }} tickLine={false} axisLine={false} />
-                          <RechartsTooltip content={<CustomForecastTooltip />} />
-                          <ReferenceLine y={0} stroke="hsl(var(--border))" strokeDasharray="3 3" />
-                          <Line type="monotone" dataKey="balance" stroke="hsl(var(--primary))" strokeWidth={2} dot={false} />
-                        </LineChart>
-                      </ResponsiveContainer>
-                    </ChartContainer>
-                  </div>
+                <div className="">
+                  <ChartContainer config={{}} className="max-h-[300px] w-full">
+                    <ResponsiveContainer>
+                      <LineChart data={forecastData} margin={{ top: 5, right: 10, left: -25, bottom: 5 }}>
+                        <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border)/0.5)" />
+                        <XAxis dataKey="date" tick={{ fill: "hsl(var(--muted-foreground))", fontSize: 12 }} tickLine={false} axisLine={false} />
+                        <YAxis tickFormatter={(value) => `$${value}`} tick={{ fill: "hsl(var(--muted-foreground))", fontSize: 12 }} tickLine={false} axisLine={false} />
+                        <RechartsTooltip content={<CustomForecastTooltip />} />
+                        <ReferenceLine y={0} stroke="hsl(var(--border))" strokeDasharray="3 3" />
+                        <Line type="monotone" dataKey="balance" stroke="hsl(var(--primary))" strokeWidth={2} dot={false} />
+                      </LineChart>
+                    </ResponsiveContainer>
+                  </ChartContainer>
+                </div>
               </CardContent>
             </Card>
 
@@ -1843,7 +1978,7 @@ export default function FinanceManager() {
         </TabsContent>
 
         <TabsContent value="analytics" className="mt-6">
-          <AnalyticsTab transactions={transactions} allYears={allYearsWithData} allCategories={allCategories} />
+          <AnalyticsTab transactions={transactions} allYears={allYearsWithData} allCategories={allCategories} recurring={recurring} />
         </TabsContent>
       </Tabs>
 
