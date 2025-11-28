@@ -199,6 +199,7 @@ CREATE TABLE IF NOT EXISTS blog_posts (
   cover_image_url TEXT,
   published BOOLEAN DEFAULT false,
   published_at TIMESTAMPTZ,
+  show_toc BOOLEAN DEFAULT true,
   tags TEXT[],
   views BIGINT DEFAULT 0,
   internal_notes TEXT,

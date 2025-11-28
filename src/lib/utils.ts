@@ -52,29 +52,34 @@ export function slugify(text: string): string {
     .replace(/-+$/, "");
 }
 
+export function parseLocalDate(dateStr: string): Date {
+  if (!dateStr) return new Date();
+  // Split string to avoid UTC interpretation by Date.parse
+  const parts = dateStr.split('-');
+  const year = parseInt(parts[0], 10);
+  const month = parseInt(parts[1], 10) - 1; // JS months are 0-11
+  const day = parseInt(parts[2], 10);
+  return new Date(year, month, day);
+}
+
 export const getNextOccurrence = (
   cursor: Date,
   rule: RecurringTransaction,
 ): Date => {
-  let next = new Date(cursor);
+  const current = new Date(cursor);
   switch (rule.frequency) {
     case "daily":
-      return addDays(next, 1);
+      return addDays(current, 1);
     case "weekly":
-      return rule.occurrence_day !== null && rule.occurrence_day !== undefined
-        ? nextDay(next, rule.occurrence_day as any)
-        : addWeeks(next, 1);
+      return addWeeks(current, 1);
     case "bi-weekly":
-      return rule.occurrence_day !== null && rule.occurrence_day !== undefined
-        ? nextDay(addWeeks(next, 1), rule.occurrence_day as any)
-        : addWeeks(next, 2);
+      return addWeeks(current, 2);
     case "monthly":
-      next = addMonths(next, 1);
-      return rule.occurrence_day ? setDate(next, rule.occurrence_day) : next;
+      return addMonths(current, 1);
     case "yearly":
-      return addYears(next, 1);
+      return addYears(current, 1);
     default:
-      return addDays(next, 1);
+      return addDays(current, 1);
   }
 };
 

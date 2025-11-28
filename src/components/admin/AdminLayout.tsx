@@ -119,7 +119,7 @@ export function AdminLayout({ children }: { children: ReactNode }) {
           </Sheet>
 
           <div className="h-6 w-px bg-border lg:hidden" aria-hidden="true" />
-          
+
           <Breadcrumbs />
 
           <div className="flex flex-1 items-center justify-end gap-x-4 self-stretch lg:gap-x-6">
@@ -144,7 +144,7 @@ export function AdminLayout({ children }: { children: ReactNode }) {
                 </div>
               </Button>
             )}
-            
+
             <Separator orientation="vertical" className="h-6" />
 
             <DropdownMenu>
@@ -160,7 +160,7 @@ export function AdminLayout({ children }: { children: ReactNode }) {
                 <DropdownMenuLabel>My Account</DropdownMenuLabel>
                 <DropdownMenuSeparator />
                 <DropdownMenuItem asChild>
-                  <Link href="/"><ExternalLink className="mr-2 h-4 w-4"/>Back to Portfolio</Link>
+                  <Link href="/"><ExternalLink className="mr-2 h-4 w-4" />Back to Portfolio</Link>
                 </DropdownMenuItem>
                 <DropdownMenuItem onClick={handleLogout}>
                   <LogOut className="mr-2 h-4 w-4" />

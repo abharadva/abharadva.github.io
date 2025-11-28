@@ -12,6 +12,7 @@ import {
   isBefore,
   isAfter,
   isSameDay,
+  startOfDay,
 } from "date-fns";
 import { Button } from "@/components/ui/button";
 import {
@@ -86,6 +87,11 @@ import {
   HandCoins,
   MoreVertical,
   MoreHorizontal,
+  Clock,
+  Check,
+  Filter,
+  ArrowRightLeft,
+  Wallet,
 } from "lucide-react";
 import {
   Table,
@@ -134,7 +140,7 @@ import {
 } from "@/components/ui/menubar";
 import dynamic from "next/dynamic";
 import { Badge } from "../ui/badge";
-import { cn } from "@/lib/utils";
+import { cn, parseLocalDate } from "@/lib/utils";
 import { ScrollArea } from "../ui/scroll-area";
 import { Progress } from "../ui/progress";
 import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle } from "../ui/sheet";
@@ -145,9 +151,12 @@ import {
   useDeleteGoalMutation,
   useAddFundsToGoalMutation,
   useManageCategoryMutation,
+  useSaveTransactionMutation,
+  useSaveRecurringMutation,
 } from "@/store/api/adminApi";
 import { getNextOccurrence } from "@/lib/utils";
 import LoadingSpinner from "./LoadingSpinner";
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "../ui/alert-dialog";
 
 // --- DYNAMIC IMPORTS ---
 const Calendar = dynamic(
@@ -184,14 +193,19 @@ const StatCard: React.FC<{
   icon?: React.ReactNode;
   helpText?: string;
   className?: string;
-}> = ({ title, value, icon, helpText, className }) => (
+  trend?: "up" | "down" | "neutral";
+}> = ({ title, value, icon, helpText, className, trend }) => (
   <Card className={cn("overflow-hidden", className)}>
     <CardHeader className="pb-2">
       <div className="flex items-start justify-between">
         <CardTitle className="text-sm font-medium text-muted-foreground">
           {title}
         </CardTitle>
-        {icon}
+        <div className={cn("p-2 rounded-full bg-background/50 border",
+          trend === 'up' ? "text-green-500 border-green-500/20 bg-green-500/10" :
+            trend === 'down' ? "text-red-500 border-red-500/20 bg-red-500/10" : "text-muted-foreground")}>
+          {icon}
+        </div>
       </div>
     </CardHeader>
     <CardContent>
@@ -482,7 +496,7 @@ const CategoriesTab = ({
 
 const MonthlyDetailSheet = ({ month, year, transactions, onClose }: { month: string; year: number; transactions: Transaction[]; onClose: () => void; }) => {
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
-  const monthTransactions = useMemo(() => transactions.filter((t) => format(new Date(t.date), "MMM") === month), [transactions, month]);
+  const monthTransactions = useMemo(() => transactions.filter((t) => format(parseLocalDate(t.date), "MMM") === month), [transactions, month]);
   const { totalIncome, totalExpenses, expenseByCategory } = useMemo(() => {
     let income = 0, expenses = 0;
     const categoryMap: Record<string, number> = {};
@@ -529,7 +543,7 @@ const MonthlyDetailSheet = ({ month, year, transactions, onClose }: { month: str
               <div>
                 <p className="font-medium">{t.description}</p>
                 <div className="flex items-center gap-2">
-                  <p className="text-xs text-muted-foreground">{format(new Date(t.date), "MMM dd")}</p>{t.category && <Badge variant="outline">{t.category}</Badge>}</div>
+                  <p className="text-xs text-muted-foreground">{format(parseLocalDate(t.date), "MMM dd")}</p>{t.category && <Badge variant="outline">{t.category}</Badge>}</div>
               </div>
               <p className={cn("font-bold text-sm", t.type === "earning" ? "text-chart-2" : "text-chart-5")}>{t.type === "earning" ? "+" : "-"}${t.amount.toFixed(2)}</p>
             </div>))) : <p className="text-center text-muted-foreground py-10">No transactions.</p>}
@@ -545,7 +559,10 @@ const AnalyticsTab = ({ transactions, allYears, allCategories }: { transactions:
   const [selectedMonthData, setSelectedMonthData] = useState<{ month: string; year: number } | null>(null);
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
 
-  const yearTransactions = useMemo(() => transactions.filter(t => new Date(t.date).getFullYear() === analyticsYear), [transactions, analyticsYear]);
+  const yearTransactions = useMemo(() => {
+    // Using parseLocalDate for correct year grouping
+    return transactions.filter(t => parseLocalDate(t.date).getFullYear() === analyticsYear)
+  }, [transactions, analyticsYear]);
 
   const { annualStats, monthlyChartData, expenseByCategory } = useMemo(() => {
     let totalIncome = 0, totalExpenses = 0;
@@ -553,7 +570,8 @@ const AnalyticsTab = ({ transactions, allYears, allCategories }: { transactions:
     const monthlyData: Record<string, { income: number; expenses: number }> = {};
 
     yearTransactions.forEach(t => {
-      const month = format(new Date(t.date), "MMM");
+      // Using parseLocalDate for correct month grouping
+      const month = format(parseLocalDate(t.date), "MMM");
       if (!monthlyData[month]) monthlyData[month] = { income: 0, expenses: 0 };
 
       if (t.type === 'earning') {
@@ -978,6 +996,163 @@ const CustomForecastTooltip = ({ active, payload, label }: any) => {
   return null;
 };
 
+const UpcomingRecurringList = ({
+  recurring,
+  onConfirm,
+}: {
+  recurring: RecurringTransaction[];
+  onConfirm: (rule: RecurringTransaction, date: Date) => void;
+}) => {
+  const upcomingItems = useMemo(() => {
+    const today = new Date();
+    const startOfToday = startOfDay(today);
+    const lookAhead = addDays(today, 45);
+    const lookBehind = subMonths(today, 12);
+
+    const items: {
+      rule: RecurringTransaction;
+      date: Date;
+      status: "overdue" | "due" | "upcoming";
+    }[] = [];
+
+    recurring.forEach((rule) => {
+      let nextDate: Date;
+
+      // Use parseLocalDate to ensure we start from exact Local date 00:00:00
+      if (rule.last_processed_date) {
+        nextDate = getNextOccurrence(parseLocalDate(rule.last_processed_date), rule);
+      } else {
+        nextDate = parseLocalDate(rule.start_date);
+      }
+
+      let safety = 0;
+      while (isBefore(nextDate, lookAhead) && safety < 50) {
+        if (isAfter(nextDate, lookBehind)) {
+          let status: "overdue" | "due" | "upcoming" = "upcoming";
+
+          if (isBefore(nextDate, startOfToday)) {
+            status = "overdue";
+          } else if (isSameDay(nextDate, startOfToday)) {
+            status = "due";
+          }
+
+          items.push({
+            rule,
+            date: new Date(nextDate),
+            status,
+          });
+        }
+        nextDate = getNextOccurrence(nextDate, rule);
+        safety++;
+      }
+    });
+
+    return items.sort((a, b) => a.date.getTime() - b.date.getTime());
+  }, [recurring]);
+
+  if (upcomingItems.length === 0) {
+    return (
+      <div className="flex h-full flex-col items-center justify-center p-8 text-center text-muted-foreground border rounded-lg border-dashed bg-muted/20">
+        <CalendarIcon className="mb-3 size-10 opacity-20" />
+        <p className="text-sm">
+          No upcoming recurring payments in the next 45 days.
+        </p>
+      </div>
+    );
+  }
+
+  return (
+    <div className="space-y-3">
+      {upcomingItems.map(({ rule, date, status }, index) => (
+        <div
+          key={`${rule.id}-${date.toISOString()}-${index}`}
+          className={cn(
+            "flex items-center justify-between rounded-lg border p-3 shadow-sm transition-all hover:bg-secondary/40",
+            status === "overdue" && "border-destructive/30 bg-destructive/5",
+            status === "due" && "border-primary/30 bg-primary/5",
+          )}
+        >
+          <div className="flex items-center gap-3 overflow-hidden">
+            <div
+              className={cn(
+                "flex h-9 w-9 shrink-0 items-center justify-center rounded-full border",
+                rule.type === "earning"
+                  ? "bg-green-500/10 text-green-500 border-green-500/20"
+                  : "bg-red-500/10 text-red-500 border-red-500/20",
+              )}
+            >
+              {rule.type === "earning" ? (
+                <ArrowUp className="size-4" />
+              ) : (
+                <ArrowDown className="size-4" />
+              )}
+            </div>
+            <div className="flex flex-col overflow-hidden">
+              <span className="truncate font-medium leading-tight">
+                {rule.description}
+              </span>
+              <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                <span
+                  className={cn(
+                    "font-medium",
+                    status === "overdue" && "text-destructive",
+                    status === "due" && "text-primary",
+                  )}
+                >
+                  {status === "overdue" ? "Overdue " : ""}
+                  {status === "due" ? "Due Today " : ""}
+                  {status === "upcoming" ? format(date, "MMM d") : format(date, "MMM d, yyyy")}
+                </span>
+                <span>•</span>
+                <span className="capitalize">{rule.frequency}</span>
+              </div>
+            </div>
+          </div>
+
+          <div className="flex items-center gap-3">
+            <span className="font-mono text-sm font-semibold">
+              ${rule.amount.toFixed(2)}
+            </span>
+
+            <AlertDialog>
+              <AlertDialogTrigger asChild>
+                <Button
+                  size="sm"
+                  variant={status === "overdue" ? "destructive" : "outline"}
+                  className="h-8 w-8 p-0 rounded-full"
+                >
+                  <Check className="size-4" />
+                  <span className="sr-only">Confirm</span>
+                </Button>
+              </AlertDialogTrigger>
+              <AlertDialogContent>
+                <AlertDialogHeader>
+                  <AlertDialogTitle>Confirm Transaction</AlertDialogTitle>
+                  <AlertDialogDescription>
+                    This will create a real transaction record for{" "}
+                    <strong>{rule.description}</strong> on{" "}
+                    <strong>{format(date, "MMMM do, yyyy")}</strong>.
+                    <br />
+                    <br />
+                    It will link back to this recurring rule and mark it as processed up to this date.
+                  </AlertDialogDescription>
+                </AlertDialogHeader>
+                <AlertDialogFooter>
+                  <AlertDialogCancel>Cancel</AlertDialogCancel>
+                  <AlertDialogAction onClick={() => onConfirm(rule, date)}>
+                    Confirm & Log
+                  </AlertDialogAction>
+                </AlertDialogFooter>
+              </AlertDialogContent>
+            </AlertDialog>
+          </div>
+        </div>
+      ))}
+    </div>
+  );
+};
+
+
 export default function FinanceManager() {
   const [searchTerm, setSearchTerm] = useState("");
   const [date, setDate] = useState<DateRange | undefined>({
@@ -986,17 +1161,20 @@ export default function FinanceManager() {
   });
   const [sheetState, setSheetState] = useState<DialogState>({ type: null });
 
+
   const { data: financialData, isLoading, error } = useGetFinancialDataQuery();
   const [deleteTransaction] = useDeleteTransactionMutation();
   const [deleteRecurring] = useDeleteRecurringMutation();
   const [deleteGoal] = useDeleteGoalMutation();
   const [addFundsToGoal] = useAddFundsToGoalMutation();
+  const [saveTransaction] = useSaveTransactionMutation();
+  const [saveRecurring] = useSaveRecurringMutation();
 
   const { transactions = [], goals = [], recurring = [] } = financialData || {};
 
   const filteredTransactions = useMemo(() => {
     return transactions.filter((t) => {
-      const transactionDate = new Date(t.date);
+      const transactionDate = parseLocalDate(t.date);
       const descriptionMatch = t.description
         .toLowerCase()
         .includes(searchTerm.toLowerCase());
@@ -1043,7 +1221,7 @@ export default function FinanceManager() {
 
   const allYearsWithData = useMemo(() => {
     const years = new Set(
-      transactions.map((t) => new Date(t.date).getFullYear()),
+      transactions.map((t) => parseLocalDate(t.date).getFullYear()),
     );
     const currentYear = new Date().getFullYear();
     years.add(currentYear);
@@ -1055,25 +1233,32 @@ export default function FinanceManager() {
     const forecastDays = 30;
     const endDate = addDays(today, forecastDays);
     const dailyChanges: Record<string, { change: number; events: string[] }> = {};
+
     recurring.forEach((rule) => {
-      let cursor = rule.last_processed_date ? new Date(rule.last_processed_date) : new Date(rule.start_date);
-      if (isBefore(cursor, new Date(rule.start_date))) { cursor = new Date(rule.start_date); }
-      let nextOccurrence = new Date(cursor);
-      if (rule.last_processed_date && (isAfter(nextOccurrence, today) || isSameDay(nextOccurrence, today))) { /* First candidate */ }
-      else { nextOccurrence = getNextOccurrence(cursor, rule); }
-      const ruleEndDate = rule.end_date ? new Date(rule.end_date) : null;
-      while (isBefore(nextOccurrence, endDate)) {
-        if (ruleEndDate && isAfter(nextOccurrence, ruleEndDate)) break;
-        if (isAfter(nextOccurrence, today) || isSameDay(nextOccurrence, today)) {
-          const dayStr = format(nextOccurrence, "yyyy-MM-dd");
+      let nextDate = rule.last_processed_date
+        ? getNextOccurrence(parseLocalDate(rule.last_processed_date), rule)
+        : parseLocalDate(rule.start_date);
+
+      // Skip past overdue items for the graph
+      while (isBefore(nextDate, today) && !isSameDay(nextDate, today)) {
+        nextDate = getNextOccurrence(nextDate, rule);
+      }
+
+      while (isBefore(nextDate, endDate)) {
+        const ruleEndDate = rule.end_date ? parseLocalDate(rule.end_date) : null;
+        if (ruleEndDate && isAfter(nextDate, ruleEndDate)) break;
+
+        if (isAfter(nextDate, today) || isSameDay(nextDate, today)) {
+          const dayStr = format(nextDate, "yyyy-MM-dd");
           if (!dailyChanges[dayStr]) { dailyChanges[dayStr] = { change: 0, events: [] }; }
           const amount = rule.type === 'earning' ? rule.amount : -rule.amount;
           dailyChanges[dayStr].change += amount;
           dailyChanges[dayStr].events.push(`${rule.type === 'earning' ? '+' : '-'}$${rule.amount.toFixed(2)}: ${rule.description}`);
         }
-        nextOccurrence = getNextOccurrence(nextOccurrence, rule);
+        nextDate = getNextOccurrence(nextDate, rule);
       }
     });
+
     let cumulativeBalance = 0;
     return Array.from({ length: forecastDays + 1 }, (_, i) => {
       const date = addDays(today, i);
@@ -1137,33 +1322,107 @@ export default function FinanceManager() {
     }
   };
 
+  const handleConfirmRecurring = async (rule: RecurringTransaction, date: Date) => {
+    const dateStr = format(date, 'yyyy-MM-dd'); // Format for DB
+
+    try {
+      // 1. Create the actual transaction record
+      await saveTransaction({
+        date: dateStr,
+        description: rule.description,
+        amount: rule.amount,
+        type: rule.type,
+        category: rule.category,
+        recurring_transaction_id: rule.id, // LINKING TO SOURCE
+      }).unwrap();
+
+      // 2. Update the recurring rule so it knows it was processed up to this date
+      await saveRecurring({
+        id: rule.id,
+        last_processed_date: dateStr,
+        // We need to pass required fields to satisfy TS if using a partial update, 
+        // but since we are just updating one field via ID, the API usually handles partials.
+        // However, checking RecurringTransactionForm, let's ensure we send minimal required info if needed.
+        // Based on adminApi definition: `saveRecurring` takes Partial<RecurringTransaction> and merges.
+      }).unwrap();
+
+      toast.success("Transaction logged successfully.");
+    } catch (err: any) {
+      toast.error("Failed to log transaction", { description: err.message });
+    }
+  };
+
+
   if (isLoading) return <LoadingSpinner />;
   if (error) return <p>Error loading data.</p>;
 
   return (
-    <div className="space-y-6">
-      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-        <div>
-          <h2 className="text-2xl font-bold">Finance Command Center</h2>
-          <p className="text-muted-foreground">Strategic overview, planning, and transaction management.</p>
+    <div className="-mt-10 space-y-6">
+      <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between sticky top-0 z-20 bg-background/95 backdrop-blur py-4 border-b -mx-6 px-6 lg:-mx-8 lg:px-8">
+        <div className="flex items-center gap-3">
+          <div className="h-10 w-10 rounded-lg bg-primary/10 flex items-center justify-center">
+            <Wallet className="size-6 text-primary" />
+          </div>
+          <div>
+            <h2 className="text-xl font-bold tracking-tight">Finance</h2>
+            <p className="text-xs text-muted-foreground">
+              {date?.from ? (
+                date.to ? `${format(date.from, "MMM d")} - ${format(date.to, "MMM d, yyyy")}` : format(date.from, "MMMM d, yyyy")
+              ) : "Select a date range"}
+            </p>
+          </div>
         </div>
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button>
-              <Plus className="mr-2 size-4" /> Quick Add</Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="end">
-            <DropdownMenuItem onSelect={() => handleOpenSheet("transaction")}>
-              <Plus className="mr-2 size-4" /> New Transaction</DropdownMenuItem>
-            <DropdownMenuItem onSelect={() => handleOpenSheet("recurring")}>
-              <Repeat className="mr-2 size-4" /> New Recurring</DropdownMenuItem>
-            <DropdownMenuItem onSelect={() => handleOpenSheet("goal")}>
-              <Target className="mr-2 size-4" /> New Goal</DropdownMenuItem>
-          </DropdownMenuContent>
-        </DropdownMenu>
+
+        <div className="flex flex-wrap items-center gap-2">
+          <div className="relative">
+            <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 size-4 text-muted-foreground" />
+            <Input
+              placeholder="Filter transactions..."
+              className="pl-9 w-[200px] lg:w-[250px]"
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+            />
+          </div>
+          <Popover>
+            <PopoverTrigger asChild>
+              <Button variant="outline" className="justify-start text-left font-normal">
+                <CalendarIcon className="mr-2 size-4" />
+                Date
+              </Button>
+            </PopoverTrigger>
+            <PopoverContent className="w-auto p-0" align="end">
+              <Calendar
+                initialFocus
+                mode="range"
+                defaultMonth={date?.from}
+                selected={date}
+                onSelect={setDate}
+                numberOfMonths={2}
+              />
+            </PopoverContent>
+          </Popover>
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button>
+                <Plus className="mr-2 size-4" /> Add New
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end">
+              <DropdownMenuItem onSelect={() => handleOpenSheet("transaction")}>
+                <ArrowRightLeft className="mr-2 size-4" /> Transaction
+              </DropdownMenuItem>
+              <DropdownMenuItem onSelect={() => handleOpenSheet("recurring")}>
+                <Repeat className="mr-2 size-4" /> Recurring Rule
+              </DropdownMenuItem>
+              <DropdownMenuItem onSelect={() => handleOpenSheet("goal")}>
+                <Target className="mr-2 size-4" /> Goal
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
+        </div>
       </div>
-      <Tabs defaultValue="dashboard">
-        <TabsList className="grid w-full grid-cols-2 md:grid-cols-5">
+      <Tabs defaultValue="dashboard" className="space-y-6">
+        <TabsList className="grid w-full grid-cols-5 lg:w-[600px] lg:grid-cols-5">
           <TabsTrigger value="dashboard">Dashboard</TabsTrigger>
           <TabsTrigger value="transactions">Transactions</TabsTrigger>
           <TabsTrigger value="recurring">Recurring</TabsTrigger>
@@ -1172,30 +1431,27 @@ export default function FinanceManager() {
         </TabsList>
 
         <TabsContent value="dashboard" className="mt-6 space-y-6">
-          <Card className="col-span-1 lg:col-span-3">
-            <CardHeader>
-              <CardTitle>Overview for Selected Period</CardTitle>
-              <CardDescription>
-                {date?.from ? (date.to ? `${format(date.from, "LLL dd, y")} - ${format(date.to, "LLL dd, y")}` : format(date.from, "LLL dd, y")) : "All time"}
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="grid grid-cols-1 sm:grid-cols-3 gap-6">
-              <div className="flex flex-col justify-center items-center p-4 border rounded-lg">
-                <p className="text-sm text-muted-foreground">Net Income</p>
-                <p className={cn("text-4xl font-bold tracking-tighter", netIncome >= 0 ? "text-green-500" : "text-red-500")}>
-                  {netIncome >= 0 ? "+" : "-"}${Math.abs(netIncome).toFixed(2)}
-                </p>
-              </div>
-              <div className="flex flex-col justify-center items-center p-4 border rounded-lg bg-secondary/30">
-                <p className="text-sm text-muted-foreground">Total Earnings</p>
-                <p className="text-2xl font-semibold text-green-500">${totalEarnings.toFixed(2)}</p>
-              </div>
-              <div className="flex flex-col justify-center items-center p-4 border rounded-lg bg-secondary/30">
-                <p className="text-sm text-muted-foreground">Total Expenses</p>
-                <p className="text-2xl font-semibold text-red-500">${totalExpenses.toFixed(2)}</p>
-              </div>
-            </CardContent>
-          </Card>
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
+            <StatCard
+              title="Net Income"
+              value={`${netIncome >= 0 ? '+' : '-'}$${Math.abs(netIncome).toFixed(2)}`}
+              icon={<Wallet className="size-5" />}
+              trend={netIncome >= 0 ? "up" : "down"}
+              className={netIncome < 0 ? "border-red-500/20" : ""}
+            />
+            <StatCard
+              title="Total Earnings"
+              value={`$${totalEarnings.toFixed(2)}`}
+              icon={<ArrowUp className="size-5" />}
+              trend="up"
+            />
+            <StatCard
+              title="Total Expenses"
+              value={`$${totalExpenses.toFixed(2)}`}
+              icon={<ArrowDown className="size-5" />}
+              trend="down"
+            />
+          </div>
 
           <div className="grid grid-cols-1 lg:grid-cols-8 gap-6">
             <Card className="lg:col-span-4">
@@ -1226,6 +1482,22 @@ export default function FinanceManager() {
                     ))}
                   </div>
                 </div>
+              </CardContent>
+            </Card>
+
+            <Card className="lg:col-span-4 h-full">
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Clock className="size-5 text-primary" />
+                  Upcoming & Due
+                </CardTitle>
+                <CardDescription>Confirm recurring items to log them as transactions.</CardDescription>
+              </CardHeader>
+              <CardContent className="max-h-[350px] overflow-y-auto pr-2">
+                <UpcomingRecurringList
+                  recurring={recurring}
+                  onConfirm={handleConfirmRecurring}
+                />
               </CardContent>
             </Card>
 
@@ -1293,35 +1565,35 @@ export default function FinanceManager() {
                 </ChartContainer>
               </CardContent>
             </Card>
+            <Card className="col-span-4">
+              <CardHeader>
+                <CardTitle>Recent Transactions</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <Table>
+                  <TableBody>
+                    {filteredTransactions.slice(0, 3).map(t => (
+                      <TableRow key={t.id}>
+                        <TableCell className="w-10">
+                          <div className={cn("flex h-8 w-8 items-center justify-center rounded-full", t.type === 'earning' ? 'bg-green-500/10' : 'bg-red-500/10')}>
+                            {t.type === 'earning' ? <TrendingUp className="size-4 text-green-500" /> : <TrendingDown className="size-4 text-red-500" />}
+                          </div>
+                        </TableCell>
+                        <TableCell>
+                          <p className="font-medium">{t.description}</p>
+                          <p className="text-xs text-muted-foreground">{format(new Date(t.date), "MMM dd, yyyy")}</p>
+                        </TableCell>
+                        <TableCell className="text-right font-mono font-semibold">
+                          {t.type === 'earning' ? '+' : '-'}${t.amount.toFixed(2)}
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              </CardContent>
+            </Card>
           </div>
 
-          <Card>
-            <CardHeader>
-              <CardTitle>Recent Transactions</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <Table>
-                <TableBody>
-                  {filteredTransactions.slice(0, 5).map(t => (
-                    <TableRow key={t.id}>
-                      <TableCell className="w-10">
-                        <div className={cn("flex h-8 w-8 items-center justify-center rounded-full", t.type === 'earning' ? 'bg-green-500/10' : 'bg-red-500/10')}>
-                          {t.type === 'earning' ? <TrendingUp className="size-4 text-green-500" /> : <TrendingDown className="size-4 text-red-500" />}
-                        </div>
-                      </TableCell>
-                      <TableCell>
-                        <p className="font-medium">{t.description}</p>
-                        <p className="text-xs text-muted-foreground">{format(new Date(t.date), "MMM dd, yyyy")}</p>
-                      </TableCell>
-                      <TableCell className="text-right font-mono font-semibold">
-                        {t.type === 'earning' ? '+' : '-'}${t.amount.toFixed(2)}
-                      </TableCell>
-                    </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
-            </CardContent>
-          </Card>
         </TabsContent>
 
         <TabsContent value="transactions" className="mt-6 space-y-4">
@@ -1329,19 +1601,24 @@ export default function FinanceManager() {
             <CardContent className="flex flex-col gap-4 p-4 sm:flex-row sm:items-center">
               <div className="relative flex-grow">
                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-muted-foreground" />
-                <Input placeholder="Search descriptions..." className="pl-10" value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} />
+                <Input
+                  placeholder="Search descriptions..."
+                  className="pl-10"
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                />
               </div>
-              <Popover>
-                <PopoverTrigger asChild>
-                  <Button variant="outline" className="w-full justify-start text-left font-normal sm:w-auto">
-                    <CalendarIcon className="mr-2 size-4" />
-                    {date?.from ? (date.to ? `${format(date.from, "LLL dd, y")} - ${format(date.to, "LLL dd, y")}` : format(date.from, "LLL dd, y")) : (<span>Pick a date range</span>)}
-                  </Button>
-                </PopoverTrigger>
-                <PopoverContent className="w-auto p-0" align="start">
-                  <Calendar initialFocus mode="range" defaultMonth={date?.from} selected={date} onSelect={setDate} numberOfMonths={2} />
-                </PopoverContent>
-              </Popover>
+              {/* Removed Date Picker from here */}
+              <div className="flex items-center gap-2">
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button variant="outline" size="icon"><Filter className="size-4" /></Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="end">
+                    <DropdownMenuItem onClick={() => setSearchTerm("")}>Clear Search</DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
+              </div>
             </CardContent>
           </Card>
           <Card>
@@ -1350,42 +1627,81 @@ export default function FinanceManager() {
                 <TableRow>
                   <TableHead>Date</TableHead>
                   <TableHead>Description</TableHead>
-                  <TableHead className="hidden md:table-cell">Category</TableHead>
+                  <TableHead className="hidden md:table-cell">
+                    Category
+                  </TableHead>
                   <TableHead className="text-right">Amount</TableHead>
                   <TableHead className="w-[80px] text-right">Actions</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {filteredTransactions.length > 0 ? (filteredTransactions.map((t) => (
-                  <TableRow key={t.id} className="group">
-                    <TableCell className="text-xs text-muted-foreground">{format(new Date(t.date), "MMM dd, yyyy")}</TableCell>
-                    <TableCell className="font-medium flex items-center gap-2">
-                      {t.type === 'earning' ? <TrendingUp className="size-4 text-green-500 shrink-0" /> : <TrendingDown className="size-4 text-red-500 shrink-0" />}
-                      {t.description}
-                    </TableCell>
-                    <TableCell className="hidden md:table-cell">
-                      <Badge variant="outline">{t.category || "–"}</Badge>
-                    </TableCell>
-                    <TableCell className={cn("text-right font-semibold font-mono", t.type === "earning" ? "text-green-500" : "text-red-500")}>
-                      {t.type === "earning" ? "+" : "-"}${t.amount.toFixed(2)}
-                    </TableCell>
-                    <TableCell className="text-right">
-                      <DropdownMenu>
-                        <DropdownMenuTrigger asChild>
-                          <Button variant="ghost" size="icon" className="h-8 w-8 opacity-0 group-hover:opacity-100">
-                            <MoreHorizontal className="size-4" />
-                          </Button>
-                        </DropdownMenuTrigger>
-                        <DropdownMenuContent align="end">
-                          <DropdownMenuItem onSelect={() => handleOpenSheet('transaction', t)}> <Edit className="mr-2 size-4" /> Edit</DropdownMenuItem>
-                          <DropdownMenuItem className="text-destructive" onSelect={() => handleDelete("transactions", t.id, `Delete transaction "${t.description}"?`)}> <Trash2 className="mr-2 size-4" /> Delete</DropdownMenuItem>
-                        </DropdownMenuContent>
-                      </DropdownMenu>
-                    </TableCell>
-                  </TableRow>
-                ))) : (
+                {filteredTransactions.length > 0 ? (
+                  filteredTransactions.map((t) => (
+                    <TableRow key={t.id} className="group">
+                      <TableCell className="text-xs text-muted-foreground">
+                        {format(parseLocalDate(t.date), "MMM dd, yyyy")}
+                      </TableCell>
+                      <TableCell className="font-medium flex items-center gap-2">
+                        {t.type === "earning" ? (
+                          <TrendingUp className="size-4 text-green-500 shrink-0" />
+                        ) : (
+                          <TrendingDown className="size-4 text-red-500 shrink-0" />
+                        )}
+                        {t.description}
+                      </TableCell>
+                      <TableCell className="hidden md:table-cell">
+                        <Badge variant="outline">{t.category || "–"}</Badge>
+                      </TableCell>
+                      <TableCell
+                        className={cn(
+                          "text-right font-semibold font-mono",
+                          t.type === "earning"
+                            ? "text-green-500"
+                            : "text-red-500",
+                        )}
+                      >
+                        {t.type === "earning" ? "+" : "-"}
+                        ${t.amount.toFixed(2)}
+                      </TableCell>
+                      <TableCell className="text-right">
+                        <DropdownMenu>
+                          <DropdownMenuTrigger asChild>
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              className="h-8 w-8 opacity-0 group-hover:opacity-100"
+                            >
+                              <MoreHorizontal className="size-4" />
+                            </Button>
+                          </DropdownMenuTrigger>
+                          <DropdownMenuContent align="end">
+                            <DropdownMenuItem
+                              onSelect={() => handleOpenSheet("transaction", t)}
+                            >
+                              <Edit className="mr-2 size-4" /> Edit
+                            </DropdownMenuItem>
+                            <DropdownMenuItem
+                              className="text-destructive"
+                              onSelect={() =>
+                                handleDelete(
+                                  "transactions",
+                                  t.id,
+                                  `Delete transaction "${t.description}"?`,
+                                )
+                              }
+                            >
+                              <Trash2 className="mr-2 size-4" /> Delete
+                            </DropdownMenuItem>
+                          </DropdownMenuContent>
+                        </DropdownMenu>
+                      </TableCell>
+                    </TableRow>
+                  ))
+                ) : (
                   <TableRow>
-                    <TableCell colSpan={5} className="h-24 text-center">No transactions found.</TableCell>
+                    <TableCell colSpan={5} className="h-24 text-center">
+                      No transactions found.
+                    </TableCell>
                   </TableRow>
                 )}
               </TableBody>
@@ -1397,7 +1713,9 @@ export default function FinanceManager() {
           <Card>
             <CardHeader>
               <CardTitle>Recurring Transactions</CardTitle>
-              <CardDescription>Automate your regular income and expenses to forecast cash flow.</CardDescription>
+              <CardDescription>
+                Automate your regular income and expenses to forecast cash flow.
+              </CardDescription>
             </CardHeader>
             <CardContent>
               <Table>
@@ -1413,46 +1731,107 @@ export default function FinanceManager() {
                 <TableBody>
                   {recurring.map((r) => {
                     let schedule: string = r.frequency;
-                    if ((r.frequency === "weekly" || r.frequency === "bi-weekly") && r.occurrence_day !== null && r.occurrence_day !== undefined) {
-                      const days = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
+                    if (
+                      (r.frequency === "weekly" ||
+                        r.frequency === "bi-weekly") &&
+                      r.occurrence_day !== null &&
+                      r.occurrence_day !== undefined
+                    ) {
+                      const days = [
+                        "Sun",
+                        "Mon",
+                        "Tue",
+                        "Wed",
+                        "Thu",
+                        "Fri",
+                        "Sat",
+                      ];
                       schedule = `${r.frequency} on ${days[r.occurrence_day]}`;
-                    } else if (r.frequency === "monthly" && r.occurrence_day) {
+                    } else if (
+                      r.frequency === "monthly" &&
+                      r.occurrence_day
+                    ) {
                       schedule = `monthly on the ${r.occurrence_day}th`;
                     }
+
+                    // Use new parseLocalDate for consistent display
                     let nextDueDate = "N/A";
                     try {
-                      let cursor = r.last_processed_date ? new Date(r.last_processed_date) : new Date(r.start_date);
-                      if (isBefore(cursor, new Date(r.start_date))) cursor = new Date(r.start_date);
-                      const next = r.last_processed_date && isAfter(new Date(r.last_processed_date), new Date()) ? cursor : getNextOccurrence(cursor, r);
+                      const cursor = r.last_processed_date
+                        ? parseLocalDate(r.last_processed_date)
+                        : parseLocalDate(r.start_date);
+
+                      // If using last_processed, the next occurrence is strictly 1 interval away.
+                      // If using start_date (never processed), the start_date ITSELF is the first occurrence.
+                      const next = r.last_processed_date
+                        ? getNextOccurrence(cursor, r)
+                        : cursor;
+
                       nextDueDate = format(next, "MMM dd, yyyy");
-                    } catch (e) { console.error("Date calculation error", e); }
+                    } catch (e) {
+                      console.error("Date error", e);
+                    }
+
                     return (
                       <TableRow key={r.id}>
-                        <TableCell className="font-medium">{r.description}</TableCell>
-                        <TableCell className={r.type === "earning" ? "text-green-500" : "text-red-500"}>${r.amount.toFixed(2)}</TableCell>
+                        <TableCell className="font-medium">
+                          {r.description}
+                        </TableCell>
+                        <TableCell
+                          className={
+                            r.type === "earning"
+                              ? "text-green-500"
+                              : "text-red-500"
+                          }
+                        >
+                          ${r.amount.toFixed(2)}
+                        </TableCell>
                         <TableCell className="capitalize">{schedule}</TableCell>
                         <TableCell>{nextDueDate}</TableCell>
                         <TableCell className="text-right">
                           <DropdownMenu>
                             <DropdownMenuTrigger asChild>
-                              <Button variant="ghost" size="icon" className="h-8 w-8">
+                              <Button
+                                variant="ghost"
+                                size="icon"
+                                className="h-8 w-8"
+                              >
                                 <MoreHorizontal className="size-4" />
                               </Button>
                             </DropdownMenuTrigger>
                             <DropdownMenuContent align="end">
-                              <DropdownMenuItem onSelect={() => handleOpenSheet('recurring', r)}>
-                                <Edit className="mr-2 size-4" />Edit</DropdownMenuItem>
-                              <DropdownMenuItem className="text-destructive" onSelect={() => handleDelete("recurring_transactions", r.id, `Delete rule "${r.description}"?`)}>
-                                <Trash2 className="mr-2 size-4" />Delete</DropdownMenuItem>
+                              <DropdownMenuItem
+                                onSelect={() => handleOpenSheet("recurring", r)}
+                              >
+                                <Edit className="mr-2 size-4" />
+                                Edit
+                              </DropdownMenuItem>
+                              <DropdownMenuItem
+                                className="text-destructive"
+                                onSelect={() =>
+                                  handleDelete(
+                                    "recurring_transactions",
+                                    r.id,
+                                    `Delete rule "${r.description}"?`,
+                                  )
+                                }
+                              >
+                                <Trash2 className="mr-2 size-4" />
+                                Delete
+                              </DropdownMenuItem>
                             </DropdownMenuContent>
                           </DropdownMenu>
                         </TableCell>
                       </TableRow>
                     );
                   })}
-                  {recurring.length === 0 && <TableRow>
-                    <TableCell colSpan={5} className="h-24 text-center">No recurring transaction rules found.</TableCell>
-                  </TableRow>}
+                  {recurring.length === 0 && (
+                    <TableRow>
+                      <TableCell colSpan={5} className="h-24 text-center">
+                        No recurring transaction rules found.
+                      </TableCell>
+                    </TableRow>
+                  )}
                 </TableBody>
               </Table>
             </CardContent>
