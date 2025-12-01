@@ -16,6 +16,7 @@ import {
   Settings,
   FlaskConical,
   LogOut,
+  LayoutDashboard,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "../ui/button";
@@ -38,6 +39,7 @@ import {
 const mainNav = [
   { name: "Dashboard", href: "/admin", icon: Home },
   { name: "Calendar", href: "/admin/calendar", icon: CalendarIcon },
+  { name: "Analytics", href: "/admin/analytics", icon: LayoutDashboard },
 ];
 
 const portfolioNav = [

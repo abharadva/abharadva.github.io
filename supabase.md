@@ -280,6 +280,74 @@ CREATE OR REPLACE FUNCTION delete_transaction_category(category_name TEXT) RETUR
 CREATE OR REPLACE FUNCTION ping() RETURNS text AS $$ BEGIN RETURN 'pong'; END; $$ LANGUAGE plpgsql;
 CREATE OR REPLACE FUNCTION update_asset_usage() RETURNS void AS $$ DECLARE asset RECORD; usage JSONB; BEGIN FOR asset IN SELECT id, file_path FROM storage_assets LOOP usage := '[]' :: jsonb; IF EXISTS (SELECT 1 FROM blog_posts WHERE cover_image_url LIKE '%' || asset.file_path || '%') THEN usage := usage || jsonb_build_object('type', 'Blog Cover', 'id', (SELECT id FROM blog_posts WHERE cover_image_url LIKE '%' || asset.file_path || '%' LIMIT 1)); END IF; IF EXISTS (SELECT 1 FROM blog_posts WHERE content LIKE '%' || asset.file_path || '%') THEN usage := usage || jsonb_build_object('type', 'Blog Content', 'id', (SELECT id FROM blog_posts WHERE content LIKE '%' || asset.file_path || '%' LIMIT 1)); END IF; IF EXISTS (SELECT 1 FROM portfolio_items WHERE image_url LIKE '%' || asset.file_path || '%') THEN usage := usage || jsonb_build_object('type', 'Portfolio Item', 'id', (SELECT id FROM portfolio_items WHERE image_url LIKE '%' || asset.file_path || '%' LIMIT 1)); END IF; UPDATE storage_assets SET used_in = usage WHERE id = asset.id; END LOOP; END; $$ LANGUAGE plpgsql;
 
+CREATE OR REPLACE FUNCTION get_analytics_overview()
+RETURNS JSONB
+LANGUAGE plpgsql
+SECURITY DEFINER -- Important for accessing user-specific data
+AS $$
+DECLARE
+  analytics_data JSONB;
+  current_user_id UUID := auth.uid();
+BEGIN
+  WITH
+  task_stats AS (
+    SELECT
+      status,
+      count(*) AS count
+    FROM tasks
+    WHERE user_id = current_user_id
+    GROUP BY status
+  ),
+  tasks_completed_weekly AS (
+    SELECT
+      date_trunc('week', updated_at)::date AS week_start,
+      count(*) AS completed_count
+    FROM tasks
+    WHERE user_id = current_user_id AND status = 'done'
+    AND updated_at > now() - interval '8 weeks'
+    GROUP BY week_start
+    ORDER BY week_start
+  ),
+  productivity_heatmap AS (
+     SELECT
+      (updated_at AT TIME ZONE 'UTC')::date AS day,
+      count(*)::INT AS count
+    FROM tasks
+    WHERE user_id = current_user_id AND status = 'done'
+    GROUP BY day
+  ),
+  blog_stats AS (
+    SELECT
+      id,
+      title,
+      slug,
+      views
+    FROM blog_posts
+    WHERE user_id = current_user_id AND published = true
+    ORDER BY views DESC
+    LIMIT 5
+  ),
+  learning_stats AS (
+    SELECT
+      ls.name as subject_name,
+      SUM(lse.duration_minutes)::INT AS total_minutes
+    FROM learning_sessions lse
+    JOIN learning_topics lt ON lse.topic_id = lt.id
+    JOIN learning_subjects ls ON lt.subject_id = ls.id
+    WHERE lse.user_id = current_user_id
+    GROUP BY ls.name
+  )
+  SELECT jsonb_build_object(
+    'task_status_distribution', (SELECT jsonb_agg(jsonb_build_object('name', status, 'value', count)) FROM task_stats),
+    'tasks_completed_weekly', (SELECT jsonb_agg(jsonb_build_object('week', to_char(week_start, 'Mon DD'), 'completed', completed_count)) FROM tasks_completed_weekly),
+    'productivity_heatmap', (SELECT jsonb_agg(jsonb_build_object('date', day, 'count', count)) FROM productivity_heatmap),
+    'top_blog_posts', (SELECT jsonb_agg(jsonb_build_object('id', id, 'title', title, 'slug', slug, 'views', views)) FROM blog_stats),
+    'learning_time_by_subject', (SELECT jsonb_agg(jsonb_build_object('name', subject_name, 'value', total_minutes)) FROM learning_stats)
+  ) INTO analytics_data;
+
+  RETURN analytics_data;
+END;
+$$;
 
 -- ========= STORAGE POLICIES =========
 DROP POLICY IF EXISTS "Public read access for blog-assets" ON storage.objects;

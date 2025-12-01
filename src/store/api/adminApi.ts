@@ -17,6 +17,7 @@ import type {
   PortfolioSection,
   PortfolioItem,
   SiteContent,
+  AnalyticsData,
 } from "@/types";
 import { publicApi } from "./publicApi";
 
@@ -65,6 +66,7 @@ export const adminApi = createApi({
     "SiteSettings",
     "AdminPosts",
     "Calendar",
+    "Analytics",
     "Dashboard",
     "MFA",
     "SiteContent"
@@ -104,7 +106,7 @@ export const adminApi = createApi({
       },
     }),
     // Dashboard Data
-     getDashboardData: builder.query<any, void>({
+    getDashboardData: builder.query<any, void>({
       queryFn: async () => {
         const now = new Date();
         const todayISO = now.toISOString().split("T")[0];
@@ -145,19 +147,19 @@ export const adminApi = createApi({
           if (t.type === "earning") monthlyEarnings += t.amount;
           else if (t.type === "expense") monthlyExpenses += t.amount;
         });
-        
+
         const createDailySummary = (rawData: any[]) => {
-            return (rawData || []).reduce((acc: any, t: any) => {
-                const day = t.date.split('T')[0];
-                if (!acc[day]) acc[day] = { day, total: 0 };
-                acc[day].total += t.amount;
-                return acc;
-            }, {});
+          return (rawData || []).reduce((acc: any, t: any) => {
+            const day = t.date.split('T')[0];
+            if (!acc[day]) acc[day] = { day, total: 0 };
+            acc[day].total += t.amount;
+            return acc;
+          }, {});
         };
 
         const dailyExpenses = Object.values(createDailySummary(dailyExpensesDataRaw));
         const dailyEarnings = Object.values(createDailySummary(dailyEarningsDataRaw));
-        
+
         const data = {
           stats: { monthlyNet: monthlyEarnings - monthlyExpenses, totalBlogViews: totalViewsRes || 0 },
           recentPosts: recentPostsData || [],
@@ -175,7 +177,14 @@ export const adminApi = createApi({
       },
       providesTags: ["Dashboard", "AdminPosts", "Notes", "Tasks", "Transactions", "Learning", "PortfolioContent", "Goals"],
     }),
-
+    getAnalyticsData: builder.query<AnalyticsData, void>({
+      queryFn: async () => {
+        const { data, error } = await supabase.rpc("get_analytics_overview");
+        if (error) return { error };
+        return { data };
+      },
+      providesTags: ["Analytics"],
+    }),
     // Calendar Data
     getCalendarData: builder.query<
       { baseEvents: CalendarItem[]; recurring: RecurringTransaction[] },
@@ -973,6 +982,7 @@ export const adminApi = createApi({
 
 export const {
   useGetDashboardDataQuery,
+  useGetAnalyticsDataQuery,
   useGetCalendarDataQuery,
   useAddEventMutation,
   useUpdateEventMutation,

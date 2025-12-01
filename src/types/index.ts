@@ -260,3 +260,11 @@ export interface SiteContent {
     copyright_text: string;
   };
 }
+
+export interface AnalyticsData {
+  task_status_distribution: { name: "todo" | "inprogress" | "done"; value: number }[] | null;
+  tasks_completed_weekly: { week: string; completed: number }[] | null;
+  productivity_heatmap: { date: string; count: number }[] | null;
+  top_blog_posts: { id: string; title: string; slug: string; views: number }[] | null;
+  learning_time_by_subject: { name: string; value: number }[] | null;
+}
