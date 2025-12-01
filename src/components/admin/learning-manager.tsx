@@ -74,15 +74,18 @@ export default function LearningManager() {
 
   if (isLoading)
     return (
-      <div className="flex h-64 items-center justify-center">
+      <div className="flex h-[calc(100vh-10rem)] items-center justify-center">
         <Loader2 className="size-8 animate-spin text-muted-foreground" />
       </div>
     );
 
   return (
     <>
-      <div className="space-y-6">
-        <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+      {/* Main Container: Calculated height to fit viewport minus header (4rem) and padding (2.5rem*2) */}
+      <div className="flex flex-col h-[calc(100vh-9rem)] gap-4">
+        
+        {/* Header Section */}
+        <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between shrink-0">
           <div>
             <h2 className="text-2xl font-bold flex items-center gap-2">
               <BrainCircuit className="size-6 text-primary" />
@@ -98,8 +101,12 @@ export default function LearningManager() {
           </Button>
         </div>
         
-        <ResizablePanelGroup direction="horizontal" className="h-[calc(100vh-12rem)] rounded-lg border">
-            <ResizablePanel defaultSize={25} minSize={20} maxSize={35} className="p-4">
+        {/* Resizable Panel: Takes remaining height (flex-1) */}
+        <ResizablePanelGroup 
+          direction="horizontal" 
+          className="flex-1 rounded-lg border bg-card min-h-0 shadow-sm"
+        >
+            <ResizablePanel defaultSize={25} minSize={20} maxSize={35} className="p-0">
                  <SubjectTopicTree
                     subjects={subjects}
                     topics={topics}
@@ -124,7 +131,7 @@ export default function LearningManager() {
             </ResizablePanel>
             <ResizableHandle withHandle />
             <ResizablePanel defaultSize={75}>
-                 <div className="p-6 h-full overflow-y-auto">
+                 <div className="h-full p-6 overflow-y-auto">
                     {activeTopic ? (
                     <TopicEditor
                         key={activeTopic.id}
