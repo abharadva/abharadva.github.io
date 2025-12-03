@@ -36,6 +36,7 @@ import {
   User,
   Home,
   Search,
+  X,
 } from "lucide-react";
 
 // --- UI Component Imports ---
@@ -1307,9 +1308,16 @@ export default function UiPage() {
                         <Button variant="outline">{side}</Button>
                       </SheetTrigger>
                       <SheetContent side={side}>
-                        <SheetHeader>
-                          <SheetTitle>Panel ({side})</SheetTitle>
-                        </SheetHeader>
+                        <div className="flex justify-between items-center">
+                          <SheetHeader>
+                            <SheetTitle>Panel ({side})</SheetTitle>
+                          </SheetHeader>
+                          <SheetClose asChild>
+                            <Button type="button" variant="ghost">
+                              <X />
+                            </Button>
+                          </SheetClose>
+                        </div>
                       </SheetContent>
                     </Sheet>
                   ))}

@@ -1,9 +1,8 @@
-// src/components/header.tsx
 import Link from "next/link";
 import { useRouter } from "next/router";
 import Container from "./container";
 import { cn } from "@/lib/utils";
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 import {
   useGetSiteIdentityQuery,
   useGetNavLinksQuery,
@@ -18,64 +17,70 @@ export default function Header() {
 
   const isLoading = isContentLoading || isNavLoading;
 
-  const linkClasses = (href: string) => {
-    const isActive =
-      router.pathname === href ||
-      (href !== "/" && router.pathname.startsWith(href));
-    return cn(
-      "relative cursor-pointer rounded-md px-3 py-1.5 text-sm font-medium text-muted-foreground transition-colors hover:text-foreground focus:outline-none focus-visible:ring-2 focus-visible:ring-ring",
-      isActive && "text-foreground",
-    );
-  };
-
   return (
-    <header className="fixed left-0 top-0 z-50 hidden w-full border-b border-border/50 bg-background/80 py-3 backdrop-blur-lg md:block">
+    <header className="fixed left-0 top-0 z-50 hidden w-full border-b border-border/40 bg-background/60 py-4 backdrop-blur-xl md:block supports-[backdrop-filter]:bg-background/30">
       <Container>
-        <div className="flex h-10 max-w-7xl items-center justify-between">
+        <div className="flex h-8 items-center justify-between">
           <Link
             href="/"
-            className="font-mono text-lg font-semibold tracking-tighter"
+            className="group relative flex items-center font-mono text-xl font-bold tracking-tighter transition-opacity hover:opacity-80"
           >
             {isLoading || !content ? (
               <Skeleton className="h-6 w-32" />
             ) : (
               <>
-                {content.profile_data.logo.main}
-                <span className="text-primary">
+                <span className="text-foreground">
+                  {content.profile_data.logo.main}
+                </span>
+                <span className="text-primary animate-pulse">
                   {content.profile_data.logo.highlight}
                 </span>
               </>
             )}
           </Link>
-          <nav className="flex items-center gap-x-2 rounded-lg p-1">
+
+          {/* Navigation */}
+          <nav className="flex items-center gap-1 rounded-full bg-secondary/40 p-1 border border-white/5 backdrop-blur-sm">
             {isLoading ? (
-              <div className="flex gap-x-2">
-                <Skeleton className="h-8 w-20" />
-                <Skeleton className="h-8 w-20" />
-                <Skeleton className="h-8 w-20" />
+              <div className="flex gap-4 px-4">
+                <Skeleton className="h-4 w-16" />
+                <Skeleton className="h-4 w-16" />
+                <Skeleton className="h-4 w-16" />
               </div>
             ) : (
               navLinks?.map((link) => {
                 const isActive =
                   router.pathname === link.href ||
                   (link.href !== "/" && router.pathname.startsWith(link.href));
+
                 return (
                   <Link
-                    className={linkClasses(link.href)}
-                    href={link.href}
                     key={link.href}
-                  >
-                    {isActive && (
-                      <motion.span
-                        layoutId="header-active-link"
-                        className="absolute inset-0 z-[-1] rounded-md bg-secondary"
-                        transition={{
-                          type: "spring",
-                          stiffness: 350,
-                          damping: 30,
-                        }}
-                      />
+                    href={link.href}
+                    className={cn(
+                      "relative px-4 py-1.5 text-sm font-medium transition-colors duration-300",
+                      isActive
+                        ? "text-primary-foreground"
+                        : "text-muted-foreground hover:text-foreground",
                     )}
+                  >
+                    <AnimatePresence mode="wait">
+                      {isActive && (
+                        <motion.div
+                          layoutId="header-pill"
+                          className="absolute inset-0 z-[-1] rounded-full bg-primary shadow-[0_0_15px_rgba(var(--primary),0.4)]"
+                          initial={{ opacity: 0, scale: 0.8 }}
+                          animate={{ opacity: 1, scale: 1 }}
+                          exit={{ opacity: 0, scale: 0.8 }}
+                          transition={{
+                            type: "spring",
+                            stiffness: 380,
+                            damping: 30,
+                            opacity: { duration: 0.2 },
+                          }}
+                        />
+                      )}
+                    </AnimatePresence>
                     {link.label}
                   </Link>
                 );

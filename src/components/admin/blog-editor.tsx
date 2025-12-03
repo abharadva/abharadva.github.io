@@ -14,6 +14,7 @@ import { Switch } from "../ui/switch";
 import { Textarea } from "../ui/textarea";
 import {
   Sheet,
+  SheetClose,
   SheetContent,
   SheetDescription,
   SheetHeader,
@@ -265,13 +266,20 @@ export default function BlogEditor({
                 <Settings className="mr-2 size-4" /> Settings
               </Button>
             </SheetTrigger>
-            <SheetContent className="w-[400px] sm:w-[540px]">
-              <SheetHeader>
-                <SheetTitle>Post Settings</SheetTitle>
-                <SheetDescription>
-                  Manage metadata, SEO, and publication details.
-                </SheetDescription>
-              </SheetHeader>
+            <SheetContent className="sm:max-w-lg w-full flex flex-col">
+              <div className="flex justify-between items-center">
+                <SheetHeader>
+                  <SheetTitle>Post Settings</SheetTitle>
+                  <SheetDescription>
+                    Manage metadata, SEO, and publication details.
+                  </SheetDescription>
+                </SheetHeader>
+                <SheetClose asChild>
+                  <Button type="button" variant="ghost">
+                    <X />
+                  </Button>
+                </SheetClose>
+              </div>
               <ScrollArea className="h-[calc(100vh-8rem)] pr-4 mt-6">
                 <div className="space-y-6">
                   {/* Publication Toggle */}
@@ -292,7 +300,9 @@ export default function BlogEditor({
 
                   <div className="flex flex-row items-center justify-between rounded-lg border p-4 shadow-sm">
                     <div className="space-y-0.5">
-                      <Label className="text-base">Show Table of Contents</Label>
+                      <Label className="text-base">
+                        Show Table of Contents
+                      </Label>
                       <p className="text-xs text-muted-foreground">
                         Display a sticky sidebar with content headings.
                       </p>

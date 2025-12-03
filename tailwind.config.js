@@ -5,11 +5,6 @@ module.exports = {
     "./src/pages/**/*.{js,ts,jsx,tsx,mdx}",
     "./src/components/**/*.{js,ts,jsx,tsx,mdx}",
   ],
-  safelist: [
-    {
-      pattern: /theme-(blueprint|matrix|solarized-light|monokai)/,
-    },
-  ],
   theme: {
     container: {
       center: true,

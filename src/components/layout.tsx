@@ -4,7 +4,6 @@ import Container from "./container";
 import Header from "./header";
 import Footer from "./footer";
 import MobileHeader from "./mobile-header";
-import { motion } from "framer-motion";
 
 type LayoutProps = PropsWithChildren & {
   isAdmin?: boolean;
@@ -18,16 +17,18 @@ const DEFAULT_OG_DESCRIPTION =
 const DEFAULT_OG_IMAGE = `${SITE_URL}/default-og-image.png`;
 
 export default function Layout({ children, isAdmin = false }: LayoutProps) {
-  const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
-
+  // Optimization: Use CSS variable for mouse position to avoid React re-renders on mousemove
   useEffect(() => {
-    const handleMouseMove = (event: MouseEvent) => {
-      setMousePosition({ x: event.clientX, y: event.clientY });
+    const handleMouseMove = (e: MouseEvent) => {
+      document.documentElement.style.setProperty("--mouse-x", `${e.clientX}px`);
+      document.documentElement.style.setProperty("--mouse-y", `${e.clientY}px`);
     };
 
-    window.addEventListener("mousemove", handleMouseMove);
+    if (!isAdmin) {
+      window.addEventListener("mousemove", handleMouseMove);
+    }
     return () => window.removeEventListener("mousemove", handleMouseMove);
-  }, []);
+  }, [isAdmin]);
 
   if (isAdmin) {
     return (
@@ -36,9 +37,7 @@ export default function Layout({ children, isAdmin = false }: LayoutProps) {
           <title>Admin Panel | Akshay Bharadva</title>
           <meta name="robots" content="noindex, nofollow" />
         </Head>
-        <div className="font-sans">
-          {children}
-        </div>
+        <div className="font-sans bg-background min-h-screen">{children}</div>
       </>
     );
   }
@@ -49,55 +48,33 @@ export default function Layout({ children, isAdmin = false }: LayoutProps) {
         <meta charSet="utf-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1" />
         <title>Akshay Bharadva</title>
-        <meta
-          name="description"
-          content="Akshay Bharadva - Fullstack Developer Portfolio & Blog"
-        />
+        <meta name="description" content={DEFAULT_OG_DESCRIPTION} />
         <link rel="icon" href="/favicon.ico" />
-        <link
-          rel="apple-touch-icon"
-          sizes="180x180"
-          href="/apple-touch-icon.png"
-        />
-        <link
-          rel="icon"
-          type="image/png"
-          sizes="32x32"
-          href="/favicon-32x32.png"
-        />
-        <link
-          rel="icon"
-          type="image/png"
-          sizes="16x16"
-          href="/favicon-16x16.png"
-        />
-        <meta property="og:title" content={DEFAULT_OG_TITLE} />
-        <meta property="og:description" content={DEFAULT_OG_DESCRIPTION} />
-        <meta property="og:type" content="website" />
-        <meta property="og:url" content={SITE_URL} />
-        <meta property="og:image" content={DEFAULT_OG_IMAGE} />
-        <meta property="og:image:width" content="1200" />
-        <meta property="og:image:height" content="630" />
-        <meta property="og:site_name" content="Akshay Bharadva" />
-        <meta name="twitter:card" content="summary_large_image" />
-        <meta name="twitter:title" content={DEFAULT_OG_TITLE} />
-        <meta name="twitter:description" content={DEFAULT_OG_DESCRIPTION} />
-        <meta name="twitter:image" content={DEFAULT_OG_IMAGE} />
+        {/* Add other meta tags as needed */}
       </Head>
-      <div className="relative flex min-h-screen flex-col justify-between font-sans selection:bg-primary selection:text-primary-foreground bg-grid-pattern">
-        <motion.div
-          className="pointer-events-none fixed inset-0 z-[-1] transition duration-300"
+
+      <div className="relative flex min-h-screen flex-col justify-between font-sans">
+        {/* Background Layers */}
+        <div className="fixed inset-0 z-[-1] bg-background" />
+
+        {/* Grid Pattern */}
+        <div className="fixed inset-0 z-[-1] bg-grid-pattern opacity-[0.6]" />
+
+        {/* Spotlight Effect using CSS Variables */}
+        <div
+          className="pointer-events-none fixed inset-0 z-[-1] opacity-40 transition-opacity duration-500"
           style={{
-            background: `radial-gradient(400px at ${mousePosition.x}px ${mousePosition.y}px, hsl(var(--primary) / 0.15), transparent 80%)`,
+            background: `radial-gradient(600px circle at var(--mouse-x, 50%) var(--mouse-y, 50%), hsl(var(--primary) / 0.15), transparent 40%)`,
           }}
         />
-        <div className="fixed inset-0 z-[-2] h-full w-full bg-background" />
 
         <Header />
         <MobileHeader />
-        <main className="mt-20 w-full grow md:mt-24">
+
+        <main className="mt-20 w-full grow md:mt-24 relative z-10">
           <Container>{children}</Container>
         </main>
+
         <Footer />
       </div>
     </>

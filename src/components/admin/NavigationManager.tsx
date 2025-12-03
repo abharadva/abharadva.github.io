@@ -4,9 +4,22 @@
 import React, { useState, useEffect, DragEvent } from "react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
-import { Loader2, Plus, Edit, Trash2, GripVertical } from "lucide-react";
-import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetDescription } from "@/components/ui/sheet";
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+  CardDescription,
+} from "@/components/ui/card";
+import { Loader2, Plus, Edit, Trash2, GripVertical, X } from "lucide-react";
+import {
+  Sheet,
+  SheetContent,
+  SheetHeader,
+  SheetTitle,
+  SheetDescription,
+  SheetClose,
+} from "@/components/ui/sheet";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
@@ -137,34 +150,36 @@ export default function NavigationManager() {
     if (!draggedLinkId || draggedLinkId === targetLinkId) return;
 
     const reorderedLinks = [...localLinks];
-    const draggedIndex = reorderedLinks.findIndex((l) => l.id === draggedLinkId);
+    const draggedIndex = reorderedLinks.findIndex(
+      (l) => l.id === draggedLinkId,
+    );
     const targetIndex = reorderedLinks.findIndex((l) => l.id === targetLinkId);
 
     const [draggedItem] = reorderedLinks.splice(draggedIndex, 1);
     reorderedLinks.splice(targetIndex, 0, draggedItem);
-    
+
     setLocalLinks(reorderedLinks);
     setDraggedLinkId(null);
 
     const linkIdsInNewOrder = reorderedLinks.map((l) => l.id);
-    
+
     try {
-        // We need a specific RPC for nav links, or a generic one
-        // Let's assume we have a generic `update_display_order` RPC
-        // If not, you'd need to create one:
-        // CREATE OR REPLACE FUNCTION update_navigation_order(link_ids UUID[]) ...
-        // For now, let's update them one-by-one. It's less efficient but works without DB changes.
-        const updatePromises = reorderedLinks.map((link, index) => 
-            saveNavLink({ id: link.id, display_order: index })
-        );
-        await Promise.all(updatePromises);
-        toast.success("Navigation order saved.");
+      // We need a specific RPC for nav links, or a generic one
+      // Let's assume we have a generic `update_display_order` RPC
+      // If not, you'd need to create one:
+      // CREATE OR REPLACE FUNCTION update_navigation_order(link_ids UUID[]) ...
+      // For now, let's update them one-by-one. It's less efficient but works without DB changes.
+      const updatePromises = reorderedLinks.map((link, index) =>
+        saveNavLink({ id: link.id, display_order: index }),
+      );
+      await Promise.all(updatePromises);
+      toast.success("Navigation order saved.");
     } catch {
       toast.error("Failed to save new order.");
       setLocalLinks(links); // Revert on failure
     }
   };
-  
+
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
@@ -185,8 +200,8 @@ export default function NavigationManager() {
       </div>
       <Card>
         <CardHeader>
-           <CardTitle>Menu Items</CardTitle>
-           <CardDescription>Drag and drop to reorder links.</CardDescription>
+          <CardTitle>Menu Items</CardTitle>
+          <CardDescription>Drag and drop to reorder links.</CardDescription>
         </CardHeader>
         <CardContent className="p-4">
           {isLoading ? (
@@ -204,13 +219,15 @@ export default function NavigationManager() {
                   onDragOver={handleDragOver}
                   className={cn(
                     "flex items-center gap-2 rounded-md p-2 border bg-card transition-all",
-                    draggedLinkId === link.id && "opacity-50 scale-95"
+                    draggedLinkId === link.id && "opacity-50 scale-95",
                   )}
                 >
                   <GripVertical className="size-5 text-muted-foreground cursor-grab" />
                   <div className="flex-1">
                     <p className="font-medium">{link.label}</p>
-                    <p className="text-xs text-muted-foreground font-mono">{link.href}</p>
+                    <p className="text-xs text-muted-foreground font-mono">
+                      {link.href}
+                    </p>
                   </div>
                   <Switch
                     checked={link.is_visible}
@@ -242,15 +259,22 @@ export default function NavigationManager() {
         </CardContent>
       </Card>
       <Sheet open={isSheetOpen} onOpenChange={setIsSheetOpen}>
-        <SheetContent>
-          <SheetHeader>
-            <SheetTitle>
-              {editingLink ? "Edit" : "Add"} Navigation Link
-            </SheetTitle>
-            <SheetDescription>
-              This link will appear in your site's main navigation bar.
-            </SheetDescription>
-          </SheetHeader>
+        <SheetContent className="sm:max-w-lg w-full flex flex-col">
+          <div className="flex justify-between items-center">
+            <SheetHeader>
+              <SheetTitle>
+                {editingLink ? "Edit" : "Add"} Navigation Link
+              </SheetTitle>
+              <SheetDescription>
+                This link will appear in your site's main navigation bar.
+              </SheetDescription>
+            </SheetHeader>
+            <SheetClose asChild>
+              <Button type="button" variant="ghost">
+                <X />
+              </Button>
+            </SheetClose>
+          </div>
           <LinkForm
             link={editingLink}
             onSave={handleSave}

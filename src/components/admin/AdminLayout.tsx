@@ -37,8 +37,12 @@ import {
 } from "@/components/ui/dropdown-menu";
 
 const formatTime = (seconds: number) => {
-  const h = Math.floor(seconds / 3600).toString().padStart(2, "0");
-  const m = Math.floor((seconds % 3600) / 60).toString().padStart(2, "0");
+  const h = Math.floor(seconds / 3600)
+    .toString()
+    .padStart(2, "0");
+  const m = Math.floor((seconds % 3600) / 60)
+    .toString()
+    .padStart(2, "0");
   const s = (seconds % 60).toString().padStart(2, "0");
   return `${h}:${m}:${s}`;
 };
@@ -57,7 +61,10 @@ const Breadcrumbs = () => {
 
   return (
     <nav className="hidden items-center gap-2 text-sm font-medium md:flex">
-      <Link href="/admin" className="text-muted-foreground hover:text-foreground">
+      <Link
+        href="/admin"
+        className="text-muted-foreground hover:text-foreground"
+      >
         Admin
       </Link>
       {pathSegments.slice(1).map((segment, index) => {
@@ -67,9 +74,16 @@ const Breadcrumbs = () => {
           <React.Fragment key={href}>
             <ChevronRight className="h-4 w-4 text-muted-foreground" />
             {isLast ? (
-              <span className="font-semibold text-foreground capitalize">{segment}</span>
+              <span className="font-semibold text-foreground capitalize">
+                {segment}
+              </span>
             ) : (
-              <Link href={href} className="text-muted-foreground hover:text-foreground capitalize">{segment}</Link>
+              <Link
+                href={href}
+                className="text-muted-foreground hover:text-foreground capitalize"
+              >
+                {segment}
+              </Link>
             )}
           </React.Fragment>
         );
@@ -105,33 +119,33 @@ export function AdminLayout({ children }: { children: ReactNode }) {
       </div>
 
       <div className="lg:pl-64">
-        <header className="sticky top-0 z-40 flex h-16 shrink-0 items-center gap-x-4 border-b border-border bg-background/80 px-4 shadow-sm backdrop-blur-sm sm:gap-x-6 sm:px-6 lg:px-8">
-          <Sheet open={mobileSidebarOpen} onOpenChange={setMobileSidebarOpen}>
-            <SheetTrigger asChild>
-              <Button variant="ghost" size="icon" className="lg:hidden -ml-2">
-                <Menu className="h-6 w-6" />
-                <span className="sr-only">Open sidebar</span>
-              </Button>
-            </SheetTrigger>
-            <SheetContent side="left" className="w-64 p-0">
-              <Sidebar onLinkClick={() => setMobileSidebarOpen(false)} />
-            </SheetContent>
-          </Sheet>
+        <header className="sticky top-0 z-40 flex h-16 shrink-0 items-center gap-x-4 border-b border-border bg-background/80 px-4 shadow-sm backdrop-blur-sm sm:gap-x-6 sm:px-6 lg:px-8 justify-between lg:justify-start">
+          <div className="flex items-center gap-4">
+            <Sheet open={mobileSidebarOpen} onOpenChange={setMobileSidebarOpen}>
+              <SheetTrigger asChild>
+                <Button variant="ghost" size="icon" className="lg:hidden -ml-2">
+                  <Menu className="h-6 w-6" />
+                  <span className="sr-only">Open sidebar</span>
+                </Button>
+              </SheetTrigger>
+              <SheetContent side="left" className="w-64 p-0">
+                <Sidebar onLinkClick={() => setMobileSidebarOpen(false)} />
+              </SheetContent>
+            </Sheet>
+            <div className="h-6 w-px bg-border lg:hidden" aria-hidden="true" />
+            <Breadcrumbs />
+          </div>
 
-          <div className="h-6 w-px bg-border lg:hidden" aria-hidden="true" />
-
-          <Breadcrumbs />
-
-          <div className="flex flex-1 items-center justify-end gap-x-4 self-stretch lg:gap-x-6">
+          <div className="flex items-center gap-x-2 lg:gap-x-6 lg:ml-auto">
             {activeSession && (
               <Button
                 variant="ghost"
                 onClick={() => router.push("/admin/learning")}
-                className="flex items-center gap-2 rounded-md bg-primary/10 px-3 py-1.5 text-sm font-semibold text-primary transition-colors hover:bg-primary/20"
+                className="flex items-center gap-2 rounded-md bg-primary/10 px-2 py-1.5 text-xs lg:text-sm font-semibold text-primary transition-colors hover:bg-primary/20 lg:px-3"
               >
                 <Timer className="size-4 animate-pulse" />
                 <div className="flex items-center gap-2">
-                  <span className="hidden sm:inline truncate max-w-[150px]">
+                  <span className="hidden sm:inline truncate max-w-[100px] lg:max-w-[150px]">
                     {currentTopicName || "Session"}
                   </span>
                   {elapsedTime === null ? (
@@ -145,22 +159,61 @@ export function AdminLayout({ children }: { children: ReactNode }) {
               </Button>
             )}
 
-            <Separator orientation="vertical" className="h-6" />
+            <Separator orientation="vertical" className="h-6 hidden lg:block" />
+
+            {/* Mobile Quick Add in Header */}
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button
+                  variant="outline"
+                  size="icon"
+                  className="lg:hidden h-9 w-9 rounded-full border-dashed border-primary/50"
+                >
+                  <Plus className="h-4 w-4 text-primary" />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end">
+                <DropdownMenuLabel>Quick Add</DropdownMenuLabel>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem onClick={() => router.push("/admin/tasks")}>
+                  <ListTodo className="mr-2 h-4 w-4" />
+                  New Task
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={() => router.push("/admin/notes")}>
+                  <StickyNote className="mr-2 h-4 w-4" />
+                  New Note
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={() => router.push("/admin/finance")}>
+                  <Banknote className="mr-2 h-4 w-4" />
+                  New Transaction
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
 
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <Button variant="ghost" className="flex items-center gap-2">
-                  <Avatar className="h-8 w-8">
-                    <AvatarFallback>{session?.user.email?.[0].toUpperCase()}</AvatarFallback>
+                <Button
+                  variant="ghost"
+                  className="flex items-center gap-2 px-1 lg:px-4"
+                >
+                  <Avatar className="h-8 w-8 border border-border">
+                    <AvatarFallback>
+                      {session?.user.email?.[0].toUpperCase()}
+                    </AvatarFallback>
                   </Avatar>
-                  <span className="hidden lg:block text-sm font-medium">{session?.user.email}</span>
+                  <span className="hidden lg:block text-sm font-medium">
+                    {session?.user.email}
+                  </span>
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end">
                 <DropdownMenuLabel>My Account</DropdownMenuLabel>
                 <DropdownMenuSeparator />
                 <DropdownMenuItem asChild>
-                  <Link href="/"><ExternalLink className="mr-2 h-4 w-4" />Back to Portfolio</Link>
+                  <Link href="/">
+                    <ExternalLink className="mr-2 h-4 w-4" />
+                    Back to Portfolio
+                  </Link>
                 </DropdownMenuItem>
                 <DropdownMenuItem onClick={handleLogout}>
                   <LogOut className="mr-2 h-4 w-4" />
@@ -171,15 +224,18 @@ export function AdminLayout({ children }: { children: ReactNode }) {
           </div>
         </header>
 
-        <main className="py-10">
+        <main className="py-6 lg:py-10">
           <div className="px-4 sm:px-6 lg:px-8">{children}</div>
         </main>
       </div>
 
-      {/* Global Quick Add FAB */}
+      {/* Desktop Quick Add FAB (Hidden on Mobile) */}
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
-          <Button className="fixed bottom-6 right-6 h-14 w-14 rounded-full shadow-lg z-10" size="icon">
+          <Button
+            className="hidden lg:flex fixed bottom-6 right-6 h-14 w-14 rounded-full shadow-lg z-50"
+            size="icon"
+          >
             <Plus className="h-6 w-6" />
             <span className="sr-only">Quick Add</span>
           </Button>
@@ -187,12 +243,20 @@ export function AdminLayout({ children }: { children: ReactNode }) {
         <DropdownMenuContent align="end" side="top" className="mb-2">
           <DropdownMenuLabel>Quick Add</DropdownMenuLabel>
           <DropdownMenuSeparator />
-          <DropdownMenuItem onClick={() => router.push('/admin/tasks')}><ListTodo className="mr-2 h-4 w-4" />New Task</DropdownMenuItem>
-          <DropdownMenuItem onClick={() => router.push('/admin/notes')}><StickyNote className="mr-2 h-4 w-4" />New Note</DropdownMenuItem>
-          <DropdownMenuItem onClick={() => router.push('/admin/finance')}><Banknote className="mr-2 h-4 w-4" />New Transaction</DropdownMenuItem>
+          <DropdownMenuItem onClick={() => router.push("/admin/tasks")}>
+            <ListTodo className="mr-2 h-4 w-4" />
+            New Task
+          </DropdownMenuItem>
+          <DropdownMenuItem onClick={() => router.push("/admin/notes")}>
+            <StickyNote className="mr-2 h-4 w-4" />
+            New Note
+          </DropdownMenuItem>
+          <DropdownMenuItem onClick={() => router.push("/admin/finance")}>
+            <Banknote className="mr-2 h-4 w-4" />
+            New Transaction
+          </DropdownMenuItem>
         </DropdownMenuContent>
       </DropdownMenu>
-
     </div>
   );
 }

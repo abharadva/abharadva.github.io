@@ -40,7 +40,10 @@ export function formatDate(
   options?: Intl.DateTimeFormatOptions,
 ): string {
   // Always parse with local date to prevent timezone shifts on display
-  const date = dateInput instanceof Date ? dateInput : parseLocalDate(dateInput.toString());
+  const date =
+    dateInput instanceof Date
+      ? dateInput
+      : parseLocalDate(dateInput.toString());
   const defaultOptions: Intl.DateTimeFormatOptions = {
     year: "numeric",
     month: "long",
@@ -75,7 +78,11 @@ export const getNextOccurrence = (
       return addDays(current, 1);
 
     case "weekly":
-      if (rule.occurrence_day != null && rule.occurrence_day >= 0 && rule.occurrence_day <= 6) {
+      if (
+        rule.occurrence_day != null &&
+        rule.occurrence_day >= 0 &&
+        rule.occurrence_day <= 6
+      ) {
         return nextDay(current, rule.occurrence_day as any);
       }
       return addWeeks(current, 1);
@@ -84,7 +91,11 @@ export const getNextOccurrence = (
       return addWeeks(current, 2);
 
     case "monthly": {
-      if (rule.occurrence_day && rule.occurrence_day >= 1 && rule.occurrence_day <= 31) {
+      if (
+        rule.occurrence_day &&
+        rule.occurrence_day >= 1 &&
+        rule.occurrence_day <= 31
+      ) {
         let candidate = setDate(current, rule.occurrence_day);
         if (isAfter(candidate, current) || isSameDay(candidate, current)) {
           if (isSameDay(candidate, current)) {

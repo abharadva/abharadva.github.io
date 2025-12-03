@@ -234,7 +234,19 @@ function ThemedApp({ Component, pageProps }: AppProps) {
         setStyle("ring", colors.primary);
       } else {
         const root = document.documentElement;
-        ["background", "foreground", "primary", "secondary", "accent", "card", "popover", "muted", "border", "input", "ring"].forEach((k) => {
+        [
+          "background",
+          "foreground",
+          "primary",
+          "secondary",
+          "accent",
+          "card",
+          "popover",
+          "muted",
+          "border",
+          "input",
+          "ring",
+        ].forEach((k) => {
           root.style.removeProperty(`--${k}`);
         });
       }

@@ -76,7 +76,11 @@ export function Sidebar({ onLinkClick }: SidebarProps) {
     router.replace("/admin/login");
   };
 
-  const NavLink = ({ item }: { item: { name: string; href: string; icon: React.ElementType } }) => {
+  const NavLink = ({
+    item,
+  }: {
+    item: { name: string; href: string; icon: React.ElementType };
+  }) => {
     const isActive =
       router.pathname === item.href ||
       (item.href !== "/admin" && router.pathname.startsWith(item.href));
@@ -121,20 +125,30 @@ export function Sidebar({ onLinkClick }: SidebarProps) {
           <li>
             <ul role="list" className="-mx-2 space-y-1">
               {mainNav.map((item) => (
-                <li key={item.name}><NavLink item={item} /></li>
+                <li key={item.name}>
+                  <NavLink item={item} />
+                </li>
               ))}
             </ul>
           </li>
 
           <li className="flex-1">
-            <Accordion type="multiple" defaultValue={["portfolio", "productivity", "system"]} className="w-full">
+            <Accordion
+              type="multiple"
+              defaultValue={["portfolio", "productivity", "system"]}
+              className="w-full"
+            >
               <AccordionItem value="portfolio" className="border-b-0">
                 <AccordionTrigger className="py-2 text-xs font-mono uppercase text-muted-foreground hover:no-underline">
                   Portfolio
                 </AccordionTrigger>
                 <AccordionContent className="pt-1">
                   <ul className="space-y-1 list-none">
-                    {portfolioNav.map((item) => <li key={item.name}><NavLink item={item} /></li>)}
+                    {portfolioNav.map((item) => (
+                      <li key={item.name}>
+                        <NavLink item={item} />
+                      </li>
+                    ))}
                   </ul>
                 </AccordionContent>
               </AccordionItem>
@@ -144,7 +158,11 @@ export function Sidebar({ onLinkClick }: SidebarProps) {
                 </AccordionTrigger>
                 <AccordionContent className="pt-1">
                   <ul className="space-y-1 list-none">
-                    {productivityNav.map((item) => <li key={item.name}><NavLink item={item} /></li>)}
+                    {productivityNav.map((item) => (
+                      <li key={item.name}>
+                        <NavLink item={item} />
+                      </li>
+                    ))}
                   </ul>
                 </AccordionContent>
               </AccordionItem>
@@ -154,7 +172,11 @@ export function Sidebar({ onLinkClick }: SidebarProps) {
                 </AccordionTrigger>
                 <AccordionContent className="pt-1">
                   <ul className="space-y-1 list-none">
-                    {systemNav.map((item) => <li key={item.name}><NavLink item={item} /></li>)}
+                    {systemNav.map((item) => (
+                      <li key={item.name}>
+                        <NavLink item={item} />
+                      </li>
+                    ))}
                   </ul>
                 </AccordionContent>
               </AccordionItem>
@@ -165,12 +187,19 @@ export function Sidebar({ onLinkClick }: SidebarProps) {
             {session ? (
               <div className="flex items-center justify-between p-4">
                 <div className="truncate">
-                  <p className="text-sm font-semibold text-foreground truncate">{session.user.email}</p>
+                  <p className="text-sm font-semibold text-foreground truncate">
+                    {session.user.email}
+                  </p>
                 </div>
                 <TooltipProvider delayDuration={100}>
                   <Tooltip>
                     <TooltipTrigger asChild>
-                      <Button variant="ghost" size="icon" className="h-8 w-8" onClick={handleLogout}>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="h-8 w-8"
+                        onClick={handleLogout}
+                      >
                         <LogOut className="h-4 w-4" />
                       </Button>
                     </TooltipTrigger>
@@ -179,7 +208,9 @@ export function Sidebar({ onLinkClick }: SidebarProps) {
                 </TooltipProvider>
               </div>
             ) : (
-              <div className="p-4"><Skeleton className="h-8 w-full" /></div>
+              <div className="p-4">
+                <Skeleton className="h-8 w-full" />
+              </div>
             )}
           </li>
         </ul>

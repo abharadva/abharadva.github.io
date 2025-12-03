@@ -11,23 +11,7 @@ const Sheet = SheetPrimitive.Root;
 
 const SheetTrigger = SheetPrimitive.Trigger;
 
-const SheetClose = React.forwardRef<
-  React.ElementRef<typeof SheetPrimitive.Close>,
-  React.ComponentPropsWithoutRef<typeof SheetPrimitive.Close>
->(({ className, ...props }, ref) => (
-  <SheetPrimitive.Close
-    ref={ref}
-    className={cn(
-      "rounded-sm opacity-70 ring-offset-background transition-opacity hover:opacity-100 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:pointer-events-none data-[state=open]:bg-secondary",
-      className,
-    )}
-    {...props}
-  >
-    <X className="h-5 w-5" />
-    <span className="sr-only">Close</span>
-  </SheetPrimitive.Close>
-));
-SheetClose.displayName = SheetPrimitive.Close.displayName;
+const SheetClose = SheetPrimitive.Close;
 
 const SheetPortal = SheetPrimitive.Portal;
 
@@ -36,12 +20,12 @@ const SheetOverlay = React.forwardRef<
   React.ComponentPropsWithoutRef<typeof SheetPrimitive.Overlay>
 >(({ className, ...props }, ref) => (
   <SheetPrimitive.Overlay
+    ref={ref}
     className={cn(
       "fixed inset-0 z-50 bg-black/80 data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0",
       className,
     )}
     {...props}
-    ref={ref}
   />
 ));
 SheetOverlay.displayName = SheetPrimitive.Overlay.displayName;
@@ -81,6 +65,7 @@ const SheetContent = React.forwardRef<
       {...props}
     >
       {children}
+      {/* REMOVED the hardcoded close button from here to allow flexible placement */}
     </SheetPrimitive.Content>
   </SheetPortal>
 ));
@@ -91,7 +76,7 @@ const SheetHeader = ({
   ...props
 }: React.HTMLAttributes<HTMLDivElement>) => (
   <div
-    className={cn("flex flex-col", className)}
+    className={cn("flex flex-col space-y-1.5 text-left", className)}
     {...props}
   />
 );

@@ -69,7 +69,7 @@ export const adminApi = createApi({
     "Analytics",
     "Dashboard",
     "MFA",
-    "SiteContent"
+    "SiteContent",
   ],
   endpoints: (builder) => ({
     // Auth & Security
@@ -110,26 +110,72 @@ export const adminApi = createApi({
       queryFn: async () => {
         const now = new Date();
         const todayISO = now.toISOString().split("T")[0];
-        const firstDayOfMonth = new Date(now.getFullYear(), now.getMonth(), 1).toISOString();
+        const firstDayOfMonth = new Date(
+          now.getFullYear(),
+          now.getMonth(),
+          1,
+        ).toISOString();
         const sevenDaysAgo = new Date();
         sevenDaysAgo.setDate(now.getDate() - 7);
         const sevenDaysAgoISO = sevenDaysAgo.toISOString().split("T")[0];
         const sevenDaysFromNow = new Date();
         sevenDaysFromNow.setDate(now.getDate() + 7);
-        const sevenDaysFromNowISO = sevenDaysFromNow.toISOString().split("T")[0];
+        const sevenDaysFromNowISO = sevenDaysFromNow
+          .toISOString()
+          .split("T")[0];
 
         const promises = [
           supabase.rpc("get_total_blog_views"),
-          supabase.from("tasks").select("id, title, due_date").lt("due_date", todayISO).neq("status", "done"),
-          supabase.from("tasks").select("id, title").eq("due_date", todayISO).neq("status", "done"),
-          supabase.from("tasks").select("id, title, due_date").gte("due_date", todayISO).lte("due_date", sevenDaysFromNowISO).neq("status", "done").order('due_date'),
-          supabase.from("notes").select("id, title, content").eq("is_pinned", true).limit(5),
-          supabase.from("blog_posts").select("id, title, updated_at, slug, published").order("updated_at", { ascending: false }).limit(3),
-          supabase.from("transactions").select("type, amount").gte("date", firstDayOfMonth),
-          supabase.from("transactions").select("date, amount").eq('type', 'expense').gte('date', sevenDaysAgoISO),
-          supabase.from("transactions").select("date, amount").eq('type', 'earning').gte('date', sevenDaysAgoISO),
-          supabase.from("recurring_transactions").select("*").order("start_date"),
-          supabase.from("financial_goals").select("*").order("target_date").limit(1),
+          supabase
+            .from("tasks")
+            .select("id, title, due_date")
+            .lt("due_date", todayISO)
+            .neq("status", "done"),
+          supabase
+            .from("tasks")
+            .select("id, title")
+            .eq("due_date", todayISO)
+            .neq("status", "done"),
+          supabase
+            .from("tasks")
+            .select("id, title, due_date")
+            .gte("due_date", todayISO)
+            .lte("due_date", sevenDaysFromNowISO)
+            .neq("status", "done")
+            .order("due_date"),
+          supabase
+            .from("notes")
+            .select("id, title, content")
+            .eq("is_pinned", true)
+            .limit(5),
+          supabase
+            .from("blog_posts")
+            .select("id, title, updated_at, slug, published")
+            .order("updated_at", { ascending: false })
+            .limit(3),
+          supabase
+            .from("transactions")
+            .select("type, amount")
+            .gte("date", firstDayOfMonth),
+          supabase
+            .from("transactions")
+            .select("date, amount")
+            .eq("type", "expense")
+            .gte("date", sevenDaysAgoISO),
+          supabase
+            .from("transactions")
+            .select("date, amount")
+            .eq("type", "earning")
+            .gte("date", sevenDaysAgoISO),
+          supabase
+            .from("recurring_transactions")
+            .select("*")
+            .order("start_date"),
+          supabase
+            .from("financial_goals")
+            .select("*")
+            .order("target_date")
+            .limit(1),
         ];
 
         const results = await Promise.all(promises);
@@ -137,12 +183,21 @@ export const adminApi = createApi({
         if (errors.length > 0) return { error: errors[0] };
 
         const [
-          { data: totalViewsRes }, { data: overdueTasksData }, { data: tasksDueTodayData }, { data: tasksDueSoonData },
-          { data: pinnedNotesData }, { data: recentPostsData }, { data: monthlyTransactionsData },
-          { data: dailyExpensesDataRaw }, { data: dailyEarningsDataRaw }, { data: recurringData }, { data: primaryGoalData }
+          { data: totalViewsRes },
+          { data: overdueTasksData },
+          { data: tasksDueTodayData },
+          { data: tasksDueSoonData },
+          { data: pinnedNotesData },
+          { data: recentPostsData },
+          { data: monthlyTransactionsData },
+          { data: dailyExpensesDataRaw },
+          { data: dailyEarningsDataRaw },
+          { data: recurringData },
+          { data: primaryGoalData },
         ] = results as any[];
 
-        let monthlyEarnings = 0, monthlyExpenses = 0;
+        let monthlyEarnings = 0,
+          monthlyExpenses = 0;
         monthlyTransactionsData?.forEach((t: any) => {
           if (t.type === "earning") monthlyEarnings += t.amount;
           else if (t.type === "expense") monthlyExpenses += t.amount;
@@ -150,18 +205,25 @@ export const adminApi = createApi({
 
         const createDailySummary = (rawData: any[]) => {
           return (rawData || []).reduce((acc: any, t: any) => {
-            const day = t.date.split('T')[0];
+            const day = t.date.split("T")[0];
             if (!acc[day]) acc[day] = { day, total: 0 };
             acc[day].total += t.amount;
             return acc;
           }, {});
         };
 
-        const dailyExpenses = Object.values(createDailySummary(dailyExpensesDataRaw));
-        const dailyEarnings = Object.values(createDailySummary(dailyEarningsDataRaw));
+        const dailyExpenses = Object.values(
+          createDailySummary(dailyExpensesDataRaw),
+        );
+        const dailyEarnings = Object.values(
+          createDailySummary(dailyEarningsDataRaw),
+        );
 
         const data = {
-          stats: { monthlyNet: monthlyEarnings - monthlyExpenses, totalBlogViews: totalViewsRes || 0 },
+          stats: {
+            monthlyNet: monthlyEarnings - monthlyExpenses,
+            totalBlogViews: totalViewsRes || 0,
+          },
           recentPosts: recentPostsData || [],
           pinnedNotes: pinnedNotesData || [],
           overdueTasks: overdueTasksData || [],
@@ -170,12 +232,21 @@ export const adminApi = createApi({
           dailyExpenses,
           dailyEarnings,
           recurring: recurringData || [],
-          primaryGoal: primaryGoalData?.[0] || null
+          primaryGoal: primaryGoalData?.[0] || null,
         };
 
         return { data };
       },
-      providesTags: ["Dashboard", "AdminPosts", "Notes", "Tasks", "Transactions", "Learning", "PortfolioContent", "Goals"],
+      providesTags: [
+        "Dashboard",
+        "AdminPosts",
+        "Notes",
+        "Tasks",
+        "Transactions",
+        "Learning",
+        "PortfolioContent",
+        "Goals",
+      ],
     }),
     getAnalyticsData: builder.query<AnalyticsData, void>({
       queryFn: async () => {
@@ -260,9 +331,9 @@ export const adminApi = createApi({
       providesTags: (result) =>
         result
           ? [
-            ...result.map(({ id }) => ({ type: "AdminPosts" as const, id })),
-            { type: "AdminPosts", id: "LIST" },
-          ]
+              ...result.map(({ id }) => ({ type: "AdminPosts" as const, id })),
+              { type: "AdminPosts", id: "LIST" },
+            ]
           : [{ type: "AdminPosts", id: "LIST" }],
     }),
     addBlogPost: builder.mutation<BlogPost, Partial<BlogPost>>({
@@ -412,7 +483,7 @@ export const adminApi = createApi({
             if (existingTask) {
               Object.assign(existingTask, task);
             }
-          })
+          }),
         );
         try {
           await queryFulfilled;
@@ -533,9 +604,9 @@ export const adminApi = createApi({
         const { id, ...updateData } = rec;
         const promise = id
           ? supabase
-            .from("recurring_transactions")
-            .update(updateData)
-            .eq("id", id)
+              .from("recurring_transactions")
+              .update(updateData)
+              .eq("id", id)
           : supabase.from("recurring_transactions").insert(updateData);
         const { data, error } = await promise.select().single();
         if (error) return { error };
@@ -777,7 +848,10 @@ export const adminApi = createApi({
     // Site Settings & Content
     getSiteSettings: builder.query<SiteContent, void>({
       queryFn: async () => {
-        const { data, error } = await supabase.from("site_identity").select("*").single();
+        const { data, error } = await supabase
+          .from("site_identity")
+          .select("*")
+          .single();
         if (error) return { error };
         return { data: data as SiteContent };
       },
@@ -785,20 +859,31 @@ export const adminApi = createApi({
     }),
     updateSiteSettings: builder.mutation<null, Partial<SiteContent>>({
       queryFn: async (updates) => {
-        const { error } = await supabase.from("site_identity").update(updates).eq("id", 1);
+        const { error } = await supabase
+          .from("site_identity")
+          .update(updates)
+          .eq("id", 1);
         if (error) return { error };
         return { data: null };
       },
       async onQueryStarted(updates, { dispatch, queryFulfilled }) {
         const patchResult = dispatch(
-          adminApi.util.updateQueryData("getSiteSettings", undefined, (draft) => {
-            Object.assign(draft, updates);
-          })
+          adminApi.util.updateQueryData(
+            "getSiteSettings",
+            undefined,
+            (draft) => {
+              Object.assign(draft, updates);
+            },
+          ),
         );
         dispatch(
-          publicApi.util.updateQueryData("getSiteIdentity", undefined, (draft) => {
-            Object.assign(draft, updates);
-          })
+          publicApi.util.updateQueryData(
+            "getSiteIdentity",
+            undefined,
+            (draft) => {
+              Object.assign(draft, updates);
+            },
+          ),
         );
         try {
           await queryFulfilled;
@@ -958,7 +1043,10 @@ export const adminApi = createApi({
         const { error: storageError } = await supabase.storage
           .from(process.env.NEXT_PUBLIC_BUCKET_NAME || "blog-assets")
           .remove([asset.file_path]);
-        if (storageError) console.warn(`Could not delete asset from storage: ${storageError.message}`);
+        if (storageError)
+          console.warn(
+            `Could not delete asset from storage: ${storageError.message}`,
+          );
 
         const { error: dbError } = await supabase
           .from("storage_assets")

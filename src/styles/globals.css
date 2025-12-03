@@ -10,8 +10,8 @@
     --foreground: 210 20% 90%;
     --primary: 200 100% 50%;
     --primary-foreground: 220 20% 5%;
-    --radius: 0.375rem;
-    /* Default Chart Colors */
+    --radius: 0.5rem;
+
     --chart-1: 200 80% 60%;
     --chart-2: 160 60% 55%;
     --chart-3: 30 80% 65%;
@@ -19,27 +19,36 @@
     --chart-5: 340 75% 65%;
   }
 
-  /* Default / Blueprint Theme */
+  /* Enhanced Blueprint Theme */
   .theme-blueprint {
-    --background: 220 20% 5%;
-    --foreground: 210 20% 90%;
-    --card: 220 20% 8%;
-    --card-foreground: 210 20% 90%;
-    --popover: 220 20% 5%;
-    --popover-foreground: 210 20% 90%;
-    --primary: 200 100% 50%;
-    --primary-foreground: 220 20% 5%;
-    --secondary: 220 20% 12%;
-    --secondary-foreground: 210 20% 90%;
-    --muted: 220 20% 12%;
-    --muted-foreground: 220 10% 60%;
-    --accent: 200 100% 50%;
-    --accent-foreground: 220 20% 5%;
-    --destructive: 0 84% 60%;
+    --background: 222 47% 11%;
+    --foreground: 210 40% 98%;
+
+    --card: 222 47% 11%;
+    --card-foreground: 210 40% 98%;
+
+    --popover: 222 47% 11%;
+    --popover-foreground: 210 40% 98%;
+
+    --primary: 180 100% 50%;
+    /* Cyan/Electric Blue */
+    --primary-foreground: 222 47% 11%;
+
+    --secondary: 217 33% 17%;
+    --secondary-foreground: 210 40% 98%;
+
+    --muted: 217 33% 17%;
+    --muted-foreground: 215 20% 65%;
+
+    --accent: 180 100% 50%;
+    --accent-foreground: 222 47% 11%;
+
+    --destructive: 0 62% 30%;
     --destructive-foreground: 210 40% 98%;
-    --border: 220 20% 15%;
-    --input: 220 20% 12%;
-    --ring: 200 100% 50%;
+
+    --border: 217 33% 20%;
+    --input: 217 33% 17%;
+    --ring: 180 100% 50%;
     --radius: 0.375rem;
     --chart-1: 200 80% 60%;
     --chart-2: 160 60% 55%;
@@ -773,11 +782,6 @@
     --chart-4: var(--muted-foreground);
     --chart-5: var(--destructive);
   }
-
-  /* ========================================
-   ULTIMATE PREMIUM THEME COLLECTION 
-   50+ Carefully Crafted Themes
-   ======================================== */
 
   /* ============ DEVELOPER FAVORITES ============ */
 
@@ -4007,29 +4011,39 @@
     --ring: 217 92% 76%;
     --radius: 0.375rem;
   }
-}
 
-@layer base {
   * {
     @apply border-border;
   }
 
   body {
-    @apply bg-background text-foreground;
+    @apply bg-background text-foreground antialiased;
+    font-feature-settings:
+      "rlig" 1,
+      "calt" 1;
   }
 
   html {
-    font-family: "Inter", sans-serif;
+    @apply scroll-smooth;
   }
 
-  /* Headings now use the sharp monospace font for a technical feel */
+  /* Typography Enhancements */
   h1,
   h2,
   h3,
   h4,
   h5,
   h6 {
-    @apply font-mono font-semibold;
+    @apply font-mono tracking-tight text-balance;
+  }
+
+  p {
+    @apply text-pretty leading-relaxed;
+  }
+
+  /* Custom Selection Color */
+  ::selection {
+    @apply bg-primary/30 text-primary-foreground;
   }
 
   /* FullCalendar Theming */
@@ -4065,6 +4079,10 @@
       @apply bg-accent text-accent-foreground;
     }
 
+    .fc-header-toolbar {
+      margin: 1em;
+    }
+
     /* Toolbar Title (e.g., "October 2024") */
     .fc-toolbar-title {
       @apply font-mono text-xl font-bold text-foreground;
@@ -4094,8 +4112,8 @@
 
     /* Today cell with electric blue glow */
     .fc-day-today {
-      background-color: hsl(var(--primary) / 0.05) !important;
-      border: 1px solid hsl(var(--primary) / 0.3) !important;
+      background-color: hsl(var(--primary) / 0.1) !important;
+      border: 1px solid hsl(var(--primary) / 0.5) !important;
     }
 
     /* Day numbers in month view */
@@ -4183,7 +4201,7 @@
     }
 
     .fc-timegrid-col.fc-day-today {
-      background-color: hsl(var(--primary) / 0.05) !important;
+      background-color: hsl(var(--primary) / 0.1) !important;
     }
 
     /* Time grid axis (left column with times) */
@@ -4256,11 +4274,10 @@
   }
 
   /* Additional forced styles for stubborn FullCalendar elements */
-  .calendar-blueprint-theme {
-
+  .themed-calendar {
     .fc-scrollgrid,
     .fc-scrollgrid-section,
-    .fc-scrollgrid-section>td {
+    .fc-scrollgrid-section > td {
       background-color: hsl(var(--card)) !important;
     }
 
@@ -4269,53 +4286,6 @@
       border-color: hsl(var(--border)) !important;
     }
   }
-}
-
-@layer components {
-
-  [class*="theme-glass"] .bg-card,
-  [class*="theme-glass"] [class*="card"] {
-    backdrop-filter: blur(12px);
-    -webkit-backdrop-filter: blur(12px);
-    background: rgba(255, 255, 255, 0.1);
-    border: 1px solid rgba(255, 255, 255, 0.2);
-  }
-
-  [class*="theme-glass"] .bg-popover {
-    backdrop-filter: blur(16px);
-    -webkit-backdrop-filter: blur(16px);
-  }
-
-  /* The new background grid pattern for the "Digital Blueprint" theme */
-  .bg-grid-pattern {
-    background-image: radial-gradient(hsl(var(--foreground)) / 0.1 1px,
-        transparent 1px);
-    background-size: 20px 20px;
-  }
-
-  /* Glassmorphism is replaced by a solid, bordered container for the Blueprint theme */
-  .bg-blueprint-bg {
-    @apply bg-card/80 backdrop-blur-sm border border-border shadow-2xl shadow-black/20;
-  }
-}
-
-@layer utilities {
-  .text-balance {
-    text-wrap: balance;
-  }
-}
-
-@layer utilities {
-  .text-balance {
-    text-wrap: balance;
-  }
-}
-
-/* ============================================
-   MARKDOWN & DYNAMIC CONTENT TYPOGRAPHY FIX
-   ============================================ */
-
-@layer base {
 
   /* Ensure all text elements use theme colors by default */
   article,
@@ -4362,6 +4332,9 @@
   .prose a {
     @apply text-primary hover:text-primary/80 underline;
     color: hsl(var(--primary)) !important;
+    white-space: wrap;
+    display: block;
+    overflow-x: hidden;
   }
 
   /* Code blocks */
@@ -4422,6 +4395,9 @@
   .prose table {
     @apply border-border;
     color: hsl(var(--foreground)) !important;
+    display: block;
+    overflow-x: auto;
+    white-space: nowrap;
   }
 
   article th,
@@ -4513,13 +4489,57 @@
   }
 }
 
-/* ============================================
-   REACT-MARKDOWN SPECIFIC FIXES
-   ============================================ */
-
 @layer components {
+  [class*="theme-glass"] .bg-card,
+  [class*="theme-glass"] [class*="card"] {
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    background: rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+  }
 
-  /* Wrapper class for react-markdown content */
+  [class*="theme-glass"] .bg-popover {
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+  }
+
+  /* The new background grid pattern for the "Digital Blueprint" theme */
+  .bg-grid-pattern {
+    background-image: radial-gradient(
+      hsl(var(--foreground)) / 0.1 1px,
+      transparent 1px
+    );
+    background-size: 20px 20px;
+  }
+
+  /* Glassmorphism is replaced by a solid, bordered container for the Blueprint theme */
+  .bg-blueprint-bg {
+    @apply bg-card/80 backdrop-blur-sm border border-border shadow-2xl shadow-black/20;
+  }
+
+  /* Modern Grid Background */
+  .bg-grid-pattern {
+    background-size: 40px 40px;
+    background-image:
+      linear-gradient(to right, hsl(var(--border) / 0.15) 1px, transparent 1px),
+      linear-gradient(to bottom, hsl(var(--border) / 0.15) 1px, transparent 1px);
+    mask-image: radial-gradient(ellipse at center, black 40%, transparent 100%);
+  }
+
+  /* Technical Card Style */
+  .bg-blueprint-bg {
+    @apply bg-card/50 backdrop-blur-xl border border-border/50 shadow-xl;
+    background-image: linear-gradient(
+      to bottom right,
+      hsl(var(--primary) / 0.03),
+      transparent
+    );
+  }
+
+  .glass-panel {
+    @apply bg-background/60 backdrop-blur-md border border-white/5 shadow-lg;
+  }
+
   .react-markdown {
     @apply text-foreground;
 
@@ -4542,26 +4562,38 @@
       color: hsl(var(--muted-foreground)) !important;
     }
   }
+}
 
-  /* General content wrapper - use this class on containers with dynamic HTML */
-  .themed-content {
-    @apply text-foreground;
+@layer utilities {
+  .text-balance {
+    text-wrap: balance;
+  }
 
-    * {
-      color: hsl(var(--foreground));
-    }
+  .text-pretty {
+    text-wrap: pretty;
+  }
 
-    a {
-      @apply text-primary hover:text-primary/80;
-    }
+  /* Hide scrollbar but keep functionality */
+  .no-scrollbar::-webkit-scrollbar {
+    display: none;
+  }
 
-    h1,
-    h2,
-    h3,
-    h4,
-    h5,
-    h6 {
-      @apply text-foreground font-mono font-semibold;
-    }
+  .no-scrollbar {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+
+  /* Improve scrollbar aesthetics */
+  ::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+  }
+
+  ::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  ::-webkit-scrollbar-thumb {
+    @apply bg-border/60 hover:bg-border rounded-full transition-colors;
   }
 }

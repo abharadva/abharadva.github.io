@@ -54,7 +54,7 @@ export default function MobileHeader() {
             </Button>
           </SheetTrigger>
           <SheetContent className="bg-blueprint-bg">
-            <SheetHeader>
+            <SheetHeader className="flex-row justify-between">
               <SheetTitle className="font-mono text-base uppercase">
                 Navigation
               </SheetTitle>

@@ -146,9 +146,7 @@ export default function BlogManager({
         published: !post.published,
         published_at: !post.published ? new Date().toISOString() : null,
       }).unwrap();
-      toast.success(
-        `Post ${!post.published ? "published" : "unpublished"}.`,
-      );
+      toast.success(`Post ${!post.published ? "published" : "unpublished"}.`);
     } catch (err: any) {
       toast.error("Failed to update status", { description: err.message });
     }
@@ -285,7 +283,7 @@ export default function BlogManager({
                           <Calendar className="h-3 w-3" />
                           {format(
                             new Date(post.updated_at || new Date()),
-                            "MMM dd, yyyy"
+                            "MMM dd, yyyy",
                           )}
                         </div>
                       </TableCell>
@@ -314,13 +312,18 @@ export default function BlogManager({
                             </DropdownMenuTrigger>
                             <DropdownMenuContent align="end">
                               <DropdownMenuLabel>Actions</DropdownMenuLabel>
-                              <DropdownMenuItem onClick={() => handleEditPost(post)}>
+                              <DropdownMenuItem
+                                onClick={() => handleEditPost(post)}
+                              >
                                 <Edit className="mr-2 h-4 w-4" /> Edit
                               </DropdownMenuItem>
-                              <DropdownMenuItem onClick={() => togglePostStatus(post)}>
+                              <DropdownMenuItem
+                                onClick={() => togglePostStatus(post)}
+                              >
                                 {post.published ? (
                                   <>
-                                    <FileText className="mr-2 h-4 w-4" /> Unpublish
+                                    <FileText className="mr-2 h-4 w-4" />{" "}
+                                    Unpublish
                                   </>
                                 ) : (
                                   <>

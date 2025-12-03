@@ -14,8 +14,13 @@ import {
   CardTitle,
 } from "../ui/card";
 import { Label } from "../ui/label";
-import { Loader2 } from "lucide-react";
-import { SheetDescription, SheetHeader, SheetTitle } from "../ui/sheet";
+import { Loader2, X } from "lucide-react";
+import {
+  SheetClose,
+  SheetDescription,
+  SheetHeader,
+  SheetTitle,
+} from "../ui/sheet";
 
 interface NoteEditorProps {
   note: Note | null;
@@ -64,18 +69,24 @@ export default function NoteEditor({
   };
 
   return (
-    <motion.div
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-    >
+    <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}>
       <div className="h-full">
-        <SheetHeader>
-          <SheetTitle>{note?.id ? "Edit Note" : "Create New Note"}</SheetTitle>
-          <SheetDescription>Organize your knowledge into broad categories.</SheetDescription>
-        </SheetHeader>
-        <form
-          className="h-full space-y-6 pt-6"
-          onSubmit={handleSubmit}>
+        <div className="flex justify-between items-center">
+          <SheetHeader>
+            <SheetTitle>
+              {note?.id ? "Edit Note" : "Create New Note"}
+            </SheetTitle>
+            <SheetDescription>
+              Organize your knowledge into broad categories.
+            </SheetDescription>
+          </SheetHeader>
+          <SheetClose asChild>
+            <Button type="button" variant="ghost">
+              <X />
+            </Button>
+          </SheetClose>
+        </div>
+        <form className="h-full space-y-6 pt-6" onSubmit={handleSubmit}>
           <div className="">
             <Label htmlFor="title">Title (Optional)</Label>
             <Input

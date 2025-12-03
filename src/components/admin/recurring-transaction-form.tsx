@@ -71,8 +71,12 @@ export default function RecurringTransactionForm({
   const frequency = form.watch("frequency");
 
   useEffect(() => {
-    if (frequency === 'daily' || frequency === 'yearly' || frequency === 'bi-weekly') {
-      form.setValue('occurrence_day', null);
+    if (
+      frequency === "daily" ||
+      frequency === "yearly" ||
+      frequency === "bi-weekly"
+    ) {
+      form.setValue("occurrence_day", null);
     }
   }, [frequency, form]);
 
@@ -186,7 +190,9 @@ export default function RecurringTransactionForm({
                   <SelectContent>
                     <SelectItem value="daily">Daily</SelectItem>
                     <SelectItem value="weekly">Weekly</SelectItem>
-                    <SelectItem value="bi-weekly">Bi-weekly (Every 2 Weeks)</SelectItem>
+                    <SelectItem value="bi-weekly">
+                      Bi-weekly (Every 2 Weeks)
+                    </SelectItem>
                     <SelectItem value="monthly">Monthly</SelectItem>
                     <SelectItem value="yearly">Yearly</SelectItem>
                   </SelectContent>
@@ -210,7 +216,11 @@ export default function RecurringTransactionForm({
                       <FormLabel>Day of Week</FormLabel>
                       <Select
                         onValueChange={(v) => field.onChange(parseInt(v))}
-                        defaultValue={field.value !== null && field.value !== undefined ? String(field.value) : undefined}
+                        defaultValue={
+                          field.value !== null && field.value !== undefined
+                            ? String(field.value)
+                            : undefined
+                        }
                       >
                         <FormControl>
                           <SelectTrigger>
@@ -254,7 +264,9 @@ export default function RecurringTransactionForm({
                           {...field}
                           value={field.value ?? ""}
                           onChange={(e) =>
-                            field.onChange(e.target.value ? parseInt(e.target.value) : null)
+                            field.onChange(
+                              e.target.value ? parseInt(e.target.value) : null,
+                            )
                           }
                         />
                       </FormControl>
@@ -288,7 +300,11 @@ export default function RecurringTransactionForm({
               <FormItem>
                 <FormLabel>End Date (Optional)</FormLabel>
                 <FormControl>
-                  <Input type="date" {...field} value={field.value || undefined} />
+                  <Input
+                    type="date"
+                    {...field}
+                    value={field.value || undefined}
+                  />
                 </FormControl>
                 <FormMessage />
               </FormItem>

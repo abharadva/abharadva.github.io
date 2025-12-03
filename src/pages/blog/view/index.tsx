@@ -1,7 +1,7 @@
 // src/pages/blog/view/index.tsx
 
 import { useRouter } from "next/router";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import type { BlogPost, SiteContent } from "@/types";
 import Head from "next/head";
 import Link from "next/link";
@@ -9,11 +9,18 @@ import { motion } from "framer-motion";
 import Layout from "@/components/layout";
 import { config as appConfig } from "@/lib/config";
 import { cn, formatDate } from "@/lib/utils";
-import { Eye, Clock, Linkedin, ChevronRight, Calendar, FileText, Mail } from "lucide-react";
+import {
+  Eye,
+  Clock,
+  Linkedin,
+  ChevronRight,
+  Calendar,
+  List,
+  X,
+} from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Separator } from "@/components/ui/separator";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import rehypeRaw from "rehype-raw";
@@ -21,6 +28,15 @@ import rehypePrism from "rehype-prism-plus";
 import rehypeSlug from "rehype-slug";
 import NotFoundComponent from "@/components/not-found";
 import { BsTwitterX } from "react-icons/bs";
+import { useIsMobile } from "@/hooks/use-mobile";
+import {
+  Sheet,
+  SheetClose,
+  SheetContent,
+  SheetHeader,
+  SheetTitle,
+  SheetTrigger,
+} from "@/components/ui/sheet";
 import {
   useGetBlogPostBySlugQuery,
   useIncrementPostViewMutation,
@@ -28,8 +44,8 @@ import {
 } from "@/store/api/publicApi";
 import { Skeleton } from "@/components/ui/skeleton";
 import { TableOfContents } from "@/components/table-of-contents";
+import { ScrollArea } from "@/components/ui/scroll-area";
 
-// ... (PostBreadcrumb and PostMeta components remain the same) ...
 const PostBreadcrumb = ({ post }: { post: BlogPost }) => (
   <nav aria-label="breadcrumb" className="mb-4">
     <ol className="flex items-center gap-1.5 text-sm text-muted-foreground">
@@ -73,7 +89,7 @@ const PostMeta = ({
       )}
       <div className="text-sm leading-tight">
         <p className="font-medium text-foreground">{authorName}</p>
-        <div className="flex items-center gap-2 text-muted-foreground text-xs">
+        <div className="flex flex-wrap items-center gap-x-2 gap-y-1 text-muted-foreground text-xs">
           <time
             dateTime={new Date(
               post.published_at || post.created_at || "",
@@ -81,7 +97,7 @@ const PostMeta = ({
           >
             {formatDate(post.published_at || post.created_at || new Date())}
           </time>
-          <span>•</span>
+          <span className="hidden sm:inline">•</span>
           <span>{readTime} min read</span>
         </div>
       </div>
@@ -90,7 +106,8 @@ const PostMeta = ({
 };
 
 const PostContent = ({ content }: { content: string }) => (
-  <div className="prose prose-lg max-w-none dark:prose-invert
+  <div
+    className="prose max-w-none dark:prose-invert
     prose-headings:scroll-mt-24
     prose-a:text-primary prose-a:no-underline hover:prose-a:underline
     prose-pre:bg-muted/50 prose-pre:border prose-pre:border-border
@@ -128,7 +145,10 @@ const PostFooter = ({
               key={tag}
               href={`/blog/tags/${encodeURIComponent(tag.toLowerCase())}`}
             >
-              <Badge variant="secondary" className="hover:bg-secondary/80 transition-colors px-3 py-1 text-sm font-normal">
+              <Badge
+                variant="secondary"
+                className="hover:bg-secondary/80 transition-colors px-3 py-1 text-sm font-normal"
+              >
                 #{tag}
               </Badge>
             </Link>
@@ -137,12 +157,24 @@ const PostFooter = ({
       )}
 
       <div className="flex items-center gap-3">
-        <span className="text-sm font-medium text-muted-foreground">Share:</span>
-        <Button variant="outline" size="icon" onClick={onShareX} className="rounded-full size-9">
+        <span className="text-sm font-medium text-muted-foreground">
+          Share:
+        </span>
+        <Button
+          variant="outline"
+          size="icon"
+          onClick={onShareX}
+          className="rounded-full size-9"
+        >
           <BsTwitterX className="size-4" />
           <span className="sr-only">Share on X</span>
         </Button>
-        <Button variant="outline" size="icon" onClick={onShareLinkedIn} className="rounded-full size-9">
+        <Button
+          variant="outline"
+          size="icon"
+          onClick={onShareLinkedIn}
+          className="rounded-full size-9"
+        >
           <Linkedin className="size-4" />
           <span className="sr-only">Share on LinkedIn</span>
         </Button>
@@ -164,7 +196,7 @@ const BlogPostSkeleton = () => (
             <Skeleton className="h-3 w-32" />
           </div>
         </div>
-        <Skeleton className="h-[400px] w-full rounded-xl mb-8" />
+        <Skeleton className="h-[250px] sm:h-[400px] w-full rounded-xl mb-8" />
         <div className="space-y-4">
           <Skeleton className="h-4 w-full" />
           <Skeleton className="h-4 w-full" />
@@ -175,10 +207,11 @@ const BlogPostSkeleton = () => (
   </div>
 );
 
-
 export default function BlogPostViewPage() {
   const router = useRouter();
   const { slug } = router.query;
+  const isMobile = useIsMobile();
+  const [isTocSheetOpen, setIsTocSheetOpen] = useState(false);
 
   const {
     data: post,
@@ -197,7 +230,7 @@ export default function BlogPostViewPage() {
     if (post?.id && process.env.NODE_ENV === "production") {
       const timer = setTimeout(() => {
         incrementView(post.id);
-      }, 3000);
+      }, 5000);
       return () => clearTimeout(timer);
     }
   }, [post?.id, incrementView]);
@@ -251,37 +284,74 @@ export default function BlogPostViewPage() {
         <link rel="canonical" href={postUrl} />
       </Head>
       <main className="py-8 md:py-16">
-        <motion.article
+        <motion.div
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.4 }}
           className="container mx-auto px-4 max-w-7xl"
         >
-          <div className={cn("grid grid-cols-1 gap-12", post.show_toc && "lg:grid-cols-12")}>
-
-            <div data-toc={post.show_toc} className={cn(post.show_toc ? "lg:col-span-8" : "lg:col-span-1")}>
+          <div
+            className={cn(
+              "grid grid-cols-1 gap-x-12",
+              post.show_toc && "lg:grid-cols-12",
+            )}
+          >
+            <article
+              className={cn(
+                "w-full max-w-3xl mx-auto",
+                post.show_toc && "lg:col-span-8 lg:max-w-none",
+              )}
+            >
               <PostBreadcrumb post={post} />
 
-              <h1 className="mt-4 text-4xl font-bold tracking-tight text-foreground md:text-5xl lg:text-6xl lg:leading-[1.1]">
+              <h1 className="mt-4 text-3xl font-bold tracking-tight text-foreground sm:text-4xl md:text-5xl lg:leading-[1.1]">
                 {post.title}
               </h1>
 
               {post.excerpt && (
-                <p className="mt-6 text-xl leading-relaxed text-muted-foreground">
+                <p className="mt-6 text-lg leading-relaxed text-muted-foreground sm:text-xl">
                   {post.excerpt}
                 </p>
               )}
 
-              <div className="mt-6 mb-10">
+              <div className="my-6 flex flex-wrap items-center gap-4">
                 <PostMeta
                   post={post}
                   readTime={readTime}
                   siteContent={siteContent || null}
                 />
+                {/* Mobile TOC Trigger */}
+                {isMobile && post.show_toc && post.content && (
+                  <Sheet open={isTocSheetOpen} onOpenChange={setIsTocSheetOpen}>
+                    <SheetTrigger asChild>
+                      <Button variant="outline" size="sm" className="gap-2">
+                        <List className="size-4" /> On this page
+                      </Button>
+                    </SheetTrigger>
+                    <SheetContent className="sm:max-w-lg w-full flex flex-col">
+                      <div className="flex justify-between items-center">
+                        <SheetHeader>
+                          <SheetTitle>Table of Contents</SheetTitle>
+                        </SheetHeader>
+                        <SheetClose asChild>
+                          <Button type="button" variant="ghost">
+                            <X />
+                          </Button>
+                        </SheetClose>
+                      </div>
+                      <ScrollArea className="h-[85vh]">
+                        <TableOfContents
+                          content={post.content}
+                          onLinkClick={() => setIsTocSheetOpen(false)}
+                        />
+                      </ScrollArea>
+                    </SheetContent>
+                  </Sheet>
+                )}
               </div>
 
               {post.cover_image_url && (
-                <div className="mb-10 overflow-hidden rounded-2xl border border-border bg-muted">
+                <div className="mb-10 overflow-hidden rounded-xl border border-border bg-muted">
                   <img
                     src={post.cover_image_url}
                     alt={post.title}
@@ -290,17 +360,17 @@ export default function BlogPostViewPage() {
                 </div>
               )}
 
-              <PostContent content={post.content || ''} />
-
+              <PostContent content={post.content || ""} />
               <PostFooter
                 post={post}
                 onShareX={shareOnX}
                 onShareLinkedIn={shareOnLinkedIn}
               />
-            </div>
+            </article>
 
-            {post.show_toc && (
-              <aside className="hidden lg:col-span-4 lg:block">
+            {/* Desktop TOC Sidebar */}
+            {!isMobile && post.show_toc && (
+              <aside className="lg:col-span-4">
                 <div className="sticky top-28 space-y-8">
                   {post.content && (
                     <div className="p-1">
@@ -310,9 +380,8 @@ export default function BlogPostViewPage() {
                 </div>
               </aside>
             )}
-
           </div>
-        </motion.article>
+        </motion.div>
       </main>
     </Layout>
   );
