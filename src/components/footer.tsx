@@ -1,10 +1,12 @@
-// src/components/footer.tsx
 import Link from "next/link";
+import { useRouter } from "next/router";
+import { useState, useEffect } from "react";
 import Container from "./container";
 import { useGetSiteIdentityQuery } from "@/store/api/publicApi";
 import { Skeleton } from "./ui/skeleton";
 import { Github, Linkedin, Mail } from "lucide-react";
 import ReactMarkdown from "react-markdown";
+import { toast } from "sonner";
 
 const socialIcons: { [key: string]: React.ComponentType<any> } = {
   github: Github,
@@ -33,6 +35,27 @@ const FooterSkeleton = () => (
 export default function Footer() {
   const { data: content, isLoading } = useGetSiteIdentityQuery();
   const currentYear = new Date().getFullYear();
+  const router = useRouter();
+
+  const [clickCount, setClickCount] = useState(0);
+
+  const handleSecretClick = () => {
+    setClickCount((prev) => prev + 1);
+  };
+
+  useEffect(() => {
+    if (clickCount > 0) {
+      const timer = setTimeout(() => setClickCount(0), 1000);
+
+      if (clickCount === 5) {
+        toast.success("Initializing Admin Sequence...");
+        router.push("/admin");
+        setClickCount(0);
+      }
+
+      return () => clearTimeout(timer);
+    }
+  }, [clickCount, router]);
 
   if (isLoading || !content) {
     return <FooterSkeleton />;
@@ -50,7 +73,14 @@ export default function Footer() {
             prose-a:text-primary hover:prose-a:underline"
           >
             <p>
-              &copy; {currentYear} {profile_data.name}.
+              {/* Wrap the copyright symbol/year in a span with the click handler */}
+              <span
+                onClick={handleSecretClick}
+                className="cursor-default select-none active:scale-95 inline-block transition-transform"
+              >
+                &copy; {currentYear}
+              </span>{" "}
+              {profile_data.name}.
             </p>
             <ReactMarkdown>{footer_data.copyright_text}</ReactMarkdown>
           </div>

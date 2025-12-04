@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { useRouter } from "next/router";
+import { useEffect, useState } from "react"; 
 import Container from "./container";
 import { cn } from "@/lib/utils";
 import { motion, AnimatePresence } from "framer-motion";
@@ -8,14 +9,25 @@ import {
   useGetNavLinksQuery,
 } from "@/store/api/publicApi";
 import { Skeleton } from "./ui/skeleton";
+import { supabase } from "@/supabase/client"; 
+import { ShieldCheck } from "lucide-react"; 
 
 export default function Header() {
   const router = useRouter();
   const { data: content, isLoading: isContentLoading } =
     useGetSiteIdentityQuery();
   const { data: navLinks, isLoading: isNavLoading } = useGetNavLinksQuery();
-
   const isLoading = isContentLoading || isNavLoading;
+
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+
+  useEffect(() => {
+    const checkUser = async () => {
+      const { data: { session } } = await supabase.auth.getSession();
+      setIsAuthenticated(!!session);
+    };
+    checkUser();
+  }, []);
 
   return (
     <header className="fixed left-0 top-0 z-50 hidden w-full border-b border-border/40 bg-background/60 py-4 backdrop-blur-xl md:block supports-[backdrop-filter]:bg-background/30">
@@ -39,7 +51,6 @@ export default function Header() {
             )}
           </Link>
 
-          {/* Navigation */}
           <nav className="flex items-center gap-1 rounded-full bg-secondary/40 p-1 border border-white/5 backdrop-blur-sm">
             {isLoading ? (
               <div className="flex gap-4 px-4">
@@ -48,43 +59,55 @@ export default function Header() {
                 <Skeleton className="h-4 w-16" />
               </div>
             ) : (
-              navLinks?.map((link) => {
-                const isActive =
-                  router.pathname === link.href ||
-                  (link.href !== "/" && router.pathname.startsWith(link.href));
+              <>
+                {navLinks?.map((link) => {
+                  const isActive =
+                    router.pathname === link.href ||
+                    (link.href !== "/" && router.pathname.startsWith(link.href));
 
-                return (
-                  <Link
-                    key={link.href}
-                    href={link.href}
-                    className={cn(
-                      "relative px-4 py-1.5 text-sm font-medium transition-colors duration-300",
-                      isActive
-                        ? "text-primary-foreground"
-                        : "text-muted-foreground hover:text-foreground",
-                    )}
-                  >
-                    <AnimatePresence mode="wait">
-                      {isActive && (
-                        <motion.div
-                          layoutId="header-pill"
-                          className="absolute inset-0 z-[-1] rounded-full bg-primary shadow-[0_0_15px_rgba(var(--primary),0.4)]"
-                          initial={{ opacity: 0, scale: 0.8 }}
-                          animate={{ opacity: 1, scale: 1 }}
-                          exit={{ opacity: 0, scale: 0.8 }}
-                          transition={{
-                            type: "spring",
-                            stiffness: 380,
-                            damping: 30,
-                            opacity: { duration: 0.2 },
-                          }}
-                        />
+                  return (
+                    <Link
+                      key={link.href}
+                      href={link.href}
+                      className={cn(
+                        "relative px-4 py-1.5 text-sm font-medium transition-colors duration-300",
+                        isActive
+                          ? "text-primary-foreground"
+                          : "text-muted-foreground hover:text-foreground",
                       )}
-                    </AnimatePresence>
-                    {link.label}
-                  </Link>
-                );
-              })
+                    >
+                      <AnimatePresence mode="wait">
+                        {isActive && (
+                          <motion.div
+                            layoutId="header-pill"
+                            className="absolute inset-0 z-[-1] rounded-full bg-primary shadow-[0_0_15px_rgba(var(--primary),0.4)]"
+                            initial={{ opacity: 0, scale: 0.8 }}
+                            animate={{ opacity: 1, scale: 1 }}
+                            exit={{ opacity: 0, scale: 0.8 }}
+                            transition={{
+                              type: "spring",
+                              stiffness: 380,
+                              damping: 30,
+                              opacity: { duration: 0.2 },
+                            }}
+                          />
+                        )}
+                      </AnimatePresence>
+                      {link.label}
+                    </Link>
+                  );
+                })}
+
+                {isAuthenticated && (
+                   <Link
+                   href="/admin"
+                   className="relative px-4 py-1.5 text-sm font-medium text-muted-foreground hover:text-primary flex items-center gap-2"
+                 >
+                   <ShieldCheck className="size-3.5" />
+                   Admin
+                 </Link>
+                )}
+              </>
             )}
           </nav>
         </div>

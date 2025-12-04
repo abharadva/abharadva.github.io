@@ -1,5 +1,4 @@
 /** @type {import('next').NextConfig} */
-
 const removeImports = require("next-remove-imports")();
 
 const nextConfig = {
@@ -10,7 +9,6 @@ const nextConfig = {
     unoptimized: true,
     domains: ["images.unsplash.com", "avatars.githubusercontent.com"],
   },
-
   basePath: "",
   assetPrefix: "",
 };
