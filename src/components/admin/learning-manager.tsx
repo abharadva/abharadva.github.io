@@ -2,8 +2,8 @@
 "use client";
 
 import { useState } from "react";
-import type { LearningSubject, LearningTopic, LearningSession } from "@/types";
-import { Plus, BrainCircuit, Loader2, X } from "lucide-react";
+import type { LearningSubject, LearningTopic } from "@/types";
+import { Plus, BrainCircuit, Loader2, X, GraduationCap } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import SubjectTopicTree from "./learning/SubjectTopicTree";
 import TopicEditor from "./learning/TopicEditor";
@@ -29,7 +29,7 @@ import {
   ResizableHandle,
   ResizablePanel,
   ResizablePanelGroup,
-} from "../ui/resizable";
+} from "@/components/ui/resizable";
 
 type SheetState =
   | { type: "create-subject" }
@@ -52,76 +52,51 @@ export default function LearningManager() {
   const topics = data?.topics || [];
   const sessions = data?.sessions || [];
 
-  const handleSelectTopic = (topic: LearningTopic) => {
-    setActiveTopic(topic);
-  };
-  const handleDeselectTopic = () => {
-    setActiveTopic(null);
-  };
-  const handleSaveSuccess = () => {
-    setSheetState(null);
-  };
+  const handleSelectTopic = (topic: LearningTopic) => setActiveTopic(topic);
+  const handleDeselectTopic = () => setActiveTopic(null);
+  const handleSaveSuccess = () => setSheetState(null);
 
   const handleDelete = async (type: "subject" | "topic", id: string) => {
-    if (
-      !confirm(
-        `Are you sure you want to delete this ${type}? This will also delete all nested items.`,
-      )
-    )
-      return;
-
-    if (type === "topic" && activeTopic?.id === id) {
-      setActiveTopic(null);
-    }
-
-    const mutation = type === "subject" ? deleteSubject : deleteTopic;
+    if (!confirm(`Are you sure you want to delete this ${type}? This cannot be undone.`)) return;
+    if (type === "topic" && activeTopic?.id === id) setActiveTopic(null);
+    
     try {
+      const mutation = type === "subject" ? deleteSubject : deleteTopic;
       await mutation(id).unwrap();
-      toast.success(`${type.charAt(0).toUpperCase() + type.slice(1)} deleted.`);
+      toast.success(`${type === 'subject' ? 'Module' : 'Topic'} deleted`);
     } catch (error: any) {
-      toast.error(`Failed to delete ${type}`, { description: error.message });
+      toast.error("Delete failed", { description: error.message });
     }
   };
 
-  if (isLoading)
-    return (
-      <div className="flex h-[calc(100vh-10rem)] items-center justify-center">
-        <Loader2 className="size-8 animate-spin text-muted-foreground" />
-      </div>
-    );
+  if (isLoading) return (
+    <div className="flex h-[80vh] items-center justify-center">
+      <Loader2 className="size-10 animate-spin text-muted-foreground/30"/>
+    </div>
+  );
 
   return (
     <>
-      {/* Main Container: Calculated height to fit viewport minus header (4rem) and padding (2.5rem*2) */}
-      <div className="flex flex-col h-[calc(100vh-9rem)] gap-4">
-        {/* Header Section */}
-        <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between shrink-0">
-          <div>
-            <h2 className="text-2xl font-bold flex items-center gap-2">
-              <BrainCircuit className="size-6 text-primary" />
-              Knowledge Hub
-            </h2>
-            <p className="text-muted-foreground">
-              Track subjects, topics, and learning sessions.
-            </p>
-          </div>
-          <Button onClick={() => setSheetState({ type: "create-subject" })}>
-            <Plus className="mr-2 size-4" />
-            New Subject
-          </Button>
-        </div>
+      <div className="flex flex-col h-[calc(100vh-6rem)]">
+        {/* Header - Hidden when editing a topic to give maximum focus space */}
+        {!activeTopic && (
+           <div className="flex items-center justify-between mb-4 shrink-0 px-2 py-1">
+             <div>
+               <h2 className="text-2xl font-bold flex items-center gap-2">
+                 <GraduationCap className="size-7 text-primary" /> Learning Center
+               </h2>
+               <p className="text-muted-foreground text-sm">Manage your personal curriculum and knowledge base.</p>
+             </div>
+             <Button onClick={() => setSheetState({ type: "create-subject" })} className="shadow-sm">
+               <Plus className="mr-2 size-4" /> New Module
+             </Button>
+           </div>
+        )}
 
-        {/* Resizable Panel: Takes remaining height (flex-1) */}
-        <ResizablePanelGroup
-          direction="horizontal"
-          className="flex-1 rounded-lg border bg-card min-h-0 shadow-sm"
-        >
-          <ResizablePanel
-            defaultSize={25}
-            minSize={20}
-            maxSize={35}
-            className="p-0"
-          >
+        <ResizablePanelGroup direction="horizontal" className="flex-1 rounded-xl border bg-card shadow-sm overflow-hidden ring-1 ring-border/50">
+          
+          {/* SIDEBAR: Timeline Tree */}
+          <ResizablePanel defaultSize={22} minSize={18} maxSize={35} className="bg-muted/5">
             <SubjectTopicTree
               subjects={subjects}
               topics={topics}
@@ -129,129 +104,60 @@ export default function LearningManager() {
               activeSession={activeSession}
               onSelectTopic={handleSelectTopic}
               onCreateSubject={() => setSheetState({ type: "create-subject" })}
-              onEditSubject={(subject) =>
-                setSheetState({ type: "edit-subject", data: subject })
-              }
+              onEditSubject={(subject) => setSheetState({ type: "edit-subject", data: subject })}
               onDeleteSubject={(id) => handleDelete("subject", id)}
-              onCreateTopic={(subjectId) =>
-                setSheetState({ type: "create-topic", subjectId })
-              }
-              onEditTopic={(topic) =>
-                setSheetState({ type: "edit-topic", data: topic })
-              }
+              onCreateTopic={(subjectId) => setSheetState({ type: "create-topic", subjectId })}
+              onEditTopic={(topic) => setSheetState({ type: "edit-topic", data: topic })}
               onDeleteTopic={(id) => handleDelete("topic", id)}
             />
           </ResizablePanel>
+          
           <ResizableHandle withHandle />
-          <ResizablePanel defaultSize={75}>
-            <div className="h-full p-6 overflow-y-auto">
-              {activeTopic ? (
-                <TopicEditor
-                  key={activeTopic.id}
-                  topic={activeTopic}
-                  onBack={handleDeselectTopic}
-                  onTopicUpdate={(updatedTopic) => {
-                    if (activeTopic?.id === updatedTopic.id) {
-                      setActiveTopic(updatedTopic);
-                    }
-                  }}
-                />
-              ) : (
-                <LearningDashboard sessions={sessions} topics={topics} />
-              )}
-            </div>
+          
+          {/* MAIN: Dashboard OR Topic Editor */}
+          <ResizablePanel defaultSize={78} className="bg-background">
+            {activeTopic ? (
+              <TopicEditor
+                key={activeTopic.id}
+                topic={activeTopic}
+                onBack={handleDeselectTopic}
+                onTopicUpdate={(updated) => {
+                  if (activeTopic?.id === updated.id) setActiveTopic(updated);
+                }}
+              />
+            ) : (
+              <div className="h-full overflow-y-auto p-6 bg-secondary/5">
+                <LearningDashboard sessions={sessions} topics={topics} subjects={subjects} />
+              </div>
+            )}
           </ResizablePanel>
         </ResizablePanelGroup>
       </div>
 
-      <Sheet
-        open={!!sheetState}
-        onOpenChange={(open) => !open && setSheetState(null)}
-      >
-        <SheetContent className="sm:max-w-lg w-full flex flex-col">
-          {sheetState?.type === "create-subject" && (
-            <>
-              <div className="flex justify-between items-center">
-                <SheetHeader>
-                  <SheetTitle>Create New Subject</SheetTitle>
-                  <SheetDescription>
-                    Organize your knowledge into broad categories.
-                  </SheetDescription>
-                </SheetHeader>
-                <SheetClose asChild>
-                  <Button type="button" variant="ghost">
-                    <X />
-                  </Button>
-                </SheetClose>
-              </div>
-              <SubjectForm subject={null} onSuccess={handleSaveSuccess} />
-            </>
+      {/* MODALS */}
+      <Sheet open={!!sheetState} onOpenChange={(open) => !open && setSheetState(null)}>
+        <SheetContent className="sm:max-w-lg">
+          <div className="flex justify-between items-center mb-6">
+            <SheetHeader>
+              <SheetTitle>
+                {sheetState?.type.includes("create") ? "Create" : "Edit"} {sheetState?.type.includes("subject") ? "Module" : "Topic"}
+              </SheetTitle>
+              <SheetDescription>Configure your learning path details.</SheetDescription>
+            </SheetHeader>
+            <SheetClose asChild><Button variant="ghost" size="icon"><X className="size-4"/></Button></SheetClose>
+          </div>
+
+          {(sheetState?.type === "create-subject" || sheetState?.type === "edit-subject") && (
+            <SubjectForm subject={sheetState.type === "edit-subject" ? sheetState.data : null} onSuccess={handleSaveSuccess} />
           )}
-          {sheetState?.type === "edit-subject" && (
-            <>
-              <div className="flex justify-between items-center">
-                <SheetHeader>
-                  <SheetTitle>Edit Subject</SheetTitle>
-                  <SheetDescription>
-                    Update the details for this subject.
-                  </SheetDescription>
-                </SheetHeader>
-                <SheetClose asChild>
-                  <Button type="button" variant="ghost">
-                    <X />
-                  </Button>
-                </SheetClose>
-              </div>
-              <SubjectForm
-                subject={sheetState.data}
-                onSuccess={handleSaveSuccess}
-              />
-            </>
-          )}
-          {sheetState?.type === "create-topic" && (
-            <>
-              <div className="flex justify-between items-center">
-                <SheetHeader>
-                  <SheetTitle>Create New Topic</SheetTitle>
-                  <SheetDescription>
-                    Add a new topic to learn within a subject.
-                  </SheetDescription>
-                </SheetHeader>
-                <SheetClose asChild>
-                  <Button type="button" variant="ghost">
-                    <X />
-                  </Button>
-                </SheetClose>
-              </div>
-              <TopicForm
-                topic={null}
-                subjects={subjects}
-                defaultSubjectId={sheetState.subjectId}
-                onSuccess={handleSaveSuccess}
-              />
-            </>
-          )}
-          {sheetState?.type === "edit-topic" && (
-            <>
-              <div className="flex justify-between items-center">
-                <SheetHeader>
-                  <SheetTitle>Edit Topic</SheetTitle>
-                  <SheetDescription>
-                    Update the details for this topic.
-                  </SheetDescription>
-                </SheetHeader>
-                <SheetClose asChild>
-                  <Button type="button" variant="ghost">
-                    <X />
-                  </Button>
-                </SheetClose>
-              </div>
-              <TopicForm
-                topic={sheetState.data}
-                subjects={subjects}
-                onSuccess={handleSaveSuccess}
-              />
-            </>
+          
+          {(sheetState?.type === "create-topic" || sheetState?.type === "edit-topic") && (
+            <TopicForm 
+              topic={sheetState.type === "edit-topic" ? sheetState.data : null} 
+              subjects={subjects} 
+              defaultSubjectId={sheetState.type === "create-topic" ? sheetState.subjectId : undefined}
+              onSuccess={handleSaveSuccess} 
+            />
           )}
         </SheetContent>
       </Sheet>

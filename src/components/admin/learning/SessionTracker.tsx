@@ -145,7 +145,7 @@ export default function SessionTracker({ topic }: SessionTrackerProps) {
               variant="ghost"
               size="sm"
             >
-              <X className="mr-2 size-4" /> Cancel
+              <X className="size-4" />
             </Button>
             <Button
               onClick={handleStop}
@@ -156,9 +156,8 @@ export default function SessionTracker({ topic }: SessionTrackerProps) {
               {isLoading ? (
                 <Loader2 className="mr-2 size-4 animate-spin" />
               ) : (
-                <Square className="mr-2 size-4" />
-              )}{" "}
-              Stop Session
+                <Square className="size-4" />
+              )}
             </Button>
           </div>
         </div>
