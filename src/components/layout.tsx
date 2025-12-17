@@ -4,6 +4,9 @@ import Container from "./container";
 import Header from "./header";
 import Footer from "./footer";
 import MobileHeader from "./mobile-header";
+import { useGetLockdownStatusQuery } from "@/store/api/publicApi"; // Import query
+import MaintenanceScreen from "@/components/MaintenanceScreen"; // Import screen
+import { supabase } from "@/supabase/client";
 
 type LayoutProps = PropsWithChildren & {
   isAdmin?: boolean;
@@ -17,7 +20,24 @@ const DEFAULT_OG_DESCRIPTION =
 const DEFAULT_OG_IMAGE = `${SITE_URL}/default-og-image.png`;
 
 export default function Layout({ children, isAdmin = false }: LayoutProps) {
-  // Optimization: Use CSS variable for mouse position to avoid React re-renders on mousemove
+  // 1. Fetch Status
+  const { data: lockdownLevel = 0, isLoading: isCheckingSecurity } =
+    useGetLockdownStatusQuery();
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [isAuthChecking, setIsAuthChecking] = useState(true);
+
+  // 2. Check if user is Admin (Admins bypass lockdown)
+  useEffect(() => {
+    const checkUser = async () => {
+      const {
+        data: { session },
+      } = await supabase.auth.getSession();
+      setIsAuthenticated(!!session);
+      setIsAuthChecking(false);
+    };
+    checkUser();
+  }, []);
+
   useEffect(() => {
     const handleMouseMove = (e: MouseEvent) => {
       document.documentElement.style.setProperty("--mouse-x", `${e.clientX}px`);
@@ -30,6 +50,27 @@ export default function Layout({ children, isAdmin = false }: LayoutProps) {
     return () => window.removeEventListener("mousemove", handleMouseMove);
   }, [isAdmin]);
 
+  // 3. LOGIC: If lockdown is active AND user is NOT admin, block access.
+  // We wait for auth check to finish to prevent flashing Maintenance to admins.
+  const isLockdownActive = lockdownLevel >= 1;
+  const shouldBlockAccess =
+    isLockdownActive && !isAuthChecking && !isAuthenticated;
+
+  // Ideally, if it's an admin page, we just render normally (the AuthGuard inside admin pages handles security)
+  // If it's a public page and should be blocked, show maintenance.
+  if (!isAdmin && shouldBlockAccess) {
+    return (
+      <>
+        <Head>
+          <title>System Offline</title>
+          <meta name="robots" content="noindex" />
+        </Head>
+        <MaintenanceScreen level={lockdownLevel} />
+      </>
+    );
+  }
+
+  // Admin pages or Normal Public access
   if (isAdmin) {
     return (
       <>
@@ -60,7 +101,7 @@ export default function Layout({ children, isAdmin = false }: LayoutProps) {
         {/* Grid Pattern */}
         <div className="fixed inset-0 z-[-1] bg-grid-pattern opacity-[0.6]" />
 
-        {/* Spotlight Effect using CSS Variables */}
+        {/* Spotlight */}
         <div
           className="pointer-events-none fixed inset-0 z-[-1] opacity-40 transition-opacity duration-500"
           style={{

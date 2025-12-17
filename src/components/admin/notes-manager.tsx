@@ -57,6 +57,7 @@ import { ToggleGroup, ToggleGroupItem } from "../ui/toggle-group";
 import { toast } from "sonner";
 import { format } from "date-fns";
 import { cn } from "@/lib/utils";
+import { useConfirm } from "../providers/ConfirmDialogProvider";
 
 const NoteCard = ({
   note,
@@ -144,6 +145,8 @@ const NoteCard = ({
 );
 
 export default function NotesManager() {
+  const confirm = useConfirm();
+
   const [editingNote, setEditingNote] = useState<Note | null>(null);
   const [isSheetOpen, setIsSheetOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
@@ -178,7 +181,12 @@ export default function NotesManager() {
   }, [notes, searchTerm]);
 
   const handleDeleteNote = async (noteId: string) => {
-    if (!confirm("Are you sure you want to delete this note?")) return;
+    const ok = await confirm({
+      title: "Delete Note?",
+      description: "This action cannot be undone.",
+      variant: "destructive",
+    });
+    if (!ok) return;
     try {
       await deleteNote(noteId).unwrap();
       toast.success("Note deleted successfully.");

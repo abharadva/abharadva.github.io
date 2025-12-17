@@ -176,6 +176,20 @@ export const publicApi = createApi({
         }
       },
     }),
+    getLockdownStatus: builder.query<number, void>({
+      queryFn: async () => {
+        const { data, error } = await supabase
+          .from("security_settings")
+          .select("lockdown_level")
+          .single();
+        // Default to 0 (Normal) if error/missing
+        if (error || !data) return { data: 0 };
+        return { data: data.lockdown_level };
+      },
+      // Cache for 1 minute to avoid hammering DB on every nav,
+      // but keeps it relatively responsive to changes
+      keepUnusedDataFor: 60,
+    }),
   }),
 });
 
@@ -187,4 +201,5 @@ export const {
   useIncrementPostViewMutation,
   useGetSectionsByPathQuery,
   useGetGitHubReposQuery,
+  useGetLockdownStatusQuery,
 } = publicApi;

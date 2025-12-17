@@ -41,17 +41,6 @@ import {
   AccordionTrigger,
 } from "../ui/accordion";
 import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-  AlertDialogTrigger,
-} from "@/components/ui/alert-dialog";
-import {
   useGetPortfolioContentQuery,
   useGetNavLinksAdminQuery,
   useSaveSectionMutation,
@@ -61,6 +50,7 @@ import {
   useUpdateSectionOrderMutation,
   useRescanAssetUsageMutation,
 } from "@/store/api/adminApi";
+import { useConfirm } from "../providers/ConfirmDialogProvider";
 
 type SheetState =
   | { type: "new-section" }
@@ -349,6 +339,8 @@ const ItemEditorSheet = ({
 };
 
 export default function ContentManager() {
+  const confirm = useConfirm();
+
   const [localSections, setLocalSections] = useState<PortfolioSection[]>([]);
   const [availablePaths, setAvailablePaths] = useState<
     { label: string; value: string }[]
@@ -444,6 +436,14 @@ export default function ContentManager() {
 
   const handleDeleteSection = async (id: string) => {
     try {
+      const ok = await confirm({
+        title: "Delete Section?",
+        description:
+          "This will permanently delete this section and all items within it.",
+        variant: "destructive",
+      });
+      if (!ok) return;
+
       await deleteSection(id).unwrap();
       toast.success("Section deleted.");
       setSelectedSectionId(null);
@@ -468,6 +468,13 @@ export default function ContentManager() {
 
   const handleDeleteItem = async (itemId: string) => {
     try {
+      const ok = await confirm({
+        title: "Delete Item?",
+        description: "This action cannot be undone.",
+        variant: "destructive",
+      });
+      if (!ok) return;
+
       await deleteItem(itemId).unwrap();
       toast.success("Item deleted.");
       await rescanUsage().unwrap();
@@ -593,33 +600,6 @@ export default function ContentManager() {
                     >
                       <Edit className="mr-2 size-4" /> Edit Details
                     </Button>
-                    <AlertDialog>
-                      <AlertDialogTrigger asChild>
-                        <Button variant="destructive" size="sm">
-                          <Trash2 className="mr-2 size-4" /> Delete
-                        </Button>
-                      </AlertDialogTrigger>
-                      <AlertDialogContent>
-                        <AlertDialogHeader>
-                          <AlertDialogTitle>Delete Section?</AlertDialogTitle>
-                          <AlertDialogDescription>
-                            This will permanently delete "
-                            {selectedSection.title}" and all of its items. This
-                            action cannot be undone.
-                          </AlertDialogDescription>
-                        </AlertDialogHeader>
-                        <AlertDialogFooter>
-                          <AlertDialogCancel>Cancel</AlertDialogCancel>
-                          <AlertDialogAction
-                            onClick={() =>
-                              handleDeleteSection(selectedSection.id)
-                            }
-                          >
-                            Confirm Delete
-                          </AlertDialogAction>
-                        </AlertDialogFooter>
-                      </AlertDialogContent>
-                    </AlertDialog>
                   </div>
                 </div>
 
@@ -672,36 +652,6 @@ export default function ContentManager() {
                           >
                             <Edit className="size-4" />
                           </Button>
-                          <AlertDialog>
-                            <AlertDialogTrigger asChild>
-                              <Button
-                                variant="ghost"
-                                size="icon"
-                                className="h-8 w-8 hover:text-destructive"
-                              >
-                                <Trash2 className="size-4" />
-                              </Button>
-                            </AlertDialogTrigger>
-                            <AlertDialogContent>
-                              <AlertDialogHeader>
-                                <AlertDialogTitle>
-                                  Delete Item?
-                                </AlertDialogTitle>
-                                <AlertDialogDescription>
-                                  This will permanently delete "{item.title}".
-                                  This action cannot be undone.
-                                </AlertDialogDescription>
-                              </AlertDialogHeader>
-                              <AlertDialogFooter>
-                                <AlertDialogCancel>Cancel</AlertDialogCancel>
-                                <AlertDialogAction
-                                  onClick={() => handleDeleteItem(item.id)}
-                                >
-                                  Confirm Delete
-                                </AlertDialogAction>
-                              </AlertDialogFooter>
-                            </AlertDialogContent>
-                          </AlertDialog>
                         </div>
                       </Card>
                     ))}

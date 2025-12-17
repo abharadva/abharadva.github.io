@@ -30,6 +30,7 @@ import {
   useUpdateSectionOrderMutation,
 } from "@/store/api/adminApi";
 import { cn } from "@/lib/utils";
+import { useConfirm } from "../providers/ConfirmDialogProvider";
 
 type NavLink = {
   id: string;
@@ -92,6 +93,8 @@ const LinkForm = ({
 };
 
 export default function NavigationManager() {
+  const confirm = useConfirm();
+
   const [editingLink, setEditingLink] = useState<NavLink | null>(null);
   const [isSheetOpen, setIsSheetOpen] = useState(false);
   const [localLinks, setLocalLinks] = useState<NavLink[]>([]);
@@ -117,7 +120,15 @@ export default function NavigationManager() {
   };
 
   const handleDelete = async (id: string) => {
-    if (!confirm("Are you sure you want to delete this link?")) return;
+    const isConfirmed = await confirm({
+      title: "Delete Navigation Link?",
+      description:
+        "This will remove the link from your site's public navigation bar.",
+      variant: "destructive",
+      confirmText: "Delete",
+    });
+
+    if (!isConfirmed) return;
     try {
       await deleteNavLink(id).unwrap();
       toast.success("Navigation link deleted.");

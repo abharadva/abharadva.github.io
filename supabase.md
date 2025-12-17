@@ -262,7 +262,59 @@ ALTER TABLE storage_assets ENABLE ROW LEVEL SECURITY; DROP POLICY IF EXISTS "Adm
 
 
 -- ========= RPC FUNCTIONS =========
-CREATE OR REPLACE FUNCTION get_calendar_data(start_date_param date, end_date_param date) RETURNS TABLE(item_id UUID, title TEXT, start_time TIMESTAMPTZ, end_time TIMESTAMPTZ, item_type TEXT, data JSONB) AS $$ BEGIN RETURN QUERY SELECT e.id, e.title, e.start_time, e.end_time, 'event' AS item_type, jsonb_build_object('description', e.description, 'is_all_day', e.is_all_day) FROM events e WHERE e.user_id = auth.uid() AND e.start_time :: date BETWEEN start_date_param AND end_date_param UNION ALL SELECT t.id, t.title, (t.due_date + interval '9 hour'):: timestamptz, NULL :: timestamptz, 'task' AS item_type, jsonb_build_object('status', t.status, 'priority', t.priority) FROM tasks t WHERE t.user_id = auth.uid() AND t.due_date BETWEEN start_date_param AND end_date_param UNION ALL SELECT tr.id, tr.description, (tr.date + interval '12 hour'):: timestamptz, NULL :: timestamptz, 'transaction' AS item_type, jsonb_build_object('amount', tr.amount, 'type', tr.type, 'category', tr.category) FROM transactions tr WHERE tr.user_id = auth.uid() AND tr.date BETWEEN start_date_param AND end_date_param; END; $$ LANGUAGE plpgsql;
+CREATE OR REPLACE FUNCTION get_calendar_data(start_date_param date, end_date_param date) 
+RETURNS TABLE(item_id UUID, title TEXT, start_time TIMESTAMPTZ, end_time TIMESTAMPTZ, item_type TEXT, data JSONB) AS $$ 
+BEGIN 
+  RETURN QUERY 
+  -- 1. Events (Individual)
+  SELECT e.id, e.title, e.start_time, e.end_time, 'event' AS item_type, jsonb_build_object('description', e.description, 'is_all_day', e.is_all_day) FROM events e WHERE e.user_id = auth.uid() AND e.start_time :: date BETWEEN start_date_param AND end_date_param 
+  
+  UNION ALL 
+  -- 2. Tasks (Individual)
+  SELECT t.id, t.title, (t.due_date + interval '9 hour'):: timestamptz, NULL :: timestamptz, 'task' AS item_type, jsonb_build_object('status', t.status, 'priority', t.priority) FROM tasks t WHERE t.user_id = auth.uid() AND t.due_date BETWEEN start_date_param AND end_date_param 
+  
+  UNION ALL
+  -- 3. Habit Summary (Grouped per day)
+  SELECT 
+    (SELECT uuid_generate_v4()), 
+    'Habits Completed',
+    (hl.completed_date + interval '7 hour')::timestamptz,
+    NULL::timestamptz,
+    'habit_summary' AS item_type,
+    jsonb_build_object(
+      'count', COUNT(*),
+      'completed_habits', jsonb_agg(
+        jsonb_build_object('title', h.title, 'color', h.color)
+      )
+    )
+  FROM habit_logs hl
+  JOIN habits h ON hl.habit_id = h.id
+  WHERE h.user_id = auth.uid()
+  AND hl.completed_date BETWEEN start_date_param AND end_date_param
+  GROUP BY hl.completed_date
+  
+  UNION ALL
+  -- 4. Transaction Summary (Grouped per day) -- NEW!
+  SELECT
+    (SELECT uuid_generate_v4()),
+    'Daily Finance',
+    (tr.date + interval '12 hour')::timestamptz,
+    NULL::timestamptz,
+    'transaction_summary' AS item_type,
+    jsonb_build_object(
+      'count', COUNT(*),
+      'total_earning', COALESCE(SUM(CASE WHEN tr.type = 'earning' THEN tr.amount ELSE 0 END), 0),
+      'total_expense', COALESCE(SUM(CASE WHEN tr.type = 'expense' THEN tr.amount ELSE 0 END), 0),
+      'transactions', jsonb_agg(
+        jsonb_build_object('description', tr.description, 'amount', tr.amount, 'type', tr.type, 'category', tr.category)
+      )
+    )
+  FROM transactions tr
+  WHERE tr.user_id = auth.uid()
+  AND tr.date BETWEEN start_date_param AND end_date_param
+  GROUP BY tr.date;
+
+END; $$ LANGUAGE plpgsql;
 CREATE OR REPLACE FUNCTION increment_blog_post_view (post_id_to_increment UUID) 
 RETURNS void LANGUAGE plpgsql AS $$ 
 BEGIN 
@@ -361,6 +413,94 @@ CREATE POLICY "Admin can update files in blog-assets" ON storage.objects FOR UPD
 
 DROP POLICY IF EXISTS "Admin can delete files in blog-assets" ON storage.objects;
 CREATE POLICY "Admin can delete files in blog-assets" ON storage.objects FOR DELETE USING (bucket_id = 'blog-assets' AND auth.role() = 'authenticated');
+
+-- =============================================
+-- 1. FOCUS MODE (Pomodoro)
+-- =============================================
+CREATE TABLE IF NOT EXISTS focus_logs (
+  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  user_id UUID REFERENCES auth.users(id) ON DELETE CASCADE DEFAULT auth.uid(),
+  task_id UUID REFERENCES tasks(id) ON DELETE SET NULL,
+  start_time TIMESTAMPTZ NOT NULL,
+  duration_minutes INT NOT NULL,
+  completed BOOLEAN DEFAULT false,
+  mode TEXT CHECK (mode IN ('work', 'break')) DEFAULT 'work',
+  created_at TIMESTAMPTZ DEFAULT now()
+);
+ALTER TABLE focus_logs ENABLE ROW LEVEL SECURITY;
+CREATE POLICY "Admin manage focus" ON focus_logs FOR ALL USING (auth.uid() = user_id);
+
+-- =============================================
+-- 2. HABIT TRACKER
+-- =============================================
+CREATE TABLE IF NOT EXISTS habits (
+  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  user_id UUID REFERENCES auth.users(id) ON DELETE CASCADE DEFAULT auth.uid(),
+  title TEXT NOT NULL,
+  color TEXT DEFAULT '#0ea5e9', -- Tailwind primary default
+  target_per_week INT DEFAULT 7,
+  is_active BOOLEAN DEFAULT true,
+  created_at TIMESTAMPTZ DEFAULT now(),
+  updated_at TIMESTAMPTZ DEFAULT now()
+);
+ALTER TABLE habits ENABLE ROW LEVEL SECURITY;
+CREATE POLICY "Admin manage habits" ON habits FOR ALL USING (auth.uid() = user_id);
+
+CREATE TABLE IF NOT EXISTS habit_logs (
+  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  habit_id UUID REFERENCES habits(id) ON DELETE CASCADE,
+  completed_date DATE NOT NULL,
+  created_at TIMESTAMPTZ DEFAULT now(),
+  UNIQUE(habit_id, completed_date) -- Prevent duplicate logs for same day
+);
+ALTER TABLE habit_logs ENABLE ROW LEVEL SECURITY;
+CREATE POLICY "Admin manage habit logs" ON habit_logs FOR ALL USING (
+  EXISTS (SELECT 1 FROM habits WHERE id = habit_logs.habit_id AND user_id = auth.uid())
+);
+
+-- =============================================
+-- 3. INVENTORY (Physical Assets)
+-- =============================================
+CREATE TABLE IF NOT EXISTS inventory_items (
+  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  user_id UUID REFERENCES auth.users(id) ON DELETE CASCADE DEFAULT auth.uid(),
+  name TEXT NOT NULL,
+  category TEXT,
+  serial_number TEXT,
+  purchase_date DATE,
+  warranty_expiry DATE,
+  purchase_price NUMERIC(10, 2),
+  current_value NUMERIC(10, 2), -- Can be manually updated or calc'd
+  image_url TEXT,
+  notes TEXT,
+  transaction_id UUID REFERENCES transactions(id) ON DELETE SET NULL, -- Link to finance
+  created_at TIMESTAMPTZ DEFAULT now(),
+  updated_at TIMESTAMPTZ DEFAULT now()
+);
+ALTER TABLE inventory_items ENABLE ROW LEVEL SECURITY;
+CREATE POLICY "Admin manage inventory" ON inventory_items FOR ALL USING (auth.uid() = user_id);
+
+-- =============================================
+-- 6. KILL SWITCH (Security Settings)
+-- =============================================
+-- We'll add this to the existing site_identity or create a dedicated settings table.
+-- Using a dedicated single-row table is safer for middleware queries.
+CREATE TABLE IF NOT EXISTS security_settings (
+  id INT PRIMARY KEY DEFAULT 1,
+  lockdown_level INT DEFAULT 0 CHECK (lockdown_level BETWEEN 0 AND 3),
+  updated_at TIMESTAMPTZ DEFAULT now(),
+  CONSTRAINT single_row_check CHECK (id = 1)
+);
+ALTER TABLE security_settings ENABLE ROW LEVEL SECURITY;
+CREATE POLICY "Public read security" ON security_settings FOR SELECT USING (true); -- Middleware needs to read this
+CREATE POLICY "Admin manage security" ON security_settings FOR ALL USING (auth.role() = 'authenticated');
+-- Insert default row if not exists
+INSERT INTO security_settings (id, lockdown_level) VALUES (1, 0) ON CONFLICT DO NOTHING;
+
+-- Trigger to auto-update updated_at columns
+CREATE TRIGGER update_habits_timestamp BEFORE UPDATE ON habits FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
+CREATE TRIGGER update_inventory_timestamp BEFORE UPDATE ON inventory_items FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
+
 ```
 
 </details>

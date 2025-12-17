@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { useRouter } from "next/router";
-import { useEffect, useState } from "react"; 
+import { useEffect, useState } from "react";
 import Container from "./container";
 import { cn } from "@/lib/utils";
 import { motion, AnimatePresence } from "framer-motion";
@@ -9,8 +9,8 @@ import {
   useGetNavLinksQuery,
 } from "@/store/api/publicApi";
 import { Skeleton } from "./ui/skeleton";
-import { supabase } from "@/supabase/client"; 
-import { ShieldCheck } from "lucide-react"; 
+import { supabase } from "@/supabase/client";
+import { ShieldCheck } from "lucide-react";
 
 export default function Header() {
   const router = useRouter();
@@ -23,7 +23,9 @@ export default function Header() {
 
   useEffect(() => {
     const checkUser = async () => {
-      const { data: { session } } = await supabase.auth.getSession();
+      const {
+        data: { session },
+      } = await supabase.auth.getSession();
       setIsAuthenticated(!!session);
     };
     checkUser();
@@ -63,7 +65,8 @@ export default function Header() {
                 {navLinks?.map((link) => {
                   const isActive =
                     router.pathname === link.href ||
-                    (link.href !== "/" && router.pathname.startsWith(link.href));
+                    (link.href !== "/" &&
+                      router.pathname.startsWith(link.href));
 
                   return (
                     <Link
@@ -99,13 +102,13 @@ export default function Header() {
                 })}
 
                 {isAuthenticated && (
-                   <Link
-                   href="/admin"
-                   className="relative px-4 py-1.5 text-sm font-medium text-muted-foreground hover:text-primary flex items-center gap-2"
-                 >
-                   <ShieldCheck className="size-3.5" />
-                   Admin
-                 </Link>
+                  <Link
+                    href="/admin"
+                    className="relative px-4 py-1.5 text-sm font-medium text-muted-foreground hover:text-primary flex items-center gap-2"
+                  >
+                    <ShieldCheck className="size-3.5" />
+                    Admin
+                  </Link>
                 )}
               </>
             )}

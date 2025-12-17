@@ -38,6 +38,7 @@ import {
   MoreHorizontal,
   AlertOctagon,
   X,
+  Zap,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -54,6 +55,9 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Separator } from "../ui/separator";
+import { startFocus } from "@/store/slices/focusSlice";
+import { useAppDispatch } from "@/store/hooks";
+import { useConfirm } from "../providers/ConfirmDialogProvider";
 
 // Constants (as they haven't been moved to a central file yet)
 type Priority = "low" | "medium" | "high";
@@ -154,11 +158,13 @@ const TaskCard = ({
   task,
   onEdit,
   onDelete,
+  onFocus,
   onDragStart,
 }: {
   task: Task;
   onEdit: () => void;
   onDelete: () => void;
+  onFocus: () => void;
   onDragStart: (e: DragEvent<HTMLDivElement>) => void;
 }) => {
   const priorityClasses: Record<Priority, string> = {
@@ -256,6 +262,19 @@ const TaskCard = ({
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
+
+        <Button
+          variant="ghost"
+          size="icon"
+          className="h-7 w-7 shrink-0 opacity-0 group-hover:opacity-100 transition-opacity absolute top-1 right-8"
+          onClick={(e) => {
+            e.stopPropagation();
+            onFocus();
+          }}
+          title="Start Focus Session"
+        >
+          <Zap className="size-4 text-yellow-500 fill-yellow-500/20" />
+        </Button>
       </Card>
     </motion.div>
   );
@@ -299,6 +318,9 @@ const QuickAddTask = ({
 };
 
 export default function TaskManager() {
+  const dispatch = useAppDispatch();
+  const confirm = useConfirm();
+
   const [editingTask, setEditingTask] = useState<Task | null>(null);
   const [isSheetOpen, setIsSheetOpen] = useState(false);
   const [draggedTaskId, setDraggedTaskId] = useState<string | null>(null);
@@ -334,7 +356,12 @@ export default function TaskManager() {
   };
 
   const handleDeleteTask = async (taskId: string) => {
-    if (!confirm("Delete this task?")) return;
+    const ok = await confirm({
+      title: "Delete Task?",
+      description: "This task and its subtasks will be removed.",
+      variant: "destructive",
+    });
+    if (!ok) return;
     try {
       await deleteTask(taskId).unwrap();
       toast.success("Task deleted.");
@@ -442,6 +469,15 @@ export default function TaskManager() {
                         onDragStart={() => {}}
                         onEdit={() => handleOpenSheet(task)}
                         onDelete={() => handleDeleteTask(task.id)}
+                        onFocus={() => {
+                          dispatch(
+                            startFocus({
+                              durationMinutes: 25,
+                              taskTitle: task.title,
+                              taskId: task.id,
+                            }),
+                          );
+                        }}
                       />
                     ))}
                 </AnimatePresence>
@@ -488,6 +524,15 @@ export default function TaskManager() {
                           onDragStart={(e) => handleDragStart(e, task.id)}
                           onEdit={() => handleOpenSheet(task)}
                           onDelete={() => handleDeleteTask(task.id)}
+                          onFocus={() => {
+                            dispatch(
+                              startFocus({
+                                durationMinutes: 25,
+                                taskTitle: task.title,
+                                taskId: task.id,
+                              }),
+                            );
+                          }}
                         />
                       ))}
                   </AnimatePresence>

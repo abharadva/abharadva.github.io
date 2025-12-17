@@ -71,11 +71,9 @@ export default function RecurringTransactionForm({
   const frequency = form.watch("frequency");
 
   useEffect(() => {
-    if (
-      frequency === "daily" ||
-      frequency === "yearly" ||
-      frequency === "bi-weekly"
-    ) {
+    // Only clear occurrence_day for daily or yearly.
+    // Weekly, Bi-Weekly, and Monthly keep it.
+    if (frequency === "daily" || frequency === "yearly") {
       form.setValue("occurrence_day", null);
     }
   }, [frequency, form]);
@@ -202,7 +200,7 @@ export default function RecurringTransactionForm({
             )}
           />
           <AnimatePresence>
-            {frequency === "weekly" && (
+            {(frequency === "weekly" || frequency === "bi-weekly") && (
               <motion.div
                 initial={{ opacity: 0, y: -10 }}
                 animate={{ opacity: 1, y: 0 }}

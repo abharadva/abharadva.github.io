@@ -34,20 +34,58 @@ import {
   ShieldAlert,
   KeyRound,
   Smartphone,
+  Siren,
+  Globe,
+  Lock,
 } from "lucide-react";
 import { toast } from "sonner";
 import {
   useGetMfaFactorsQuery,
+  useGetSecuritySettingsQuery,
   useUnenrollMfaFactorMutation,
+  useUpdateLockdownLevelMutation,
   useUpdateUserPasswordMutation,
 } from "@/store/api/adminApi";
 import { Separator } from "../ui/separator";
+import { cn } from "@/lib/utils";
+import { useConfirm } from "../providers/ConfirmDialogProvider";
 
 export default function SecuritySettings() {
+  const confirm = useConfirm();
+
   const [newPassword, setNewPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [passwordError, setPasswordError] = useState("");
   const router = useRouter();
+
+  const { data: security } = useGetSecuritySettingsQuery();
+  const [updateLockdown, { isLoading: isLocking }] =
+    useUpdateLockdownLevelMutation();
+
+  const handleLockdown = async (level: number) => {
+    const messages = [
+      "Switch to Normal Mode? Site will be public.",
+      "Switch to Maintenance Mode? Public site will be inaccessible.",
+      "ACTIVATE LOCKDOWN? This is an emergency state.",
+    ];
+    const isConfirmed = await confirm({
+      title: "Confirm Security Level Change",
+      description: messages[level],
+      variant: level === 2 ? "destructive" : "default",
+      confirmText: "Yes, Change Level",
+    });
+
+    if (!isConfirmed) return;
+
+    try {
+      await updateLockdown(level).unwrap();
+      toast.success(`Security Level set to ${level}`);
+    } catch (err) {
+      toast.error("Failed to change security level");
+    }
+  };
+
+  const level = security?.lockdown_level || 0;
 
   const {
     data: factors = [],
@@ -60,12 +98,15 @@ export default function SecuritySettings() {
     useUpdateUserPasswordMutation();
 
   const handleUnenroll = async (factorId: string) => {
-    if (
-      !confirm(
-        "Are you sure? Removing your only 2FA method may lock you out until you set it up again upon next login.",
-      )
-    )
-      return;
+    const isConfirmed = await confirm({
+      title: "Remove 2FA Method?",
+      description:
+        "Removing your only 2FA method may lock you out until you set it up again upon next login.",
+      variant: "destructive",
+      confirmText: "Remove",
+    });
+
+    if (!isConfirmed) return;
     try {
       await unenrollFactor(factorId).unwrap();
       toast.success("MFA method removed successfully.");
@@ -276,6 +317,89 @@ export default function SecuritySettings() {
               )}
             </Button>
           </form>
+        </CardContent>
+      </Card>
+
+      <Card className="border-red-500/50 bg-red-500/5">
+        <CardHeader>
+          <div className="flex items-center gap-4">
+            <div className="p-3 bg-red-500/10 rounded-full animate-pulse">
+              <Siren className="h-8 w-8 text-red-500" />
+            </div>
+            <div>
+              <CardTitle className="text-red-500">Emergency Protocol</CardTitle>
+              <CardDescription>
+                Control global access to your portfolio in case of emergency.
+              </CardDescription>
+            </div>
+          </div>
+        </CardHeader>
+        <CardContent className="grid gap-4 md:grid-cols-3">
+          <button
+            onClick={() => handleLockdown(0)}
+            disabled={isLocking}
+            className={cn(
+              "flex flex-col items-center justify-center p-4 border-2 rounded-lg transition-all",
+              level === 0
+                ? "border-green-500 bg-green-500/10"
+                : "border-muted hover:border-green-500/50",
+            )}
+          >
+            <Globe
+              className={cn(
+                "size-8 mb-2",
+                level === 0 ? "text-green-500" : "text-muted-foreground",
+              )}
+            />
+            <span className="font-bold">Level 0: Normal</span>
+            <span className="text-xs text-muted-foreground mt-1 text-center">
+              Public site is live.
+            </span>
+          </button>
+
+          <button
+            onClick={() => handleLockdown(1)}
+            disabled={isLocking}
+            className={cn(
+              "flex flex-col items-center justify-center p-4 border-2 rounded-lg transition-all",
+              level === 1
+                ? "border-orange-500 bg-orange-500/10"
+                : "border-muted hover:border-orange-500/50",
+            )}
+          >
+            <Lock
+              className={cn(
+                "size-8 mb-2",
+                level === 1 ? "text-orange-500" : "text-muted-foreground",
+              )}
+            />
+            <span className="font-bold">Level 1: Maintenance</span>
+            <span className="text-xs text-muted-foreground mt-1 text-center">
+              Public site hidden. Admin accessible.
+            </span>
+          </button>
+
+          <button
+            onClick={() => handleLockdown(2)}
+            disabled={isLocking}
+            className={cn(
+              "flex flex-col items-center justify-center p-4 border-2 rounded-lg transition-all",
+              level === 2
+                ? "border-red-600 bg-red-600/20"
+                : "border-muted hover:border-red-600/50",
+            )}
+          >
+            <Siren
+              className={cn(
+                "size-8 mb-2",
+                level === 2 ? "text-red-600" : "text-muted-foreground",
+              )}
+            />
+            <span className="font-bold text-red-600">Level 2: Lockdown</span>
+            <span className="text-xs text-muted-foreground mt-1 text-center">
+              API Read-Only. No edits allowed.
+            </span>
+          </button>
         </CardContent>
       </Card>
 

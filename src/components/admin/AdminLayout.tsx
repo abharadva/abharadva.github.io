@@ -35,6 +35,8 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import FocusTimer from "./focus/FocusTimer";
+import { GlobalCommandPalette } from "../GlobalCommandPalette";
 
 const formatTime = (seconds: number) => {
   const h = Math.floor(seconds / 3600)
@@ -49,46 +51,66 @@ const formatTime = (seconds: number) => {
 
 const Breadcrumbs = () => {
   const router = useRouter();
-  const pathSegments = router.asPath.split("/").filter((segment) => segment);
+  // Remove query params for breadcrumb display
+  const cleanPath = router.asPath.split("?")[0];
+  const pathSegments = cleanPath.split("/").filter((segment) => segment);
 
+  // Case: Dashboard
   if (pathSegments.length <= 1) {
     return (
       <div className="flex items-center gap-2 text-sm font-medium text-muted-foreground">
-        <Home className="h-4 w-4" /> Dashboard
+        <Home className="h-4 w-4" />
+        <span>Dashboard</span>
       </div>
     );
   }
 
+  const currentSegment = pathSegments[pathSegments.length - 1];
+
   return (
-    <nav className="hidden items-center gap-2 text-sm font-medium md:flex">
-      <Link
-        href="/admin"
-        className="text-muted-foreground hover:text-foreground"
-      >
-        Admin
-      </Link>
-      {pathSegments.slice(1).map((segment, index) => {
-        const isLast = index === pathSegments.length - 2;
-        const href = "/admin/" + pathSegments.slice(1, index + 2).join("/");
-        return (
-          <React.Fragment key={href}>
-            <ChevronRight className="h-4 w-4 text-muted-foreground" />
-            {isLast ? (
-              <span className="font-semibold text-foreground capitalize">
-                {segment}
-              </span>
-            ) : (
-              <Link
-                href={href}
-                className="text-muted-foreground hover:text-foreground capitalize"
-              >
-                {segment}
-              </Link>
-            )}
-          </React.Fragment>
-        );
-      })}
-    </nav>
+    <>
+      {/* Mobile View: Just current page title */}
+      <div className="md:hidden font-semibold text-lg capitalize tracking-tight">
+        {currentSegment.replace(/-/g, " ")}
+      </div>
+
+      {/* Desktop View: Full Breadcrumbs */}
+      <nav className="hidden items-center gap-2 text-sm font-medium md:flex">
+        <Link
+          href="/admin"
+          className="text-muted-foreground hover:text-foreground"
+        >
+          Admin
+        </Link>
+        {pathSegments.slice(1).map((segment, index) => {
+          // Adjust logic: if we have ['admin', 'blog', 'create'], length is 3.
+          // Slice(1) gives ['blog', 'create'].
+          // index 0 is blog. index 1 is create.
+          // pathSegments.length - 2 is 1. So 'create' is last.
+
+          const isLast = index === pathSegments.slice(1).length - 1;
+          const href = "/admin/" + pathSegments.slice(1, index + 2).join("/");
+
+          return (
+            <React.Fragment key={href}>
+              <ChevronRight className="h-4 w-4 text-muted-foreground" />
+              {isLast ? (
+                <span className="font-semibold text-foreground capitalize">
+                  {segment.replace(/-/g, " ")}
+                </span>
+              ) : (
+                <Link
+                  href={href}
+                  className="text-muted-foreground hover:text-foreground capitalize"
+                >
+                  {segment.replace(/-/g, " ")}
+                </Link>
+              )}
+            </React.Fragment>
+          );
+        })}
+      </nav>
+    </>
   );
 };
 
@@ -114,6 +136,8 @@ export function AdminLayout({ children }: { children: ReactNode }) {
 
   return (
     <div className="min-h-screen bg-secondary/30">
+      <GlobalCommandPalette />
+      <FocusTimer />
       <div className="hidden lg:fixed lg:inset-y-0 lg:z-50 lg:flex lg:w-64 lg:flex-col">
         <Sidebar />
       </div>

@@ -53,6 +53,7 @@ import {
 import { toast } from "sonner";
 import { format } from "date-fns";
 import { cn } from "@/lib/utils";
+import { useConfirm } from "../providers/ConfirmDialogProvider";
 
 interface BlogManagerProps {
   startInCreateMode?: boolean;
@@ -63,6 +64,8 @@ export default function BlogManager({
   startInCreateMode,
   onActionHandled,
 }: BlogManagerProps) {
+  const confirm = useConfirm();
+
   const [editingPost, setEditingPost] = useState<BlogPost | null>(null);
   const [isCreating, setIsCreating] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
@@ -110,12 +113,13 @@ export default function BlogManager({
   };
 
   const handleDeletePost = async (post: BlogPost) => {
-    if (
-      !confirm(
-        `Are you sure you want to delete "${post.title}"? This action cannot be undone.`,
-      )
-    )
-      return;
+    const ok = await confirm({
+      title: `Delete "${post.title}"?`,
+      description: "This action cannot be undone.",
+      variant: "destructive",
+    });
+    if (!ok) return;
+
     try {
       await deleteBlogPost(post).unwrap();
       toast.success("Post deleted successfully.");

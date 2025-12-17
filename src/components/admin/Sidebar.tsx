@@ -17,6 +17,9 @@ import {
   FlaskConical,
   LogOut,
   LayoutDashboard,
+  CheckSquare,
+  Box,
+  Search,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "../ui/button";
@@ -49,10 +52,12 @@ const portfolioNav = [
 ];
 
 const productivityNav = [
+  { name: "Habits", href: "/admin/habits", icon: CheckSquare },
+  { name: "Finance", href: "/admin/finance", icon: Banknote },
   { name: "Tasks", href: "/admin/tasks", icon: ListTodo },
   { name: "Notes", href: "/admin/notes", icon: StickyNote },
-  { name: "Finance", href: "/admin/finance", icon: Banknote },
   { name: "Learning", href: "/admin/learning", icon: BrainCircuit },
+  { name: "Inventory", href: "/admin/inventory", icon: Box },
 ];
 
 const systemNav = [
@@ -121,6 +126,23 @@ export function Sidebar({ onLinkClick }: SidebarProps) {
         </Link>
       </div>
       <nav className="flex flex-1 flex-col">
+        <div className="mb-4 px-2">
+          <Button
+            variant="outline"
+            className="relative h-9 w-full justify-start text-sm text-muted-foreground sm:pr-12"
+            onClick={() =>
+              document.dispatchEvent(
+                new KeyboardEvent("keydown", { key: "k", metaKey: true }),
+              )
+            }
+          >
+            <Search className="mr-2 h-4 w-4" />
+            <span className="hidden lg:inline-flex">Search...</span>
+            <kbd className="pointer-events-none absolute right-1.5 top-1.5 hidden h-5 select-none items-center gap-1 rounded border bg-muted px-1.5 font-mono text-[10px] font-medium opacity-100 sm:flex">
+              <span className="text-xs">⌘</span>K
+            </kbd>
+          </Button>
+        </div>
         <ul role="list" className="flex flex-1 flex-col gap-y-7">
           <li>
             <ul role="list" className="-mx-2 space-y-1">

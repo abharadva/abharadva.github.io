@@ -165,6 +165,23 @@ export interface FinancialGoal {
   updated_at?: string;
 }
 
+export interface Habit {
+  id: string;
+  user_id?: string;
+  title: string;
+  color: string;
+  target_per_week: number;
+  is_active: boolean;
+  created_at?: string;
+  habit_logs?: HabitLog[]; // Joined data
+}
+
+export interface HabitLog {
+  id: string;
+  habit_id: string;
+  completed_date: string; // YYYY-MM-DD
+}
+
 export interface LearningSubject {
   id: string;
   user_id?: string;
@@ -272,4 +289,19 @@ export interface AnalyticsData {
     | { id: string; title: string; slug: string; views: number }[]
     | null;
   learning_time_by_subject: { name: string; value: number }[] | null;
+}
+export interface InventoryItem {
+  id: string;
+  user_id?: string;
+  name: string;
+  category: string;
+  serial_number?: string | null;
+  purchase_date?: string | null;
+  warranty_expiry?: string | null;
+  purchase_price: number;
+  current_value?: number | null;
+  image_url?: string | null;
+  notes?: string | null;
+  created_at?: string;
+  updated_at?: string;
 }

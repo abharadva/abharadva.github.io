@@ -88,6 +88,15 @@ export const getNextOccurrence = (
       return addWeeks(current, 1);
 
     case "bi-weekly":
+      // If a specific day is selected, find the next occurrence of that day,
+      // then skip a week to make it bi-weekly.
+      if (
+        rule.occurrence_day != null &&
+        rule.occurrence_day >= 0 &&
+        rule.occurrence_day <= 6
+      ) {
+        return addWeeks(nextDay(current, rule.occurrence_day as any), 1);
+      }
       return addWeeks(current, 2);
 
     case "monthly": {

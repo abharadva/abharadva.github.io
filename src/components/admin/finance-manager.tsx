@@ -170,6 +170,7 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "../ui/alert-dialog";
+import { useConfirm } from "../providers/ConfirmDialogProvider";
 
 // --- DYNAMIC IMPORTS ---
 const Calendar = dynamic(
@@ -990,89 +991,67 @@ const GoalCard = ({
   onEdit: () => void;
   onDelete: () => void;
 }) => {
-  const progress = Math.min(
+  const percentage = Math.min(
     (goal.current_amount / goal.target_amount) * 100,
     100,
   );
-  const remainingAmount = goal.target_amount - goal.current_amount;
-  const remainingDays = goal.target_date
-    ? differenceInDays(new Date(goal.target_date), new Date())
-    : null;
-
   return (
-    <Card className="relative flex flex-col overflow-hidden transition-all duration-300 hover:-translate-y-1 hover:shadow-xl">
+    <Card className="relative flex flex-col overflow-hidden transition-all duration-300 hover:-translate-y-1 hover:shadow-xl h-[320px] group">
       <motion.div
         className="absolute bottom-0 left-0 right-0 bg-primary/10 -z-0"
         initial={{ height: 0 }}
-        animate={{ height: `${progress}%` }}
+        animate={{ height: `${percentage}%` }}
         transition={{ duration: 0.8, ease: "easeOut" }}
       />
-      <div className="relative z-10 flex h-full flex-col">
+
+      {/* Overlay to ensure text readability */}
+      <div className="absolute inset-0 bg-background/70 group-hover:bg-background/80 transition-colors z-10" />
+
+      {/* Content Layer */}
+      <div className="relative z-20 flex h-full flex-col">
         <CardHeader className="pb-2">
           <div className="flex items-start justify-between">
-            <CardTitle className="leading-tight truncate pr-4">
+            <CardTitle className="leading-tight truncate pr-4 text-foreground drop-shadow-md">
               {goal.name}
             </CardTitle>
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <Button variant="ghost" size="icon" className="h-8 w-8">
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="h-8 w-8 hover:bg-background/50"
+                >
                   <MoreHorizontal className="size-4" />
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end">
-                <DropdownMenuItem onSelect={onEdit}>
-                  {" "}
-                  <Edit className="mr-2 size-4" /> Edit
-                </DropdownMenuItem>
+                <DropdownMenuItem onSelect={onEdit}>Edit</DropdownMenuItem>
                 <DropdownMenuItem
                   className="text-destructive"
                   onSelect={onDelete}
                 >
-                  {" "}
-                  <Trash2 className="mr-2 size-4" /> Delete
+                  Delete
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
           </div>
         </CardHeader>
-        <CardContent className="flex flex-grow flex-col justify-between text-center py-4">
+
+        <CardContent className="flex flex-grow flex-col justify-center text-center py-4">
           <div>
-            <p className="text-5xl font-black text-primary/80">
-              {progress.toFixed(0)}
-              <span className="text-2xl text-primary/50">%</span>
+            <p className="text-5xl font-black text-primary drop-shadow-sm">
+              {percentage.toFixed(0)}
+              <span className="text-2xl text-primary/70">%</span>
             </p>
             <p className="font-semibold text-muted-foreground text-sm mt-1">
               ${goal.current_amount.toLocaleString()} / $
               {goal.target_amount.toLocaleString()}
             </p>
           </div>
-          <div className="mt-6 grid grid-cols-2 gap-3 text-xs">
-            <div className="space-y-0.5 rounded-md bg-background/50 p-2">
-              <p className="font-semibold uppercase text-muted-foreground text-[10px]">
-                Remaining
-              </p>
-              <p className="font-bold text-foreground text-sm">
-                ${remainingAmount > 0 ? remainingAmount.toLocaleString() : 0}
-              </p>
-            </div>
-            <div className="space-y-0.5 rounded-md bg-background/50 p-2">
-              <p className="font-semibold uppercase text-muted-foreground text-[10px]">
-                Time Left
-              </p>
-              <p
-                className={`font-bold text-sm ${remainingDays !== null && remainingDays < 0 ? "text-destructive" : "text-foreground"}`}
-              >
-                {remainingDays !== null
-                  ? remainingDays < 0
-                    ? `Overdue`
-                    : `${remainingDays}d`
-                  : "-"}
-              </p>
-            </div>
-          </div>
         </CardContent>
-        <CardFooter className="pt-0">
-          <Button size="sm" className="w-full" onClick={onAddFunds}>
+
+        <CardFooter className="pt-0 pb-4 px-4">
+          <Button size="sm" className="w-full shadow-lg" onClick={onAddFunds}>
             <Plus className="mr-2 size-4" /> Add Funds
           </Button>
         </CardFooter>
@@ -1245,6 +1224,8 @@ const UpcomingRecurringList = ({
 };
 
 export default function FinanceManager() {
+  const confirm = useConfirm();
+
   const [activeTab, setActiveTab] = useState("dashboard");
   const [searchTerm, setSearchTerm] = useState("");
   const [date, setDate] = useState<DateRange | undefined>({
@@ -1387,7 +1368,12 @@ export default function FinanceManager() {
     id: string,
     message: string,
   ) => {
-    if (!confirm(message)) return;
+    const ok = await confirm({
+      title: "Confirm Deletion",
+      description: message,
+      variant: "destructive",
+    });
+    if (!ok) return;
     try {
       const mutation =
         type === "transactions"

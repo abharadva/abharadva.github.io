@@ -18,6 +18,7 @@ import {
   useUpdateLearningSessionMutation,
   useDeleteLearningSessionMutation,
 } from "@/store/api/adminApi";
+import { useConfirm } from "@/components/providers/ConfirmDialogProvider";
 
 interface SessionTrackerProps {
   topic: LearningTopic | null;
@@ -35,6 +36,8 @@ const formatTime = (seconds: number) => {
 };
 
 export default function SessionTracker({ topic }: SessionTrackerProps) {
+  const confirm = useConfirm();
+
   const [journalNotes, setJournalNotes] = useState("");
   const dispatch = useAppDispatch();
   const { activeSession, elapsedTime } = useAppSelector(
@@ -104,13 +107,18 @@ export default function SessionTracker({ topic }: SessionTrackerProps) {
   };
 
   const handleCancel = async () => {
-    if (
-      !activeSession ||
-      !confirm(
-        "Are you sure you want to cancel this session? It will be permanently deleted.",
-      )
-    )
-      return;
+    if (!activeSession) return;
+
+    const ok = await confirm({
+      title: "Discard Session?",
+      description:
+        "This will delete the current session time and notes permanently.",
+      variant: "destructive",
+      confirmText: "Discard",
+    });
+
+    if (!ok) return;
+
     try {
       await cancelSessionMutation(activeSession.id).unwrap();
 

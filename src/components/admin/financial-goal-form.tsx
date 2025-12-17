@@ -26,6 +26,7 @@ const goalSchema = z.object({
   description: z.string().optional(),
   target_amount: z.coerce.number().positive("Target amount must be positive."),
   target_date: z.string().optional(),
+  image_url: z.string().optional(),
 });
 type GoalFormValues = z.infer<typeof goalSchema>;
 
@@ -115,6 +116,22 @@ export default function FinancialGoalForm({
                 <FormControl>
                   <Input type="date" {...field} />
                 </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+          <FormField
+            control={form.control}
+            name="image_url"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Vision Board Image URL</FormLabel>
+                <FormControl>
+                  <Input {...field} placeholder="https://..." />
+                </FormControl>
+                <p className="text-[10px] text-muted-foreground">
+                  Paste a link from your Asset Manager.
+                </p>
                 <FormMessage />
               </FormItem>
             )}

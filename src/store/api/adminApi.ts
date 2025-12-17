@@ -18,6 +18,8 @@ import type {
   PortfolioItem,
   SiteContent,
   AnalyticsData,
+  Habit,
+  InventoryItem,
 } from "@/types";
 import { publicApi } from "./publicApi";
 
@@ -70,6 +72,8 @@ export const adminApi = createApi({
     "Dashboard",
     "MFA",
     "SiteContent",
+    "Habits",
+    "Inventory",
   ],
   endpoints: (builder) => ({
     // Auth & Security
@@ -1065,6 +1069,199 @@ export const adminApi = createApi({
       },
       invalidatesTags: ["Assets"],
     }),
+    // --- HABIT TRACKER ---
+    getHabits: builder.query<Habit[], void>({
+      queryFn: async () => {
+        const today = new Date();
+        const thirtyDaysAgo = new Date();
+        thirtyDaysAgo.setDate(today.getDate() - 30);
+
+        // Fetch habits and their logs for the last 30 days
+        const { data, error } = await supabase
+          .from("habits")
+          .select(`*, habit_logs(id, completed_date)`)
+          .eq("is_active", true)
+          .gte("habit_logs.completed_date", thirtyDaysAgo.toISOString())
+          .order("created_at", { ascending: true });
+
+        if (error) return { error };
+        return { data };
+      },
+      providesTags: ["Habits"],
+    }),
+
+    saveHabit: builder.mutation<Habit, Partial<Habit>>({
+      queryFn: async (habit) => {
+        const { id, ...updateData } = habit;
+        const promise = id
+          ? supabase.from("habits").update(updateData).eq("id", id)
+          : supabase.from("habits").insert(updateData);
+
+        const { data, error } = await promise.select().single();
+        if (error) return { error };
+        return { data };
+      },
+      invalidatesTags: ["Habits"],
+    }),
+
+    deleteHabit: builder.mutation<void, string>({
+      queryFn: async (id) => {
+        const { error } = await supabase.from("habits").delete().eq("id", id);
+        if (error) return { error };
+        return { data: undefined };
+      },
+      invalidatesTags: ["Habits"],
+    }),
+
+    toggleHabitLog: builder.mutation<void, { habit_id: string; date: string }>({
+      queryFn: async ({ habit_id, date }) => {
+        // ... (keep existing queryFn logic) ...
+        const { data: existing } = await supabase
+          .from("habit_logs")
+          .select("id")
+          .eq("habit_id", habit_id)
+          .eq("completed_date", date)
+          .single();
+
+        if (existing) {
+          const { error } = await supabase
+            .from("habit_logs")
+            .delete()
+            .eq("id", existing.id);
+          if (error) return { error };
+        } else {
+          const { error } = await supabase
+            .from("habit_logs")
+            .insert({ habit_id, completed_date: date });
+          if (error) return { error };
+        }
+        return { data: undefined };
+      },
+      // OPTIMISTIC UPDATE LOGIC
+      async onQueryStarted({ habit_id, date }, { dispatch, queryFulfilled }) {
+        const patchResult = dispatch(
+          adminApi.util.updateQueryData("getHabits", undefined, (draft) => {
+            const habit = draft.find((h) => h.id === habit_id);
+            if (habit) {
+              if (!habit.habit_logs) habit.habit_logs = [];
+
+              const existingIndex = habit.habit_logs.findIndex(
+                (l) => l.completed_date === date,
+              );
+
+              if (existingIndex !== -1) {
+                // Remove locally
+                habit.habit_logs.splice(existingIndex, 1);
+              } else {
+                // Add locally
+                habit.habit_logs.push({
+                  id: "temp-id-" + Date.now(), // Temporary ID
+                  habit_id,
+                  completed_date: date,
+                });
+              }
+            }
+          }),
+        );
+        try {
+          await queryFulfilled;
+        } catch {
+          patchResult.undo();
+        }
+      },
+    }),
+    // --- FOCUS MODE ---
+    logFocusSession: builder.mutation<
+      null,
+      { duration_minutes: number; task_id?: string | null; mode: string }
+    >({
+      queryFn: async (data) => {
+        const { error } = await supabase.from("focus_logs").insert({
+          duration_minutes: data.duration_minutes,
+          task_id: data.task_id,
+          mode: data.mode,
+          start_time: new Date().toISOString(), // Approximate start
+          completed: true,
+        });
+        if (error) return { error };
+        return { data: null };
+      },
+      invalidatesTags: ["Analytics"], // Update dashboard stats
+    }),
+    // --- INVENTORY ---
+    getInventory: builder.query<InventoryItem[], void>({
+      queryFn: async () => {
+        const { data, error } = await supabase
+          .from("inventory_items")
+          .select("*")
+          .order("purchase_date", { ascending: false });
+        if (error) return { error };
+        return { data };
+      },
+      providesTags: ["Inventory"],
+    }),
+    addInventoryItem: builder.mutation<InventoryItem, Partial<InventoryItem>>({
+      queryFn: async (item) => {
+        const { data, error } = await supabase
+          .from("inventory_items")
+          .insert(item)
+          .select()
+          .single();
+        if (error) return { error };
+        return { data };
+      },
+      invalidatesTags: ["Inventory"],
+    }),
+    updateInventoryItem: builder.mutation<
+      InventoryItem,
+      Partial<InventoryItem>
+    >({
+      queryFn: async (item) => {
+        const { id, ...updateData } = item;
+        const { data, error } = await supabase
+          .from("inventory_items")
+          .update(updateData)
+          .eq("id", id!)
+          .select()
+          .single();
+        if (error) return { error };
+        return { data };
+      },
+      invalidatesTags: ["Inventory"],
+    }),
+    deleteInventoryItem: builder.mutation<void, string>({
+      queryFn: async (id) => {
+        const { error } = await supabase
+          .from("inventory_items")
+          .delete()
+          .eq("id", id);
+        if (error) return { error };
+        return { data: undefined };
+      },
+      invalidatesTags: ["Inventory"],
+    }),
+    getSecuritySettings: builder.query<{ lockdown_level: number }, void>({
+      queryFn: async () => {
+        const { data, error } = await supabase
+          .from("security_settings")
+          .select("lockdown_level")
+          .single();
+        if (error) return { error };
+        return { data };
+      },
+      providesTags: ["SiteSettings"],
+    }),
+    updateLockdownLevel: builder.mutation<void, number>({
+      queryFn: async (level) => {
+        const { error } = await supabase
+          .from("security_settings")
+          .update({ lockdown_level: level })
+          .eq("id", 1);
+        if (error) return { error };
+        return { data: undefined };
+      },
+      invalidatesTags: ["SiteSettings"],
+    }),
   }),
 });
 
@@ -1127,4 +1324,15 @@ export const {
   useUnenrollMfaFactorMutation,
   useUpdateUserPasswordMutation,
   useSignOutMutation,
+  useGetHabitsQuery,
+  useSaveHabitMutation,
+  useDeleteHabitMutation,
+  useToggleHabitLogMutation,
+  useLogFocusSessionMutation,
+  useGetInventoryQuery,
+  useAddInventoryItemMutation,
+  useUpdateInventoryItemMutation,
+  useDeleteInventoryItemMutation,
+  useGetSecuritySettingsQuery,
+  useUpdateLockdownLevelMutation,
 } = adminApi;
