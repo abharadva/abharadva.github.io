@@ -16,7 +16,7 @@ export default function AdminFinancePage() {
   }
 
   return (
-    <AdminLayout>
+    <AdminLayout title="Finance">
       <FinanceManager />
     </AdminLayout>
   );

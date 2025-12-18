@@ -16,7 +16,7 @@ export default function AdminAssetsPage() {
   }
 
   return (
-    <AdminLayout>
+    <AdminLayout title="Asset Manager">
       <AssetManager />
     </AdminLayout>
   );

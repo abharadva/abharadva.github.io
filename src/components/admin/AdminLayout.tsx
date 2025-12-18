@@ -37,6 +37,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import FocusTimer from "./focus/FocusTimer";
 import { GlobalCommandPalette } from "../GlobalCommandPalette";
+import Head from "next/head";
 
 const formatTime = (seconds: number) => {
   const h = Math.floor(seconds / 3600)
@@ -114,10 +115,17 @@ const Breadcrumbs = () => {
   );
 };
 
-export function AdminLayout({ children }: { children: ReactNode }) {
+interface AdminLayoutProps {
+  children: ReactNode;
+  title?: string;
+}
+
+export function AdminLayout({ children, title }: AdminLayoutProps) {
   const router = useRouter();
   const [mobileSidebarOpen, setMobileSidebarOpen] = useState(false);
   const { session } = useAuthGuard();
+
+  const pageTitle = title ? `${title} | Admin Panel` : "Admin Panel";
 
   const { activeSession, elapsedTime } = useAppSelector(
     (state) => state.learningSession,
@@ -136,6 +144,9 @@ export function AdminLayout({ children }: { children: ReactNode }) {
 
   return (
     <div className="min-h-screen bg-secondary/30">
+      <Head>
+        <title>{pageTitle}</title>
+      </Head>
       <GlobalCommandPalette />
       <FocusTimer />
       <div className="hidden lg:fixed lg:inset-y-0 lg:z-50 lg:flex lg:w-64 lg:flex-col">

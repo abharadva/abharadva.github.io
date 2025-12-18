@@ -16,7 +16,7 @@ export default function AdminTasksPage() {
   }
 
   return (
-    <AdminLayout>
+    <AdminLayout title="Task Board">
       <TaskManager />
     </AdminLayout>
   );

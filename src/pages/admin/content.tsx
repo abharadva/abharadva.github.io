@@ -15,7 +15,7 @@ export default function AdminContentPage() {
   }
 
   return (
-    <AdminLayout>
+    <AdminLayout title="Content Manager">
       <ContentManager />
     </AdminLayout>
   );

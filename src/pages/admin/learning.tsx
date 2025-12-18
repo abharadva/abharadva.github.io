@@ -16,7 +16,7 @@ export default function AdminLearningPage() {
   }
 
   return (
-    <AdminLayout>
+    <AdminLayout title="Learning Center">
       <LearningManager />
     </AdminLayout>
   );

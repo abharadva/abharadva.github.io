@@ -21,7 +21,7 @@ export default function AdminCalendarPage() {
   }
 
   return (
-    <AdminLayout>
+    <AdminLayout title="Calendar">
       <CommandCalendar onNavigate={handleNavigate} />
     </AdminLayout>
   );

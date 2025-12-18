@@ -16,7 +16,7 @@ export default function AdminSettingsPage() {
   }
 
   return (
-    <AdminLayout>
+    <AdminLayout title="Site Settings">
       <SiteSettingsManager />
     </AdminLayout>
   );

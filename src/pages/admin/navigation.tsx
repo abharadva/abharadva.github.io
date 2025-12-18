@@ -16,7 +16,7 @@ export default function AdminNavigationPage() {
   }
 
   return (
-    <AdminLayout>
+    <AdminLayout title="Navigation">
       <NavigationManager />
     </AdminLayout>
   );

@@ -16,7 +16,7 @@ export default function AdminBlogPage() {
   }
 
   return (
-    <AdminLayout>
+    <AdminLayout title="Blog Manager">
       <BlogManager />
     </AdminLayout>
   );

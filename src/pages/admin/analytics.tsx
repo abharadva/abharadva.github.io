@@ -16,7 +16,7 @@ export default function AdminAnalyticsPage() {
   }
 
   return (
-    <AdminLayout>
+    <AdminLayout title="Analytics">
       <AnalyticsDashboard />
     </AdminLayout>
   );
