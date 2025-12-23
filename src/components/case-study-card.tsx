@@ -36,27 +36,32 @@ export default function FeaturedProject({
       whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true, amount: 0.2 }}
       transition={{ duration: 0.6, ease: "easeOut" }}
-      className="grid grid-cols-1 items-center gap-8 md:grid-cols-10"
+      className="grid grid-cols-1 items-center gap-8 md:grid-cols-12 lg:gap-12"
     >
       {/* Image Column */}
       <div
         className={cn(
-          "group relative md:col-span-6",
-          isReversed ? "md:col-start-5" : "",
+          "group relative md:col-span-7",
+          // On Desktop: Alternate sides. On Mobile: Always first.
+          isReversed ? "md:order-last" : "md:order-first",
         )}
       >
         <a
           href={project.link_url || "#"}
           target="_blank"
           rel="noopener noreferrer"
-          className="block rounded-lg overflow-hidden bg-secondary shadow-lg transition-all duration-300 hover:shadow-primary/20"
+          className="block rounded-xl overflow-hidden bg-secondary shadow-lg transition-all duration-300 hover:shadow-primary/20 border border-border/50"
         >
-          {project.image_url && (
+          {project.image_url ? (
             <img
               src={project.image_url}
               alt={project.title}
               className="aspect-video w-full object-cover object-center transition-transform duration-500 group-hover:scale-105"
             />
+          ) : (
+            <div className="aspect-video w-full bg-secondary flex items-center justify-center text-muted-foreground">
+              No Image Available
+            </div>
           )}
         </a>
       </div>
@@ -64,12 +69,15 @@ export default function FeaturedProject({
       {/* Text Content Column */}
       <div
         className={cn(
-          "relative md:col-span-4",
-          isReversed ? "md:col-start-1 md:row-start-1 md:text-right" : "",
+          "relative flex flex-col md:col-span-5",
+          // On Desktop: Align text based on order. On Mobile: Always left align.
+          isReversed
+            ? "md:text-right md:items-end"
+            : "md:text-left md:items-start",
         )}
       >
-        <p className="font-mono text-sm text-primary">Featured Project</p>
-        <h3 className="mt-2 text-2xl font-bold text-foreground">
+        <p className="font-mono text-sm text-primary mb-2">Featured Project</p>
+        <h3 className="text-2xl font-bold text-foreground mb-4">
           <a
             href={project.link_url || "#"}
             target="_blank"
@@ -79,7 +87,18 @@ export default function FeaturedProject({
             {project.title}
           </a>
         </h3>
-        <div className="my-4 rounded-md bg-card p-6 shadow-md border border-border">
+
+        {/* Description Box */}
+        <div
+          className={cn(
+            "rounded-lg bg-card p-6 shadow-md border border-border z-10 w-full",
+            // Overlap effect only on Desktop
+            "md:w-[120%] lg:w-[130%]",
+            isReversed
+              ? "md:mr-[-20%] lg:mr-[-30%]"
+              : "md:ml-[-20%] lg:ml-[-30%]",
+          )}
+        >
           <div
             className="prose prose-sm max-w-none text-muted-foreground
             prose-p:text-muted-foreground
@@ -92,22 +111,28 @@ export default function FeaturedProject({
             </ReactMarkdown>
           </div>
         </div>
+
+        {/* Tech Stack */}
         {project.tags && project.tags.length > 0 && (
           <div
             className={cn(
-              "flex flex-wrap gap-2 font-mono text-sm text-muted-foreground",
-              isReversed ? "md:justify-end" : "",
+              "flex flex-wrap gap-2 font-mono text-xs text-muted-foreground mt-6",
+              isReversed ? "md:justify-end" : "md:justify-start",
             )}
           >
             {project.tags.map((tag) => (
-              <span key={tag}>{tag}</span>
+              <span key={tag} className="bg-secondary/50 px-2 py-1 rounded">
+                {tag}
+              </span>
             ))}
           </div>
         )}
+
+        {/* Links */}
         <div
           className={cn(
-            "mt-4 flex items-center gap-3",
-            isReversed ? "md:justify-end" : "",
+            "mt-6 flex items-center gap-4",
+            isReversed ? "md:justify-end" : "md:justify-start",
           )}
         >
           {githubUrl && (
@@ -116,9 +141,9 @@ export default function FeaturedProject({
               target="_blank"
               rel="noopener noreferrer"
               aria-label="GitHub Repository"
-              className="text-muted-foreground transition-colors hover:text-primary"
+              className="text-muted-foreground transition-colors hover:text-primary hover:scale-110"
             >
-              <Github className="size-5" />
+              <Github className="size-6" />
             </a>
           )}
           {project.link_url && (
@@ -127,9 +152,9 @@ export default function FeaturedProject({
               target="_blank"
               rel="noopener noreferrer"
               aria-label="Live Site"
-              className="text-muted-foreground transition-colors hover:text-primary"
+              className="text-muted-foreground transition-colors hover:text-primary hover:scale-110"
             >
-              <ExternalLink className="size-5" />
+              <ExternalLink className="size-6" />
             </a>
           )}
         </div>

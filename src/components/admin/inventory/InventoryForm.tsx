@@ -1,3 +1,4 @@
+// src/components/admin/inventory/InventoryForm.tsx
 "use client";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -63,7 +64,7 @@ export default function InventoryForm({
       category: item?.category || "",
       serial_number: item?.serial_number || "",
       purchase_price: item?.purchase_price || 0,
-      current_value: item?.current_value || 0,
+      current_value: item?.current_value || item?.purchase_price || 0,
       purchase_date: item?.purchase_date || "",
       warranty_expiry: item?.warranty_expiry || "",
       notes: item?.notes || "",
@@ -75,12 +76,9 @@ export default function InventoryForm({
     try {
       const payload = {
         ...values,
-        current_value: values.current_value || values.purchase_price, // Default to purchase price if empty
+        current_value: values.current_value || values.purchase_price,
         purchase_date: values.purchase_date || null,
         warranty_expiry: values.warranty_expiry || null,
-        serial_number: values.serial_number || null,
-        notes: values.notes || null,
-        image_url: values.image_url || null,
       };
 
       if (item) {
@@ -109,7 +107,7 @@ export default function InventoryForm({
             <FormItem>
               <FormLabel>Item Name *</FormLabel>
               <FormControl>
-                <Input {...field} placeholder="e.g. MacBook Pro M3" />
+                <Input {...field} placeholder="e.g. MacBook Pro M3" autoFocus />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -215,7 +213,24 @@ export default function InventoryForm({
             <FormItem>
               <FormLabel>Notes</FormLabel>
               <FormControl>
-                <Textarea {...field} rows={3} />
+                <Textarea
+                  {...field}
+                  rows={3}
+                  placeholder="Condition, location, etc."
+                />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+        <FormField
+          control={form.control}
+          name="image_url"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Image URL</FormLabel>
+              <FormControl>
+                <Input {...field} placeholder="Link from Asset Manager..." />
               </FormControl>
               <FormMessage />
             </FormItem>

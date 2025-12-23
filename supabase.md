@@ -229,7 +229,7 @@ DO $$ BEGIN CREATE TYPE learning_status AS ENUM ('To Learn', 'Learning', 'Practi
 CREATE TABLE IF NOT EXISTS events ( id UUID PRIMARY KEY DEFAULT uuid_generate_v4(), user_id UUID REFERENCES auth.users(id) ON DELETE CASCADE DEFAULT auth.uid(), title TEXT NOT NULL, description TEXT, start_time TIMESTAMPTZ NOT NULL, end_time TIMESTAMPTZ, is_all_day BOOLEAN DEFAULT false, created_at TIMESTAMPTZ DEFAULT now(), updated_at TIMESTAMPTZ DEFAULT now() );
 ALTER TABLE events ENABLE ROW LEVEL SECURITY; DROP POLICY IF EXISTS "Admin can manage their own events" ON events; CREATE POLICY "Admin can manage their own events" ON events FOR ALL USING (auth.uid() = user_id) WITH CHECK (auth.uid() = user_id); DROP TRIGGER IF EXISTS update_events_updated_at ON events; CREATE TRIGGER update_events_updated_at BEFORE UPDATE ON events FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
 
-CREATE TABLE IF NOT EXISTS notes ( id UUID PRIMARY KEY DEFAULT uuid_generate_v4(), user_id UUID REFERENCES auth.users(id) ON DELETE CASCADE DEFAULT auth.uid(), title TEXT, content TEXT, tags TEXT[], is_pinned BOOLEAN DEFAULT false, created_at TIMESTAMPTZ DEFAULT now(), updated_at TIMESTAMPTZ DEFAULT now() );
+CREATE TABLE IF NOT EXISTS notes ( id UUID PRIMARY KEY DEFAULT uuid_generate_v4(), user_id UUID REFERENCES auth.users(id) ON DELETE CASCADE DEFAULT auth.uid(), title TEXT, content TEXT, color TEXT, tags TEXT[], is_pinned BOOLEAN DEFAULT false, created_at TIMESTAMPTZ DEFAULT now(), updated_at TIMESTAMPTZ DEFAULT now() );
 ALTER TABLE notes ENABLE ROW LEVEL SECURITY; DROP POLICY IF EXISTS "Admin can manage their own notes" ON notes; CREATE POLICY "Admin can manage their own notes" ON notes FOR ALL USING (auth.uid() = user_id) WITH CHECK (auth.uid() = user_id); DROP TRIGGER IF EXISTS update_notes_updated_at ON notes; CREATE TRIGGER update_notes_updated_at BEFORE UPDATE ON notes FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
 
 CREATE TABLE IF NOT EXISTS tasks ( id UUID PRIMARY KEY DEFAULT uuid_generate_v4(), user_id UUID REFERENCES auth.users(id) ON DELETE CASCADE DEFAULT auth.uid(), title TEXT NOT NULL, status task_status DEFAULT 'todo', due_date DATE, priority task_priority DEFAULT 'medium', created_at TIMESTAMPTZ DEFAULT now(), updated_at TIMESTAMPTZ DEFAULT now() );
@@ -262,21 +262,21 @@ ALTER TABLE storage_assets ENABLE ROW LEVEL SECURITY; DROP POLICY IF EXISTS "Adm
 
 
 -- ========= RPC FUNCTIONS =========
-CREATE OR REPLACE FUNCTION get_calendar_data(start_date_param date, end_date_param date) 
-RETURNS TABLE(item_id UUID, title TEXT, start_time TIMESTAMPTZ, end_time TIMESTAMPTZ, item_type TEXT, data JSONB) AS $$ 
-BEGIN 
-  RETURN QUERY 
+CREATE OR REPLACE FUNCTION get_calendar_data(start_date_param date, end_date_param date)
+RETURNS TABLE(item_id UUID, title TEXT, start_time TIMESTAMPTZ, end_time TIMESTAMPTZ, item_type TEXT, data JSONB) AS $$
+BEGIN
+  RETURN QUERY
   -- 1. Events (Individual)
-  SELECT e.id, e.title, e.start_time, e.end_time, 'event' AS item_type, jsonb_build_object('description', e.description, 'is_all_day', e.is_all_day) FROM events e WHERE e.user_id = auth.uid() AND e.start_time :: date BETWEEN start_date_param AND end_date_param 
-  
-  UNION ALL 
+  SELECT e.id, e.title, e.start_time, e.end_time, 'event' AS item_type, jsonb_build_object('description', e.description, 'is_all_day', e.is_all_day) FROM events e WHERE e.user_id = auth.uid() AND e.start_time :: date BETWEEN start_date_param AND end_date_param
+
+  UNION ALL
   -- 2. Tasks (Individual)
-  SELECT t.id, t.title, (t.due_date + interval '9 hour'):: timestamptz, NULL :: timestamptz, 'task' AS item_type, jsonb_build_object('status', t.status, 'priority', t.priority) FROM tasks t WHERE t.user_id = auth.uid() AND t.due_date BETWEEN start_date_param AND end_date_param 
-  
+  SELECT t.id, t.title, (t.due_date + interval '9 hour'):: timestamptz, NULL :: timestamptz, 'task' AS item_type, jsonb_build_object('status', t.status, 'priority', t.priority) FROM tasks t WHERE t.user_id = auth.uid() AND t.due_date BETWEEN start_date_param AND end_date_param
+
   UNION ALL
   -- 3. Habit Summary (Grouped per day)
-  SELECT 
-    (SELECT uuid_generate_v4()), 
+  SELECT
+    (SELECT uuid_generate_v4()),
     'Habits Completed',
     (hl.completed_date + interval '7 hour')::timestamptz,
     NULL::timestamptz,
@@ -292,7 +292,7 @@ BEGIN
   WHERE h.user_id = auth.uid()
   AND hl.completed_date BETWEEN start_date_param AND end_date_param
   GROUP BY hl.completed_date
-  
+
   UNION ALL
   -- 4. Transaction Summary (Grouped per day) -- NEW!
   SELECT
@@ -315,13 +315,13 @@ BEGIN
   GROUP BY tr.date;
 
 END; $$ LANGUAGE plpgsql;
-CREATE OR REPLACE FUNCTION increment_blog_post_view (post_id_to_increment UUID) 
-RETURNS void LANGUAGE plpgsql AS $$ 
-BEGIN 
-  UPDATE blog_posts 
-  SET views = views + 1 
+CREATE OR REPLACE FUNCTION increment_blog_post_view (post_id_to_increment UUID)
+RETURNS void LANGUAGE plpgsql AS $$
+BEGIN
+  UPDATE blog_posts
+  SET views = views + 1
   WHERE id = post_id_to_increment AND published = true;
-END; 
+END;
 $$;
 CREATE OR REPLACE FUNCTION update_section_order(section_ids UUID[]) RETURNS void AS $$ BEGIN FOR i IN 1..array_length(section_ids, 1) LOOP UPDATE portfolio_sections SET display_order = i WHERE id = section_ids[i]; END LOOP; END; $$ LANGUAGE plpgsql;
 CREATE OR REPLACE FUNCTION get_total_blog_views() RETURNS BIGINT AS $$ DECLARE total_views BIGINT; BEGIN SELECT SUM(views) INTO total_views FROM blog_posts WHERE published = true; RETURN COALESCE(total_views, 0); END; $$ LANGUAGE plpgsql;

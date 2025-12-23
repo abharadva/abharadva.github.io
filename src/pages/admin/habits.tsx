@@ -1,3 +1,4 @@
+// src/pages/admin/habits.tsx
 "use client";
 import React, { useState } from "react";
 import { AdminLayout } from "@/components/admin/AdminLayout";
@@ -10,8 +11,8 @@ import {
 } from "@/store/api/adminApi";
 import HabitGrid from "@/components/admin/habits/HabitGrid";
 import HabitForm from "@/components/admin/habits/HabitForm";
-import HabitStats from "@/components/admin/habits/HabitStats"; // Import
-import HabitHeatmapModal from "@/components/admin/habits/HabitHeatmapModal"; // Import
+import HabitStats from "@/components/admin/habits/HabitStats";
+import HabitHeatmapModal from "@/components/admin/habits/HabitHeatmapModal";
 import { Button } from "@/components/ui/button";
 import { Plus, CheckSquare } from "lucide-react";
 import {
@@ -22,15 +23,13 @@ import {
 } from "@/components/ui/sheet";
 import { toast } from "sonner";
 import { Habit } from "@/types";
-import { useConfirm } from "@/components/providers/ConfirmDialogProvider"; // Confirm
+import { useConfirm } from "@/components/providers/ConfirmDialogProvider";
 import { PerfectDayBadge } from "@/components/admin/habits/PerfectDayBadge";
 
 export default function AdminHabitsPage() {
   const { isLoading: isAuthLoading } = useAuthGuard();
   const [isSheetOpen, setIsSheetOpen] = useState(false);
   const [editingHabit, setEditingHabit] = useState<Habit | null>(null);
-
-  // New State for Heatmap
   const [selectedHabitForStats, setSelectedHabitForStats] =
     useState<Habit | null>(null);
 
@@ -43,12 +42,7 @@ export default function AdminHabitsPage() {
     try {
       await toggleLog({ habit_id: habitId, date }).unwrap();
     } catch {
-      toast.error("Failed to update status", {
-        action: {
-          label: "Retry",
-          onClick: () => handleToggle(habitId, date),
-        },
-      });
+      toast.error("Failed to update status");
     }
   };
 
@@ -87,17 +81,22 @@ export default function AdminHabitsPage() {
 
   return (
     <AdminLayout title="Habit Tracker">
-      <div className="space-y-8">
-        <div className="flex items-center justify-between">
+      <div className="space-y-4 sm:space-y-8">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
           <div>
-            <h2 className="text-2xl font-bold flex items-center gap-2">
-              <CheckSquare className="size-6 text-primary" /> Habit Tracker
+            <h2 className="text-xl sm:text-2xl font-bold flex items-center gap-2">
+              <CheckSquare className="size-5 sm:size-6 text-primary" /> Habit
+              Tracker
             </h2>
-            <p className="text-muted-foreground">
+            <p className="text-muted-foreground text-sm hidden sm:block">
               Level up your life, one day at a time.
             </p>
           </div>
-          <Button onClick={openCreate} className="shadow-lg shadow-primary/20">
+          <Button
+            onClick={openCreate}
+            size="sm"
+            className="w-full sm:w-auto shadow-lg shadow-primary/20"
+          >
             <Plus className="mr-2 size-4" /> New Habit
           </Button>
         </div>
@@ -105,7 +104,9 @@ export default function AdminHabitsPage() {
         {/* 1. Gamified Stats */}
         {!isDataLoading && habits.length > 0 && <HabitStats habits={habits} />}
 
-        <PerfectDayBadge habits={habits} />
+        <div className="flex justify-center -my-2 sm:my-0">
+          <PerfectDayBadge habits={habits} />
+        </div>
 
         {/* 2. Main Grid */}
         {isDataLoading ? (
@@ -116,13 +117,13 @@ export default function AdminHabitsPage() {
             onToggle={handleToggle}
             onDelete={handleDelete}
             onEdit={openEdit}
-            onViewStats={setSelectedHabitForStats} // Pass the handler
+            onViewStats={setSelectedHabitForStats}
           />
         )}
 
         {/* Forms & Modals */}
         <Sheet open={isSheetOpen} onOpenChange={setIsSheetOpen}>
-          <SheetContent>
+          <SheetContent className="w-full sm:max-w-md">
             <SheetHeader>
               <SheetTitle>
                 {editingHabit ? "Edit Habit" : "Create New Habit"}

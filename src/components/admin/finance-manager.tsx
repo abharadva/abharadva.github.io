@@ -119,25 +119,25 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { motion } from "framer-motion";
-import { Separator } from "../ui/separator";
+import { Separator } from "@/components/ui/separator";
 import {
   Tooltip,
   TooltipContent,
   TooltipProvider,
   TooltipTrigger,
-} from "../ui/tooltip";
+} from "@/components/ui/tooltip";
 import dynamic from "next/dynamic";
-import { Badge } from "../ui/badge";
+import { Badge } from "@/components/ui/badge";
 import { cn, parseLocalDate } from "@/lib/utils";
-import { ScrollArea } from "../ui/scroll-area";
-import { Progress } from "../ui/progress";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import { Progress } from "@/components/ui/progress";
 import {
   Sheet,
   SheetClose,
   SheetContent,
   SheetHeader,
   SheetTitle,
-} from "../ui/sheet";
+} from "@/components/ui/sheet";
 import {
   Drawer,
   DrawerContent,
@@ -169,8 +169,8 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
   AlertDialogTrigger,
-} from "../ui/alert-dialog";
-import { useConfirm } from "../providers/ConfirmDialogProvider";
+} from "@/components/ui/alert-dialog";
+import { useConfirm } from "@/components/providers/ConfirmDialogProvider";
 
 // --- DYNAMIC IMPORTS ---
 const Calendar = dynamic(
@@ -316,7 +316,7 @@ const MonthlyDetailSheet = ({
             </Button>
           </SheetClose>
         </div>
-        <ScrollArea className="h-[calc(100vh-8rem)] pr-4 mt-4">
+        <ScrollArea className="h-[calc(100vh-8rem)] ">
           <div className="grid grid-cols-2 gap-4 my-4">
             <StatCard
               title="Income"

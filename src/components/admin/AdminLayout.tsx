@@ -5,28 +5,27 @@ import Link from "next/link";
 import { Sidebar } from "@/components/admin/Sidebar";
 import { Button } from "@/components/ui/button";
 import {
-  LogOut,
   Menu,
   Timer,
   Loader2,
   Home,
   ChevronRight,
-  User as UserIcon,
   Plus,
   StickyNote,
   ListTodo,
   Banknote,
+  LogOut,
   ExternalLink,
 } from "lucide-react";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
-import { Separator } from "../ui/separator";
+import { Separator } from "@/components/ui/separator";
 import { useAppSelector } from "@/store/hooks";
 import {
   useGetLearningDataQuery,
   useSignOutMutation,
 } from "@/store/api/adminApi";
 import { useAuthGuard } from "@/hooks/useAuthGuard";
-import { Avatar, AvatarFallback } from "../ui/avatar";
+import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -36,7 +35,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import FocusTimer from "./focus/FocusTimer";
-import { GlobalCommandPalette } from "../GlobalCommandPalette";
+import { GlobalCommandPalette } from "@/components/GlobalCommandPalette";
 import Head from "next/head";
 
 const formatTime = (seconds: number) => {
@@ -52,11 +51,9 @@ const formatTime = (seconds: number) => {
 
 const Breadcrumbs = () => {
   const router = useRouter();
-  // Remove query params for breadcrumb display
   const cleanPath = router.asPath.split("?")[0];
   const pathSegments = cleanPath.split("/").filter((segment) => segment);
 
-  // Case: Dashboard
   if (pathSegments.length <= 1) {
     return (
       <div className="flex items-center gap-2 text-sm font-medium text-muted-foreground">
@@ -66,29 +63,19 @@ const Breadcrumbs = () => {
     );
   }
 
-  const currentSegment = pathSegments[pathSegments.length - 1];
-
   return (
     <>
-      {/* Mobile View: Just current page title */}
       <div className="md:hidden font-semibold text-lg capitalize tracking-tight">
-        {currentSegment.replace(/-/g, " ")}
+        {pathSegments[pathSegments.length - 1].replace(/-/g, " ")}
       </div>
-
-      {/* Desktop View: Full Breadcrumbs */}
       <nav className="hidden items-center gap-2 text-sm font-medium md:flex">
         <Link
           href="/admin"
-          className="text-muted-foreground hover:text-foreground"
+          className="text-muted-foreground hover:text-foreground transition-colors"
         >
           Admin
         </Link>
         {pathSegments.slice(1).map((segment, index) => {
-          // Adjust logic: if we have ['admin', 'blog', 'create'], length is 3.
-          // Slice(1) gives ['blog', 'create'].
-          // index 0 is blog. index 1 is create.
-          // pathSegments.length - 2 is 1. So 'create' is last.
-
           const isLast = index === pathSegments.slice(1).length - 1;
           const href = "/admin/" + pathSegments.slice(1, index + 2).join("/");
 
@@ -102,7 +89,7 @@ const Breadcrumbs = () => {
               ) : (
                 <Link
                   href={href}
-                  className="text-muted-foreground hover:text-foreground capitalize"
+                  className="text-muted-foreground hover:text-foreground transition-colors capitalize"
                 >
                   {segment.replace(/-/g, " ")}
                 </Link>
@@ -143,30 +130,40 @@ export function AdminLayout({ children, title }: AdminLayoutProps) {
     : null;
 
   return (
-    <div className="min-h-screen bg-secondary/30">
+    // FIX: Changed min-h-screen to min-h-dvh for better mobile browser support
+    <div className="min-h-[100dvh] bg-secondary/30 flex flex-col">
       <Head>
         <title>{pageTitle}</title>
+        <meta
+          name="viewport"
+          content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=0"
+        />
       </Head>
       <GlobalCommandPalette />
       <FocusTimer />
-      <div className="hidden lg:fixed lg:inset-y-0 lg:z-50 lg:flex lg:w-64 lg:flex-col">
-        <Sidebar />
+
+      <div className="hidden lg:fixed lg:inset-y-0 lg:z-50 lg:flex lg:w-64 lg:flex-col border-r border-border bg-background">
+        <Sidebar className="border-r-0" />
       </div>
 
-      <div className="lg:pl-64">
+      <Sheet open={mobileSidebarOpen} onOpenChange={setMobileSidebarOpen}>
+        <SheetContent side="left" className="w-64 p-0">
+          <Sidebar onLinkClick={() => setMobileSidebarOpen(false)} />
+        </SheetContent>
+      </Sheet>
+
+      <div className="lg:pl-64 flex flex-col min-h-[100dvh] transition-all duration-300">
         <header className="sticky top-0 z-40 flex h-16 shrink-0 items-center gap-x-4 border-b border-border bg-background/80 px-4 shadow-sm backdrop-blur-sm sm:gap-x-6 sm:px-6 lg:px-8 justify-between lg:justify-start">
           <div className="flex items-center gap-4">
-            <Sheet open={mobileSidebarOpen} onOpenChange={setMobileSidebarOpen}>
-              <SheetTrigger asChild>
-                <Button variant="ghost" size="icon" className="lg:hidden -ml-2">
-                  <Menu className="h-6 w-6" />
-                  <span className="sr-only">Open sidebar</span>
-                </Button>
-              </SheetTrigger>
-              <SheetContent side="left" className="w-64 p-0">
-                <Sidebar onLinkClick={() => setMobileSidebarOpen(false)} />
-              </SheetContent>
-            </Sheet>
+            <Button
+              variant="ghost"
+              size="icon"
+              className="lg:hidden -ml-2"
+              onClick={() => setMobileSidebarOpen(true)}
+            >
+              <Menu className="h-6 w-6" />
+              <span className="sr-only">Open sidebar</span>
+            </Button>
             <div className="h-6 w-px bg-border lg:hidden" aria-hidden="true" />
             <Breadcrumbs />
           </div>
@@ -196,7 +193,6 @@ export function AdminLayout({ children, title }: AdminLayoutProps) {
 
             <Separator orientation="vertical" className="h-6 hidden lg:block" />
 
-            {/* Mobile Quick Add in Header */}
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <Button
@@ -211,16 +207,13 @@ export function AdminLayout({ children, title }: AdminLayoutProps) {
                 <DropdownMenuLabel>Quick Add</DropdownMenuLabel>
                 <DropdownMenuSeparator />
                 <DropdownMenuItem onClick={() => router.push("/admin/tasks")}>
-                  <ListTodo className="mr-2 h-4 w-4" />
-                  New Task
+                  <ListTodo className="mr-2 h-4 w-4" /> New Task
                 </DropdownMenuItem>
                 <DropdownMenuItem onClick={() => router.push("/admin/notes")}>
-                  <StickyNote className="mr-2 h-4 w-4" />
-                  New Note
+                  <StickyNote className="mr-2 h-4 w-4" /> New Note
                 </DropdownMenuItem>
                 <DropdownMenuItem onClick={() => router.push("/admin/finance")}>
-                  <Banknote className="mr-2 h-4 w-4" />
-                  New Transaction
+                  <Banknote className="mr-2 h-4 w-4" /> New Transaction
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
@@ -259,36 +252,32 @@ export function AdminLayout({ children, title }: AdminLayoutProps) {
           </div>
         </header>
 
-        <main className="py-6 lg:py-10">
-          <div className="px-4 sm:px-6 lg:px-8">{children}</div>
+        <main className="flex-1 py-6 lg:py-10">
+          <div className="px-4 sm:px-6 lg:px-8 h-full">{children}</div>
         </main>
       </div>
 
-      {/* Desktop Quick Add FAB (Hidden on Mobile) */}
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
           <Button
-            className="hidden lg:flex fixed bottom-6 right-6 h-14 w-14 rounded-full shadow-lg z-50"
+            className="hidden lg:flex fixed bottom-6 right-6 h-14 w-14 rounded-full shadow-lg z-50 bg-primary hover:bg-primary/90 text-primary-foreground"
             size="icon"
           >
             <Plus className="h-6 w-6" />
             <span className="sr-only">Quick Add</span>
           </Button>
         </DropdownMenuTrigger>
-        <DropdownMenuContent align="end" side="top" className="mb-2">
+        <DropdownMenuContent align="end" side="top" className="mb-2 w-48">
           <DropdownMenuLabel>Quick Add</DropdownMenuLabel>
           <DropdownMenuSeparator />
           <DropdownMenuItem onClick={() => router.push("/admin/tasks")}>
-            <ListTodo className="mr-2 h-4 w-4" />
-            New Task
+            <ListTodo className="mr-2 h-4 w-4" /> New Task
           </DropdownMenuItem>
           <DropdownMenuItem onClick={() => router.push("/admin/notes")}>
-            <StickyNote className="mr-2 h-4 w-4" />
-            New Note
+            <StickyNote className="mr-2 h-4 w-4" /> New Note
           </DropdownMenuItem>
           <DropdownMenuItem onClick={() => router.push("/admin/finance")}>
-            <Banknote className="mr-2 h-4 w-4" />
-            New Transaction
+            <Banknote className="mr-2 h-4 w-4" /> New Transaction
           </DropdownMenuItem>
         </DropdownMenuContent>
       </DropdownMenu>

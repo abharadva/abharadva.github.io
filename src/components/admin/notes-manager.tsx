@@ -18,47 +18,22 @@ import {
   Plus,
   StickyNote,
   Loader2,
-  LayoutGrid,
-  List,
-  MoreHorizontal,
+  Tag,
+  X,
 } from "lucide-react";
 import { Button } from "../ui/button";
-import {
-  Card,
-  CardContent,
-  CardFooter,
-  CardHeader,
-  CardTitle,
-} from "../ui/card";
+import { Card, CardContent, CardFooter, CardHeader } from "../ui/card";
 import { Badge } from "../ui/badge";
-import {
-  Sheet,
-  SheetContent,
-  SheetHeader,
-  SheetTitle,
-  SheetDescription,
-} from "../ui/sheet";
+import { Sheet, SheetContent } from "../ui/sheet";
 import { Input } from "../ui/input";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "../ui/table";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "../ui/dropdown-menu";
-import { ToggleGroup, ToggleGroupItem } from "../ui/toggle-group";
 import { toast } from "sonner";
-import { format } from "date-fns";
+import { formatDistanceToNow } from "date-fns";
 import { cn } from "@/lib/utils";
 import { useConfirm } from "../providers/ConfirmDialogProvider";
+import ReactMarkdown from "react-markdown";
+import { ScrollArea, ScrollBar } from "../ui/scroll-area"; // Import ScrollArea
 
+// NoteCard Component (Same as before)
 const NoteCard = ({
   note,
   onEdit,
@@ -72,29 +47,34 @@ const NoteCard = ({
 }) => (
   <motion.div
     layout
-    initial={{ opacity: 0 }}
-    animate={{ opacity: 1 }}
-    exit={{ opacity: 0 }}
+    initial={{ opacity: 0, scale: 0.9 }}
+    animate={{ opacity: 1, scale: 1 }}
+    exit={{ opacity: 0, scale: 0.9 }}
+    transition={{ type: "spring", stiffness: 300, damping: 30 }}
   >
     <Card
       className={cn(
-        "flex flex-col h-full hover:border-primary/50 transition-colors",
-        note.is_pinned && "bg-secondary border-primary/20",
+        "flex flex-col h-full hover:shadow-md transition-shadow duration-300 relative overflow-hidden border-t-4",
+        note.is_pinned && "bg-secondary/50",
       )}
+      style={{ borderTopColor: note.color || "hsl(var(--border))" }}
     >
-      <CardHeader>
+      <CardHeader className="pb-2">
+        {note.is_pinned && (
+          <Pin className="absolute top-3 right-3 size-4 text-muted-foreground" />
+        )}
         {note.title && (
-          <CardTitle className="truncate text-base font-bold">
+          <h3 className="font-semibold text-foreground truncate pr-6">
             {note.title}
-          </CardTitle>
+          </h3>
         )}
       </CardHeader>
-      <CardContent className="flex-grow">
-        <p className="line-clamp-4 text-sm text-muted-foreground">
-          {note.content || <span className="italic">No content.</span>}
-        </p>
+      <CardContent className="flex-grow py-0">
+        <div className="prose prose-sm dark:prose-invert text-muted-foreground line-clamp-5">
+          <ReactMarkdown>{note.content || ""}</ReactMarkdown>
+        </div>
       </CardContent>
-      <CardFooter className="flex-col items-start gap-3 border-t pt-4">
+      <CardFooter className="flex flex-col items-start gap-3 pt-4 mt-auto">
         {note.tags && note.tags.length > 0 && (
           <div className="flex flex-wrap gap-1">
             {note.tags.slice(0, 3).map((tag) => (
@@ -102,42 +82,44 @@ const NoteCard = ({
                 {tag}
               </Badge>
             ))}
-            {note.tags.length > 3 && (
-              <Badge variant="outline" className="text-xs">
-                +{note.tags.length - 3}
-              </Badge>
-            )}
           </div>
         )}
-        <div className="flex w-full items-center justify-between gap-2 pt-2">
-          <div className="text-xs text-muted-foreground">
-            {format(new Date(note.updated_at || ""), "MMM dd, yyyy")}
+        <div className="flex w-full items-center justify-between text-xs text-muted-foreground/80">
+          <span>
+            {formatDistanceToNow(new Date(note.updated_at || ""), {
+              addSuffix: true,
+            })}
+          </span>
+          <div className="flex items-center">
+            <Button
+              variant="ghost"
+              size="icon"
+              className="h-7 w-7"
+              onClick={onTogglePin}
+            >
+              {note.is_pinned ? (
+                <PinOff className="size-3.5" />
+              ) : (
+                <Pin className="size-3.5" />
+              )}
+            </Button>
+            <Button
+              variant="ghost"
+              size="icon"
+              className="h-7 w-7"
+              onClick={onEdit}
+            >
+              <Edit className="size-3.5" />
+            </Button>
+            <Button
+              variant="ghost"
+              size="icon"
+              className="h-7 w-7 hover:text-destructive"
+              onClick={onDelete}
+            >
+              <Trash2 className="size-3.5" />
+            </Button>
           </div>
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button variant="ghost" size="icon" className="h-8 w-8">
-                <MoreHorizontal className="size-4" />
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end">
-              <DropdownMenuItem onClick={onTogglePin}>
-                {note.is_pinned ? (
-                  <PinOff className="mr-2 size-4" />
-                ) : (
-                  <Pin className="mr-2 size-4" />
-                )}
-                {note.is_pinned ? "Unpin" : "Pin"}
-              </DropdownMenuItem>
-              <DropdownMenuItem onClick={onEdit}>
-                <Edit className="mr-2 size-4" />
-                Edit
-              </DropdownMenuItem>
-              <DropdownMenuItem className="text-destructive" onClick={onDelete}>
-                <Trash2 className="mr-2 size-4" />
-                Delete
-              </DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
         </div>
       </CardFooter>
     </Card>
@@ -146,18 +128,37 @@ const NoteCard = ({
 
 export default function NotesManager() {
   const confirm = useConfirm();
-
   const [editingNote, setEditingNote] = useState<Note | null>(null);
   const [isSheetOpen, setIsSheetOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
-  const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
+  const [selectedTag, setSelectedTag] = useState<string | null>(null);
 
-  const { data: notes = [], isLoading, error } = useGetNotesQuery();
-  const [addNote, { isLoading: isAdding }] = useAddNoteMutation();
-  const [updateNote, { isLoading: isUpdating }] = useUpdateNoteMutation();
+  const { data: notes = [], isLoading } = useGetNotesQuery();
+  const [updateNote] = useUpdateNoteMutation();
   const [deleteNote] = useDeleteNoteMutation();
 
-  const isMutating = isAdding || isUpdating;
+  const uniqueTags = useMemo(() => {
+    const allTags = new Set<string>();
+    notes.forEach((note) => note.tags?.forEach((tag) => allTags.add(tag)));
+    return Array.from(allTags).sort();
+  }, [notes]);
+
+  const filteredNotes = useMemo(() => {
+    return notes
+      .filter((note) => {
+        if (!selectedTag) return true;
+        return note.tags?.includes(selectedTag);
+      })
+      .filter((note) => {
+        if (!searchTerm) return true;
+        const lowercasedTerm = searchTerm.toLowerCase();
+        return (
+          note.title?.toLowerCase().includes(lowercasedTerm) ||
+          note.content?.toLowerCase().includes(lowercasedTerm) ||
+          note.tags?.some((tag) => tag.toLowerCase().includes(lowercasedTerm))
+        );
+      });
+  }, [notes, searchTerm, selectedTag]);
 
   const handleCreateNote = () => {
     setEditingNote(null);
@@ -167,18 +168,6 @@ export default function NotesManager() {
     setEditingNote(note);
     setIsSheetOpen(true);
   };
-  const handleCloseSheet = () => setIsSheetOpen(false);
-
-  const filteredNotes = useMemo(() => {
-    if (!searchTerm) return notes;
-    const lowercasedTerm = searchTerm.toLowerCase();
-    return notes.filter(
-      (note) =>
-        note.title?.toLowerCase().includes(lowercasedTerm) ||
-        note.content?.toLowerCase().includes(lowercasedTerm) ||
-        note.tags?.some((tag) => tag.toLowerCase().includes(lowercasedTerm)),
-    );
-  }, [notes, searchTerm]);
 
   const handleDeleteNote = async (noteId: string) => {
     const ok = await confirm({
@@ -189,24 +178,9 @@ export default function NotesManager() {
     if (!ok) return;
     try {
       await deleteNote(noteId).unwrap();
-      toast.success("Note deleted successfully.");
+      toast.success("Note deleted.");
     } catch (err: any) {
       toast.error("Failed to delete note", { description: err.message });
-    }
-  };
-
-  const handleSaveNote = async (noteData: Partial<Note>) => {
-    try {
-      if (editingNote?.id) {
-        await updateNote({ ...noteData, id: editingNote.id }).unwrap();
-        toast.success("Note updated successfully.");
-      } else {
-        await addNote(noteData).unwrap();
-        toast.success("Note created successfully.");
-      }
-      handleCloseSheet();
-    } catch (err: any) {
-      toast.error("Failed to save note", { description: err.message });
     }
   };
 
@@ -230,166 +204,127 @@ export default function NotesManager() {
     <div className="space-y-6">
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <h2 className="text-2xl font-bold">Personal Notes</h2>
+          <h2 className="text-2xl font-bold flex items-center gap-2">
+            <StickyNote className="size-6 text-primary" /> Personal Notes
+          </h2>
           <p className="text-muted-foreground">
             A space for your thoughts, ideas, and reminders.
           </p>
         </div>
-        <div className="flex items-center gap-2">
-          <Input
-            placeholder="Filter notes..."
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-            className="w-full sm:w-64"
-          />
-          <ToggleGroup
-            type="single"
-            value={viewMode}
-            onValueChange={(v) => v && setViewMode(v as any)}
-            size="sm"
-          >
-            <ToggleGroupItem value="list">
-              <List className="h-4 w-4" />
-            </ToggleGroupItem>
-            <ToggleGroupItem value="grid">
-              <LayoutGrid className="h-4 w-4" />
-            </ToggleGroupItem>
-          </ToggleGroup>
-          <Button onClick={handleCreateNote} size="sm" className="h-9">
-            <Plus className="mr-2 size-4" /> New Note
-          </Button>
-        </div>
+        <Button onClick={handleCreateNote}>
+          <Plus className="mr-2 size-4" /> New Note
+        </Button>
       </div>
 
-      {!isLoading && filteredNotes.length === 0 ? (
-        <div className="py-20 text-center text-muted-foreground border-2 border-dashed rounded-lg">
-          <StickyNote className="mx-auto size-12 opacity-50" />
-          <h3 className="mt-4 text-lg font-semibold">No Notes Found</h3>
-          <p className="mt-1 mb-4">
-            {searchTerm
-              ? "Try a different search term."
-              : "Create your first note to get started."}
-          </p>
-        </div>
-      ) : (
-        <AnimatePresence>
-          {viewMode === "grid" ? (
-            <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-              {filteredNotes.map((note) => (
-                <NoteCard
-                  key={note.id}
-                  note={note}
-                  onEdit={() => handleEditNote(note)}
-                  onDelete={() => handleDeleteNote(note.id)}
-                  onTogglePin={() => handleTogglePin(note)}
-                />
-              ))}
+      <div className="flex flex-col md:flex-row gap-6 items-start">
+        {/* Sidebar for Tags (Desktop) */}
+        <aside className="w-56 hidden md:block sticky top-20 shrink-0">
+          <div className="font-semibold text-sm mb-3 px-2">Tags</div>
+          <div className="flex flex-col gap-1">
+            <Button
+              variant={!selectedTag ? "secondary" : "ghost"}
+              className="justify-start"
+              onClick={() => setSelectedTag(null)}
+            >
+              All Notes
+            </Button>
+            {uniqueTags.map((tag) => (
+              <Button
+                key={tag}
+                variant={selectedTag === tag ? "secondary" : "ghost"}
+                className="justify-start"
+                onClick={() => setSelectedTag(tag)}
+              >
+                <Tag className="mr-2 size-3.5 opacity-60" />
+                <span className="truncate">{tag}</span>
+              </Button>
+            ))}
+          </div>
+        </aside>
+
+        {/* Main Content */}
+        <main className="flex-1 w-full min-w-0">
+          <div className="relative mb-4">
+            <Input
+              placeholder="Search notes..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="pl-8"
+            />
+            {searchTerm && (
+              <X
+                className="absolute right-2.5 top-2.5 size-4 text-muted-foreground cursor-pointer"
+                onClick={() => setSearchTerm("")}
+              />
+            )}
+          </div>
+
+          {/* RESPONSIVE FIX: Mobile Tag Filter (Horizontal Scroll) */}
+          <div className="md:hidden mb-6">
+            <ScrollArea className="w-full whitespace-nowrap pb-2">
+              <div className="flex space-x-2">
+                <Button
+                  size="sm"
+                  variant={!selectedTag ? "default" : "outline"}
+                  onClick={() => setSelectedTag(null)}
+                  className="rounded-full h-8"
+                >
+                  All
+                </Button>
+                {uniqueTags.map((tag) => (
+                  <Button
+                    key={tag}
+                    size="sm"
+                    variant={selectedTag === tag ? "default" : "outline"}
+                    onClick={() =>
+                      setSelectedTag(tag === selectedTag ? null : tag)
+                    }
+                    className="rounded-full h-8"
+                  >
+                    # {tag}
+                  </Button>
+                ))}
+              </div>
+              <ScrollBar orientation="horizontal" />
+            </ScrollArea>
+          </div>
+
+          {!isLoading && filteredNotes.length === 0 ? (
+            <div className="py-20 text-center text-muted-foreground border-2 border-dashed rounded-lg bg-muted/20">
+              <StickyNote className="mx-auto size-12 opacity-30" />
+              <h3 className="mt-4 text-lg font-semibold">No Notes Found</h3>
+              <p className="mt-1 text-sm">
+                {searchTerm
+                  ? "Try a different search."
+                  : selectedTag
+                    ? `No notes with the tag "${selectedTag}".`
+                    : "Create your first note!"}
+              </p>
             </div>
           ) : (
-            <Card>
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead className="w-[40px]"></TableHead>
-                    <TableHead>Title</TableHead>
-                    <TableHead className="hidden md:table-cell">Tags</TableHead>
-                    <TableHead className="hidden lg:table-cell">
-                      Last Updated
-                    </TableHead>
-                    <TableHead className="text-right">Actions</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {filteredNotes.map((note) => (
-                    <TableRow key={note.id} className="group">
-                      <TableCell>
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          className="h-8 w-8"
-                          onClick={() => handleTogglePin(note)}
-                        >
-                          {note.is_pinned ? (
-                            <Pin className="size-4 text-primary" />
-                          ) : (
-                            <Pin className="size-4 text-muted-foreground opacity-20 group-hover:opacity-100" />
-                          )}
-                        </Button>
-                      </TableCell>
-                      <TableCell className="font-medium max-w-xs truncate">
-                        {note.title || (
-                          <span className="text-muted-foreground italic">
-                            Untitled Note
-                          </span>
-                        )}
-                      </TableCell>
-                      <TableCell className="hidden md:table-cell">
-                        <div className="flex flex-wrap gap-1">
-                          {note.tags?.slice(0, 2).map((tag) => (
-                            <Badge
-                              key={tag}
-                              variant="secondary"
-                              className="text-xs"
-                            >
-                              {tag}
-                            </Badge>
-                          ))}
-                          {note.tags && note.tags.length > 2 && (
-                            <Badge variant="outline" className="text-xs">
-                              +{note.tags.length - 2}
-                            </Badge>
-                          )}
-                        </div>
-                      </TableCell>
-                      <TableCell className="hidden lg:table-cell text-muted-foreground text-xs">
-                        {format(
-                          new Date(note.updated_at || ""),
-                          "MMM dd, yyyy",
-                        )}
-                      </TableCell>
-                      <TableCell className="text-right">
-                        <DropdownMenu>
-                          <DropdownMenuTrigger asChild>
-                            <Button
-                              variant="ghost"
-                              size="icon"
-                              className="h-8 w-8 opacity-0 group-hover:opacity-100"
-                            >
-                              <MoreHorizontal className="size-4" />
-                            </Button>
-                          </DropdownMenuTrigger>
-                          <DropdownMenuContent align="end">
-                            <DropdownMenuItem
-                              onClick={() => handleEditNote(note)}
-                            >
-                              <Edit className="mr-2 size-4" />
-                              Edit
-                            </DropdownMenuItem>
-                            <DropdownMenuItem
-                              className="text-destructive"
-                              onClick={() => handleDeleteNote(note.id)}
-                            >
-                              <Trash2 className="mr-2 size-4" />
-                              Delete
-                            </DropdownMenuItem>
-                          </DropdownMenuContent>
-                        </DropdownMenu>
-                      </TableCell>
-                    </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
-            </Card>
+            <AnimatePresence>
+              <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-3">
+                {filteredNotes.map((note) => (
+                  <NoteCard
+                    key={note.id}
+                    note={note}
+                    onEdit={() => handleEditNote(note)}
+                    onDelete={() => handleDeleteNote(note.id)}
+                    onTogglePin={() => handleTogglePin(note)}
+                  />
+                ))}
+              </div>
+            </AnimatePresence>
           )}
-        </AnimatePresence>
-      )}
+        </main>
+      </div>
 
       <Sheet open={isSheetOpen} onOpenChange={setIsSheetOpen}>
-        <SheetContent className="sm:max-w-lg w-full flex flex-col">
+        <SheetContent className="sm:max-w-xl w-full flex flex-col">
           <NoteEditor
             note={editingNote}
-            onSave={handleSaveNote}
-            onCancel={handleCloseSheet}
+            onSuccess={() => setIsSheetOpen(false)}
+            onCancel={() => setIsSheetOpen(false)}
           />
         </SheetContent>
       </Sheet>

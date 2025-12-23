@@ -40,6 +40,7 @@ import { Alert, AlertDescription } from "../ui/alert";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 interface BlogEditorProps {
   post: BlogPost | null;
@@ -54,6 +55,7 @@ export default function BlogEditor({
   onSave,
   onCancel,
 }: BlogEditorProps) {
+  const isMobile = useIsMobile();
   const initialFormData = {
     title: "",
     slug: "",
@@ -233,12 +235,17 @@ export default function BlogEditor({
     <motion.div
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
-      className="flex flex-col h-[calc(100vh-8rem)]"
+      className="flex flex-col h-[calc(100vh-6rem)]"
     >
       {/* Sticky Header Toolbar */}
-      <div className="sticky top-0 z-10 flex items-center justify-between border-b bg-background/95 pb-4 backdrop-blur supports-[backdrop-filter]:bg-background/60">
-        <div className="flex items-center gap-4">
-          <Button variant="ghost" size="sm" onClick={onCancel}>
+      <div className="sticky top-0 z-10 flex flex-col sm:flex-row items-start sm:items-center justify-between border-b bg-background/95 p-4 gap-4 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+        <div className="flex items-center gap-4 w-full sm:w-auto justify-between sm:justify-start">
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={onCancel}
+            className="-ml-2"
+          >
             <ArrowLeft className="mr-2 size-4" /> Back
           </Button>
           <div className="flex items-center gap-2">
@@ -259,14 +266,19 @@ export default function BlogEditor({
             )}
           </div>
         </div>
-        <div className="flex items-center gap-2">
+
+        <div className="flex items-center gap-2 w-full sm:w-auto">
           <Sheet open={isSettingsOpen} onOpenChange={setIsSettingsOpen}>
             <SheetTrigger asChild>
-              <Button variant="outline" size="sm">
+              <Button
+                variant="outline"
+                size="sm"
+                className="flex-1 sm:flex-none"
+              >
                 <Settings className="mr-2 size-4" /> Settings
               </Button>
             </SheetTrigger>
-            <SheetContent className="sm:max-w-lg w-full flex flex-col">
+            <SheetContent className="w-full sm:max-w-lg flex flex-col">
               <div className="flex justify-between items-center">
                 <SheetHeader>
                   <SheetTitle>Post Settings</SheetTitle>
@@ -283,7 +295,7 @@ export default function BlogEditor({
               <ScrollArea className="h-[calc(100vh-8rem)] pr-4 mt-6">
                 <div className="space-y-6">
                   {/* Publication Toggle */}
-                  <div className="flex flex-row items-center justify-between rounded-lg border p-4 shadow-sm">
+                  <div className="flex flex-row items-center justify-between rounded-lg border p-4 shadow-sm bg-secondary/10">
                     <div className="space-y-0.5">
                       <Label className="text-base">Publish Post</Label>
                       <p className="text-xs text-muted-foreground">
@@ -298,7 +310,7 @@ export default function BlogEditor({
                     />
                   </div>
 
-                  <div className="flex flex-row items-center justify-between rounded-lg border p-4 shadow-sm">
+                  <div className="flex flex-row items-center justify-between rounded-lg border p-4 shadow-sm bg-secondary/10">
                     <div className="space-y-0.5">
                       <Label className="text-base">
                         Show Table of Contents
@@ -500,6 +512,7 @@ export default function BlogEditor({
           <Button
             onClick={() => handleSubmit()}
             disabled={isSaving || isUploading}
+            className="flex-1 sm:flex-none shadow-sm"
           >
             {isSaving ? (
               <>
@@ -514,7 +527,7 @@ export default function BlogEditor({
         </div>
       </div>
 
-      <div className="flex-1 flex flex-col max-w-5xl mx-auto w-full mt-6 space-y-6">
+      <div className="flex-1 flex flex-col max-w-5xl mx-auto w-full mt-2 sm:mt-6 space-y-4 sm:space-y-6 px-4">
         <div className="px-1">
           <Input
             id="title"
@@ -522,7 +535,7 @@ export default function BlogEditor({
             onChange={(e) => handleTitleChange(e.target.value)}
             placeholder="Post Title"
             className={cn(
-              "text-4xl md:text-5xl font-black tracking-tight border-none px-0 h-auto bg-transparent focus-visible:ring-0 placeholder:text-muted-foreground/40",
+              "text-3xl sm:text-4xl md:text-5xl font-black tracking-tight border-none px-0 h-auto bg-transparent focus-visible:ring-0 placeholder:text-muted-foreground/40 leading-tight",
               errors.title && "placeholder:text-destructive/60",
             )}
             autoFocus

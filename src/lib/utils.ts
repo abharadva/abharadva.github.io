@@ -12,6 +12,8 @@ import {
   setDate,
   isAfter,
   isSameDay,
+  isValid,
+  parseISO,
 } from "date-fns";
 import { supabase } from "@/supabase/client";
 
@@ -29,29 +31,41 @@ export function cn(...inputs: ClassValue[]): string {
   return twMerge(clsx(inputs));
 }
 
-export function parseLocalDate(dateStr: string): Date {
-  if (!dateStr) return new Date();
-  const [year, month, day] = dateStr.split("-").map(Number);
-  return new Date(year, month - 1, day);
+export function parseLocalDate(
+  dateInput: string | Date | null | undefined,
+): Date {
+  if (!dateInput) return new Date();
+  if (dateInput instanceof Date) return dateInput;
+
+  // Handle ISO strings (Supabase default)
+  const parsed = parseISO(dateInput);
+  if (isValid(parsed)) return parsed;
+
+  // Fallback for simple YYYY-MM-DD
+  const parts = dateInput.split("-");
+  if (parts.length === 3) {
+    const [year, month, day] = parts.map(Number);
+    return new Date(year, month - 1, day);
+  }
+
+  return new Date();
 }
 
 export function formatDate(
-  dateInput: Date | string | number,
+  dateInput: Date | string | number | null | undefined,
   options?: Intl.DateTimeFormatOptions,
 ): string {
-  // Always parse with local date to prevent timezone shifts on display
-  const date =
-    dateInput instanceof Date
-      ? dateInput
-      : parseLocalDate(dateInput.toString());
+  const date = parseLocalDate(dateInput?.toString());
+
+  if (!isValid(date)) return "N/A";
+
   const defaultOptions: Intl.DateTimeFormatOptions = {
     year: "numeric",
     month: "long",
     day: "numeric",
-    timeZone: "UTC", // Display the date as is, without local timezone conversion
     ...options,
   };
-  return date.toLocaleDateString(undefined, defaultOptions);
+  return date.toLocaleDateString("en-US", defaultOptions);
 }
 
 export function slugify(text: string): string {
@@ -88,8 +102,6 @@ export const getNextOccurrence = (
       return addWeeks(current, 1);
 
     case "bi-weekly":
-      // If a specific day is selected, find the next occurrence of that day,
-      // then skip a week to make it bi-weekly.
       if (
         rule.occurrence_day != null &&
         rule.occurrence_day >= 0 &&

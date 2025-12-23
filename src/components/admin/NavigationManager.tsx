@@ -31,6 +31,7 @@ import {
 } from "@/store/api/adminApi";
 import { cn } from "@/lib/utils";
 import { useConfirm } from "../providers/ConfirmDialogProvider";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 type NavLink = {
   id: string;
@@ -94,6 +95,7 @@ const LinkForm = ({
 
 export default function NavigationManager() {
   const confirm = useConfirm();
+  const isMobile = useIsMobile();
 
   const [editingLink, setEditingLink] = useState<NavLink | null>(null);
   const [isSheetOpen, setIsSheetOpen] = useState(false);
@@ -101,9 +103,10 @@ export default function NavigationManager() {
   const [draggedLinkId, setDraggedLinkId] = useState<string | null>(null);
 
   const { data: links = [], isLoading } = useGetNavLinksAdminQuery();
-  const [saveNavLink, { isLoading: isSaving }] = useSaveNavLinkMutation();
+  const [saveNavLink] = useSaveNavLinkMutation();
   const [deleteNavLink] = useDeleteNavLinkMutation();
-  const [updateOrder] = useUpdateSectionOrderMutation(); // Re-using this for nav links
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const [updateOrder] = useUpdateSectionOrderMutation();
 
   useEffect(() => {
     setLocalLinks(links);
@@ -132,23 +135,37 @@ export default function NavigationManager() {
     try {
       await deleteNavLink(id).unwrap();
       toast.success("Navigation link deleted.");
+      if (editingLink?.id === id) setIsSheetOpen(false);
     } catch (err: any) {
       toast.error("Failed to delete link", { description: err.message });
     }
   };
 
   const handleToggleVisibility = async (link: NavLink) => {
+    // Optimistic update for the edit sheet
+    if (editingLink?.id === link.id) {
+      setEditingLink({ ...editingLink, is_visible: !link.is_visible });
+    }
+
     try {
       await saveNavLink({ id: link.id, is_visible: !link.is_visible }).unwrap();
       toast.success(
         `"${link.label}" is now ${!link.is_visible ? "visible" : "hidden"}.`,
       );
     } catch (err: any) {
+      // Revert if failed
+      if (editingLink?.id === link.id) {
+        setEditingLink({ ...editingLink, is_visible: link.is_visible });
+      }
       toast.error("Failed to update visibility", { description: err.message });
     }
   };
 
   const handleDragStart = (e: DragEvent<HTMLDivElement>, linkId: string) => {
+    if (isMobile) {
+      e.preventDefault();
+      return;
+    }
     setDraggedLinkId(linkId);
     e.dataTransfer.effectAllowed = "move";
   };
@@ -172,14 +189,7 @@ export default function NavigationManager() {
     setLocalLinks(reorderedLinks);
     setDraggedLinkId(null);
 
-    const linkIdsInNewOrder = reorderedLinks.map((l) => l.id);
-
     try {
-      // We need a specific RPC for nav links, or a generic one
-      // Let's assume we have a generic `update_display_order` RPC
-      // If not, you'd need to create one:
-      // CREATE OR REPLACE FUNCTION update_navigation_order(link_ids UUID[]) ...
-      // For now, let's update them one-by-one. It's less efficient but works without DB changes.
       const updatePromises = reorderedLinks.map((link, index) =>
         saveNavLink({ id: link.id, display_order: index }),
       );
@@ -187,13 +197,13 @@ export default function NavigationManager() {
       toast.success("Navigation order saved.");
     } catch {
       toast.error("Failed to save new order.");
-      setLocalLinks(links); // Revert on failure
+      setLocalLinks(links);
     }
   };
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
           <h2 className="text-2xl font-bold">Navigation Manager</h2>
           <p className="text-muted-foreground">
@@ -205,14 +215,20 @@ export default function NavigationManager() {
             setEditingLink(null);
             setIsSheetOpen(true);
           }}
+          className="w-full sm:w-auto"
         >
           <Plus className="mr-2 size-4" /> Add Link
         </Button>
       </div>
+
       <Card>
         <CardHeader>
           <CardTitle>Menu Items</CardTitle>
-          <CardDescription>Drag and drop to reorder links.</CardDescription>
+          <CardDescription>
+            {isMobile
+              ? "Manage your menu links."
+              : "Drag and drop to reorder links."}
+          </CardDescription>
         </CardHeader>
         <CardContent className="p-4">
           {isLoading ? (
@@ -224,51 +240,77 @@ export default function NavigationManager() {
               {localLinks.map((link) => (
                 <div
                   key={link.id}
-                  draggable
+                  draggable={!isMobile}
                   onDragStart={(e) => handleDragStart(e, link.id)}
                   onDrop={() => handleDrop(link.id)}
                   onDragOver={handleDragOver}
                   className={cn(
-                    "flex items-center gap-2 rounded-md p-2 border bg-card transition-all",
+                    "flex items-center gap-3 rounded-md p-3 border bg-card transition-all hover:border-primary/50",
                     draggedLinkId === link.id && "opacity-50 scale-95",
                   )}
                 >
-                  <GripVertical className="size-5 text-muted-foreground cursor-grab" />
-                  <div className="flex-1">
-                    <p className="font-medium">{link.label}</p>
-                    <p className="text-xs text-muted-foreground font-mono">
+                  {!isMobile && (
+                    <GripVertical className="size-5 text-muted-foreground cursor-grab shrink-0" />
+                  )}
+
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center gap-2 mb-0.5">
+                      <p className="font-medium truncate">{link.label}</p>
+                      {isMobile && (
+                        <div
+                          className={cn(
+                            "h-2 w-2 rounded-full",
+                            link.is_visible ? "bg-green-500" : "bg-muted",
+                          )}
+                        />
+                      )}
+                    </div>
+                    <p className="text-xs text-muted-foreground font-mono truncate">
                       {link.href}
                     </p>
                   </div>
-                  <Switch
-                    checked={link.is_visible}
-                    onCheckedChange={() => handleToggleVisibility(link)}
-                    aria-label="Toggle visibility"
-                  />
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    onClick={() => {
-                      setEditingLink(link);
-                      setIsSheetOpen(true);
-                    }}
-                  >
-                    <Edit className="size-4" />
-                  </Button>
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    className="hover:bg-destructive/10 hover:text-destructive"
-                    onClick={() => handleDelete(link.id)}
-                  >
-                    <Trash2 className="size-4" />
-                  </Button>
+
+                  <div className="flex items-center gap-2">
+                    {!isMobile && (
+                      <Switch
+                        checked={link.is_visible}
+                        onCheckedChange={() => handleToggleVisibility(link)}
+                        aria-label="Toggle visibility"
+                      />
+                    )}
+
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="h-8 w-8"
+                      onClick={() => {
+                        setEditingLink(link);
+                        setIsSheetOpen(true);
+                      }}
+                    >
+                      <Edit className="size-4" />
+                    </Button>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="h-8 w-8 hover:bg-destructive/10 hover:text-destructive"
+                      onClick={() => handleDelete(link.id)}
+                    >
+                      <Trash2 className="size-4" />
+                    </Button>
+                  </div>
                 </div>
               ))}
+              {localLinks.length === 0 && (
+                <div className="text-center py-8 text-muted-foreground">
+                  No links found. Add one to get started.
+                </div>
+              )}
             </div>
           )}
         </CardContent>
       </Card>
+
       <Sheet open={isSheetOpen} onOpenChange={setIsSheetOpen}>
         <SheetContent className="sm:max-w-lg w-full flex flex-col">
           <div className="flex justify-between items-center">
@@ -286,6 +328,21 @@ export default function NavigationManager() {
               </Button>
             </SheetClose>
           </div>
+
+          {/* Mobile Visibility Toggle in Edit Sheet */}
+          {isMobile && editingLink && (
+            <div className="flex items-center justify-between border rounded-md p-3 my-4 bg-muted/20">
+              <div className="space-y-0.5">
+                <Label>Visible</Label>
+                <p className="text-xs text-muted-foreground">Show in menu</p>
+              </div>
+              <Switch
+                checked={editingLink.is_visible}
+                onCheckedChange={() => handleToggleVisibility(editingLink)}
+              />
+            </div>
+          )}
+
           <LinkForm
             link={editingLink}
             onSave={handleSave}

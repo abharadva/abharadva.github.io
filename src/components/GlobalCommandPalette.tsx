@@ -1,3 +1,4 @@
+// src/components/GlobalCommandPalette.tsx
 "use client";
 
 import * as React from "react";
@@ -6,6 +7,7 @@ import { useTheme } from "next-themes";
 import { supabase } from "@/supabase/client";
 import { useAppDispatch } from "@/store/hooks";
 import { startFocus } from "@/store/slices/focusSlice";
+import { useIsMobile } from "@/hooks/use-mobile";
 import {
   Calculator,
   Calendar,
@@ -20,14 +22,13 @@ import {
   Laptop,
   Plus,
   StickyNote,
-  ListTodo,
   Zap,
   Home,
   Briefcase,
-  Search,
   PenTool,
   Copy,
   Terminal,
+  Search,
 } from "lucide-react";
 
 import {
@@ -48,6 +49,7 @@ export function GlobalCommandPalette() {
   const router = useRouter();
   const { setTheme } = useTheme();
   const dispatch = useAppDispatch();
+  const isMobile = useIsMobile();
 
   // 1. Keyboard Shortcut Listener (Cmd+K / Ctrl+K)
   React.useEffect(() => {
@@ -61,7 +63,15 @@ export function GlobalCommandPalette() {
     return () => document.removeEventListener("keydown", down);
   }, []);
 
-  // 2. Check Auth Status on Mount (Lightweight)
+  // 2. Custom Event Listener (For mobile triggers or programmatic opening)
+  React.useEffect(() => {
+    const handleCustomOpen = () => setOpen(true);
+    document.addEventListener("open-command-palette", handleCustomOpen);
+    return () =>
+      document.removeEventListener("open-command-palette", handleCustomOpen);
+  }, []);
+
+  // 3. Check Auth Status
   React.useEffect(() => {
     const checkUser = async () => {
       const {
@@ -71,7 +81,6 @@ export function GlobalCommandPalette() {
     };
     checkUser();
 
-    // Listen for auth changes (login/logout) to update palette instantly
     const {
       data: { subscription },
     } = supabase.auth.onAuthStateChange((_event, session) => {
@@ -80,13 +89,13 @@ export function GlobalCommandPalette() {
     return () => subscription.unsubscribe();
   }, []);
 
-  // 3. Helper to run command and close palette
+  // 4. Helper to run command and close palette
   const runCommand = React.useCallback((command: () => unknown) => {
     setOpen(false);
     command();
   }, []);
 
-  // 4. Actions
+  // 5. Actions
   const handleLogout = async () => {
     await supabase.auth.signOut();
     toast.success("Logged out successfully");
@@ -108,10 +117,10 @@ export function GlobalCommandPalette() {
   return (
     <CommandDialog open={open} onOpenChange={setOpen}>
       <CommandInput placeholder="Type a command or search..." />
-      <CommandList>
+      <CommandList className="max-h-[300px] overflow-y-auto overflow-x-hidden">
         <CommandEmpty>No results found.</CommandEmpty>
 
-        {/* --- SECTION: ADMIN SHORTCUTS (Only visible if logged in) --- */}
+        {/* --- SECTION: ADMIN SHORTCUTS --- */}
         {isAdmin && (
           <>
             <CommandGroup heading="Quick Actions">
@@ -122,14 +131,14 @@ export function GlobalCommandPalette() {
               >
                 <PenTool className="mr-2 h-4 w-4" />
                 <span>Write New Post</span>
-                <CommandShortcut>C P</CommandShortcut>
+                {!isMobile && <CommandShortcut>C P</CommandShortcut>}
               </CommandItem>
               <CommandItem
                 onSelect={() => runCommand(() => router.push("/admin/tasks"))}
               >
                 <Plus className="mr-2 h-4 w-4" />
                 <span>Add Task</span>
-                <CommandShortcut>C T</CommandShortcut>
+                {!isMobile && <CommandShortcut>C T</CommandShortcut>}
               </CommandItem>
               <CommandItem
                 onSelect={() => runCommand(() => router.push("/admin/notes"))}
@@ -183,7 +192,6 @@ export function GlobalCommandPalette() {
                 <span>Settings</span>
               </CommandItem>
             </CommandGroup>
-
             <CommandSeparator />
           </>
         )}

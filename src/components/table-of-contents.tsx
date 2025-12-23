@@ -1,3 +1,5 @@
+// src/components/table-of-contents.tsx
+
 import { useEffect, useState } from "react";
 import { cn } from "@/lib/utils";
 import { List } from "lucide-react";
@@ -10,23 +12,27 @@ interface Heading {
 
 interface TableOfContentsProps {
   content: string;
-  onLinkClick?: () => void; // ADD THIS PROP
+  onLinkClick?: () => void;
+  onHeadingsFound?: (hasHeadings: boolean) => void; // New callback prop
 }
 
 export function TableOfContents({
   content,
   onLinkClick,
+  onHeadingsFound,
 }: TableOfContentsProps) {
   const [headings, setHeadings] = useState<Heading[]>([]);
   const [activeId, setActiveId] = useState<string>("");
 
   useEffect(() => {
+    // Regex to find markdown headings (## or ###)
     const headingRegex = /^(#{2,3})\s+(.+)$/gm;
     const matches = Array.from(content.matchAll(headingRegex));
 
     const extractedHeadings = matches.map((match) => {
       const level = match[1].length;
       const text = match[2];
+      // Generate ID consistent with rehype-slug
       const id = text
         .toLowerCase()
         .replace(/[^a-z0-9]+/g, "-")
@@ -36,7 +42,12 @@ export function TableOfContents({
     });
 
     setHeadings(extractedHeadings);
-  }, [content]);
+
+    // Notify parent if headings exist
+    if (onHeadingsFound) {
+      onHeadingsFound(extractedHeadings.length > 0);
+    }
+  }, [content, onHeadingsFound]);
 
   useEffect(() => {
     const observer = new IntersectionObserver(
@@ -62,6 +73,25 @@ export function TableOfContents({
 
   if (headings.length === 0) return null;
 
+  const handleClick = (e: React.MouseEvent<HTMLAnchorElement>, id: string) => {
+    e.preventDefault(); // CRITICAL: Stop browser from auto-jumping/updating URL hash
+
+    const element = document.getElementById(id);
+    if (element) {
+      const headerOffset = 100; // Offset for sticky header
+      const elementPosition = element.getBoundingClientRect().top;
+      const offsetPosition = elementPosition + window.scrollY - headerOffset;
+
+      window.scrollTo({
+        top: offsetPosition,
+        behavior: "smooth",
+      });
+
+      setActiveId(id);
+      if (onLinkClick) onLinkClick();
+    }
+  };
+
   return (
     <nav className="space-y-2 text-sm">
       <div className="flex items-center gap-2 mb-4 text-primary font-mono text-xs uppercase tracking-widest font-bold">
@@ -69,32 +99,22 @@ export function TableOfContents({
         Table of Contents
       </div>
       <div className="relative pl-3">
+        {/* Vertical line track */}
         <div className="absolute left-0 top-0 bottom-0 w-px bg-border" />
 
         <ul className="space-y-3">
           {headings.map((heading) => (
             <li key={heading.id} className="relative">
+              {/* Active Indicator */}
               {activeId === heading.id && (
                 <div className="absolute -left-[13px] top-1.5 h-4 w-0.5 bg-primary rounded-full transition-all duration-300" />
               )}
 
               <a
                 href={`#${heading.id}`}
-                onClick={(e) => {
-                  e.preventDefault();
-                  const element = document.getElementById(heading.id);
-                  if (element) {
-                    const y =
-                      element.getBoundingClientRect().top +
-                      window.pageYOffset -
-                      100;
-                    window.scrollTo({ top: y, behavior: "smooth" });
-                    setActiveId(heading.id);
-                  }
-                  onLinkClick?.(); // <-- CALL THE CALLBACK HERE
-                }}
+                onClick={(e) => handleClick(e, heading.id)}
                 className={cn(
-                  "block transition-colors duration-200 line-clamp-2 leading-snug hover:text-primary",
+                  "block text-left transition-colors duration-200 line-clamp-2 leading-snug hover:text-primary focus:outline-none",
                   heading.level === 3 && "ml-4 text-xs",
                   activeId === heading.id
                     ? "text-primary font-medium translate-x-1"

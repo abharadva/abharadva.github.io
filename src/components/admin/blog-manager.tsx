@@ -35,7 +35,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import {
   Edit,
@@ -54,6 +54,7 @@ import { toast } from "sonner";
 import { format } from "date-fns";
 import { cn } from "@/lib/utils";
 import { useConfirm } from "../providers/ConfirmDialogProvider";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 interface BlogManagerProps {
   startInCreateMode?: boolean;
@@ -65,6 +66,7 @@ export default function BlogManager({
   onActionHandled,
 }: BlogManagerProps) {
   const confirm = useConfirm();
+  const isMobile = useIsMobile();
 
   const [editingPost, setEditingPost] = useState<BlogPost | null>(null);
   const [isCreating, setIsCreating] = useState(false);
@@ -175,13 +177,17 @@ export default function BlogManager({
             Manage, create, and publish your content.
           </p>
         </div>
-        <Button onClick={handleCreatePost} size="sm" className="h-9">
+        <Button
+          onClick={handleCreatePost}
+          size="sm"
+          className="h-9 w-full sm:w-auto"
+        >
           <Plus className="mr-2 size-4" /> Create Post
         </Button>
       </div>
 
-      <Card className="flex-1 flex flex-col overflow-hidden">
-        <CardHeader className="border-b p-4 space-y-0">
+      <Card className="flex-1 flex flex-col overflow-hidden border-none sm:border shadow-none sm:shadow-sm bg-transparent sm:bg-card">
+        <CardHeader className="p-0 sm:p-4 sm:border-b mb-4 sm:mb-0">
           <div className="flex flex-col sm:flex-row gap-4 justify-between items-center">
             <div className="relative w-full sm:w-72">
               <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
@@ -210,159 +216,266 @@ export default function BlogManager({
           </div>
         </CardHeader>
 
-        <CardContent className="p-0 flex-1 overflow-auto bg-background/50">
+        <CardContent className="p-0 flex-1 overflow-auto bg-transparent sm:bg-background/50">
           {isLoading ? (
             <div className="flex h-64 items-center justify-center">
               <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
             </div>
           ) : filteredPosts.length === 0 ? (
-            <div className="flex h-64 flex-col items-center justify-center text-muted-foreground">
+            <div className="flex h-64 flex-col items-center justify-center text-muted-foreground border-2 border-dashed rounded-lg bg-muted/10 mx-0 sm:mx-4 my-4">
               <FileText className="h-12 w-12 mb-4 opacity-20" />
               <p>No posts found.</p>
             </div>
           ) : (
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead className="w-[60px]">Image</TableHead>
-                  <TableHead>Title</TableHead>
-                  <TableHead>Status</TableHead>
-                  <TableHead className="hidden md:table-cell">Views</TableHead>
-                  <TableHead className="hidden md:table-cell">Date</TableHead>
-                  <TableHead className="text-right">Actions</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                <AnimatePresence>
-                  {filteredPosts.map((post) => (
-                    <motion.tr
-                      key={post.id}
-                      layout
-                      initial={{ opacity: 0 }}
-                      animate={{ opacity: 1 }}
-                      exit={{ opacity: 0 }}
-                      transition={{ duration: 0.2 }}
-                      className="group hover:bg-secondary/40"
-                    >
-                      <TableCell>
-                        <div className="h-10 w-10 rounded-md border bg-secondary/50 overflow-hidden flex items-center justify-center">
-                          {post.cover_image_url ? (
-                            <img
-                              src={post.cover_image_url}
-                              alt=""
-                              className="h-full w-full object-cover"
-                            />
-                          ) : (
-                            <ImageIcon className="h-4 w-4 text-muted-foreground opacity-50" />
-                          )}
-                        </div>
-                      </TableCell>
-                      <TableCell className="font-medium">
-                        <div className="flex flex-col">
-                          <span className="truncate max-w-[200px] sm:max-w-[300px]">
-                            {post.title}
-                          </span>
-                          <span className="text-xs text-muted-foreground font-mono">
-                            /{post.slug}
-                          </span>
-                        </div>
-                      </TableCell>
-                      <TableCell>
-                        <Badge
-                          variant={post.published ? "default" : "secondary"}
-                          className={
-                            post.published
-                              ? "bg-primary/15 text-primary hover:bg-primary/25 border-primary/20"
-                              : ""
-                          }
+            <>
+              {/* DESKTOP TABLE VIEW */}
+              <div className="hidden md:block">
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead className="w-[60px]">Image</TableHead>
+                      <TableHead>Title</TableHead>
+                      <TableHead>Status</TableHead>
+                      <TableHead>Views</TableHead>
+                      <TableHead>Date</TableHead>
+                      <TableHead className="text-right">Actions</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    <AnimatePresence>
+                      {filteredPosts.map((post) => (
+                        <motion.tr
+                          key={post.id}
+                          layout
+                          initial={{ opacity: 0 }}
+                          animate={{ opacity: 1 }}
+                          exit={{ opacity: 0 }}
+                          transition={{ duration: 0.2 }}
+                          className="group hover:bg-secondary/40"
                         >
-                          {post.published ? "Published" : "Draft"}
-                        </Badge>
-                      </TableCell>
-                      <TableCell className="hidden md:table-cell font-mono text-sm">
-                        {post.views?.toLocaleString() || 0}
-                      </TableCell>
-                      <TableCell className="hidden md:table-cell text-sm text-muted-foreground">
-                        <div className="flex items-center gap-2">
-                          <Calendar className="h-3 w-3" />
-                          {format(
-                            new Date(post.updated_at || new Date()),
-                            "MMM dd, yyyy",
-                          )}
-                        </div>
-                      </TableCell>
-                      <TableCell className="text-right">
-                        <div className="flex items-center justify-end gap-2">
-                          <Button
-                            variant="ghost"
-                            size="icon"
-                            className="h-8 w-8 opacity-0 group-hover:opacity-100 transition-opacity"
-                            onClick={() => handleEditPost(post)}
-                          >
-                            <Edit className="h-4 w-4" />
-                            <span className="sr-only">Edit</span>
-                          </Button>
-
-                          <DropdownMenu>
-                            <DropdownMenuTrigger asChild>
+                          <TableCell>
+                            <div className="h-10 w-10 rounded-md border bg-secondary/50 overflow-hidden flex items-center justify-center">
+                              {post.cover_image_url ? (
+                                <img
+                                  src={post.cover_image_url}
+                                  alt=""
+                                  className="h-full w-full object-cover"
+                                />
+                              ) : (
+                                <ImageIcon className="h-4 w-4 text-muted-foreground opacity-50" />
+                              )}
+                            </div>
+                          </TableCell>
+                          <TableCell className="font-medium">
+                            <div className="flex flex-col">
+                              <span className="truncate max-w-[200px] lg:max-w-[300px]">
+                                {post.title}
+                              </span>
+                              <span className="text-xs text-muted-foreground font-mono">
+                                /{post.slug}
+                              </span>
+                            </div>
+                          </TableCell>
+                          <TableCell>
+                            <Badge
+                              variant={post.published ? "default" : "secondary"}
+                              className={
+                                post.published
+                                  ? "bg-primary/15 text-primary hover:bg-primary/25 border-primary/20"
+                                  : ""
+                              }
+                            >
+                              {post.published ? "Published" : "Draft"}
+                            </Badge>
+                          </TableCell>
+                          <TableCell className="font-mono text-sm">
+                            {post.views?.toLocaleString() || 0}
+                          </TableCell>
+                          <TableCell className="text-sm text-muted-foreground">
+                            <div className="flex items-center gap-2">
+                              <Calendar className="h-3 w-3" />
+                              {format(
+                                new Date(post.updated_at || new Date()),
+                                "MMM dd, yyyy",
+                              )}
+                            </div>
+                          </TableCell>
+                          <TableCell className="text-right">
+                            <div className="flex items-center justify-end gap-2">
                               <Button
                                 variant="ghost"
                                 size="icon"
-                                className="h-8 w-8"
-                              >
-                                <MoreHorizontal className="h-4 w-4" />
-                                <span className="sr-only">Menu</span>
-                              </Button>
-                            </DropdownMenuTrigger>
-                            <DropdownMenuContent align="end">
-                              <DropdownMenuLabel>Actions</DropdownMenuLabel>
-                              <DropdownMenuItem
+                                className="h-8 w-8 opacity-0 group-hover:opacity-100 transition-opacity"
                                 onClick={() => handleEditPost(post)}
                               >
-                                <Edit className="mr-2 h-4 w-4" /> Edit
-                              </DropdownMenuItem>
-                              <DropdownMenuItem
-                                onClick={() => togglePostStatus(post)}
-                              >
-                                {post.published ? (
-                                  <>
-                                    <FileText className="mr-2 h-4 w-4" />{" "}
-                                    Unpublish
-                                  </>
-                                ) : (
-                                  <>
-                                    <Eye className="mr-2 h-4 w-4" /> Publish
-                                  </>
-                                )}
-                              </DropdownMenuItem>
-                              {post.published && (
-                                <DropdownMenuItem asChild>
-                                  <a
-                                    href={`/blog/view?slug=${post.slug}`}
-                                    target="_blank"
-                                    rel="noopener noreferrer"
+                                <Edit className="h-4 w-4" />
+                                <span className="sr-only">Edit</span>
+                              </Button>
+
+                              <DropdownMenu>
+                                <DropdownMenuTrigger asChild>
+                                  <Button
+                                    variant="ghost"
+                                    size="icon"
+                                    className="h-8 w-8"
                                   >
-                                    <ExternalLink className="mr-2 h-4 w-4" />{" "}
-                                    View Live
-                                  </a>
-                                </DropdownMenuItem>
-                              )}
-                              <DropdownMenuSeparator />
-                              <DropdownMenuItem
-                                className="text-destructive focus:text-destructive"
-                                onClick={() => handleDeletePost(post)}
-                              >
-                                <Trash2 className="mr-2 h-4 w-4" /> Delete
-                              </DropdownMenuItem>
-                            </DropdownMenuContent>
-                          </DropdownMenu>
-                        </div>
-                      </TableCell>
-                    </motion.tr>
+                                    <MoreHorizontal className="h-4 w-4" />
+                                    <span className="sr-only">Menu</span>
+                                  </Button>
+                                </DropdownMenuTrigger>
+                                <DropdownMenuContent align="end">
+                                  <DropdownMenuLabel>Actions</DropdownMenuLabel>
+                                  <DropdownMenuItem
+                                    onClick={() => handleEditPost(post)}
+                                  >
+                                    <Edit className="mr-2 h-4 w-4" /> Edit
+                                  </DropdownMenuItem>
+                                  <DropdownMenuItem
+                                    onClick={() => togglePostStatus(post)}
+                                  >
+                                    {post.published ? (
+                                      <>
+                                        <FileText className="mr-2 h-4 w-4" />{" "}
+                                        Unpublish
+                                      </>
+                                    ) : (
+                                      <>
+                                        <Eye className="mr-2 h-4 w-4" /> Publish
+                                      </>
+                                    )}
+                                  </DropdownMenuItem>
+                                  {post.published && (
+                                    <DropdownMenuItem asChild>
+                                      <a
+                                        href={`/blog/view?slug=${post.slug}`}
+                                        target="_blank"
+                                        rel="noopener noreferrer"
+                                      >
+                                        <ExternalLink className="mr-2 h-4 w-4" />{" "}
+                                        View Live
+                                      </a>
+                                    </DropdownMenuItem>
+                                  )}
+                                  <DropdownMenuSeparator />
+                                  <DropdownMenuItem
+                                    className="text-destructive focus:text-destructive"
+                                    onClick={() => handleDeletePost(post)}
+                                  >
+                                    <Trash2 className="mr-2 h-4 w-4" /> Delete
+                                  </DropdownMenuItem>
+                                </DropdownMenuContent>
+                              </DropdownMenu>
+                            </div>
+                          </TableCell>
+                        </motion.tr>
+                      ))}
+                    </AnimatePresence>
+                  </TableBody>
+                </Table>
+              </div>
+
+              {/* MOBILE CARD VIEW */}
+              <div className="md:hidden space-y-3">
+                <AnimatePresence>
+                  {filteredPosts.map((post) => (
+                    <motion.div
+                      key={post.id}
+                      initial={{ opacity: 0, y: 10 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      exit={{ opacity: 0 }}
+                    >
+                      <Card className="overflow-hidden">
+                        <CardContent className="p-4">
+                          <div className="flex gap-4">
+                            {/* Render Thumbnail Only If Exists */}
+                            {post.cover_image_url && (
+                              <div className="h-16 w-16 shrink-0 rounded-md border bg-secondary/50 overflow-hidden flex items-center justify-center">
+                                <img
+                                  src={post.cover_image_url}
+                                  alt=""
+                                  className="h-full w-full object-cover"
+                                />
+                              </div>
+                            )}
+
+                            {/* Content */}
+                            <div className="flex-1 min-w-0">
+                              <div className="flex justify-between items-start mb-1">
+                                <h3 className="font-semibold text-sm truncate pr-2">
+                                  {post.title}
+                                </h3>
+                                <DropdownMenu>
+                                  <DropdownMenuTrigger asChild>
+                                    <Button
+                                      variant="ghost"
+                                      size="icon"
+                                      className="h-6 w-6 -mr-2 -mt-1"
+                                    >
+                                      <MoreHorizontal className="h-4 w-4" />
+                                    </Button>
+                                  </DropdownMenuTrigger>
+                                  <DropdownMenuContent align="end">
+                                    <DropdownMenuItem
+                                      onClick={() => handleEditPost(post)}
+                                    >
+                                      Edit
+                                    </DropdownMenuItem>
+                                    <DropdownMenuItem
+                                      onClick={() => togglePostStatus(post)}
+                                    >
+                                      {post.published ? "Unpublish" : "Publish"}
+                                    </DropdownMenuItem>
+                                    <DropdownMenuItem
+                                      className="text-destructive"
+                                      onClick={() => handleDeletePost(post)}
+                                    >
+                                      Delete
+                                    </DropdownMenuItem>
+                                  </DropdownMenuContent>
+                                </DropdownMenu>
+                              </div>
+
+                              <div className="flex items-center gap-2 mb-2">
+                                <Badge
+                                  variant={
+                                    post.published ? "default" : "secondary"
+                                  }
+                                  className={cn(
+                                    "text-[10px] h-5 px-1.5",
+                                    post.published
+                                      ? "bg-primary/15 text-primary border-primary/20"
+                                      : "",
+                                  )}
+                                >
+                                  {post.published ? "Published" : "Draft"}
+                                </Badge>
+                                <span className="text-xs text-muted-foreground font-mono">
+                                  /{post.slug}
+                                </span>
+                              </div>
+
+                              <div className="flex items-center justify-between text-xs text-muted-foreground mt-2 border-t pt-2">
+                                <div className="flex items-center gap-1">
+                                  <Eye className="size-3" />{" "}
+                                  {post.views?.toLocaleString() || 0}
+                                </div>
+                                <div className="flex items-center gap-1">
+                                  <Calendar className="size-3" />{" "}
+                                  {format(
+                                    new Date(post.updated_at || new Date()),
+                                    "MMM dd",
+                                  )}
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+                        </CardContent>
+                      </Card>
+                    </motion.div>
                   ))}
                 </AnimatePresence>
-              </TableBody>
-            </Table>
+              </div>
+            </>
           )}
         </CardContent>
       </Card>

@@ -150,11 +150,11 @@ export default function SecuritySettings() {
     <motion.div
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
-      className="mx-auto max-w-4xl space-y-8"
+      className="mx-auto max-w-4xl space-y-8 pb-20 md:pb-0"
     >
-      <div>
+      <div className="flex flex-col gap-2">
         <h2 className="text-2xl font-bold">Security Settings</h2>
-        <p className="text-muted-foreground">
+        <p className="text-muted-foreground text-sm">
           Manage your account security and two-factor authentication.
         </p>
       </div>
@@ -169,24 +169,33 @@ export default function SecuritySettings() {
       )}
 
       <Card>
-        <CardHeader>
-          <div className="flex items-center gap-4">
-            {mfaEnabled ? (
-              <ShieldCheck className="h-10 w-10 text-green-500" />
-            ) : (
-              <ShieldAlert className="h-10 w-10 text-yellow-500" />
-            )}
-            <div>
-              <CardTitle>Two-Factor Authentication (2FA)</CardTitle>
-              <CardDescription>
-                {mfaEnabled
-                  ? "Your account is secured with an additional layer of verification."
-                  : "Add an extra layer of security to your account."}
-              </CardDescription>
+        <CardHeader className="pb-3">
+          <div className="flex flex-col sm:flex-row sm:items-center gap-4">
+            <div className="flex items-center gap-4 flex-1">
+              <div className="shrink-0">
+                {mfaEnabled ? (
+                  <ShieldCheck className="h-10 w-10 text-green-500" />
+                ) : (
+                  <ShieldAlert className="h-10 w-10 text-yellow-500" />
+                )}
+              </div>
+              <div>
+                <CardTitle className="text-lg">
+                  Two-Factor Authentication (2FA)
+                </CardTitle>
+                <CardDescription className="mt-1">
+                  {mfaEnabled
+                    ? "Your account is secured with an additional layer of verification."
+                    : "Add an extra layer of security to your account."}
+                </CardDescription>
+              </div>
             </div>
             <Badge
               variant={mfaEnabled ? "default" : "secondary"}
-              className={mfaEnabled ? "bg-green-500/15 text-green-600" : ""}
+              className={cn(
+                "w-fit mt-2 sm:mt-0",
+                mfaEnabled ? "bg-green-500/15 text-green-600" : "",
+              )}
             >
               {mfaEnabled ? "Enabled" : "Disabled"}
             </Badge>
@@ -199,7 +208,10 @@ export default function SecuritySettings() {
               <p className="text-sm text-muted-foreground mt-1 mb-4">
                 Protect your account from unauthorized access.
               </p>
-              <Button onClick={() => router.push("/admin/setup-mfa")}>
+              <Button
+                onClick={() => router.push("/admin/setup-mfa")}
+                className="w-full sm:w-auto"
+              >
                 <Smartphone className="mr-2 size-4" /> Enable 2FA Now
               </Button>
             </div>
@@ -209,55 +221,58 @@ export default function SecuritySettings() {
               <h4 className="text-sm font-semibold mb-2">
                 Registered Authenticators
               </h4>
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>Name</TableHead>
-                    <TableHead>Status</TableHead>
-                    <TableHead className="text-right">Action</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {factors.map((factor) => (
-                    <TableRow key={factor.id}>
-                      <TableCell className="font-medium">
-                        {factor.friendly_name || `Authenticator`}
-                      </TableCell>
-                      <TableCell>
-                        <Badge
-                          variant={
-                            factor.status === "verified"
-                              ? "default"
-                              : "secondary"
-                          }
-                        >
-                          {factor.status}
-                        </Badge>
-                      </TableCell>
-                      <TableCell className="text-right">
-                        <Button
-                          onClick={() => handleUnenroll(factor.id)}
-                          variant="destructive"
-                          size="sm"
-                          disabled={isLoading}
-                        >
-                          Remove
-                        </Button>
-                      </TableCell>
+              <div className="rounded-md border overflow-hidden">
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>Name</TableHead>
+                      <TableHead>Status</TableHead>
+                      <TableHead className="text-right">Action</TableHead>
                     </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
+                  </TableHeader>
+                  <TableBody>
+                    {factors.map((factor) => (
+                      <TableRow key={factor.id}>
+                        <TableCell className="font-medium">
+                          {factor.friendly_name || `Authenticator`}
+                        </TableCell>
+                        <TableCell>
+                          <Badge
+                            variant={
+                              factor.status === "verified"
+                                ? "default"
+                                : "secondary"
+                            }
+                          >
+                            {factor.status}
+                          </Badge>
+                        </TableCell>
+                        <TableCell className="text-right">
+                          <Button
+                            onClick={() => handleUnenroll(factor.id)}
+                            variant="destructive"
+                            size="sm"
+                            disabled={isLoading}
+                          >
+                            Remove
+                          </Button>
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              </div>
             </>
           )}
         </CardContent>
         {mfaEnabled && (
-          <CardFooter className="border-t pt-4">
+          <CardFooter className="border-t pt-4 bg-muted/5">
             <Button
               variant="outline"
               size="sm"
               onClick={() => router.push("/admin/setup-mfa")}
               disabled={isLoading}
+              className="w-full sm:w-auto"
             >
               Add Another Method
             </Button>
@@ -286,6 +301,7 @@ export default function SecuritySettings() {
                 onChange={(e) => setNewPassword(e.target.value)}
                 required
                 minLength={6}
+                className="mt-1.5"
               />
             </div>
             <div>
@@ -297,16 +313,18 @@ export default function SecuritySettings() {
                 onChange={(e) => setConfirmPassword(e.target.value)}
                 required
                 minLength={6}
+                className="mt-1.5"
               />
             </div>
             {passwordError && (
-              <p className="text-sm font-medium text-destructive">
+              <p className="text-sm font-medium text-destructive bg-destructive/10 p-2 rounded">
                 {passwordError}
               </p>
             )}
             <Button
               type="submit"
               disabled={isUpdatingPassword || !newPassword || !confirmPassword}
+              className="w-full sm:w-auto"
             >
               {isUpdatingPassword ? (
                 <>
@@ -320,10 +338,10 @@ export default function SecuritySettings() {
         </CardContent>
       </Card>
 
-      <Card className="border-red-500/50 bg-red-500/5">
+      <Card className="border-red-500/30 bg-red-500/5">
         <CardHeader>
-          <div className="flex items-center gap-4">
-            <div className="p-3 bg-red-500/10 rounded-full animate-pulse">
+          <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4">
+            <div className="p-3 bg-red-500/10 rounded-full animate-pulse shrink-0">
               <Siren className="h-8 w-8 text-red-500" />
             </div>
             <div>
@@ -334,15 +352,15 @@ export default function SecuritySettings() {
             </div>
           </div>
         </CardHeader>
-        <CardContent className="grid gap-4 md:grid-cols-3">
+        <CardContent className="grid grid-cols-1 md:grid-cols-3 gap-4">
           <button
             onClick={() => handleLockdown(0)}
             disabled={isLocking}
             className={cn(
-              "flex flex-col items-center justify-center p-4 border-2 rounded-lg transition-all",
+              "flex flex-col items-center justify-center p-4 border-2 rounded-xl transition-all duration-200 h-32",
               level === 0
-                ? "border-green-500 bg-green-500/10"
-                : "border-muted hover:border-green-500/50",
+                ? "border-green-500 bg-green-500/10 shadow-sm"
+                : "border-border bg-background hover:border-green-500/50 hover:bg-green-500/5",
             )}
           >
             <Globe
@@ -361,10 +379,10 @@ export default function SecuritySettings() {
             onClick={() => handleLockdown(1)}
             disabled={isLocking}
             className={cn(
-              "flex flex-col items-center justify-center p-4 border-2 rounded-lg transition-all",
+              "flex flex-col items-center justify-center p-4 border-2 rounded-xl transition-all duration-200 h-32",
               level === 1
-                ? "border-orange-500 bg-orange-500/10"
-                : "border-muted hover:border-orange-500/50",
+                ? "border-orange-500 bg-orange-500/10 shadow-sm"
+                : "border-border bg-background hover:border-orange-500/50 hover:bg-orange-500/5",
             )}
           >
             <Lock
@@ -383,10 +401,10 @@ export default function SecuritySettings() {
             onClick={() => handleLockdown(2)}
             disabled={isLocking}
             className={cn(
-              "flex flex-col items-center justify-center p-4 border-2 rounded-lg transition-all",
+              "flex flex-col items-center justify-center p-4 border-2 rounded-xl transition-all duration-200 h-32",
               level === 2
-                ? "border-red-600 bg-red-600/20"
-                : "border-muted hover:border-red-600/50",
+                ? "border-red-600 bg-red-600/20 shadow-sm"
+                : "border-border bg-background hover:border-red-600/50 hover:bg-red-600/5",
             )}
           >
             <Siren
@@ -405,19 +423,19 @@ export default function SecuritySettings() {
 
       <Card>
         <CardHeader>
-          <CardTitle>Security Tips</CardTitle>
+          <CardTitle className="text-lg">Security Best Practices</CardTitle>
         </CardHeader>
         <CardContent>
-          <ul className="space-y-2 text-sm text-muted-foreground">
+          <ul className="space-y-3 text-sm text-muted-foreground">
             {[
-              "Keep your authenticator app secure and backed up.",
-              "Do not share your password or MFA codes.",
-              "Use a strong, unique password for admin access.",
-              "Log out when you finish managing your site.",
+              "Keep your authenticator app secure and backed up (e.g. Authy cloud backup).",
+              "Do not share your password or MFA codes with anyone.",
+              "Use a strong, unique password generated by a password manager.",
+              "Log out when you finish managing your site on shared devices.",
             ].map((tip) => (
               <li key={tip} className="flex items-start">
-                <CheckCircle className="mr-2 mt-1 size-3.5 shrink-0 text-primary" />
-                {tip}
+                <CheckCircle className="mr-3 mt-0.5 size-4 shrink-0 text-primary" />
+                <span>{tip}</span>
               </li>
             ))}
           </ul>

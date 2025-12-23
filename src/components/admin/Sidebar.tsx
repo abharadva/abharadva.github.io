@@ -22,7 +22,7 @@ import {
   Search,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { Button } from "../ui/button";
+import { Button } from "@/components/ui/button";
 import { useAuthGuard } from "@/hooks/useAuthGuard";
 import { useSignOutMutation } from "@/store/api/adminApi";
 import {
@@ -31,7 +31,7 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from "@/components/ui/accordion";
-import { Skeleton } from "../ui/skeleton";
+import { Skeleton } from "@/components/ui/skeleton";
 import {
   Tooltip,
   TooltipProvider,
@@ -69,9 +69,10 @@ const systemNav = [
 
 interface SidebarProps {
   onLinkClick?: () => void;
+  className?: string;
 }
 
-export function Sidebar({ onLinkClick }: SidebarProps) {
+export function Sidebar({ onLinkClick, className }: SidebarProps) {
   const router = useRouter();
   const { session } = useAuthGuard();
   const [signOut] = useSignOutMutation();
@@ -116,8 +117,13 @@ export function Sidebar({ onLinkClick }: SidebarProps) {
   };
 
   return (
-    <div className="flex grow flex-col gap-y-5 overflow-y-auto border-r border-border bg-background px-4">
-      <div className="flex h-16 shrink-0 items-center">
+    <div
+      className={cn(
+        "flex h-full flex-col gap-y-5 overflow-y-auto bg-background px-4 py-4",
+        className,
+      )}
+    >
+      <div className="flex h-10 shrink-0 items-center px-2">
         <Link
           href="/admin"
           className="font-mono text-lg font-semibold tracking-tighter"
@@ -125,8 +131,10 @@ export function Sidebar({ onLinkClick }: SidebarProps) {
           ADMIN<span className="text-primary">.</span>PANEL
         </Link>
       </div>
+
       <nav className="flex flex-1 flex-col">
-        <div className="mb-4 px-2">
+        {/* Search Bar - Hidden on mobile within sidebar to save space if needed */}
+        <div className="mb-4 px-1">
           <Button
             variant="outline"
             className="relative h-9 w-full justify-start text-sm text-muted-foreground sm:pr-12"
@@ -143,6 +151,7 @@ export function Sidebar({ onLinkClick }: SidebarProps) {
             </kbd>
           </Button>
         </div>
+
         <ul role="list" className="flex flex-1 flex-col gap-y-7">
           <li>
             <ul role="list" className="-mx-2 space-y-1">
@@ -205,11 +214,11 @@ export function Sidebar({ onLinkClick }: SidebarProps) {
             </Accordion>
           </li>
 
-          <li className="-mx-4 mt-auto border-t">
+          <li className="-mx-4 mt-auto border-t border-border">
             {session ? (
               <div className="flex items-center justify-between p-4">
                 <div className="truncate">
-                  <p className="text-sm font-semibold text-foreground truncate">
+                  <p className="text-sm font-semibold text-foreground truncate max-w-[150px]">
                     {session.user.email}
                   </p>
                 </div>
@@ -219,7 +228,7 @@ export function Sidebar({ onLinkClick }: SidebarProps) {
                       <Button
                         variant="ghost"
                         size="icon"
-                        className="h-8 w-8"
+                        className="h-8 w-8 hover:text-destructive"
                         onClick={handleLogout}
                       >
                         <LogOut className="h-4 w-4" />

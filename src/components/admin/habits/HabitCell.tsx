@@ -86,7 +86,7 @@ const HabitCell = React.memo(
                 {/* Hypothetical Streak Context */}
                 {isCompleted && (
                   <p className="text-[10px] opacity-70 border-t border-border/50 pt-1 mt-1">
-                    Marked done {formatDistanceToNow(new Date())} ago
+                    Marked done {formatDistanceToNow(new Date(dateStr))} ago
                   </p>
                 )}
               </div>

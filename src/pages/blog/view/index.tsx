@@ -46,6 +46,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { TableOfContents } from "@/components/table-of-contents";
 import { ScrollArea } from "@/components/ui/scroll-area";
 
+// ... (Keep PostBreadcrumb, PostMeta, PostContent, PostFooter components as they are) ...
 const PostBreadcrumb = ({ post }: { post: BlogPost }) => (
   <nav aria-label="breadcrumb" className="mb-4">
     <ol className="flex items-center gap-1.5 text-sm text-muted-foreground">

@@ -5,13 +5,7 @@ import React, { useState, useRef, DragEvent } from "react";
 import { supabase } from "@/supabase/client";
 import { toast } from "sonner";
 import { Button, buttonVariants } from "@/components/ui/button";
-import {
-  Card,
-  CardContent,
-  CardHeader,
-  CardTitle,
-  CardDescription,
-} from "@/components/ui/card";
+import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import {
@@ -39,7 +33,6 @@ import {
   Copy,
   AlertTriangle,
   Link as LinkIcon,
-  Edit,
   LayoutGrid,
   List,
   RefreshCw,
@@ -48,12 +41,6 @@ import {
   ExternalLink,
 } from "lucide-react";
 import { cn, getStorageUrl } from "@/lib/utils";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from "../ui/tooltip";
 import {
   Table,
   TableBody,
@@ -72,6 +59,7 @@ import {
 } from "@/store/api/adminApi";
 import Link from "next/link";
 import { Checkbox } from "../ui/checkbox";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 type StorageAsset = {
   id: string;
@@ -87,6 +75,7 @@ type StorageAsset = {
 const BUCKET_NAME = process.env.NEXT_PUBLIC_BUCKET_NAME || "blog-assets";
 
 export default function AssetManager() {
+  const isMobile = useIsMobile();
   const [isUploading, setIsUploading] = useState(false);
   const [selectedAsset, setSelectedAsset] = useState<StorageAsset | null>(null);
   const [assetsToDelete, setAssetsToDelete] = useState<StorageAsset[]>([]);
@@ -96,7 +85,7 @@ export default function AssetManager() {
   );
   const [isDragging, setIsDragging] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
-  const [viewMode, setViewMode] = useState<"list" | "grid">("list");
+  const [viewMode, setViewMode] = useState<"list" | "grid">("grid"); // Default to grid for better mobile exp
 
   const { data: assets = [], isLoading } = useGetAssetsQuery();
   const [addAsset] = useAddAssetMutation();
@@ -239,16 +228,19 @@ export default function AssetManager() {
     setBulkSelectedIds(newSet);
   };
 
+  // Determine effective view mode (force grid on mobile if preferred, or keep explicit toggle)
+  const effectiveViewMode = isMobile ? "grid" : viewMode;
+
   return (
-    <div className="space-y-6">
-      <div className="flex items-center justify-between">
+    <div className="space-y-6 pb-20 md:pb-0">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
           <h2 className="text-2xl font-bold">Asset Manager</h2>
           <p className="text-muted-foreground">
             Upload, view, and manage your site's images and files.
           </p>
         </div>
-        <div className="flex gap-2">
+        <div className="flex flex-wrap gap-2">
           {isBulkSelectMode ? (
             <>
               <Button
@@ -256,6 +248,7 @@ export default function AssetManager() {
                 size="sm"
                 onClick={handleBulkDelete}
                 disabled={bulkSelectedIds.size === 0}
+                className="flex-1 sm:flex-none"
               >
                 <Trash2 className="mr-2 size-4" /> Delete (
                 {bulkSelectedIds.size})
@@ -267,6 +260,7 @@ export default function AssetManager() {
                   setIsBulkSelectMode(false);
                   setBulkSelectedIds(new Set());
                 }}
+                className="flex-1 sm:flex-none"
               >
                 <X className="mr-2 size-4" /> Cancel
               </Button>
@@ -278,13 +272,15 @@ export default function AssetManager() {
                 size="sm"
                 onClick={() => handleRescanUsage()}
                 disabled={isLoading}
+                className="hidden sm:flex"
               >
-                <RefreshCw className="mr-2 size-4" /> Rescan Usage
+                <RefreshCw className="mr-2 size-4" /> Rescan
               </Button>
               <Button
                 onClick={() => fileInputRef.current?.click()}
                 disabled={isUploading}
                 size="sm"
+                className="flex-1 sm:flex-none"
               >
                 {isUploading ? (
                   <Loader2 className="mr-2 size-4 animate-spin" />
@@ -305,7 +301,9 @@ export default function AssetManager() {
           />
         </div>
       </div>
+
       <Card
+        className="min-h-[500px]"
         onDragEnter={(e) => handleDragEvents(e, true)}
         onDragLeave={(e) => handleDragEvents(e, false)}
         onDragOver={(e) => handleDragEvents(e, true)}
@@ -314,160 +312,187 @@ export default function AssetManager() {
         <CardHeader className="border-b p-4">
           <div className="flex justify-between items-center">
             <Button
-              variant="secondary"
+              variant={isBulkSelectMode ? "secondary" : "outline"}
               size="sm"
               onClick={() => setIsBulkSelectMode(!isBulkSelectMode)}
-              disabled={isBulkSelectMode}
             >
-              <CheckSquare className="mr-2 size-4" /> Bulk Select
+              <CheckSquare className="mr-2 size-4" />
+              {isMobile ? "Select" : "Bulk Select"}
             </Button>
-            <ToggleGroup
-              type="single"
-              value={viewMode}
-              onValueChange={(value) => {
-                if (value) setViewMode(value as "grid" | "list");
-              }}
-              size="sm"
-            >
-              <ToggleGroupItem value="list" aria-label="List view">
-                <List className="h-4 w-4" />
-              </ToggleGroupItem>
-              <ToggleGroupItem value="grid" aria-label="Grid view">
-                <LayoutGrid className="h-4 w-4" />
-              </ToggleGroupItem>
-            </ToggleGroup>
+
+            {/* Hide view toggle on mobile if forcing grid */}
+            {!isMobile && (
+              <ToggleGroup
+                type="single"
+                value={viewMode}
+                onValueChange={(value) => {
+                  if (value) setViewMode(value as "grid" | "list");
+                }}
+                size="sm"
+              >
+                <ToggleGroupItem value="list" aria-label="List view">
+                  <List className="h-4 w-4" />
+                </ToggleGroupItem>
+                <ToggleGroupItem value="grid" aria-label="Grid view">
+                  <LayoutGrid className="h-4 w-4" />
+                </ToggleGroupItem>
+              </ToggleGroup>
+            )}
           </div>
         </CardHeader>
         <CardContent className="p-0 relative">
           {isDragging && (
-            <div className="absolute inset-0 z-10 bg-primary/10 border-2 border-dashed border-primary rounded-b-lg flex flex-col items-center justify-center">
+            <div className="absolute inset-0 z-50 bg-primary/10 border-2 border-dashed border-primary rounded-b-lg flex flex-col items-center justify-center backdrop-blur-sm">
               <Upload className="size-10 text-primary mb-2" />
               <p className="font-semibold text-primary">Drop files to upload</p>
             </div>
           )}
+
           {isLoading && !assets.length ? (
             <div className="flex justify-center p-8">
-              <Loader2 className="animate-spin" />
+              <Loader2 className="animate-spin text-muted-foreground" />
             </div>
           ) : assets.length === 0 ? (
-            <div className="py-12 text-center text-muted-foreground">
-              <h3 className="text-lg font-semibold">No assets found.</h3>
-              <p>Click "Upload" or drag files here to add your first asset.</p>
+            <div className="py-20 text-center text-muted-foreground flex flex-col items-center">
+              <div className="p-4 bg-muted/50 rounded-full mb-4">
+                <LayoutGrid className="size-8 opacity-20" />
+              </div>
+              <h3 className="text-lg font-semibold">No assets found</h3>
+              <p className="text-sm mt-1">Upload images to get started.</p>
             </div>
-          ) : viewMode === "grid" ? (
-            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-4 p-4">
+          ) : effectiveViewMode === "grid" ? (
+            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-2 sm:gap-4 p-4">
               {assets.map((asset) => (
                 <div
                   key={asset.id}
-                  className="group relative aspect-square overflow-hidden rounded-md border bg-secondary cursor-pointer"
-                  onClick={() => !isBulkSelectMode && setSelectedAsset(asset)}
+                  className={cn(
+                    "group relative aspect-square overflow-hidden rounded-md border bg-secondary cursor-pointer hover:ring-2 hover:ring-primary/50 transition-all",
+                    isBulkSelectMode &&
+                      bulkSelectedIds.has(asset.id) &&
+                      "ring-2 ring-primary bg-primary/10",
+                  )}
+                  onClick={() => {
+                    if (isBulkSelectMode) toggleBulkSelect(asset.id);
+                    else setSelectedAsset(asset);
+                  }}
                 >
                   {isBulkSelectMode && (
-                    <div
-                      className="absolute top-2 left-2 z-10"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        toggleBulkSelect(asset.id);
-                      }}
-                    >
+                    <div className="absolute top-2 left-2 z-10">
                       <Checkbox
                         checked={bulkSelectedIds.has(asset.id)}
-                        className="bg-background/50 border-white/50 data-[state=checked]:bg-primary"
+                        className="bg-background/80 border-primary data-[state=checked]:bg-primary data-[state=checked]:text-primary-foreground"
                       />
                     </div>
                   )}
+
                   <img
                     src={getStorageUrl(asset.file_path)}
                     alt={asset.alt_text || asset.file_name}
                     className={cn(
                       "h-full w-full object-cover transition-transform duration-300",
-                      isBulkSelectMode &&
-                        bulkSelectedIds.has(asset.id) &&
-                        "scale-90 opacity-70",
+                      !isBulkSelectMode && "group-hover:scale-105",
                     )}
+                    loading="lazy"
                   />
+
+                  {/* Overlay on Desktop Hover / Always Visible Title on Mobile if needed (optional) */}
                   <div
                     className={cn(
-                      "absolute inset-0 bg-black/60 opacity-0 transition-opacity flex flex-col justify-between p-2 text-white",
+                      "absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/80 to-transparent p-2 text-white opacity-0 transition-opacity flex flex-col justify-end",
                       !isBulkSelectMode && "group-hover:opacity-100",
                     )}
                   >
-                    <p className="text-xs font-semibold truncate">
+                    <p className="text-[10px] font-medium truncate">
                       {asset.file_name}
                     </p>
+                    <p className="text-[9px] opacity-80 uppercase">
+                      {asset.mime_type?.split("/")[1]}
+                    </p>
                   </div>
+
                   {asset.used_in && asset.used_in.length > 0 && (
-                    <div className="absolute top-1.5 right-1.5 rounded-full bg-primary p-1">
-                      <LinkIcon className="size-3 text-primary-foreground" />
+                    <div className="absolute top-1.5 right-1.5 rounded-full bg-primary/90 p-1 shadow-sm">
+                      <LinkIcon className="size-2.5 text-primary-foreground" />
                     </div>
                   )}
                 </div>
               ))}
             </div>
           ) : (
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead className="w-[80px]">Preview</TableHead>
-                  <TableHead>Filename</TableHead>
-                  <TableHead>Alt Text</TableHead>
-                  <TableHead>Size</TableHead>
-                  <TableHead>Used</TableHead>
-                  <TableHead className="text-right">Actions</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {assets.map((asset) => (
-                  <TableRow
-                    key={asset.id}
-                    className="group hover:bg-secondary/40 cursor-pointer"
-                    onClick={() => !isBulkSelectMode && setSelectedAsset(asset)}
-                  >
-                    <TableCell>
-                      {isBulkSelectMode ? (
-                        <Checkbox
-                          checked={bulkSelectedIds.has(asset.id)}
-                          onCheckedChange={() => toggleBulkSelect(asset.id)}
-                        />
-                      ) : (
-                        <img
-                          src={getStorageUrl(asset.file_path)}
-                          alt={asset.alt_text || asset.file_name}
-                          className="h-10 w-10 object-cover rounded-md"
-                        />
-                      )}
-                    </TableCell>
-                    <TableCell className="font-medium truncate max-w-xs">
-                      {asset.file_name}
-                    </TableCell>
-                    <TableCell className="text-muted-foreground truncate max-w-[200px]">
-                      {asset.alt_text || "—"}
-                    </TableCell>
-                    <TableCell className="text-muted-foreground">
-                      {asset.size_kb ? `${asset.size_kb.toFixed(1)} KB` : "N/A"}
-                    </TableCell>
-                    <TableCell>
-                      {asset.used_in && asset.used_in.length > 0 && (
-                        <LinkIcon className="size-4 text-primary" />
-                      )}
-                    </TableCell>
-                    <TableCell className="text-right">
-                      <Button
-                        size="icon"
-                        variant="ghost"
-                        className="h-8 w-8"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          setAssetsToDelete([asset]);
-                        }}
-                      >
-                        <Trash2 className="size-4 text-destructive" />
-                      </Button>
-                    </TableCell>
+            <div className="overflow-x-auto">
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead className="w-[80px]">Preview</TableHead>
+                    <TableHead>Filename</TableHead>
+                    <TableHead className="hidden md:table-cell">
+                      Alt Text
+                    </TableHead>
+                    <TableHead className="hidden sm:table-cell">Size</TableHead>
+                    <TableHead className="w-[50px]">Used</TableHead>
+                    <TableHead className="text-right">Actions</TableHead>
                   </TableRow>
-                ))}
-              </TableBody>
-            </Table>
+                </TableHeader>
+                <TableBody>
+                  {assets.map((asset) => (
+                    <TableRow
+                      key={asset.id}
+                      className="group hover:bg-muted/30 cursor-pointer"
+                      onClick={() => {
+                        if (isBulkSelectMode) toggleBulkSelect(asset.id);
+                        else setSelectedAsset(asset);
+                      }}
+                    >
+                      <TableCell className="py-2">
+                        {isBulkSelectMode ? (
+                          <Checkbox
+                            checked={bulkSelectedIds.has(asset.id)}
+                            onCheckedChange={() => toggleBulkSelect(asset.id)}
+                          />
+                        ) : (
+                          <div className="h-10 w-10 rounded-md overflow-hidden bg-secondary">
+                            <img
+                              src={getStorageUrl(asset.file_path)}
+                              alt={asset.alt_text || asset.file_name}
+                              className="h-full w-full object-cover"
+                            />
+                          </div>
+                        )}
+                      </TableCell>
+                      <TableCell className="font-medium max-w-[150px] truncate">
+                        {asset.file_name}
+                      </TableCell>
+                      <TableCell className="hidden md:table-cell text-muted-foreground truncate max-w-[200px]">
+                        {asset.alt_text || "—"}
+                      </TableCell>
+                      <TableCell className="hidden sm:table-cell text-muted-foreground font-mono text-xs">
+                        {asset.size_kb
+                          ? `${asset.size_kb.toFixed(0)} KB`
+                          : "N/A"}
+                      </TableCell>
+                      <TableCell>
+                        {asset.used_in && asset.used_in.length > 0 && (
+                          <LinkIcon className="size-4 text-primary" />
+                        )}
+                      </TableCell>
+                      <TableCell className="text-right">
+                        <Button
+                          size="icon"
+                          variant="ghost"
+                          className="h-8 w-8"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setAssetsToDelete([asset]);
+                          }}
+                        >
+                          <Trash2 className="size-4 text-destructive" />
+                        </Button>
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </div>
           )}
         </CardContent>
       </Card>
@@ -476,27 +501,28 @@ export default function AssetManager() {
         open={assetsToDelete.length > 0}
         onOpenChange={(open) => !open && setAssetsToDelete([])}
       >
-        <AlertDialogContent>
+        <AlertDialogContent className="max-w-[90vw] sm:max-w-lg rounded-xl">
           <AlertDialogHeader>
             <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
             <AlertDialogDescription>
               This action cannot be undone. This will permanently delete{" "}
-              {assetsToDelete.length} asset(s). Any links to these assets will
-              be broken.
+              <span className="font-bold text-foreground">
+                {assetsToDelete.length}
+              </span>{" "}
+              asset(s). Any links to these assets will be broken.
             </AlertDialogDescription>
             {assetsToDelete.some((a) => a.used_in && a.used_in.length > 0) && (
               <div className="mt-4 rounded-md border border-destructive/50 bg-destructive/10 p-3 text-sm text-destructive">
                 <div className="flex items-start gap-2">
                   <AlertTriangle className="size-4 mt-0.5" />
-                  <p>
-                    <strong>Warning:</strong> At least one selected asset is
-                    currently in use.
+                  <p className="font-medium">
+                    Warning: One or more selected assets are currently in use.
                   </p>
                 </div>
               </div>
             )}
           </AlertDialogHeader>
-          <AlertDialogFooter>
+          <AlertDialogFooter className="gap-2">
             <AlertDialogCancel>Cancel</AlertDialogCancel>
             <AlertDialogAction
               onClick={confirmDelete}
@@ -512,46 +538,81 @@ export default function AssetManager() {
         open={!!selectedAsset}
         onOpenChange={(open) => !open && setSelectedAsset(null)}
       >
-        <SheetContent className="sm:max-w-lg w-full flex flex-col">
-          <div className="flex justify-between items-center">
-            <SheetHeader>
+        <SheetContent className="w-full sm:max-w-lg flex flex-col p-0">
+          <div className="flex justify-between items-center p-4 border-b bg-background/50 backdrop-blur sticky top-0 z-10">
+            <SheetHeader className="text-left">
               <SheetTitle>Asset Details</SheetTitle>
-              <SheetDescription>
-                View details, edit alt text, and see where this asset is used.
+              <SheetDescription className="hidden sm:block">
+                View details, edit alt text, and see usage.
               </SheetDescription>
             </SheetHeader>
 
             <SheetClose asChild>
-              <Button type="button" variant="ghost">
-                <X />
+              <Button type="button" variant="ghost" size="icon">
+                <X className="size-4" />
               </Button>
             </SheetClose>
           </div>
+
           {selectedAsset && (
-            <div className="py-6 space-y-6">
-              <img
-                src={getStorageUrl(selectedAsset.file_path)}
-                alt={selectedAsset.alt_text || selectedAsset.file_name}
-                className="w-full object-contain rounded-md border bg-secondary/30 aspect-video"
-              />
-              <form onSubmit={handleUpdateAltText} className="space-y-2">
-                <Label htmlFor="alt_text">Alt Text (for accessibility)</Label>
+            <div className="flex-1 overflow-y-auto p-4 space-y-6">
+              <div className="rounded-lg border bg-secondary/20 p-2 flex items-center justify-center min-h-[200px]">
+                <img
+                  src={getStorageUrl(selectedAsset.file_path)}
+                  alt={selectedAsset.alt_text || selectedAsset.file_name}
+                  className="max-h-[300px] w-auto object-contain rounded-md shadow-sm"
+                />
+              </div>
+
+              <form onSubmit={handleUpdateAltText} className="space-y-3">
+                <Label htmlFor="alt_text">Alt Text (Accessibility)</Label>
                 <div className="flex gap-2">
                   <Input
                     id="alt_text"
                     name="alt_text"
                     defaultValue={selectedAsset.alt_text || ""}
+                    placeholder="Describe this image..."
+                    className="flex-1"
                   />
-                  <Button type="submit">Save</Button>
+                  <Button type="submit" size="sm">
+                    Save
+                  </Button>
                 </div>
               </form>
-              <div className="space-y-2">
+
+              <div className="space-y-3">
+                <Label>File Information</Label>
+                <div className="rounded-md border p-3 text-sm space-y-2 bg-card">
+                  <div className="flex justify-between">
+                    <span className="text-muted-foreground">Filename:</span>
+                    <span className="font-mono text-xs truncate max-w-[200px]">
+                      {selectedAsset.file_name}
+                    </span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-muted-foreground">Size:</span>
+                    <span>
+                      {selectedAsset.size_kb
+                        ? `${selectedAsset.size_kb.toFixed(1)} KB`
+                        : "N/A"}
+                    </span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-muted-foreground">Type:</span>
+                    <span className="uppercase">
+                      {selectedAsset.mime_type?.split("/")[1] || "Unknown"}
+                    </span>
+                  </div>
+                </div>
+              </div>
+
+              <div className="space-y-3">
                 <Label>Public URL</Label>
                 <div className="flex gap-2">
                   <Input
                     value={getStorageUrl(selectedAsset.file_path)}
                     readOnly
-                    className="text-xs font-mono"
+                    className="text-xs font-mono bg-muted/50"
                   />
                   <Button
                     variant="outline"
@@ -564,25 +625,26 @@ export default function AssetManager() {
                   </Button>
                 </div>
               </div>
-              <div className="space-y-2">
-                <Label>Usage</Label>
+
+              <div className="space-y-3">
+                <Label>Used In</Label>
                 {selectedAsset.used_in && selectedAsset.used_in.length > 0 ? (
                   <div className="space-y-2">
                     {selectedAsset.used_in.map((use, i) => (
                       <Link
                         key={i}
                         href="#"
-                        className="flex items-center justify-between p-2 rounded-md hover:bg-secondary text-sm"
+                        className="flex items-center justify-between p-3 rounded-md border bg-card hover:bg-accent transition-colors text-sm group"
                       >
-                        <span>{use.type}</span>
-                        <ExternalLink className="size-4 text-muted-foreground" />
+                        <span className="font-medium">{use.type}</span>
+                        <ExternalLink className="size-4 text-muted-foreground group-hover:text-primary" />
                       </Link>
                     ))}
                   </div>
                 ) : (
-                  <p className="text-sm text-muted-foreground p-2 border rounded-md bg-secondary/30">
-                    This asset is not currently used in any content.
-                  </p>
+                  <div className="p-4 rounded-md border border-dashed text-center text-sm text-muted-foreground bg-muted/10">
+                    Not currently used in any known content.
+                  </div>
                 )}
               </div>
             </div>

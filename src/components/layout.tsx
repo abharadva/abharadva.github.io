@@ -1,11 +1,12 @@
+// src/components/layout.tsx
 import Head from "next/head";
 import { PropsWithChildren, useEffect, useState } from "react";
 import Container from "./container";
 import Header from "./header";
 import Footer from "./footer";
 import MobileHeader from "./mobile-header";
-import { useGetLockdownStatusQuery } from "@/store/api/publicApi"; // Import query
-import MaintenanceScreen from "@/components/MaintenanceScreen"; // Import screen
+import { useGetLockdownStatusQuery } from "@/store/api/publicApi";
+import MaintenanceScreen from "@/components/MaintenanceScreen";
 import { supabase } from "@/supabase/client";
 
 type LayoutProps = PropsWithChildren & {
@@ -17,16 +18,12 @@ const SITE_URL =
 const DEFAULT_OG_TITLE = "Akshay Bharadva - Fullstack Developer";
 const DEFAULT_OG_DESCRIPTION =
   "Portfolio and Blog of Akshay Bharadva, showcasing projects and thoughts on web development.";
-const DEFAULT_OG_IMAGE = `${SITE_URL}/default-og-image.png`;
 
 export default function Layout({ children, isAdmin = false }: LayoutProps) {
-  // 1. Fetch Status
-  const { data: lockdownLevel = 0, isLoading: isCheckingSecurity } =
-    useGetLockdownStatusQuery();
+  const { data: lockdownLevel = 0 } = useGetLockdownStatusQuery();
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [isAuthChecking, setIsAuthChecking] = useState(true);
 
-  // 2. Check if user is Admin (Admins bypass lockdown)
   useEffect(() => {
     const checkUser = async () => {
       const {
@@ -50,14 +47,10 @@ export default function Layout({ children, isAdmin = false }: LayoutProps) {
     return () => window.removeEventListener("mousemove", handleMouseMove);
   }, [isAdmin]);
 
-  // 3. LOGIC: If lockdown is active AND user is NOT admin, block access.
-  // We wait for auth check to finish to prevent flashing Maintenance to admins.
   const isLockdownActive = lockdownLevel >= 1;
   const shouldBlockAccess =
     isLockdownActive && !isAuthChecking && !isAuthenticated;
 
-  // Ideally, if it's an admin page, we just render normally (the AuthGuard inside admin pages handles security)
-  // If it's a public page and should be blocked, show maintenance.
   if (!isAdmin && shouldBlockAccess) {
     return (
       <>
@@ -70,15 +63,18 @@ export default function Layout({ children, isAdmin = false }: LayoutProps) {
     );
   }
 
-  // Admin pages or Normal Public access
   if (isAdmin) {
     return (
       <>
         <Head>
           <title>Admin Panel | Akshay Bharadva</title>
           <meta name="robots" content="noindex, nofollow" />
+          <meta
+            name="viewport"
+            content="width=device-width, initial-scale=1, maximum-scale=1"
+          />
         </Head>
-        <div className="font-sans bg-background min-h-screen">{children}</div>
+        <div className="font-sans bg-background min-h-[100dvh]">{children}</div>
       </>
     );
   }
@@ -91,17 +87,11 @@ export default function Layout({ children, isAdmin = false }: LayoutProps) {
         <title>Akshay Bharadva</title>
         <meta name="description" content={DEFAULT_OG_DESCRIPTION} />
         <link rel="icon" href="/favicon.ico" />
-        {/* Add other meta tags as needed */}
       </Head>
 
-      <div className="relative flex min-h-screen flex-col justify-between font-sans">
-        {/* Background Layers */}
+      <div className="relative flex min-h-[100dvh] flex-col justify-between font-sans">
         <div className="fixed inset-0 z-[-1] bg-background" />
-
-        {/* Grid Pattern */}
         <div className="fixed inset-0 z-[-1] bg-grid-pattern opacity-[0.6]" />
-
-        {/* Spotlight */}
         <div
           className="pointer-events-none fixed inset-0 z-[-1] opacity-40 transition-opacity duration-500"
           style={{
@@ -112,8 +102,8 @@ export default function Layout({ children, isAdmin = false }: LayoutProps) {
         <Header />
         <MobileHeader />
 
-        <main className="mt-20 w-full grow md:mt-24 relative z-10">
-          <Container>{children}</Container>
+        <main className="mt-20 w-full grow md:mt-24 relative z-10 flex flex-col">
+          <Container className="flex-grow">{children}</Container>
         </main>
 
         <Footer />

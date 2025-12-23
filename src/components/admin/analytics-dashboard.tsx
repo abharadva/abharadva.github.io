@@ -32,13 +32,8 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import {
-  ChartContainer,
-  ChartTooltip,
-  ChartTooltipContent,
-} from "@/components/ui/chart";
+import { ChartContainer, ChartTooltipContent } from "@/components/ui/chart";
 import LoadingSpinner from "./LoadingSpinner";
-import { Badge } from "../ui/badge";
 import {
   AlertTriangle,
   BookOpen,
@@ -71,7 +66,10 @@ const COLORS = {
 const Heatmap = ({ data }: { data: { date: string; count: number }[] }) => {
   const { heatmapData, gridDays } = useMemo(() => {
     const today = startOfDay(new Date());
-    const gridStartDate = startOfWeek(subDays(today, 364));
+    // Show fewer days on mobile for better fit
+    const daysToShow =
+      typeof window !== "undefined" && window.innerWidth < 640 ? 180 : 364;
+    const gridStartDate = startOfWeek(subDays(today, daysToShow));
     const days = eachDayOfInterval({ start: gridStartDate, end: today });
 
     const dataMap = new Map(data.map((item) => [item.date, item.count]));
@@ -88,32 +86,36 @@ const Heatmap = ({ data }: { data: { date: string; count: number }[] }) => {
   };
 
   return (
-    <TooltipProvider delayDuration={100}>
-      <div className="grid grid-flow-col grid-rows-7 gap-1">
-        {gridDays.map((day) => {
-          const dayStr = format(day, "yyyy-MM-dd");
-          const count = heatmapData.get(dayStr) || 0;
-          return (
-            <Tooltip key={dayStr}>
-              <TooltipTrigger asChild>
-                <div
-                  className={cn(
-                    "aspect-square rounded-[2px]",
-                    getColorClass(count),
-                  )}
-                />
-              </TooltipTrigger>
-              <TooltipContent>
-                <p className="font-semibold">
-                  {count > 0 ? `${count} tasks completed` : "No tasks"} on{" "}
-                  {format(day, "MMM dd, yyyy")}
-                </p>
-              </TooltipContent>
-            </Tooltip>
-          );
-        })}
+    <div className="w-full overflow-x-auto pb-2">
+      <div className="min-w-fit">
+        <TooltipProvider delayDuration={100}>
+          <div className="grid grid-flow-col grid-rows-7 gap-1">
+            {gridDays.map((day) => {
+              const dayStr = format(day, "yyyy-MM-dd");
+              const count = heatmapData.get(dayStr) || 0;
+              return (
+                <Tooltip key={dayStr}>
+                  <TooltipTrigger asChild>
+                    <div
+                      className={cn(
+                        "w-3 h-3 sm:w-4 sm:h-4 rounded-[2px]",
+                        getColorClass(count),
+                      )}
+                    />
+                  </TooltipTrigger>
+                  <TooltipContent>
+                    <p className="font-semibold">
+                      {count > 0 ? `${count} tasks completed` : "No tasks"} on{" "}
+                      {format(day, "MMM dd, yyyy")}
+                    </p>
+                  </TooltipContent>
+                </Tooltip>
+              );
+            })}
+          </div>
+        </TooltipProvider>
       </div>
-    </TooltipProvider>
+    </div>
   );
 };
 
@@ -152,7 +154,6 @@ export default function AnalyticsDashboard() {
     return <LoadingSpinner />;
   }
 
-  console.log("analyticsData", analyticsData);
   if (!analyticsData) {
     return (
       <Card>
@@ -168,15 +169,15 @@ export default function AnalyticsDashboard() {
   }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 pb-20 md:pb-0">
       <div>
         <h2 className="text-2xl font-bold">Analytics Dashboard</h2>
-        <p className="text-muted-foreground">
+        <p className="text-muted-foreground text-sm">
           Data-driven insights from your modules.
         </p>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         <StatCard title="Total Tasks" value={totalTasks} icon={ListTodo} />
         <StatCard
           title="Task Completion"
@@ -217,7 +218,13 @@ export default function AnalyticsDashboard() {
                   >
                     {(analyticsData.task_status_distribution || []).map(
                       (entry, index) => (
-                        <Cell key={`cell-${index}`} fill={COLORS[entry.name]} />
+                        <Cell
+                          key={`cell-${index}`}
+                          fill={
+                            COLORS[entry.name as keyof typeof COLORS] ||
+                            COLORS.todo
+                          }
+                        />
                       ),
                     )}
                   </Pie>
@@ -235,20 +242,32 @@ export default function AnalyticsDashboard() {
           </CardHeader>
           <CardContent>
             <ChartContainer config={{}} className="h-64 w-full">
-              <BarChart data={analyticsData.tasks_completed_weekly || []}>
-                <CartesianGrid vertical={false} />
-                <XAxis dataKey="week" />
-                <YAxis allowDecimals={false} />
-                <RechartsTooltip
-                  content={<ChartTooltipContent />}
-                  cursor={false}
-                />
-                <Bar
-                  dataKey="completed"
-                  fill="hsl(var(--primary))"
-                  radius={4}
-                />
-              </BarChart>
+              <ResponsiveContainer>
+                <BarChart data={analyticsData.tasks_completed_weekly || []}>
+                  <CartesianGrid vertical={false} />
+                  <XAxis
+                    dataKey="week"
+                    tick={{ fontSize: 10 }}
+                    tickLine={false}
+                    axisLine={false}
+                  />
+                  <YAxis
+                    allowDecimals={false}
+                    tick={{ fontSize: 10 }}
+                    tickLine={false}
+                    axisLine={false}
+                  />
+                  <RechartsTooltip
+                    content={<ChartTooltipContent />}
+                    cursor={false}
+                  />
+                  <Bar
+                    dataKey="completed"
+                    fill="hsl(var(--primary))"
+                    radius={[4, 4, 0, 0]}
+                  />
+                </BarChart>
+              </ResponsiveContainer>
             </ChartContainer>
           </CardContent>
         </Card>
@@ -258,7 +277,7 @@ export default function AnalyticsDashboard() {
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <CalendarDays className="size-5 text-primary" /> Productivity
-            Heatmap (Last Year)
+            Heatmap
           </CardTitle>
           <CardDescription>
             Visualizing when you complete the most tasks.
@@ -274,25 +293,36 @@ export default function AnalyticsDashboard() {
           <CardHeader>
             <CardTitle>Top Blog Posts by Views</CardTitle>
           </CardHeader>
-          <CardContent>
+          <CardContent className="p-0">
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead>Title</TableHead>
-                  <TableHead className="text-right">Views</TableHead>
+                  <TableHead className="pl-4">Title</TableHead>
+                  <TableHead className="text-right pr-4">Views</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
                 {analyticsData.top_blog_posts?.map((post) => (
                   <TableRow key={post.id}>
-                    <TableCell className="font-medium truncate max-w-xs">
+                    <TableCell className="font-medium truncate max-w-[200px] pl-4">
                       {post.title}
                     </TableCell>
-                    <TableCell className="text-right font-mono">
+                    <TableCell className="text-right font-mono pr-4">
                       {post.views.toLocaleString()}
                     </TableCell>
                   </TableRow>
                 ))}
+                {(!analyticsData.top_blog_posts ||
+                  analyticsData.top_blog_posts.length === 0) && (
+                  <TableRow>
+                    <TableCell
+                      colSpan={2}
+                      className="text-center text-muted-foreground h-24"
+                    >
+                      No posts yet.
+                    </TableCell>
+                  </TableRow>
+                )}
               </TableBody>
             </Table>
           </CardContent>
@@ -303,44 +333,46 @@ export default function AnalyticsDashboard() {
           </CardHeader>
           <CardContent>
             <ChartContainer config={{}} className="h-64 w-full">
-              <BarChart
-                data={analyticsData.learning_time_by_subject || []}
-                layout="vertical"
-                margin={{ left: 10 }}
-              >
-                <CartesianGrid horizontal={false} />
-                <XAxis type="number" hide />
-                <YAxis
-                  dataKey="name"
-                  type="category"
-                  tickLine={false}
-                  axisLine={false}
-                  tick={{ fill: "hsl(var(--foreground))" }}
-                  width={120}
-                />
-                <RechartsTooltip
-                  content={<ChartTooltipContent />}
-                  cursor={false}
-                />
-                <Bar
-                  dataKey="value"
-                  fill="hsl(var(--primary))"
-                  radius={4}
+              <ResponsiveContainer>
+                <BarChart
+                  data={analyticsData.learning_time_by_subject || []}
                   layout="vertical"
+                  margin={{ left: 0, right: 0 }}
                 >
-                  {(analyticsData.learning_time_by_subject || []).map(
-                    (entry, index) => (
-                      <Cell
-                        key={`cell-${index}`}
-                        fill={
-                          COLORS[entry.name as keyof typeof COLORS] ||
-                          COLORS.done
-                        }
-                      />
-                    ),
-                  )}
-                </Bar>
-              </BarChart>
+                  <CartesianGrid horizontal={false} />
+                  <XAxis type="number" hide />
+                  <YAxis
+                    dataKey="name"
+                    type="category"
+                    tickLine={false}
+                    axisLine={false}
+                    tick={{ fill: "hsl(var(--foreground))", fontSize: 11 }}
+                    width={100}
+                  />
+                  <RechartsTooltip
+                    content={<ChartTooltipContent />}
+                    cursor={false}
+                  />
+                  <Bar
+                    dataKey="value"
+                    fill="hsl(var(--primary))"
+                    radius={[0, 4, 4, 0]}
+                    layout="vertical"
+                  >
+                    {(analyticsData.learning_time_by_subject || []).map(
+                      (entry, index) => (
+                        <Cell
+                          key={`cell-${index}`}
+                          fill={
+                            COLORS[entry.name as keyof typeof COLORS] ||
+                            COLORS.done
+                          }
+                        />
+                      ),
+                    )}
+                  </Bar>
+                </BarChart>
+              </ResponsiveContainer>
             </ChartContainer>
           </CardContent>
         </Card>

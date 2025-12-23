@@ -99,10 +99,10 @@ export interface Note {
   content?: string | null;
   tags?: string[] | null;
   is_pinned?: boolean;
+  color?: string | null; // ADD THIS LINE
   created_at?: string;
   updated_at?: string;
 }
-
 export interface SubTask {
   id: string;
   task_id: string;

@@ -19,7 +19,6 @@ import {
   FileText,
   Globe,
   GraduationCap,
-  BookOpen,
   Hourglass,
   Layers,
   ExternalLink,
@@ -38,7 +37,7 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { Separator } from "@/components/ui/separator";
 import { Badge } from "@/components/ui/badge";
 
-// --- COMPONENTS ---
+// --- COMPONENTS (No changes here, keeping them for context) ---
 
 const STATUS_STEPS: { value: LearningStatus; label: string }[] = [
   { value: "To Learn", label: "Queue" },
@@ -75,11 +74,8 @@ const StatusPipeline = ({
   </div>
 );
 
-// --- RESOURCE HANDLING ---
-
 const parseResource = (rawText: string | undefined | null) => {
   if (!rawText) return { type: "Link", title: "Untitled Resource" };
-
   const types = [
     "Article",
     "Video",
@@ -113,7 +109,6 @@ const getResourceIcon = (type: string) => {
   }
 };
 
-// --- RESOURCE CARD ---
 const ResourceCard = ({
   resource,
   onDelete,
@@ -122,7 +117,6 @@ const ResourceCard = ({
   onDelete: () => void;
 }) => {
   const { type, title } = parseResource(resource.name);
-
   return (
     <div className="group relative flex items-start gap-3 p-3 rounded-xl border bg-card/50 hover:bg-card hover:shadow-sm hover:border-primary/20 transition-all duration-200">
       <div className="mt-0.5 shrink-0 size-8 flex items-center justify-center bg-background rounded-lg border border-border shadow-sm">
@@ -193,8 +187,6 @@ export default function TopicEditor({
     if (topic) {
       setCoreNotes(topic.core_notes || "");
       setStatus(topic.status || "To Learn");
-
-      // Data Normalization: Handle imported JSON using 'text' instead of 'name'
       const rawResources = topic.resources || [];
       const normalizedResources = rawResources.map((res: any) => ({
         name: res.name || res.text || "Untitled Resource",
@@ -221,7 +213,6 @@ export default function TopicEditor({
     [topic, saveTopic, onTopicUpdate],
   );
 
-  // Autosave Notes
   useEffect(() => {
     if (!topic || coreNotes === (topic.core_notes || "")) return;
     const handler = setTimeout(
@@ -235,7 +226,6 @@ export default function TopicEditor({
     setStatus(newStatus);
     handleSave({ status: newStatus });
   };
-
   const handleAddResource = () => {
     if (!newResName || !newResUrl) return;
     const updatedResources = [
@@ -248,7 +238,6 @@ export default function TopicEditor({
     setNewResUrl("");
     setIsAddResourceOpen(false);
   };
-
   const handleDeleteResource = (index: number) => {
     const updatedResources = resources.filter((_, i) => i !== index);
     setResources(updatedResources);
@@ -258,9 +247,8 @@ export default function TopicEditor({
   if (!topic) return null;
 
   return (
-    <div className="flex flex-col h-full bg-background">
-      {/* HEADER */}
-      <header className="border-b bg-background/80 backdrop-blur-md sticky top-0 z-20 px-6 py-3 flex flex-col md:flex-row md:items-center justify-between gap-4">
+    <div className="flex flex-col h-full bg-background rounded-xl border">
+      <header className="border-b bg-background/80 backdrop-blur-md sticky top-0 z-20 px-4 py-3 flex flex-col md:flex-row md:items-center justify-between gap-4 rounded-t-xl">
         <div className="flex items-center gap-3 overflow-hidden">
           <Button
             variant="ghost"
@@ -289,10 +277,7 @@ export default function TopicEditor({
         </div>
         <StatusPipeline current={status} onChange={handleStatusChange} />
       </header>
-
-      {/* CONTENT SPLIT */}
       <div className="flex-1 flex flex-col lg:flex-row overflow-hidden">
-        {/* LEFT: CONTENT (NOTES) */}
         <div className="flex-1 flex flex-col min-w-0 bg-background/50 relative">
           <div className="absolute inset-0 overflow-hidden">
             <AdvancedMarkdownEditor
@@ -305,22 +290,16 @@ export default function TopicEditor({
             />
           </div>
         </div>
-
-        {/* RIGHT: SIDEBAR (ACTION DECK) */}
-        <div className="w-full lg:w-[380px] bg-muted/5 border-l border-border flex flex-col shrink-0">
+        <div className="w-full lg:w-[380px] bg-muted/5 border-t lg:border-t-0 lg:border-l border-border flex flex-col shrink-0">
           <ScrollArea className="flex-1">
             <div className="p-6 space-y-8">
-              {/* 1. Timer Widget */}
               <section className="bg-gradient-to-br from-background to-secondary/30 rounded-xl border border-border p-4 shadow-sm">
                 <div className="flex items-center gap-2 mb-3 text-xs font-bold text-muted-foreground uppercase tracking-widest">
                   <Hourglass className="size-3.5" /> Study Timer
                 </div>
                 <SessionTracker topic={topic} />
               </section>
-
               <Separator />
-
-              {/* 2. Resources Widget */}
               <section>
                 <div className="flex items-center justify-between mb-4">
                   <div className="text-xs font-bold text-muted-foreground uppercase tracking-widest flex items-center gap-2">
@@ -341,7 +320,6 @@ export default function TopicEditor({
                     <Plus className="size-3.5" />
                   </Button>
                 </div>
-
                 <div className="space-y-3">
                   <AnimatePresence initial={false}>
                     {resources.map((res, i) => (
@@ -358,7 +336,6 @@ export default function TopicEditor({
                       </motion.div>
                     ))}
                   </AnimatePresence>
-
                   {resources.length === 0 && (
                     <div
                       onClick={() => setIsAddResourceOpen(true)}
@@ -381,8 +358,6 @@ export default function TopicEditor({
           </ScrollArea>
         </div>
       </div>
-
-      {/* MODAL */}
       <Dialog open={isAddResourceOpen} onOpenChange={setIsAddResourceOpen}>
         <DialogContent className="sm:max-w-md">
           <DialogHeader>
@@ -398,9 +373,8 @@ export default function TopicEditor({
                 autoFocus
               />
               <p className="text-[10px] text-muted-foreground">
-                Prefix with <strong>Article</strong>, <strong>Video</strong>,{" "}
-                <strong>Course</strong>, or <strong>Official</strong> to
-                auto-assign an icon.
+                Prefix with <strong>Article</strong>, <strong>Video</strong>,
+                etc. to auto-assign an icon.
               </p>
             </div>
             <div className="space-y-2">

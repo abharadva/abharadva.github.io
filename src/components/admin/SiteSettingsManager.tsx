@@ -95,7 +95,7 @@ const settingsFormSchema = z.object({
     }),
     bio: z.array(z.string()).min(1, "At least one bio paragraph is required"),
     status_panel: z.object({
-      show: z.boolean().default(true), // Added show field
+      show: z.boolean().default(true),
       title: z.string(),
       availability: z.string().min(1, "Availability text is required"),
       currently_exploring: z.object({
@@ -178,13 +178,13 @@ const defaultValues: SettingsFormValues = {
 };
 
 const SettingsSkeleton = () => (
-  <div className="space-y-6 max-w-6xl mx-auto">
-    <div className="flex justify-between items-center">
-      <Skeleton className="h-8 w-64" />
-      <Skeleton className="h-10 w-40" />
+  <div className="space-y-6 max-w-6xl mx-auto px-4 sm:px-6">
+    <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+      <Skeleton className="h-8 w-48 sm:w-64" />
+      <Skeleton className="h-10 w-full sm:w-40" />
     </div>
     <Separator />
-    <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 items-start">
+    <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 lg:gap-8 items-start">
       <div className="lg:col-span-2 space-y-6">
         <Skeleton className="h-64 w-full" />
         <Skeleton className="h-80 w-full" />
@@ -210,6 +210,7 @@ export default function SiteSettingsManager() {
 
   useEffect(() => {
     if (settingsData) {
+      // Helper to convert nulls to empty strings for form compatibility
       const nullsToStrings = (obj: any): any => {
         if (obj === null || obj === undefined) return "";
         if (typeof obj !== "object") return obj;
@@ -222,11 +223,13 @@ export default function SiteSettingsManager() {
         );
       };
       const cleanIdentity = nullsToStrings(settingsData);
+
       const fetchedSocials = (cleanIdentity.social_links as any[]) || [];
       const mergedSocials = (defaultValues.social_links || []).map((def) => {
         const fetched = fetchedSocials.find((f) => f.id === def.id);
         return fetched ? { ...def, ...fetched } : def;
       });
+
       const fetchedColors =
         cleanIdentity.profile_data.custom_theme_colors || {};
       const defaultColors = defaultValues.profile_data.custom_theme_colors!;
@@ -238,6 +241,7 @@ export default function SiteSettingsManager() {
         accent: fetchedColors.accent || defaultColors.accent,
         card: fetchedColors.card || defaultColors.card,
       };
+
       const mergedProfileData = {
         ...defaultValues.profile_data,
         ...cleanIdentity.profile_data,
@@ -249,7 +253,6 @@ export default function SiteSettingsManager() {
         status_panel: {
           ...defaultValues.profile_data.status_panel,
           ...(cleanIdentity.profile_data.status_panel || {}),
-          // Ensure 'show' property is handled, defaulting to true if undefined in DB for backward compatibility or false if you prefer hidden by default on old data
           show: cleanIdentity.profile_data.status_panel?.show ?? true,
           currently_exploring: {
             ...defaultValues.profile_data.status_panel.currently_exploring,
@@ -274,6 +277,7 @@ export default function SiteSettingsManager() {
           ? cleanIdentity.profile_data.bio
           : [""],
       };
+
       form.reset({
         portfolio_mode: settingsData.portfolio_mode || "multi-page",
         profile_data: mergedProfileData,
@@ -295,26 +299,28 @@ export default function SiteSettingsManager() {
   if (isLoadingSettings) return <SettingsSkeleton />;
 
   return (
-    <div className="space-y-6">
-      <div className="sticky top-16 z-20 bg-background/80 backdrop-blur-sm -mx-8 px-8 py-4 -mt-4 mb-2 border-b">
-        <div className="flex justify-between items-center max-w-6xl mx-auto">
-          <div>
-            <h2 className="text-2xl font-bold">Site Settings</h2>
-            <p className="text-muted-foreground text-sm">
-              Manage global settings for your portfolio's identity and layout.
-            </p>
-          </div>
-          <Button onClick={form.handleSubmit(onSubmit)} disabled={isSubmitting}>
-            {isSubmitting && <Loader2 className="mr-2 size-4 animate-spin" />}{" "}
-            Save Changes
-          </Button>
+    <div className="space-y-6 pb-20 md:pb-0">
+      <div className="sticky top-16 z-20 bg-background/80 backdrop-blur-sm -mx-4 md:-mx-8 px-4 md:px-8 py-4 -mt-4 mb-2 border-b flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+        <div>
+          <h2 className="text-2xl font-bold">Site Settings</h2>
+          <p className="text-muted-foreground text-sm hidden sm:block">
+            Manage global settings for your portfolio's identity and layout.
+          </p>
         </div>
+        <Button
+          onClick={form.handleSubmit(onSubmit)}
+          disabled={isSubmitting}
+          className="w-full sm:w-auto shadow-md"
+        >
+          {isSubmitting && <Loader2 className="mr-2 size-4 animate-spin" />}{" "}
+          Save Changes
+        </Button>
       </div>
 
       <Form {...form}>
         <form
           onSubmit={form.handleSubmit(onSubmit)}
-          className="grid grid-cols-1 lg:grid-cols-3 gap-6 max-w-6xl mx-auto"
+          className="grid grid-cols-1 lg:grid-cols-3 gap-6 max-w-6xl mx-auto px-1"
         >
           <div className="lg:col-span-2 space-y-6">
             <Card>
@@ -337,7 +343,7 @@ export default function SiteSettingsManager() {
                     </FormItem>
                   )}
                 />
-                <div className="grid grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <FormField
                     control={form.control}
                     name="profile_data.logo.main"
@@ -382,7 +388,7 @@ export default function SiteSettingsManager() {
                   control={form.control}
                   name="profile_data.show_profile_picture"
                   render={({ field }) => (
-                    <FormItem className="flex flex-row items-center justify-between rounded-lg border p-3 shadow-sm">
+                    <FormItem className="flex flex-row items-center justify-between rounded-lg border p-3 shadow-sm bg-secondary/10">
                       <div className="space-y-0.5">
                         <FormLabel>Show Profile Picture</FormLabel>
                         <FormDescription>
@@ -468,8 +474,7 @@ export default function SiteSettingsManager() {
             <Card>
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
-                  <Github className="size-5 text-primary" /> GitHub Projects
-                  Integration
+                  <Github className="size-5 text-primary" /> GitHub Integration
                 </CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
@@ -477,7 +482,7 @@ export default function SiteSettingsManager() {
                   control={form.control}
                   name="profile_data.github_projects_config.show"
                   render={({ field }) => (
-                    <FormItem className="flex flex-row items-center justify-between rounded-lg border p-3 shadow-sm">
+                    <FormItem className="flex flex-row items-center justify-between rounded-lg border p-3 shadow-sm bg-secondary/10">
                       <div className="space-y-0.5">
                         <FormLabel>Show GitHub Section</FormLabel>
                       </div>
@@ -503,10 +508,12 @@ export default function SiteSettingsManager() {
                     </FormItem>
                   )}
                 />
-                <Accordion type="single" collapsible>
-                  <AccordionItem value="item-1">
-                    <AccordionTrigger>Advanced Options</AccordionTrigger>
-                    <AccordionContent className="pt-4 space-y-4">
+                <Accordion type="single" collapsible className="w-full">
+                  <AccordionItem value="item-1" className="border-b-0">
+                    <AccordionTrigger className="hover:no-underline py-2">
+                      Advanced Options
+                    </AccordionTrigger>
+                    <AccordionContent className="pt-4 space-y-4 px-1">
                       <FormField
                         control={form.control}
                         name="profile_data.github_projects_config.sort_by"
@@ -571,8 +578,10 @@ export default function SiteSettingsManager() {
                           control={form.control}
                           name="profile_data.github_projects_config.exclude_forks"
                           render={({ field }) => (
-                            <FormItem className="flex flex-row items-center justify-between">
-                              <FormLabel>Exclude Forks</FormLabel>
+                            <FormItem className="flex flex-row items-center justify-between border rounded-md p-2">
+                              <FormLabel className="text-sm font-normal">
+                                Exclude Forks
+                              </FormLabel>
                               <FormControl>
                                 <Switch
                                   checked={field.value}
@@ -586,8 +595,10 @@ export default function SiteSettingsManager() {
                           control={form.control}
                           name="profile_data.github_projects_config.exclude_archived"
                           render={({ field }) => (
-                            <FormItem className="flex flex-row items-center justify-between">
-                              <FormLabel>Exclude Archived</FormLabel>
+                            <FormItem className="flex flex-row items-center justify-between border rounded-md p-2">
+                              <FormLabel className="text-sm font-normal">
+                                Exclude Archived
+                              </FormLabel>
                               <FormControl>
                                 <Switch
                                   checked={field.value}
@@ -601,8 +612,10 @@ export default function SiteSettingsManager() {
                           control={form.control}
                           name="profile_data.github_projects_config.exclude_profile_repo"
                           render={({ field }) => (
-                            <FormItem className="flex flex-row items-center justify-between">
-                              <FormLabel>Exclude Profile Repo</FormLabel>
+                            <FormItem className="flex flex-row items-center justify-between border rounded-md p-2">
+                              <FormLabel className="text-sm font-normal">
+                                Exclude Profile Repo
+                              </FormLabel>
                               <FormControl>
                                 <Switch
                                   checked={field.value}
@@ -628,7 +641,7 @@ export default function SiteSettingsManager() {
                 </CardTitle>
               </CardHeader>
               <CardContent>
-                <Tabs defaultValue="presets">
+                <Tabs defaultValue="presets" className="w-full">
                   <TabsList className="grid w-full grid-cols-2 mb-4">
                     <TabsTrigger value="presets">Presets</TabsTrigger>
                     <TabsTrigger value="custom">Custom</TabsTrigger>
@@ -1045,7 +1058,7 @@ export default function SiteSettingsManager() {
                   <TabsContent value="custom" className="space-y-4">
                     <div className="flex items-center justify-between rounded-lg border p-3 bg-secondary/30">
                       <Label
-                        className="cursor-pointer"
+                        className="cursor-pointer text-sm"
                         onClick={() =>
                           form.setValue(
                             "profile_data.default_theme",
@@ -1068,7 +1081,7 @@ export default function SiteSettingsManager() {
                         }
                       />
                     </div>
-                    <div className="grid grid-cols-2 gap-4">
+                    <div className="grid grid-cols-2 gap-3">
                       {[
                         "background",
                         "foreground",
@@ -1085,21 +1098,21 @@ export default function SiteSettingsManager() {
                           }
                           render={({ field }) => (
                             <FormItem>
-                              <FormLabel className="capitalize">
+                              <FormLabel className="capitalize text-xs">
                                 {colorKey}
                               </FormLabel>
-                              <div className="flex gap-2">
-                                <div className="relative w-10 h-10 rounded-md border overflow-hidden shrink-0">
+                              <div className="flex gap-2 items-center">
+                                <div className="relative w-8 h-8 rounded-md border overflow-hidden shrink-0">
                                   <input
                                     type="color"
-                                    className="absolute inset-0 w-16 h-16 -top-2 -left-2 cursor-pointer"
+                                    className="absolute inset-0 w-12 h-12 -top-2 -left-2 cursor-pointer"
                                     {...field}
                                   />
                                 </div>
                                 <FormControl>
                                   <Input
                                     {...field}
-                                    className="font-mono text-xs"
+                                    className="font-mono text-[10px] h-8 px-2"
                                   />
                                 </FormControl>
                               </div>
@@ -1123,12 +1136,13 @@ export default function SiteSettingsManager() {
                         ),
                       }}
                     >
-                      <h4 className="font-bold text-lg mb-2">Preview</h4>
-                      <p className="mb-3 text-sm opacity-80">
+                      <h4 className="font-bold text-sm mb-2">Preview</h4>
+                      <p className="mb-3 text-xs opacity-80">
                         This is how your custom theme looks.
                       </p>
                       <button
-                        className="px-4 py-2 rounded-md text-sm font-medium"
+                        type="button"
+                        className="px-3 py-1.5 rounded-md text-xs font-medium"
                         style={{
                           backgroundColor: form.watch(
                             "profile_data.custom_theme_colors.primary",
@@ -1153,9 +1167,14 @@ export default function SiteSettingsManager() {
               </CardHeader>
               <CardContent className="space-y-4">
                 {form.getValues("social_links").map((field, index) => (
-                  <div key={field.id} className="space-y-2">
+                  <div
+                    key={field.id}
+                    className="space-y-2 border rounded-md p-2 bg-secondary/5"
+                  >
                     <div className="flex items-center justify-between">
-                      <FormLabel>{field.label}</FormLabel>
+                      <FormLabel className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+                        {field.label}
+                      </FormLabel>
                       <FormField
                         control={form.control}
                         name={`social_links.${index}.is_visible`}
@@ -1165,6 +1184,7 @@ export default function SiteSettingsManager() {
                               <Switch
                                 checked={switchField.value}
                                 onCheckedChange={switchField.onChange}
+                                className="scale-75"
                               />
                             </FormControl>
                           </FormItem>
@@ -1180,6 +1200,7 @@ export default function SiteSettingsManager() {
                             <Input
                               {...urlField}
                               placeholder={`Enter ${field.label} URL`}
+                              className="h-8 text-sm"
                             />
                           </FormControl>
                           <FormMessage />
@@ -1202,7 +1223,7 @@ export default function SiteSettingsManager() {
                   control={form.control}
                   name="profile_data.status_panel.show"
                   render={({ field }) => (
-                    <FormItem className="flex flex-row items-center justify-between rounded-lg border p-3 shadow-sm">
+                    <FormItem className="flex flex-row items-center justify-between rounded-lg border p-3 shadow-sm bg-secondary/10">
                       <div className="space-y-0.5">
                         <FormLabel>Show Status Panel</FormLabel>
                         <FormDescription>
@@ -1301,21 +1322,21 @@ export default function SiteSettingsManager() {
                         <RadioGroup
                           onValueChange={field.onChange}
                           value={field.value}
-                          className="space-y-2"
+                          className="flex flex-col gap-2"
                         >
-                          <FormItem className="flex items-center space-x-3 space-y-0">
+                          <FormItem className="flex items-center space-x-3 space-y-0 border rounded-md p-2 hover:bg-secondary/10 cursor-pointer">
                             <FormControl>
                               <RadioGroupItem value="multi-page" />
                             </FormControl>
-                            <FormLabel className="font-normal">
+                            <FormLabel className="font-normal cursor-pointer flex-1">
                               Multi-Page
                             </FormLabel>
                           </FormItem>
-                          <FormItem className="flex items-center space-x-3 space-y-0">
+                          <FormItem className="flex items-center space-x-3 space-y-0 border rounded-md p-2 hover:bg-secondary/10 cursor-pointer">
                             <FormControl>
                               <RadioGroupItem value="single-page" />
                             </FormControl>
-                            <FormLabel className="font-normal">
+                            <FormLabel className="font-normal cursor-pointer flex-1">
                               Single-Page
                             </FormLabel>
                           </FormItem>
@@ -1340,7 +1361,11 @@ export default function SiteSettingsManager() {
                     <FormItem>
                       <FormLabel>Copyright Text (Markdown)</FormLabel>
                       <FormControl>
-                        <Textarea {...field} rows={2} />
+                        <Textarea
+                          {...field}
+                          rows={2}
+                          className="min-h-[60px]"
+                        />
                       </FormControl>
                       <FormMessage />
                     </FormItem>

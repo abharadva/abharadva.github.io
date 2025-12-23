@@ -1,7 +1,7 @@
 // src/components/admin/tasks-manager.tsx
 "use client";
-import React, { useState, FormEvent, DragEvent, useRef } from "react";
-import { motion, AnimatePresence } from "framer-motion";
+
+import React, { useState, FormEvent, useMemo, useEffect } from "react";
 import type { Task, SubTask } from "@/types";
 import {
   useGetTasksQuery,
@@ -12,623 +12,234 @@ import {
   useUpdateSubTaskMutation,
   useDeleteSubTaskMutation,
 } from "@/store/api/adminApi";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
+import { TaskManagerHeader } from "@/components/admin/tasks/TaskManagerHeader";
+import { TaskTreeView } from "@/components/admin/tasks/TaskTreeView";
+import { TaskKanbanBoard } from "@/components/admin/tasks/TaskKanbanBoard";
+import TaskForm from "@/components/admin/tasks/TaskForm";
 import {
   Sheet,
   SheetContent,
   SheetHeader,
   SheetTitle,
   SheetDescription,
-  SheetClose,
 } from "@/components/ui/sheet";
 import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import {
-  Trash2,
-  Edit,
-  Plus,
-  Loader2,
-  MoreHorizontal,
-  AlertOctagon,
-  X,
-  Zap,
-} from "lucide-react";
-import { cn } from "@/lib/utils";
-import { Checkbox } from "@/components/ui/checkbox";
-import { Card, CardContent } from "@/components/ui/card";
-import { Progress } from "@/components/ui/progress";
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+  DialogFooter,
+  DialogClose,
+} from "@/components/ui/dialog";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Loader2 } from "lucide-react";
 import { toast } from "sonner";
+import { useConfirm } from "@/components/providers/ConfirmDialogProvider";
+import { AnimatePresence, motion } from "framer-motion";
 import { useIsMobile } from "@/hooks/use-mobile";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-import { Separator } from "../ui/separator";
-import { startFocus } from "@/store/slices/focusSlice";
-import { useAppDispatch } from "@/store/hooks";
-import { useConfirm } from "../providers/ConfirmDialogProvider";
-
-// Constants (as they haven't been moved to a central file yet)
-type Priority = "low" | "medium" | "high";
-type Status = "todo" | "inprogress" | "done";
-
-const KANBAN_COLUMNS: { id: Status; title: string }[] = [
-  { id: "todo", title: "To Do" },
-  { id: "inprogress", title: "In Progress" },
-  { id: "done", title: "Done" },
-];
-const TASK_PRIORITIES: Priority[] = ["low", "medium", "high"];
-
-const SubTaskList = ({ task }: { task: Task | null }) => {
-  const [newSubTask, setNewSubTask] = useState("");
-  const [addSubTask, { isLoading: isAdding }] = useAddSubTaskMutation();
-  const [updateSubTask] = useUpdateSubTaskMutation();
-  const [deleteSubTask] = useDeleteSubTaskMutation();
-  if (!task) return null;
-
-  const handleAddSubTask = async (e: FormEvent) => {
-    e.preventDefault();
-    if (!newSubTask.trim()) return;
-    try {
-      await addSubTask({ task_id: task.id, title: newSubTask }).unwrap();
-      setNewSubTask("");
-    } catch (err) {
-      toast.error("Failed to add sub-task.");
-    }
-  };
-
-  const handleToggleSubTask = async (subTask: SubTask) => {
-    try {
-      await updateSubTask({
-        id: subTask.id,
-        is_completed: !subTask.is_completed,
-      }).unwrap();
-    } catch (err) {
-      toast.error("Failed to update sub-task.");
-    }
-  };
-
-  const handleDeleteSubTask = async (subTaskId: string) => {
-    try {
-      await deleteSubTask(subTaskId).unwrap();
-    } catch (err) {
-      toast.error("Failed to delete sub-task.");
-    }
-  };
-
-  return (
-    <div className="space-y-3">
-      {task.sub_tasks?.map((subTask) => (
-        <div
-          key={subTask.id}
-          className="group flex items-center gap-3 p-2 rounded-md hover:bg-muted"
-        >
-          <Checkbox
-            id={`subtask-${subTask.id}`}
-            checked={subTask.is_completed}
-            onCheckedChange={() => handleToggleSubTask(subTask)}
-          />
-          <label
-            htmlFor={`subtask-${subTask.id}`}
-            className={`flex-grow text-sm ${subTask.is_completed ? "line-through text-muted-foreground" : "text-foreground"}`}
-          >
-            {subTask.title}
-          </label>
-          <Button
-            variant="ghost"
-            size="icon"
-            onClick={() => handleDeleteSubTask(subTask.id)}
-            className="h-7 w-7 opacity-0 group-hover:opacity-100"
-          >
-            <Trash2 className="size-4 text-destructive" />
-          </Button>
-        </div>
-      ))}
-      <form onSubmit={handleAddSubTask} className="flex items-center gap-2">
-        <Input
-          value={newSubTask}
-          onChange={(e) => setNewSubTask(e.target.value)}
-          placeholder="Add a new sub-task..."
-          className="h-9 text-sm"
-        />
-        <Button
-          type="submit"
-          size="sm"
-          disabled={!newSubTask.trim() || isAdding}
-        >
-          {isAdding ? <Loader2 className="size-4 animate-spin" /> : "Add"}
-        </Button>
-      </form>
-    </div>
-  );
-};
-
-const TaskCard = ({
-  task,
-  onEdit,
-  onDelete,
-  onFocus,
-  onDragStart,
-}: {
-  task: Task;
-  onEdit: () => void;
-  onDelete: () => void;
-  onFocus: () => void;
-  onDragStart: (e: DragEvent<HTMLDivElement>) => void;
-}) => {
-  const priorityClasses: Record<Priority, string> = {
-    low: "border-primary/80",
-    medium: "border-yellow-500/80",
-    high: "border-destructive/80",
-  };
-  const isOverdue =
-    task.due_date &&
-    new Date(task.due_date) < new Date() &&
-    task.status !== "done";
-  const subtaskProgress = {
-    total: task.sub_tasks?.length || 0,
-    completed: task.sub_tasks?.filter((st) => st.is_completed).length || 0,
-  };
-
-  return (
-    <motion.div
-      layout
-      initial={{ opacity: 0, y: -10 }}
-      animate={{ opacity: 1, y: 0 }}
-      exit={{ opacity: 0, y: 10 }}
-      transition={{ duration: 0.2 }}
-    >
-      <Card
-        draggable="true"
-        onDragStart={onDragStart}
-        className={cn(
-          "group cursor-grab active:cursor-grabbing hover:bg-secondary/50 transition-colors relative border-l-4",
-          priorityClasses[task.priority || "medium"],
-        )}
-      >
-        <CardContent className="p-3 cursor-pointer" onClick={onEdit}>
-          <div className="flex justify-between items-start gap-2">
-            <p className="font-semibold text-foreground break-words pr-8">
-              {task.title}
-            </p>
-          </div>
-          <div className="mt-3 space-y-3">
-            {subtaskProgress.total > 0 && (
-              <div className="flex items-center gap-2">
-                <Progress
-                  value={
-                    (subtaskProgress.completed / subtaskProgress.total) * 100
-                  }
-                  className="h-1"
-                />
-                <span className="text-xs font-mono text-muted-foreground">
-                  {subtaskProgress.completed}/{subtaskProgress.total}
-                </span>
-              </div>
-            )}
-            {task.due_date && (
-              <div
-                className={cn(
-                  "flex items-center gap-1.5 text-xs",
-                  isOverdue
-                    ? "text-destructive font-semibold"
-                    : "text-muted-foreground",
-                )}
-              >
-                {isOverdue && <AlertOctagon className="size-3.5" />}
-                <span>
-                  {new Date(task.due_date).toLocaleDateString(undefined, {
-                    month: "short",
-                    day: "numeric",
-                  })}
-                </span>
-              </div>
-            )}
-          </div>
-        </CardContent>
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button
-              variant="ghost"
-              size="icon"
-              className="h-7 w-7 shrink-0 opacity-0 group-hover:opacity-100 transition-opacity absolute top-1 right-1"
-            >
-              <MoreHorizontal className="size-4" />
-            </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="end">
-            <DropdownMenuItem onClick={onEdit}>
-              <Edit className="mr-2 size-4" />
-              Edit Task
-            </DropdownMenuItem>
-            <DropdownMenuSeparator />
-            <DropdownMenuItem
-              className="text-destructive focus:text-destructive"
-              onClick={onDelete}
-            >
-              <Trash2 className="mr-2 size-4" />
-              Delete Task
-            </DropdownMenuItem>
-          </DropdownMenuContent>
-        </DropdownMenu>
-
-        <Button
-          variant="ghost"
-          size="icon"
-          className="h-7 w-7 shrink-0 opacity-0 group-hover:opacity-100 transition-opacity absolute top-1 right-8"
-          onClick={(e) => {
-            e.stopPropagation();
-            onFocus();
-          }}
-          title="Start Focus Session"
-        >
-          <Zap className="size-4 text-yellow-500 fill-yellow-500/20" />
-        </Button>
-      </Card>
-    </motion.div>
-  );
-};
-
-const QuickAddTask = ({
-  status,
-  onAddTask,
-}: {
-  status: Status;
-  onAddTask: (title: string, status: Status) => void;
-}) => {
-  const [title, setTitle] = useState("");
-  const handleSubmit = (e: FormEvent) => {
-    e.preventDefault();
-    if (!title.trim()) return;
-    onAddTask(title, status);
-    setTitle("");
-  };
-  return (
-    <form onSubmit={handleSubmit} className="p-1 mt-auto">
-      <div className="relative">
-        <Input
-          value={title}
-          onChange={(e) => setTitle(e.target.value)}
-          placeholder="+ Add a task..."
-          className="h-9 pr-10 text-sm bg-card/50"
-        />
-        <Button
-          type="submit"
-          variant="ghost"
-          size="icon"
-          className="absolute right-1 top-1/2 -translate-y-1/2 h-7 w-7"
-          disabled={!title.trim()}
-        >
-          <Plus className="size-4" />
-        </Button>
-      </div>
-    </form>
-  );
-};
 
 export default function TaskManager() {
-  const dispatch = useAppDispatch();
   const confirm = useConfirm();
-
-  const [editingTask, setEditingTask] = useState<Task | null>(null);
-  const [isSheetOpen, setIsSheetOpen] = useState(false);
-  const [draggedTaskId, setDraggedTaskId] = useState<string | null>(null);
-  const [dragOverColumn, setDragOverColumn] = useState<Status | null>(null);
-  const [title, setTitle] = useState("");
-  const [dueDate, setDueDate] = useState("");
-  const [priority, setPriority] = useState<Priority>("medium");
   const isMobile = useIsMobile();
+  const [view, setView] = useState<"table" | "board">("table");
+  const [searchTerm, setSearchTerm] = useState("");
 
-  const { data: tasks = [], isLoading } = useGetTasksQuery();
-  const [addTask, { isLoading: isAdding }] = useAddTaskMutation();
-  const [updateTask, { isLoading: isUpdating }] = useUpdateTaskMutation();
-  const [deleteTask] = useDeleteTaskMutation();
-  const isMutating = isAdding || isUpdating;
+  const [isSheetOpen, setIsSheetOpen] = useState(false);
+  const [editingTask, setEditingTask] = useState<Task | null>(null);
 
-  const resetForm = () => {
-    setTitle("");
-    setDueDate("");
-    setPriority("medium");
-    setEditingTask(null);
-  };
+  const [isSubtaskDialogOpen, setIsSubtaskDialogOpen] = useState(false);
+  const [activeParentTaskId, setActiveParentTaskId] = useState<string | null>(
+    null,
+  );
+  const [newSubtaskTitle, setNewSubtaskTitle] = useState("");
 
-  const handleOpenSheet = (task: Task | null = null) => {
-    if (task) {
-      setEditingTask(task);
-      setTitle(task.title);
-      setDueDate(task.due_date || "");
-      setPriority(task.priority || "medium");
-    } else {
-      resetForm();
+  // Force table view on mobile
+  useEffect(() => {
+    if (isMobile) {
+      setView("table");
     }
+  }, [isMobile]);
+
+  // API Hooks
+  const { data: tasks = [], isLoading } = useGetTasksQuery();
+  const [addTask] = useAddTaskMutation();
+  const [updateTask] = useUpdateTaskMutation();
+  const [deleteTask] = useDeleteTaskMutation();
+  const [addSubTask] = useAddSubTaskMutation();
+  const [updateSubTask] = useUpdateSubTaskMutation();
+  const [deleteSubTask] = useDeleteSubTaskMutation();
+
+  // --- FILTERING & STABLE SORTING ---
+  const filteredTasks = useMemo(() => {
+    const filtered = tasks.filter((t) =>
+      t.title.toLowerCase().includes(searchTerm.toLowerCase()),
+    );
+    // STABLE SORT FIX: Sort by Creation Date Descending (Newest first).
+    return filtered.sort((a, b) => {
+      return (
+        new Date(b.created_at || 0).getTime() -
+        new Date(a.created_at || 0).getTime()
+      );
+    });
+  }, [tasks, searchTerm]);
+
+  // --- HANDLERS ---
+  const handleCreateTask = (initialStatus: string = "todo") => {
+    setEditingTask({ status: initialStatus as any } as Task);
     setIsSheetOpen(true);
   };
-
-  const handleDeleteTask = async (taskId: string) => {
+  const handleEditTask = (task: Task) => {
+    setEditingTask(task);
+    setIsSheetOpen(true);
+  };
+  const handleDeleteTask = async (id: string) => {
     const ok = await confirm({
       title: "Delete Task?",
-      description: "This task and its subtasks will be removed.",
+      description: "This will permanently remove the task and all subtasks.",
       variant: "destructive",
     });
     if (!ok) return;
+
     try {
-      await deleteTask(taskId).unwrap();
-      toast.success("Task deleted.");
-    } catch (err: any) {
-      toast.error("Failed to delete task", { description: err.message });
+      await deleteTask(id).unwrap();
+      toast.success("Task deleted");
+      if (editingTask?.id === id) setIsSheetOpen(false);
+    } catch {
+      toast.error("Failed to delete task");
+    }
+  };
+  const openSubtaskDialog = (taskId: string) => {
+    setActiveParentTaskId(taskId);
+    setNewSubtaskTitle("");
+    setIsSubtaskDialogOpen(true);
+  };
+  const handleCreateSubtask = async (e?: React.FormEvent) => {
+    if (e) e.preventDefault();
+    if (!activeParentTaskId || !newSubtaskTitle.trim()) return;
+    try {
+      await addSubTask({
+        task_id: activeParentTaskId,
+        title: newSubtaskTitle,
+        is_completed: false,
+      }).unwrap();
+      toast.success("Subtask added");
+      setIsSubtaskDialogOpen(false);
+    } catch {
+      toast.error("Failed to add subtask");
     }
   };
 
-  const handleQuickAdd = async (title: string, status: Status) => {
-    try {
-      await addTask({ title, status, priority: "medium" }).unwrap();
-    } catch (err: any) {
-      toast.error("Failed to add task", { description: err.message });
-    }
-  };
-
-  const handleFormSubmit = async (e: FormEvent) => {
-    e.preventDefault();
-    if (!title.trim()) return;
-    const taskData: Partial<Task> = {
-      title,
-      due_date: dueDate || null,
-      priority,
-      status: editingTask?.status || "todo",
-    };
-    try {
-      if (editingTask) {
-        await updateTask({ ...taskData, id: editingTask.id }).unwrap();
-      } else {
-        await addTask(taskData).unwrap();
-      }
-      toast.success(editingTask ? "Task updated." : "Task created.");
-      setIsSheetOpen(false);
-      resetForm();
-    } catch (err: any) {
-      toast.error("Failed to save task", { description: err.message });
-    }
-  };
-
-  const handleDragStart = (e: DragEvent<HTMLDivElement>, taskId: string) =>
-    setDraggedTaskId(taskId);
-  const handleDragOver = (e: DragEvent<HTMLDivElement>, status: Status) => {
-    e.preventDefault();
-    setDragOverColumn(status);
-  };
-  const handleDragLeave = () => setDragOverColumn(null);
-  const handleDrop = async (e: DragEvent<HTMLDivElement>, status: Status) => {
-    e.preventDefault();
-    if (
-      !draggedTaskId ||
-      tasks.find((t) => t.id === draggedTaskId)?.status === status
-    ) {
-      setDragOverColumn(null);
-      return;
-    }
-    try {
-      await updateTask({ id: draggedTaskId, status }).unwrap();
-    } catch (err: any) {
-      toast.error("Failed to move task", { description: err.message });
-    }
-    setDraggedTaskId(null);
-    setDragOverColumn(null);
-  };
+  if (isLoading) return <LoadingSpinner />;
 
   return (
-    <div className="space-y-6">
-      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-        <div>
-          <h2 className="text-2xl font-bold">Task Board</h2>
-          <p className="text-muted-foreground">
-            Organize your projects with a drag-and-drop Kanban board.
-          </p>
-        </div>
-        <Button onClick={() => handleOpenSheet()}>
-          {" "}
-          <Plus className="mr-2 size-4" /> Add Task{" "}
-        </Button>
+    <div className="flex flex-col h-[calc(100vh-6rem)]">
+      <TaskManagerHeader
+        view={view}
+        setView={setView}
+        searchTerm={searchTerm}
+        setSearchTerm={setSearchTerm}
+        onNewTask={() => handleCreateTask("todo")}
+        isMobile={isMobile}
+      />
+
+      <div className="flex-1 overflow-auto p-4 md:p-6 bg-secondary/5">
+        <AnimatePresence mode="wait">
+          {view === "table" ? (
+            <motion.div
+              key="table"
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -10 }}
+            >
+              <TaskTreeView
+                tasks={filteredTasks}
+                onUpdateTask={(id, updates) => updateTask({ id, ...updates })}
+                onEditTask={handleEditTask}
+                onDeleteTask={handleDeleteTask}
+                onAddSubTask={openSubtaskDialog}
+                onUpdateSubTask={(id, completed) =>
+                  updateSubTask({ id, is_completed: completed })
+                }
+                onDeleteSubTask={(id) => deleteSubTask(id)}
+              />
+            </motion.div>
+          ) : (
+            <motion.div
+              key="board"
+              initial={{ opacity: 0, scale: 0.98 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.98 }}
+              className="h-full"
+            >
+              <TaskKanbanBoard
+                tasks={filteredTasks}
+                onUpdateTask={(id, updates) => updateTask({ id, ...updates })}
+                onEditTask={handleEditTask}
+                onDeleteTask={handleDeleteTask}
+                onNewTask={handleCreateTask}
+              />
+            </motion.div>
+          )}
+        </AnimatePresence>
       </div>
 
-      {isLoading && (
-        <div className="flex justify-center py-10">
-          <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
-        </div>
-      )}
-
-      {isMobile && !isLoading ? (
-        <Tabs defaultValue="todo" className="w-full">
-          <TabsList className="grid w-full grid-cols-3 mb-4">
-            {KANBAN_COLUMNS.map((col) => (
-              <TabsTrigger key={col.id} value={col.id}>
-                {col.title} ({tasks.filter((t) => t.status === col.id).length})
-              </TabsTrigger>
-            ))}
-          </TabsList>
-          {KANBAN_COLUMNS.map((column) => (
-            <TabsContent key={column.id} value={column.id} className="mt-0">
-              <div className="space-y-3 min-h-[300px] rounded-lg border bg-secondary/20 p-3">
-                <AnimatePresence>
-                  {tasks
-                    .filter((t) => t.status === column.id)
-                    .map((task) => (
-                      <TaskCard
-                        key={task.id}
-                        task={task}
-                        onDragStart={() => {}}
-                        onEdit={() => handleOpenSheet(task)}
-                        onDelete={() => handleDeleteTask(task.id)}
-                        onFocus={() => {
-                          dispatch(
-                            startFocus({
-                              durationMinutes: 25,
-                              taskTitle: task.title,
-                              taskId: task.id,
-                            }),
-                          );
-                        }}
-                      />
-                    ))}
-                </AnimatePresence>
-                {tasks.filter((t) => t.status === column.id).length === 0 && (
-                  <div className="text-center text-muted-foreground py-8">
-                    No tasks here.
-                  </div>
-                )}
-                <QuickAddTask status={column.id} onAddTask={handleQuickAdd} />
-              </div>
-            </TabsContent>
-          ))}
-        </Tabs>
-      ) : (
-        !isLoading && (
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            {KANBAN_COLUMNS.map((column) => (
-              <div
-                key={column.id}
-                onDragOver={(e) => handleDragOver(e, column.id)}
-                onDragLeave={handleDragLeave}
-                onDrop={(e) => handleDrop(e, column.id)}
-                className={cn(
-                  "rounded-lg bg-secondary/30 flex flex-col transition-colors",
-                  dragOverColumn === column.id && "bg-primary/10",
-                )}
-              >
-                <div className="p-4 border-b border-border">
-                  <h3 className="font-semibold text-foreground">
-                    {column.title}
-                    <span className="ml-2 text-sm font-normal text-muted-foreground">
-                      {tasks.filter((t) => t.status === column.id).length}
-                    </span>
-                  </h3>
-                </div>
-                <div className="flex-1 p-3 space-y-3 min-h-[200px] overflow-y-auto">
-                  <AnimatePresence>
-                    {tasks
-                      .filter((t) => t.status === column.id)
-                      .map((task) => (
-                        <TaskCard
-                          key={task.id}
-                          task={task}
-                          onDragStart={(e) => handleDragStart(e, task.id)}
-                          onEdit={() => handleOpenSheet(task)}
-                          onDelete={() => handleDeleteTask(task.id)}
-                          onFocus={() => {
-                            dispatch(
-                              startFocus({
-                                durationMinutes: 25,
-                                taskTitle: task.title,
-                                taskId: task.id,
-                              }),
-                            );
-                          }}
-                        />
-                      ))}
-                  </AnimatePresence>
-                </div>
-                <QuickAddTask status={column.id} onAddTask={handleQuickAdd} />
-              </div>
-            ))}
-          </div>
-        )
-      )}
-
       <Sheet open={isSheetOpen} onOpenChange={setIsSheetOpen}>
-        <SheetContent className="sm:max-w-lg w-full flex flex-col">
-          <div className="flex justify-between items-center">
-            <SheetHeader>
-              <SheetTitle>
-                {editingTask ? "Edit Task" : "Add New Task"}
-              </SheetTitle>
-              <SheetDescription>
-                Fill in the details for your task. Sub-tasks can be added below.
-              </SheetDescription>
-            </SheetHeader>
-            <SheetClose asChild>
-              <Button type="button" variant="ghost">
-                <X />
-              </Button>
-            </SheetClose>
-          </div>
-          <form onSubmit={handleFormSubmit} className="space-y-6 pt-6">
-            <div>
-              <Label htmlFor="task-title">Title *</Label>
+        <SheetContent className="w-full sm:max-w-md md:max-w-lg overflow-y-auto">
+          <SheetHeader>
+            <SheetTitle>
+              {editingTask?.id ? "Edit Task" : "Create Task"}
+            </SheetTitle>
+            <SheetDescription>
+              Manage task details and subtasks.
+            </SheetDescription>
+          </SheetHeader>
+          <TaskForm
+            key={editingTask?.id || "new"}
+            task={editingTask}
+            onSuccess={() => setIsSheetOpen(false)}
+            onClose={() => setIsSheetOpen(false)}
+          />
+        </SheetContent>
+      </Sheet>
+
+      <Dialog open={isSubtaskDialogOpen} onOpenChange={setIsSubtaskDialogOpen}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>Add Subtask</DialogTitle>
+            <DialogDescription>Quickly add a sub-item.</DialogDescription>
+          </DialogHeader>
+          <form onSubmit={handleCreateSubtask} className="space-y-4 py-4">
+            <div className="space-y-2">
+              <Label htmlFor="subtask-title">Title</Label>
               <Input
-                id="task-title"
-                value={title}
-                onChange={(e) => setTitle(e.target.value)}
-                required
+                id="subtask-title"
+                value={newSubtaskTitle}
+                onChange={(e) => setNewSubtaskTitle(e.target.value)}
                 autoFocus
               />
             </div>
-            <div className="grid grid-cols-2 gap-4">
-              <div>
-                <Label htmlFor="task-due-date">Due Date</Label>
-                <Input
-                  id="task-due-date"
-                  type="date"
-                  value={dueDate}
-                  onChange={(e) => setDueDate(e.target.value)}
-                />
-              </div>
-              <div>
-                <Label htmlFor="task-priority">Priority</Label>
-                <Select
-                  value={priority}
-                  onValueChange={(v: Priority) => setPriority(v)}
-                >
-                  <SelectTrigger>
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {TASK_PRIORITIES.map((p) => (
-                      <SelectItem key={p} value={p} className="capitalize">
-                        {p}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-            </div>
-            <Separator />
-            <div>
-              <Label>Sub-tasks</Label>
-              <div className="mt-2 p-3 rounded-md border bg-muted/50">
-                <SubTaskList task={editingTask} />
-              </div>
-            </div>
-            <div className="flex justify-end gap-3 pt-4">
-              <Button
-                type="button"
-                variant="outline"
-                onClick={() => setIsSheetOpen(false)}
-              >
-                Cancel
-              </Button>
-              <Button type="submit" disabled={isMutating}>
-                {isMutating ? (
-                  <Loader2 className="animate-spin" />
-                ) : editingTask ? (
-                  "Save Changes"
-                ) : (
-                  "Create Task"
-                )}
-              </Button>
-            </div>
+            <DialogFooter>
+              <DialogClose asChild>
+                <Button type="button" variant="ghost">
+                  Cancel
+                </Button>
+              </DialogClose>
+              <Button type="submit">Add</Button>
+            </DialogFooter>
           </form>
-        </SheetContent>
-      </Sheet>
+        </DialogContent>
+      </Dialog>
+    </div>
+  );
+}
+
+function LoadingSpinner() {
+  return (
+    <div className="flex h-96 items-center justify-center">
+      <Loader2 className="size-8 animate-spin text-muted-foreground" />
     </div>
   );
 }

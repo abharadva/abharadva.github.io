@@ -28,7 +28,6 @@ import {
   Circle,
   PlayCircle,
   BrainCircuit,
-  Filter,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { ScrollArea } from "@/components/ui/scroll-area";
@@ -66,7 +65,7 @@ const getStatusIcon = (status: string, isActive: boolean) => {
       );
     case "Learning":
       return (
-        <div className="relative flex items-center justify-center">
+        <div className="relative flex items-center justify-center size-4">
           <div className="absolute size-4 bg-blue-500/30 rounded-full animate-ping" />
           <div className="size-3 bg-blue-500 rounded-full border-2 border-background" />
         </div>
@@ -100,14 +99,15 @@ export default function SubjectTopicTree({
 
   const filteredSubjects = useMemo(() => {
     if (!searchQuery) return subjects;
+    const lowercasedQuery = searchQuery.toLowerCase();
     return subjects.filter((subject) => {
       const subjectMatches = subject.name
         .toLowerCase()
-        .includes(searchQuery.toLowerCase());
+        .includes(lowercasedQuery);
       const hasMatchingTopics = topics.some(
         (t) =>
           t.subject_id === subject.id &&
-          t.title.toLowerCase().includes(searchQuery.toLowerCase()),
+          t.title.toLowerCase().includes(lowercasedQuery),
       );
       return subjectMatches || hasMatchingTopics;
     });
@@ -133,7 +133,7 @@ export default function SubjectTopicTree({
         <div className="relative group">
           <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 size-3.5 text-muted-foreground group-focus-within:text-primary transition-colors" />
           <Input
-            placeholder="Search topics..."
+            placeholder="Search..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             className="pl-9 h-8 bg-background/50 text-xs focus-visible:ring-1"
@@ -152,13 +152,11 @@ export default function SubjectTopicTree({
               const subjectTopics = topics.filter(
                 (t) => t.subject_id === subject.id,
               );
-
               const visibleTopics = searchQuery
                 ? subjectTopics.filter((t) =>
                     t.title.toLowerCase().includes(searchQuery.toLowerCase()),
                   )
                 : subjectTopics;
-
               const completed = subjectTopics.filter(
                 (t) => t.status === "Mastered",
               ).length;
@@ -171,59 +169,58 @@ export default function SubjectTopicTree({
                   key={subject.id}
                   className="border rounded-lg bg-card shadow-sm overflow-hidden group/item"
                 >
-                  <div className="flex flex-col bg-secondary/5 border-b border-border/40">
-                    <div className="flex items-center justify-between px-3 py-2.5">
-                      <AccordionTrigger className="flex-1 py-0 hover:no-underline !no-underline text-sm font-semibold">
-                        {subject.name}
-                      </AccordionTrigger>
-                      <DropdownMenu>
-                        <DropdownMenuTrigger asChild>
-                          <Button
-                            variant="ghost"
-                            size="icon"
-                            className="h-6 w-6 text-muted-foreground opacity-0 group-hover/item:opacity-100 transition-opacity"
-                          >
-                            <MoreHorizontal className="size-3.5" />
-                          </Button>
-                        </DropdownMenuTrigger>
-                        <DropdownMenuContent align="end">
-                          <DropdownMenuItem
-                            onClick={() => onEditSubject(subject)}
-                          >
-                            <Edit2 className="mr-2 size-3.5" /> Edit
-                          </DropdownMenuItem>
-                          <DropdownMenuItem
-                            onClick={() => onCreateTopic(subject.id)}
-                          >
-                            <Plus className="mr-2 size-3.5" /> Add Topic
-                          </DropdownMenuItem>
-                          <DropdownMenuItem
-                            className="text-destructive"
-                            onClick={() => onDeleteSubject(subject.id)}
-                          >
-                            <Trash2 className="mr-2 size-3.5" /> Delete
-                          </DropdownMenuItem>
-                        </DropdownMenuContent>
-                      </DropdownMenu>
-                    </div>
-
-                    {/* Progress Bar inside Header */}
-                    <div className="px-3 pb-2.5">
-                      <div className="flex justify-between text-[10px] text-muted-foreground mb-1 font-mono">
-                        <span>{Math.round(progress)}% Complete</span>
-                        <span>
-                          {completed}/{total}
-                        </span>
+                  {/* STICKY HEADER IMPLEMENTATION */}
+                  <div className="sticky top-0 z-10 bg-card">
+                    <div className="flex flex-col bg-secondary/5 border-b border-border/40">
+                      <div className="flex items-center justify-between px-3 py-2.5">
+                        <AccordionTrigger className="flex-1 py-0 hover:no-underline !no-underline text-sm font-semibold">
+                          {subject.name}
+                        </AccordionTrigger>
+                        <DropdownMenu>
+                          <DropdownMenuTrigger asChild>
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              className="h-6 w-6 text-muted-foreground opacity-0 group-hover/item:opacity-100 transition-opacity"
+                            >
+                              <MoreHorizontal className="size-3.5" />
+                            </Button>
+                          </DropdownMenuTrigger>
+                          <DropdownMenuContent align="end">
+                            <DropdownMenuItem
+                              onClick={() => onEditSubject(subject)}
+                            >
+                              <Edit2 className="mr-2 size-3.5" /> Edit
+                            </DropdownMenuItem>
+                            <DropdownMenuItem
+                              onClick={() => onCreateTopic(subject.id)}
+                            >
+                              <Plus className="mr-2 size-3.5" /> Add Topic
+                            </DropdownMenuItem>
+                            <DropdownMenuItem
+                              className="text-destructive"
+                              onClick={() => onDeleteSubject(subject.id)}
+                            >
+                              <Trash2 className="mr-2 size-3.5" /> Delete
+                            </DropdownMenuItem>
+                          </DropdownMenuContent>
+                        </DropdownMenu>
                       </div>
-                      <Progress value={progress} className="h-1 bg-muted" />
+                      <div className="px-3 pb-2.5">
+                        <div className="flex justify-between text-[10px] text-muted-foreground mb-1 font-mono">
+                          <span>{Math.round(progress)}% Complete</span>
+                          <span>
+                            {completed}/{total}
+                          </span>
+                        </div>
+                        <Progress value={progress} className="h-1 bg-muted" />
+                      </div>
                     </div>
                   </div>
 
                   <AccordionContent className="p-0 bg-background">
                     <div className="relative py-2 pl-3">
-                      {/* Timeline Line */}
                       <div className="absolute top-2 bottom-4 w-px bg-border" />
-
                       {visibleTopics.length === 0 ? (
                         <div className="pl-12 py-4 text-xs text-muted-foreground italic flex flex-col gap-2">
                           No topics.
@@ -241,7 +238,6 @@ export default function SubjectTopicTree({
                           const isActive = activeTopicId === topic.id;
                           const isSessionActive =
                             activeSession?.topic_id === topic.id;
-
                           return (
                             <div
                               key={topic.id}
@@ -251,11 +247,9 @@ export default function SubjectTopicTree({
                               )}
                               onClick={() => onSelectTopic(topic)}
                             >
-                              {/* Connector Dot */}
                               <div className=" z-10 bg-background">
                                 {getStatusIcon(topic.status, isActive)}
                               </div>
-
                               <div className="flex-1 min-w-0">
                                 <p
                                   className={cn(
@@ -270,7 +264,6 @@ export default function SubjectTopicTree({
                                 >
                                   {topic.title}
                                 </p>
-
                                 {isSessionActive && (
                                   <div className="mt-1 inline-flex items-center gap-1.5 px-1.5 py-0.5 rounded bg-blue-50 text-[10px] font-bold text-blue-600 border border-blue-100 dark:bg-blue-950 dark:text-blue-300 dark:border-blue-900">
                                     <span className="relative flex h-1.5 w-1.5">
@@ -281,8 +274,6 @@ export default function SubjectTopicTree({
                                   </div>
                                 )}
                               </div>
-
-                              {/* Hover Action */}
                               <div className="opacity-0 group-hover/topic:opacity-100 transition-opacity">
                                 <DropdownMenu>
                                   <DropdownMenuTrigger asChild>
@@ -319,7 +310,6 @@ export default function SubjectTopicTree({
                           );
                         })
                       )}
-
                       {!searchQuery && visibleTopics.length > 0 && (
                         <div className="pl-10 pr-2 pt-2 pb-2">
                           <Button

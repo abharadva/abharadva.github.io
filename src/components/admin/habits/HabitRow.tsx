@@ -1,3 +1,4 @@
+// src/components/admin/habits/HabitRow.tsx
 "use client";
 import React, { useMemo } from "react";
 import { format, isSameDay } from "date-fns";
@@ -5,7 +6,6 @@ import { Habit } from "@/types";
 import { cn } from "@/lib/utils";
 import { Flame, MoreVertical, Edit2, Trash2, BarChart2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
 import { TableCell, TableRow } from "@/components/ui/table";
 import {
   DropdownMenu,
@@ -15,7 +15,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { calculateHabitStats } from "@/lib/habit-utils";
 import confetti from "canvas-confetti";
-import HabitCell from "./HabitCell"; // Import the optimized cell
+import HabitCell from "./HabitCell";
 import { CircularProgress } from "@/components/ui/circular-progress";
 
 interface HabitRowProps {
@@ -26,42 +26,6 @@ interface HabitRowProps {
   onDelete: (id: string) => void;
   onViewStats: (habit: Habit) => void;
 }
-
-// Helper for Micro-Sparkline
-const SparkLine = ({ logs, color }: { logs: string[]; color: string }) => {
-  // Map last 7 days. 1 = done, 0 = missed.
-  const points = Array.from({ length: 7 }).map((_, i) => {
-    const d = new Date();
-    d.setDate(d.getDate() - (6 - i));
-    const dateStr = format(d, "yyyy-MM-dd");
-    return logs.includes(dateStr) ? 1 : 0;
-  });
-
-  // Create SVG path
-  const width = 40;
-  const height = 16;
-  const step = width / 6;
-  const path = points
-    .map((val, i) => {
-      const x = i * step;
-      const y = val === 1 ? 2 : height - 2; // High or Low
-      return `${i === 0 ? "M" : "L"} ${x} ${y}`;
-    })
-    .join(" ");
-
-  return (
-    <svg width={width} height={height} className="opacity-60">
-      <path
-        d={path}
-        fill="none"
-        stroke={color}
-        strokeWidth="2"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      />
-    </svg>
-  );
-};
 
 const HabitRow = React.memo(
   ({
@@ -77,7 +41,6 @@ const HabitRow = React.memo(
       [habit.habit_logs],
     );
 
-    // Create a Set for O(1) lookup during render loop
     const completedDatesSet = useMemo(
       () => new Set(habit.habit_logs?.map((l) => l.completed_date) || []),
       [habit.habit_logs],
@@ -85,8 +48,6 @@ const HabitRow = React.memo(
 
     const handleCheck = (dateStr: string) => {
       const isAlreadyDone = completedDatesSet.has(dateStr);
-
-      // Optimistic confetti check
       const todayStr = format(new Date(), "yyyy-MM-dd");
       if (!isAlreadyDone && dateStr === todayStr) {
         confetti({
@@ -97,25 +58,26 @@ const HabitRow = React.memo(
           disableForReducedMotion: true,
         });
       }
-
       onToggle(habit.id, dateStr);
     };
 
     return (
       <TableRow className="group hover:bg-muted/30 transition-colors">
+        {/* STICKY FIRST COLUMN for Habit Name */}
         <TableCell
-          className="font-medium w-[200px] cursor-pointer"
+          className="font-medium w-[120px] sm:w-[180px] min-w-[120px] sm:min-w-[180px] cursor-pointer sticky left-0 bg-background/95 backdrop-blur z-10 border-r border-border/50 group-hover:bg-muted/30 transition-colors shadow-[4px_0_12px_-4px_rgba(0,0,0,0.1)] p-3 sm:p-4"
           onClick={() => onViewStats(habit)}
         >
-          <div className="flex flex-col gap-1.5">
+          <div className="flex flex-col justify-center h-full gap-1.5">
             <span
-              className="truncate max-w-[120px] font-semibold text-foreground/90 group-hover:text-primary transition-colors"
+              className="truncate font-semibold text-foreground/90 group-hover:text-primary transition-colors text-sm"
               title={habit.title}
             >
               {habit.title}
             </span>
 
-            <div className="flex items-center gap-3">
+            {/* Hide stats on mobile to save space */}
+            <div className="hidden sm:flex items-center gap-3">
               <CircularProgress
                 value={completionRate}
                 size={32}
@@ -130,6 +92,13 @@ const HabitRow = React.memo(
                 </span>
               </div>
             </div>
+
+            {/* Mobile-only condensed stats */}
+            <div className="sm:hidden text-[10px] text-muted-foreground flex gap-1">
+              <span>{habit.target_per_week}/wk</span>
+              <span>•</span>
+              <span>{completionRate}%</span>
+            </div>
           </div>
         </TableCell>
 
@@ -138,7 +107,7 @@ const HabitRow = React.memo(
           return (
             <TableCell
               key={dateStr}
-              className="p-0 text-center relative h-full"
+              className="p-0 text-center relative h-full w-10 sm:w-11 min-w-[40px] sm:min-w-[44px]"
             >
               <HabitCell
                 dateStr={dateStr}
@@ -151,10 +120,10 @@ const HabitRow = React.memo(
           );
         })}
 
-        <TableCell className="text-center">
+        <TableCell className="text-center w-[60px] sm:w-[80px]">
           <div
             className={cn(
-              "inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-bold border transition-colors",
+              "inline-flex items-center gap-1 px-1.5 py-0.5 sm:px-2 sm:py-1 rounded-full text-[10px] sm:text-xs font-bold border transition-colors",
               streak > 2
                 ? "bg-orange-500/10 text-orange-600 border-orange-500/20"
                 : "bg-secondary/50 text-muted-foreground border-transparent",
@@ -163,14 +132,14 @@ const HabitRow = React.memo(
             {streak}{" "}
             <Flame
               className={cn(
-                "size-3.5",
+                "size-3 sm:size-3.5",
                 streak > 2 && "fill-orange-500 text-orange-600",
               )}
             />
           </div>
         </TableCell>
 
-        <TableCell className="text-right">
+        <TableCell className="text-right w-[40px] sm:w-[50px] pr-2">
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button

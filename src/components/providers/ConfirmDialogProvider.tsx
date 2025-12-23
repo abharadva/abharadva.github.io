@@ -1,3 +1,4 @@
+// src/components/providers/ConfirmDialogProvider.tsx
 "use client";
 
 import React, {
@@ -17,7 +18,6 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-import { Button } from "@/components/ui/button";
 
 interface ConfirmOptions {
   title?: string;
@@ -84,23 +84,40 @@ export const ConfirmDialogProvider = ({
     <ConfirmDialogContext.Provider value={{ confirm }}>
       {children}
       <AlertDialog open={open} onOpenChange={setOpen}>
-        <AlertDialogContent>
+        {/* 
+          RESPONSIVE UPDATE: 
+          - w-[95vw]: Takes up 95% of viewport width on mobile (prevents edge touching)
+          - max-w-lg: Caps width on desktop for readability
+          - rounded-lg: Softer corners for mobile
+        */}
+        <AlertDialogContent className="w-[95vw] max-w-lg rounded-xl md:rounded-lg">
           <AlertDialogHeader>
-            <AlertDialogTitle>{options.title}</AlertDialogTitle>
-            <AlertDialogDescription>
+            <AlertDialogTitle className="text-xl">
+              {options.title}
+            </AlertDialogTitle>
+            <AlertDialogDescription className="text-base text-muted-foreground/90">
               {options.description}
             </AlertDialogDescription>
           </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel onClick={handleCancel}>
+          {/* 
+             RESPONSIVE FOOTER:
+             - flex-col-reverse: Stacks buttons vertically on mobile (Cancel at bottom)
+             - sm:flex-row: Reverts to horizontal on small tablets/desktop
+             - gap-3: Adds space between stacked buttons
+          */}
+          <AlertDialogFooter className="flex-col-reverse gap-3 sm:flex-row sm:justify-end sm:gap-2 mt-4">
+            <AlertDialogCancel
+              onClick={handleCancel}
+              className="mt-0 w-full sm:w-auto h-12 sm:h-10 text-base"
+            >
               {options.cancelText}
             </AlertDialogCancel>
             <AlertDialogAction
               onClick={handleConfirm}
               className={
                 options.variant === "destructive"
-                  ? "bg-destructive text-destructive-foreground hover:bg-destructive/90"
-                  : ""
+                  ? "bg-destructive text-destructive-foreground hover:bg-destructive/90 w-full sm:w-auto h-12 sm:h-10 text-base"
+                  : "w-full sm:w-auto h-12 sm:h-10 text-base"
               }
             >
               {options.confirmText}
