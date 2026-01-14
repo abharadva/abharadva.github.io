@@ -1,6 +1,12 @@
 // src/store/api/publicApi.ts
 import { createApi, fakeBaseQuery } from "@reduxjs/toolkit/query/react";
 import { supabase } from "@/supabase/client";
+import {
+  MOCK_SITE_IDENTITY,
+  MOCK_BLOG_POSTS,
+  MOCK_SECTIONS,
+  MOCK_NAV_LINKS,
+} from "@/lib/fallback-data";
 import type {
   BlogPost,
   GitHubRepo,
@@ -24,6 +30,12 @@ export const publicApi = createApi({
   endpoints: (builder) => ({
     getSiteIdentity: builder.query<SiteContent, void>({
       queryFn: async () => {
+        // --- MOCK FALLBACK ---
+        if (!supabase) {
+          return { data: MOCK_SITE_IDENTITY };
+        }
+        // ---------------------
+
         const { data, error } = await supabase
           .from("site_identity")
           .select("*")
@@ -33,8 +45,15 @@ export const publicApi = createApi({
       },
       providesTags: ["SiteContent"],
     }),
+
     getNavLinks: builder.query<NavLink[], void>({
       queryFn: async () => {
+        // --- MOCK FALLBACK ---
+        if (!supabase) {
+          return { data: MOCK_NAV_LINKS };
+        }
+        // ---------------------
+
         const [identityRes, linksRes] = await Promise.all([
           supabase.from("site_identity").select("portfolio_mode").single(),
           supabase
@@ -61,8 +80,15 @@ export const publicApi = createApi({
       },
       providesTags: ["Navigation", "SiteContent"],
     }),
+
     getPublishedBlogPosts: builder.query<BlogPost[], void>({
       queryFn: async () => {
+        // --- MOCK FALLBACK ---
+        if (!supabase) {
+          return { data: MOCK_BLOG_POSTS };
+        }
+        // ---------------------
+
         const { data, error } = await supabase
           .from("blog_posts")
           .select("*")
@@ -79,8 +105,25 @@ export const publicApi = createApi({
             ]
           : [{ type: "Posts", id: "LIST" }],
     }),
+
     getBlogPostBySlug: builder.query<BlogPost, string>({
       queryFn: async (slug) => {
+        // --- MOCK FALLBACK ---
+        if (!supabase) {
+          const post = MOCK_BLOG_POSTS.find((p) => p.slug === slug);
+          if (!post)
+            return {
+              error: {
+                message: "Not Found",
+                details: "Mock",
+                hint: "",
+                code: "404",
+              },
+            };
+          return { data: post };
+        }
+        // ---------------------
+
         const { data, error } = await supabase
           .from("blog_posts")
           .select("*")
@@ -97,8 +140,13 @@ export const publicApi = createApi({
       providesTags: (result) =>
         result ? [{ type: "Post", id: result.id }] : [],
     }),
+
     incrementPostView: builder.mutation<void, string>({
       queryFn: async (postId) => {
+        // --- MOCK FALLBACK ---
+        if (!supabase) return { data: undefined };
+        // ---------------------
+
         const { error } = await supabase.rpc("increment_blog_post_view", {
           post_id_to_increment: postId,
         });
@@ -110,8 +158,17 @@ export const publicApi = createApi({
         { type: "Posts", id: "LIST" },
       ],
     }),
+
     getSectionsByPath: builder.query<PortfolioSection[], string>({
       queryFn: async (pagePath) => {
+        // --- MOCK FALLBACK ---
+        if (!supabase) {
+          return {
+            data: MOCK_SECTIONS.filter((s) => s.page_path === pagePath),
+          };
+        }
+        // ---------------------
+
         const { data, error } = await supabase
           .from("portfolio_sections")
           .select("*, portfolio_items(*)")
@@ -124,6 +181,7 @@ export const publicApi = createApi({
       },
       providesTags: (result, error, path) => [{ type: "Portfolio", id: path }],
     }),
+
     getGitHubRepos: builder.query<
       GitHubRepo[],
       {
@@ -176,18 +234,17 @@ export const publicApi = createApi({
         }
       },
     }),
+
     getLockdownStatus: builder.query<number, void>({
       queryFn: async () => {
+        if (!supabase) return { data: 0 }; // Mock: Always normal
         const { data, error } = await supabase
           .from("security_settings")
           .select("lockdown_level")
           .single();
-        // Default to 0 (Normal) if error/missing
         if (error || !data) return { data: 0 };
         return { data: data.lockdown_level };
       },
-      // Cache for 1 minute to avoid hammering DB on every nav,
-      // but keeps it relatively responsive to changes
       keepUnusedDataFor: 60,
     }),
   }),

@@ -128,7 +128,7 @@ import {
 } from "@/components/ui/tooltip";
 import dynamic from "next/dynamic";
 import { Badge } from "@/components/ui/badge";
-import { cn, parseLocalDate } from "@/lib/utils";
+import { cn, parseLocalDate, getNextOccurrence } from "@/lib/utils";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Progress } from "@/components/ui/progress";
 import {
@@ -157,7 +157,6 @@ import {
   useSaveTransactionMutation,
   useSaveRecurringMutation,
 } from "@/store/api/adminApi";
-import { getNextOccurrence } from "@/lib/utils";
 import LoadingSpinner from "./LoadingSpinner";
 import {
   AlertDialog,
@@ -993,8 +992,7 @@ const GoalCard = ({
 }) => {
   const percentage = Math.min(
     (goal.current_amount / goal.target_amount) * 100,
-    100,
-  );
+    100,  );
   return (
     <Card className="relative flex flex-col overflow-hidden transition-all duration-300 hover:-translate-y-1 hover:shadow-xl h-[320px] group">
       <motion.div

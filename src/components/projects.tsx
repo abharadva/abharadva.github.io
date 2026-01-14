@@ -77,7 +77,7 @@ export default function Projects({ showTitle = true }: ProjectsProps) {
   }
 
   return (
-    <section className="my-24 py-16">
+    <section>
       {showTitle && (
         <motion.div
           initial={{ opacity: 0 }}

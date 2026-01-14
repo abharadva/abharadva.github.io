@@ -1,5 +1,3 @@
-// src/lib/utils.ts
-
 import { RecurringTransaction } from "@/types";
 import { clsx, type ClassValue } from "clsx";
 import { twMerge } from "tailwind-merge";
@@ -22,6 +20,7 @@ const BUCKET_NAME = process.env.NEXT_PUBLIC_BUCKET_NAME || "blog-assets";
 export function getStorageUrl(filePath: string | null | undefined): string {
   if (!filePath) return "";
   if (filePath.startsWith("http")) return filePath;
+  if (!supabase) return filePath;
 
   const { data } = supabase.storage.from(BUCKET_NAME).getPublicUrl(filePath);
   return data.publicUrl;
@@ -37,16 +36,17 @@ export function parseLocalDate(
   if (!dateInput) return new Date();
   if (dateInput instanceof Date) return dateInput;
 
-  // Handle ISO strings (Supabase default)
-  const parsed = parseISO(dateInput);
-  if (isValid(parsed)) return parsed;
-
-  // Fallback for simple YYYY-MM-DD
-  const parts = dateInput.split("-");
-  if (parts.length === 3) {
-    const [year, month, day] = parts.map(Number);
+  // Handle "YYYY-MM-DD" strings specifically to prevent timezone shifts.
+  // new Date("2024-05-23") creates UTC midnight, which is 2024-05-22 20:00:00 EST.
+  // We want 2024-05-23 00:00:00 Local.
+  if (typeof dateInput === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(dateInput)) {
+    const [year, month, day] = dateInput.split('-').map(Number);
     return new Date(year, month - 1, day);
   }
+
+  // Handle standard ISO strings with time components
+  const parsed = parseISO(dateInput);
+  if (isValid(parsed)) return parsed;
 
   return new Date();
 }

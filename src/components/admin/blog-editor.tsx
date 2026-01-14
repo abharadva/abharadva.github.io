@@ -48,7 +48,7 @@ interface BlogEditorProps {
   onCancel: () => void;
 }
 
-const bucketName = process.env.NEXT_PUBLIC_BUCKET_NAME || "blog-assets";
+const bucketName = process.env.NEXT_PUBLIC_BUCKET_NAME || "assets";
 
 export default function BlogEditor({
   post,
@@ -73,7 +73,6 @@ export default function BlogEditor({
   const [isUploading, setIsUploading] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
 
-  // Refs for file inputs
   const contentImageInputRef = useRef<HTMLInputElement>(null);
   const coverImageInputRef = useRef<HTMLInputElement>(null);
 
@@ -153,8 +152,9 @@ export default function BlogEditor({
 
     await onSave(postDataToSave);
 
-    // Trigger RPC to update asset usage if needed
-    await supabase.rpc("update_asset_usage");
+    if (supabase) {
+      await supabase.rpc("update_asset_usage");
+    }
 
     setIsSaving(false);
   };
@@ -164,6 +164,11 @@ export default function BlogEditor({
     forCoverImage: boolean = false,
   ) => {
     if (!file) return;
+    if (!supabase) {
+      toast.error("DB connection missing. Cannot upload images.");
+      return;
+    }
+
     setIsUploading(true);
     setErrors((prev) => ({ ...prev, image_upload: "" }));
 

@@ -28,6 +28,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Badge } from "@/components/ui/badge";
+import { parseLocalDate } from "@/lib/utils";
 
 interface TableViewProps {
   tasks: Task[];
@@ -99,7 +100,7 @@ export function TaskTableView({
                   {task.due_date ? (
                     <div className="flex items-center text-sm text-muted-foreground">
                       <Calendar className="mr-2 size-3.5 opacity-70" />
-                      {format(new Date(task.due_date), "MMM d, yyyy")}
+                      {format(parseLocalDate(task.due_date), "MMM d, yyyy")}
                     </div>
                   ) : (
                     <span className="text-xs text-muted-foreground/50 italic">

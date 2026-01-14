@@ -51,7 +51,6 @@ export function GlobalCommandPalette() {
   const dispatch = useAppDispatch();
   const isMobile = useIsMobile();
 
-  // 1. Keyboard Shortcut Listener (Cmd+K / Ctrl+K)
   React.useEffect(() => {
     const down = (e: KeyboardEvent) => {
       if (e.key === "k" && (e.metaKey || e.ctrlKey)) {
@@ -63,7 +62,6 @@ export function GlobalCommandPalette() {
     return () => document.removeEventListener("keydown", down);
   }, []);
 
-  // 2. Custom Event Listener (For mobile triggers or programmatic opening)
   React.useEffect(() => {
     const handleCustomOpen = () => setOpen(true);
     document.addEventListener("open-command-palette", handleCustomOpen);
@@ -71,9 +69,9 @@ export function GlobalCommandPalette() {
       document.removeEventListener("open-command-palette", handleCustomOpen);
   }, []);
 
-  // 3. Check Auth Status
   React.useEffect(() => {
     const checkUser = async () => {
+      if (!supabase) return;
       const {
         data: { session },
       } = await supabase.auth.getSession();
@@ -81,22 +79,23 @@ export function GlobalCommandPalette() {
     };
     checkUser();
 
-    const {
-      data: { subscription },
-    } = supabase.auth.onAuthStateChange((_event, session) => {
-      setIsAdmin(!!session);
-    });
-    return () => subscription.unsubscribe();
+    if (supabase) {
+      const {
+        data: { subscription },
+      } = supabase.auth.onAuthStateChange((_event, session) => {
+        setIsAdmin(!!session);
+      });
+      return () => subscription.unsubscribe();
+    }
   }, []);
 
-  // 4. Helper to run command and close palette
   const runCommand = React.useCallback((command: () => unknown) => {
     setOpen(false);
     command();
   }, []);
 
-  // 5. Actions
   const handleLogout = async () => {
+    if (!supabase) return;
     await supabase.auth.signOut();
     toast.success("Logged out successfully");
     router.push("/admin/login");
@@ -120,7 +119,6 @@ export function GlobalCommandPalette() {
       <CommandList className="max-h-[300px] overflow-y-auto overflow-x-hidden">
         <CommandEmpty>No results found.</CommandEmpty>
 
-        {/* --- SECTION: ADMIN SHORTCUTS --- */}
         {isAdmin && (
           <>
             <CommandGroup heading="Quick Actions">
@@ -196,7 +194,6 @@ export function GlobalCommandPalette() {
           </>
         )}
 
-        {/* --- SECTION: PUBLIC NAVIGATION --- */}
         <CommandGroup heading="Navigation">
           <CommandItem onSelect={() => runCommand(() => router.push("/"))}>
             <Home className="mr-2 h-4 w-4" />
@@ -228,7 +225,6 @@ export function GlobalCommandPalette() {
 
         <CommandSeparator />
 
-        {/* --- SECTION: SYSTEM --- */}
         <CommandGroup heading="System">
           <CommandItem onSelect={() => runCommand(() => setTheme("light"))}>
             <Sun className="mr-2 h-4 w-4" />

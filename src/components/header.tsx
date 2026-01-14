@@ -1,3 +1,4 @@
+// src/components/header.tsx
 import Link from "next/link";
 import { useRouter } from "next/router";
 import { useEffect, useState } from "react";
@@ -23,6 +24,7 @@ export default function Header() {
 
   useEffect(() => {
     const checkUser = async () => {
+      if (!supabase) return; // Mock Mode
       const {
         data: { session },
       } = await supabase.auth.getSession();

@@ -37,7 +37,7 @@ export default function AboutPage() {
           className="mx-auto max-w-3xl"
         >
           <h1 className="mb-4 border-b pb-4 text-center font-mono text-4xl font-bold tracking-tighter text-foreground sm:text-5xl">
-            [ ABOUT_ME ]
+            About.
           </h1>
           <div className="mt-12 flex flex-col items-center gap-8 sm:flex-row sm:items-start">
             {isLoading || !content ? (

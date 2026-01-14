@@ -1,148 +1,187 @@
-# Personal Portfolio & Headless CMS
+# 🚀 Personal Portfolio & Headless CMS (Personal OS)
 
-This repository contains the source code for a comprehensive personal portfolio and blog, architected as a full-stack application using Next.js for the frontend and Supabase as a headless backend. It features a minimalist, responsive public-facing site and a secure, feature-rich admin panel for complete content and personal management.
+![Next.js](https://img.shields.io/badge/Next.js-14-black?style=flat-square&logo=next.js)
+![Supabase](https://img.shields.io/badge/Supabase-Backend-green?style=flat-square&logo=supabase)
+![TypeScript](https://img.shields.io/badge/TypeScript-5-blue?style=flat-square&logo=typescript)
+![Redux Toolkit](https://img.shields.io/badge/Redux-State-purple?style=flat-square&logo=redux)
+![License](https://img.shields.io/badge/License-MIT-yellow?style=flat-square)
 
- <!-- It's highly recommended to add a preview image of your site -->
+A high-performance, kinetic typography-themed portfolio website integrated with a powerful **"Personal OS" Admin Panel**. 
 
----
-
-## 🚀 Key Features
-
-### Public-Facing Website
-
-- **Modern & Responsive:** A sleek, minimalist dark theme built with Tailwind CSS and shadcn/ui, optimized for all screen sizes.
-- **Dynamic Content:** All sections—including Work Experience, Tech Stack, Projects, and custom pages—are dynamically populated from the CMS.
-- **Full-Featured Blog:** Clean, readable articles with server-side rendering for SEO, view counters, and tag-based organization.
-- **Engaging UI/UX:** Features kinetic typography on the homepage and elegant hover effects for a polished user experience.
-- **GitHub Integration:** An "Open Source" section automatically fetches and displays public repositories from a specified GitHub account.
-
-### 🔐 Admin Panel & CMS
-
-- **Secure Authentication:** Powered by Supabase Auth with mandatory Two-Factor Authentication (MFA/TOTP) for robust admin access.
-- **Central Dashboard:** An at-a-glance overview of key metrics: monthly finances, task progress, total notes, and blog views.
-- **Comprehensive CMS:**
-  - Manage all public-facing content sections across multiple pages (`/`, `/about`, `/contact`, etc.).
-  - Create, update, and reorder sections (Markdown, List Items, Galleries) with drag-and-drop.
-  - Full CRUD functionality for all portfolio items within sections.
-- **Blog Manager:**
-  - Advanced Markdown editor with live preview, syntax highlighting, and integrated image uploads.
-  - On-the-fly image compression (to WEBP) and cloud storage via Supabase Storage.
-  - Manage post metadata: slugs, tags, excerpts, and publish status.
-- **Personal Management Suite:**
-  - **Task Manager:** Kanban-style board with sub-tasks, priorities, and due dates.
-  - **Finance Tracker:** Log earnings/expenses, manage recurring transactions, and view monthly/yearly analytics with charts. Includes a 30-day cash flow forecast.
-  - **Knowledge Hub:** A system to track learning progress on subjects and topics, complete with session tracking and a GitHub-style activity heatmap.
-  - **Notes Manager:** A simple, effective tool for personal notes with pinning functionality.
+This project solves the dilemma of having a static portfolio but needing dynamic features. It runs in two modes:
+1.  **Static Mode:** Zero-config, data loaded from a file (Great for simple hosting).
+2.  **Admin Mode:** Full-stack "Personal OS" connected to Supabase (Finance, Tasks, CMS, Habits).
 
 ---
 
-## 🛠️ Tech Stack & Architecture
+## 🌟 Key Features
 
-This project is built with a modern, scalable tech stack focused on developer experience and performance.
+### 🎨 Public-Facing Portfolio
+*   **Universal Template:** Works immediately upon cloning. Missing database credentials? It gracefully falls back to fallback data.
+*   **Kinetic Design:** Bold aesthetic with smooth Framer Motion animations.
+*   **Dynamic Content Engine:** Pages like `/about` or `/projects` are rendered based on your CMS data.
+*   **Markdown Blog:** Full-featured blog with syntax highlighting, Table of Contents, and read-time estimation.
 
-- **Framework:** [Next.js](https://nextjs.org/) (React) with TypeScript
-- **Styling:** [Tailwind CSS](https://tailwindcss.com/) with [shadcn/ui](https://ui.shadcn.com/) for components.
-- **Backend & Database:** [Supabase](https://supabase.com/) (PostgreSQL, Auth, Storage)
-- **State Management:** [Redux Toolkit](https://redux-toolkit.js.org/) with **RTK Query** for centralized state and efficient, cached data fetching.
-- **Animation:** [Framer Motion](https://www.framer.com/motion/)
-- **Forms:** [React Hook Form](https://react-hook-form.com/) & [Zod](https://zod.dev/) for validation
-- **Charts & Calendar:** [Recharts](https://recharts.org/) & [FullCalendar](https://fullcalendar.io/)
-- **Deployment:** Configured for static export to [GitHub Pages](https://pages.github.com/) via GitHub Actions.
-
-### Architectural Overview
-
-The application utilizes a sophisticated state management architecture with **RTK Query** at its core.
-
-- **Centralized API Logic:** All interactions with the Supabase backend are defined declaratively in API "slices" (`publicApi.ts` for the public site, `adminApi.ts` for the admin panel). This removes data-fetching logic from components.
-- **Automated Caching:** RTK Query provides intelligent, automatic caching of fetched data. This reduces redundant API calls, improves performance, and minimizes backend load.
-- **Tag-Based Re-validation:** The system uses a tagging mechanism to automatically re-fetch data when related information is mutated. For example, adding a new blog post automatically invalidates the "posts" tag, causing any component displaying the post list to update without manual intervention.
-- **Client State Management:** For non-API state, such as the learning session timer, standard Redux slices are used to manage state predictably.
+### 🔐 Admin Panel (Personal OS)
+*   **Secure Auth:** Supabase Auth with mandatory **Multi-Factor Authentication (MFA/TOTP)**.
+*   **Productivity Suite:**
+    *   **Task Manager:** Kanban board and Tree view with subtasks.
+    *   **Finance Tracker:** Income/Expense tracking, recurring subscriptions, and investment forecasting.
+    *   **Habit Tracker:** GitHub-style contribution heatmaps.
+    *   **Inventory:** Asset tracking for hardware/software with depreciation.
+    *   **Learning Hub:** Curriculum builder with a built-in Pomodoro focus timer.
+*   **CMS:** Drag-and-drop page builder and advanced Markdown editor with image uploads.
 
 ---
 
-## ⚙️ Local Setup & Installation
+## 🛠️ Tech Stack
 
-Follow these steps to get the project running on your local machine.
+*   **Frontend:** Next.js 14 (Pages Router), React 18
+*   **Language:** TypeScript
+*   **Styling:** Tailwind CSS, Shadcn UI, Framer Motion
+*   **Backend:** Supabase (PostgreSQL, Auth, Storage)
+*   **State:** Redux Toolkit (RTK Query) for caching and optimistic updates
+*   **Visualization:** Recharts (Analytics), FullCalendar
 
-### 1. Prerequisites
+---
 
-- [Node.js](https://nodejs.org/en/) (v18 or later)
-- [npm](https://www.npmjs.com/) or [yarn](https://yarnpkg.com/)
-- A free [Supabase](https://supabase.com/) account.
+## 🚀 Getting Started
 
-### 2. Clone and Install
-
+### 1. Clone & Install
 ```bash
 git clone https://github.com/abharadva/abharadva.github.io.git
 cd abharadva.github.io
 npm install
 ```
 
-### 3. Supabase Configuration
+### 2. Choose Your Mode
 
-This project requires a Supabase backend. For a complete, step-by-step guide on setting up your project, tables, and authentication, please refer to the detailed **[Supabase Setup Guide](./supabase.md)**.
+#### 🟢 Option A: Static Mode (Fastest)
+Ideal if you just want the portfolio website without the admin features.
+1.  Simply run `npm run dev`.
+2.  The app detects missing database keys and switches to **Mock Mode**.
+3.  Edit `src/lib/mock-data.ts` to change your content.
 
-### 4. Environment Variables
+#### 🔴 Option B: Admin Mode (Full Power)
+Connect a free Supabase database to unlock the Admin Panel, CMS, and Dashboard.
 
-After setting up your Supabase project, create a new file named `.env.local` in the root directory. Copy the contents of `.env.example` and fill in your Supabase credentials:
+**Step 1: Create Supabase Project**
+1.  Go to [Supabase.com](https://supabase.com) and create a new project.
+2.  Go to **Project Settings > API**.
+3.  Copy the **Project URL** and **anon / public** Key.
+
+**Step 2: Environment Variables**
+Create a `.env.local` file in your root directory:
 
 ```env
-NEXT_PUBLIC_SUPABASE_URL=YOUR_SUPABASE_PROJECT_URL
-NEXT_PUBLIC_SUPABASE_ANON_KEY=YOUR_SUPABASE_ANON_PUBLIC_KEY
-NEXT_PUBLIC_BUCKET_NAME=blog-assets
 NEXT_PUBLIC_SITE_URL=http://localhost:3000
+NEXT_PUBLIC_SUPABASE_URL=your_project_url_here
+NEXT_PUBLIC_SUPABASE_ANON_KEY=your_anon_key_here
+NEXT_PUBLIC_BUCKET_NAME=blog-assets
+
+# Optional: Only needed for the 'npm run seed' script
+SUPABASE_SERVICE_ROLE_KEY=your_service_role_key_here
 ```
 
-### 5. Run the Development Server
+**Step 3: Database Setup**
+1.  Open the file `db/schema.sql` in this repository.
+2.  Copy the contents.
+3.  Go to the **Supabase SQL Editor**, paste the SQL, and click **Run**.
+    *   *This creates all 18+ tables, RLS policies, and triggers.*
 
+**Step 4: Storage Setup**
+1.  Go to **Storage** in Supabase.
+2.  Create a new bucket named `blog-assets`.
+3.  **Important:** Toggle "Public Bucket" to **ON**.
+
+**Step 5: Seed Data**
+Populate the database with the default template data so your dashboard isn't empty.
+```bash
+npm run seed
+```
+
+**Step 6: Launch**
 ```bash
 npm run dev
 ```
 
-The application will be available at `http://localhost:3000`.
+---
+
+## 👤 First-Time Admin Setup
+
+The admin panel is secure by default. There is no public registration page.
+
+1.  Navigate to `http://localhost:3000/admin/signup`.
+    *   *Note: This page only works if no admin user exists in the database.*
+2.  Create your root account.
+3.  **Check your email** to confirm the account.
+4.  Log in at `/admin/login`.
+5.  Follow the prompt to scan the QR Code and set up **2FA (MFA)**.
 
 ---
 
-## 🔑 Accessing the Admin Panel
+## 📦 Deployment
 
-The admin panel is secure and does not have a public sign-up page.
+This project uses `output: 'export'` for compatibility with static hosts like **GitHub Pages**.
 
-1.  **Create Your User:** In your Supabase Dashboard, go to **Authentication** > **Users** and click **Add user**. Enter your email and a secure password.
-2.  **Confirm Your Email:** Click the confirmation link sent to your email address.
-3.  **Log In:** Navigate to `http://localhost:3000/admin/login` and sign in with your new credentials.
-4.  **MFA Setup:** You will be automatically redirected to set up Two-Factor Authentication. Scan the QR code with an authenticator app (e.g., Google Authenticator, Authy) and verify the code to complete the setup. You will then be redirected to the admin dashboard.
+### 1. GitHub Secrets
+Go to your GitHub Repository -> **Settings** -> **Secrets and variables** -> **Actions**. Add these secrets:
 
----
+| Secret Name | Value |
+| :--- | :--- |
+| `NEXT_PUBLIC_SUPABASE_URL` | Your Supabase Project URL |
+| `NEXT_PUBLIC_SUPABASE_ANON_KEY` | Your Supabase Anon Key |
+| `NEXT_PUBLIC_BUCKET_NAME` | `blog-assets` |
+| `NEXT_PUBLIC_SITE_URL` | Your production domain (e.g., `https://yourname.github.io`) |
 
-## 🚀 Deployment
+### 2. Enable Pages
+Go to **Settings** -> **Pages**. Set **Source** to **GitHub Actions**.
 
-This project is configured for static export and deployment to **GitHub Pages** using GitHub Actions.
-
-### 1. Repository Secrets
-
-For GitHub Actions to build the site, you must add your Supabase credentials as repository secrets.
-
-1.  In your GitHub repository, go to **Settings** > **Secrets and variables** > **Actions**.
-2.  Click **New repository secret** for each of the following variables from your `.env.local` file:
-    - `NEXT_PUBLIC_SUPABASE_URL`
-    - `NEXT_PUBLIC_SUPABASE_ANON_KEY`
-    - `NEXT_PUBLIC_BUCKET_NAME`
-    - `NEXT_PUBLIC_SITE_URL` (Set this to your public GitHub Pages URL, e.g., `https://your-username.github.io`)
-
-### 2. Enable GitHub Pages
-
-The workflow file at `.github/workflows/next-deploy.yml` is already configured.
-
-1.  Push your code to the `main` branch. The deployment action will run automatically.
-2.  In your GitHub repository, go to **Settings** > **Pages**.
-3.  Under **Build and deployment**, set the **Source** to **GitHub Actions**.
-4.  Once the action completes, your site will be live at the URL provided on this page.
+Push your code to the `main` branch. The included workflow `.github/workflows/next-deploy.yml` will automatically build and deploy your site.
 
 ---
 
-## 📜 Available Scripts
+## 🤖 Automations (Optional)
 
-- `npm run dev`: Starts the development server.
-- `npm run build`: Creates a production-ready static build in the `./out` directory.
-- `npm run lint`: Runs ESLint to check for code quality issues.
-- `npm run format`: Formats all code using Prettier.
+### Supabase Keep-Alive & Fun Facts
+The Supabase Free Tier pauses projects after 7 days of inactivity. This repository includes a GitHub Action to prevent this.
+
+**Features:**
+1.  Pings your database twice daily.
+2.  Fetches a random **Dev Joke** or **Fun Fact**.
+3.  Sends a beautiful status report to Discord.
+
+**Setup:**
+1.  Create a **Discord Webhook** (Channel Settings -> Integrations -> Webhooks).
+2.  Add a GitHub Secret named `DISCORD_WEBHOOK_URL` with the webhook link.
+3.  The workflow is located at `.github/workflows/keep-alive.yml` and runs automatically.
+
+---
+
+## 📂 Project Structure
+
+```
+├── src/
+│   ├── components/
+│   │   ├── admin/       # Dashboard, Finance, Tasks, CMS components
+│   │   ├── ui/          # Reusable Shadcn UI primitives
+│   │   └── ...          # Public components (Hero, Projects)
+│   ├── lib/
+│   │   ├── mock-data.ts # Fallback content for Static Mode
+│   │   └── utils.ts     # Helpers (Date parsing, formatting)
+│   ├── pages/           # Next.js Routes
+│   │   ├── admin/       # Secure admin routes
+│   │   └── ...          # Public routes
+│   ├── store/           # Redux Logic (RTK Query API definitions)
+├── db/                  # SQL Schema for Supabase
+├── public/              # Static assets
+└── ...config files
+```
+
+## 🤝 Contributing
+
+Contributions are welcome! Please feel free to submit a Pull Request.
+
+## 📄 License
+
+This project is licensed under the [MIT License](LICENSE).

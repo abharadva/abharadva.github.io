@@ -1,25 +1,23 @@
+// src/supabase/client.ts
+
 import {
   createClient,
   Session,
   User,
+  SupabaseClient,
   SupabaseClientOptions,
 } from "@supabase/supabase-js";
-import { config } from "@/lib/config";
+import { config, isSupabaseConfigured } from "@/lib/config";
 
 const { supabase: supabaseConfig } = config;
 
-if (!supabaseConfig.url || !supabaseConfig.anonKey) {
-  throw new Error(
-    "Supabase URL and Anon Key must be configured in environment variables.",
-  );
-}
-
 const options: SupabaseClientOptions<"public"> = {};
 
-export const supabase = createClient(
-  supabaseConfig.url,
-  supabaseConfig.anonKey,
-  options,
-);
+// Export a safe client.
+// If not configured, this will be null.
+// All API calls must check if (supabase) before using it.
+export const supabase: SupabaseClient | null = isSupabaseConfigured
+  ? createClient(supabaseConfig.url, supabaseConfig.anonKey, options)
+  : null;
 
 export type { Session, User };

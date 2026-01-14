@@ -9,6 +9,7 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Loader2, Lock } from "lucide-react";
+import { useCheckAdminExistsQuery } from "@/store/api/adminApi"; // Import hook
 
 export default function SupabaseLogin() {
   const [email, setEmail] = useState("");
@@ -17,25 +18,37 @@ export default function SupabaseLogin() {
   const [isLoading, setIsLoading] = useState(false);
   const router = useRouter();
 
+  // --- NEW: Check Admin Status ---
+  const { data: adminExists, isLoading: isCheckingAdmin } = useCheckAdminExistsQuery();
+
   useEffect(() => {
+    // If check finishes and result is FALSE, redirect to setup
+    if (!isCheckingAdmin && adminExists === false) {
+      router.replace("/admin/signup");
+    }
+  }, [adminExists, isCheckingAdmin, router]);
+  // -------------------------------
+
+  useEffect(() => {
+    if (!supabase) return;
     const redirectIfAuthenticated = async () => {
       setIsLoading(true);
       const {
         data: { session },
-      } = await supabase.auth.getSession();
+      } = await supabase!.auth.getSession();
 
       if (session) {
         const { data: aalData } =
-          await supabase.auth.mfa.getAuthenticatorAssuranceLevel();
+          await supabase!.auth.mfa.getAuthenticatorAssuranceLevel();
         if (aalData?.currentLevel === "aal2") {
-          router.replace("/admin"); // Already fully logged in
+          router.replace("/admin");
         } else if (aalData?.nextLevel === "aal2") {
-          router.replace("/admin/mfa-challenge"); // Needs MFA
+          router.replace("/admin/mfa-challenge");
         } else {
-          router.replace("/admin/setup-mfa"); // Needs MFA setup
+          router.replace("/admin/setup-mfa");
         }
       } else {
-        setIsLoading(false); // No session, stay on login page
+        setIsLoading(false);
       }
     };
 
@@ -44,6 +57,10 @@ export default function SupabaseLogin() {
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!supabase) {
+      setError("Database connection missing. Cannot login.");
+      return;
+    }
     setIsLoading(true);
     setError("");
 
@@ -91,6 +108,15 @@ export default function SupabaseLogin() {
     animate: { opacity: 1, y: 0 },
     exit: { opacity: 0, y: -20 },
   };
+
+  // While checking if admin exists, show loader to prevent form flash
+  if (isCheckingAdmin && !isLoading) {
+    return (
+      <div className="flex min-h-screen items-center justify-center bg-grid-pattern">
+        <Loader2 className="size-8 animate-spin text-muted-foreground" />
+      </div>
+    );
+  }
 
   return (
     <motion.div

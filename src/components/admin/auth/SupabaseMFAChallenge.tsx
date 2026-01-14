@@ -25,6 +25,7 @@ export default function SupabaseMFAChallenge() {
 
   useEffect(() => {
     const protectPageAndGetFactor = async () => {
+      if (!supabase) return;
       setIsLoadingState(true);
       const {
         data: { session },
@@ -86,6 +87,7 @@ export default function SupabaseMFAChallenge() {
 
   const handleVerify = async (e: React.FormEvent | string) => {
     if (typeof e !== "string") e.preventDefault();
+    if (!supabase) return;
     if (!factorId) {
       setError("MFA factor ID is missing. Please try logging in again.");
       return;

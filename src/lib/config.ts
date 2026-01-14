@@ -40,20 +40,19 @@ export const config: AppConfig = {
   supabase: {
     url: process.env.NEXT_PUBLIC_SUPABASE_URL || "",
     anonKey: process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || "",
-    bucketName: process.env.NEXT_PUBLIC_BUCKET_NAME || "blog-assets",
+    bucketName: process.env.NEXT_PUBLIC_BUCKET_NAME || "assets",
   },
   session: {
     maxAge: 24 * 60 * 60 * 1000,
   },
 };
 
-if (!config.supabase.url) {
-  console.warn(
-    "Supabase URL is not configured. Please set NEXT_PUBLIC_SUPABASE_URL.",
-  );
-}
-if (!config.supabase.anonKey) {
-  console.warn(
-    "Supabase Anon Key is not configured. Please set NEXT_PUBLIC_SUPABASE_ANON_KEY.",
+// --- CONFIGURATION VALIDATION ---
+export const isSupabaseConfigured =
+  !!config.supabase.url && !!config.supabase.anonKey;
+
+if (!isSupabaseConfigured) {
+  console.info(
+    "⚠️ Supabase credentials not found. App running in STATIC MOCK MODE.",
   );
 }

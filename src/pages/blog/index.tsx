@@ -13,11 +13,10 @@ import {
   FileText,
   Search,
   X,
-  Tag,
   CalendarIcon,
 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
-import { Card, CardContent, CardFooter } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { useGetPublishedBlogPostsQuery } from "@/store/api/publicApi";
@@ -81,7 +80,7 @@ export default function BlogIndexPage() {
         <link rel="canonical" href={`${siteConfig.url}/blog/`} />
       </Head>
 
-      <main className="mx-auto max-w-7xl px-4 py-12 md:py-20">
+      <main className="mx-auto max-w-5xl px-4 py-12 md:py-20">
         <div className="flex flex-col items-center text-center mb-12 space-y-4">
           <motion.h1
             initial={{ opacity: 0, y: -20 }}
@@ -126,14 +125,18 @@ export default function BlogIndexPage() {
         </div>
 
         {isLoading ? (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {[1, 2, 3, 4, 5, 6].map((i) => (
-              <div key={i} className="flex flex-col space-y-3">
-                <Skeleton className="h-48 w-full rounded-xl" />
-                <div className="space-y-2">
-                  <Skeleton className="h-4 w-3/4" />
+          <div className="flex flex-col gap-6">
+            {[1, 2, 3, 4].map((i) => (
+              <div
+                key={i}
+                className="flex flex-col md:flex-row gap-6 border rounded-xl p-4 bg-card/50"
+              >
+                <div className="space-y-4 flex-1 py-2 order-2 md:order-1">
+                  <Skeleton className="h-6 w-3/4" />
+                  <Skeleton className="h-4 w-full" />
                   <Skeleton className="h-4 w-1/2" />
                 </div>
+                <Skeleton className="h-48 w-full md:w-64 md:h-40 rounded-lg shrink-0 order-1 md:order-2" />
               </div>
             ))}
           </div>
@@ -167,8 +170,7 @@ export default function BlogIndexPage() {
           </div>
         ) : (
           <motion.div
-            // MASONRY GRID IMPLEMENTATION
-            className="columns-1 md:columns-2 lg:columns-3 gap-6 space-y-6"
+            className="flex flex-col gap-6"
             variants={containerVariants}
             initial="hidden"
             animate="visible"
@@ -183,15 +185,73 @@ export default function BlogIndexPage() {
                     key={post.id}
                     variants={itemVariants}
                     layout
-                    className="break-inside-avoid" // Prevents cards from splitting across columns
+                    className="w-full"
                   >
                     <Link
                       href={`/blog/view?slug=${post.slug}`}
-                      className="group flex flex-col h-full focus:outline-none focus-visible:ring-2 focus-visible:ring-ring rounded-lg"
+                      className="group block focus:outline-none focus-visible:ring-2 focus-visible:ring-ring rounded-xl"
                     >
-                      <Card className="flex flex-col h-full overflow-hidden transition-all duration-300 hover:-translate-y-1 hover:shadow-lg hover:border-primary/50 bg-card border-border/50">
-                        {hasImage && (
-                          <div className="w-full overflow-hidden bg-secondary relative shrink-0">
+                      <Card className="flex flex-col md:flex-row overflow-hidden transition-all duration-300 hover:shadow-lg hover:border-primary/50 bg-card border-border/50">
+                        {/* Content Section - Now First in DOM for flex layout, but visually flexible */}
+                        <CardContent className="flex flex-col flex-1 p-5 md:p-8 justify-center order-2 md:order-1">
+                          <div className="flex flex-wrap items-center gap-2 mb-3">
+                            {post.tags?.slice(0, 3).map((tag) => (
+                              <Badge
+                                key={tag}
+                                variant="secondary"
+                                className="text-xs font-normal bg-secondary/50 text-muted-foreground"
+                              >
+                                {tag}
+                              </Badge>
+                            ))}
+                            <div className="flex items-center gap-1.5 text-xs text-muted-foreground ml-auto md:ml-0">
+                              <CalendarIcon className="size-3.5" />
+                              <time
+                                dateTime={
+                                  post.published_at || post.created_at || ""
+                                }
+                              >
+                                {formatDate(
+                                  post.published_at || post.created_at,
+                                )}
+                              </time>
+                            </div>
+                          </div>
+
+                          <h2 className="text-xl md:text-2xl font-bold tracking-tight text-foreground transition-colors group-hover:text-primary mb-3">
+                            {post.title}
+                          </h2>
+
+                          <p className="text-muted-foreground text-sm md:text-base leading-relaxed mb-4 line-clamp-2">
+                            {post.excerpt || "Read more about this topic..."}
+                          </p>
+
+                          <div className="flex items-center gap-4 text-xs text-muted-foreground font-medium mt-auto pt-2">
+                            <span className="flex items-center gap-1.5">
+                              <Clock className="size-3.5" /> {readTime} min read
+                            </span>
+                            {typeof post.views === "number" && (
+                              <span className="flex items-center gap-1.5">
+                                <Eye className="size-3.5" /> {post.views} views
+                              </span>
+                            )}
+                          </div>
+                        </CardContent>
+
+                        {/* Image Section - Now Second for flex layout (Right on Desktop, Top on Mobile via CSS logic if needed, currently Bottom on Mobile due to order-1 above) */}
+                        {/* To keep Image on Top on Mobile but Right on Desktop:
+                            Mobile: Flex-col -> Image first in DOM -> Content second.
+                            Desktop: Flex-row -> Content left -> Image right.
+                            
+                            However, the code below puts Content first in DOM (order-2 on mobile?? No).
+                            
+                            Let's use explicit ordering classes:
+                            Mobile: Image (order-1), Content (order-2)
+                            Desktop: Content (order-1), Image (order-2)
+                        */}
+
+                        {hasImage ? (
+                          <div className="w-full md:w-72 h-48 md:h-auto overflow-hidden bg-secondary relative shrink-0 order-1 md:order-2">
                             <img
                               src={post.cover_image_url!}
                               alt={post.title}
@@ -199,50 +259,10 @@ export default function BlogIndexPage() {
                               loading="lazy"
                             />
                           </div>
+                        ) : (
+                          // Optional placeholder to maintain layout balance
+                          <div className="hidden md:flex w-24 shrink-0 bg-transparent order-2" />
                         )}
-
-                        <CardContent className="flex flex-col flex-1 p-5">
-                          {post.tags && post.tags[0] && (
-                            <div className="mb-3">
-                              <Badge
-                                variant="secondary"
-                                className="text-xs font-normal"
-                              >
-                                {post.tags[0]}
-                              </Badge>
-                            </div>
-                          )}
-
-                          <h2 className="text-xl font-bold tracking-tight text-foreground transition-colors group-hover:text-primary mb-2">
-                            {post.title}
-                          </h2>
-                          <p className="text-muted-foreground text-sm leading-relaxed mb-4 flex-grow">
-                            {post.excerpt || "Read more about this topic..."}
-                          </p>
-                        </CardContent>
-
-                        <CardFooter className="p-5 pt-0 flex items-center justify-between text-xs text-muted-foreground/60 font-medium border-t border-border/30 mt-auto">
-                          <div className="flex items-center gap-1.5 pt-4">
-                            <CalendarIcon className="size-3.5" />
-                            <time
-                              dateTime={
-                                post.published_at || post.created_at || ""
-                              }
-                            >
-                              {formatDate(post.published_at || post.created_at)}
-                            </time>
-                          </div>
-                          <div className="flex items-center gap-3 pt-4">
-                            <span className="flex items-center gap-1">
-                              <Clock className="size-3.5" /> {readTime} min
-                            </span>
-                            {typeof post.views === "number" && (
-                              <span className="flex items-center gap-1">
-                                <Eye className="size-3.5" /> {post.views}
-                              </span>
-                            )}
-                          </div>
-                        </CardFooter>
                       </Card>
                     </Link>
                   </motion.div>

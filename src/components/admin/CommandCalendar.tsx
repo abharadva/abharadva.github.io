@@ -26,6 +26,7 @@ import {
   setHours,
   setMinutes,
   startOfDay,
+  endOfDay,
 } from "date-fns";
 import {
   Banknote,
@@ -45,7 +46,7 @@ import {
   ChevronRight,
   ChevronLeft,
 } from "lucide-react";
-import { cn, getNextOccurrence } from "@/lib/utils";
+import { cn, getNextOccurrence, parseLocalDate } from "@/lib/utils";
 import {
   Popover,
   PopoverContent,
@@ -115,10 +116,19 @@ type EventType = {
 
 const mapItemToEvent = (item: CalendarItem): EventType => {
   const { type: transactionType, ...restOfData } = item.data;
+
+  let startDate: Date;
+  
+  if (item.item_type === 'task' || item.item_type === 'transaction' || item.item_type === 'transaction_summary') {
+      startDate = parseLocalDate(item.start_time);
+  } else {
+      startDate = new Date(item.start_time);
+  }
+
   return {
     id: item.item_id,
     title: item.title,
-    start: new Date(item.start_time),
+    start: startDate,
     end: item.end_time ? new Date(item.end_time) : undefined,
     allDay:
       item.item_type === "task" ||
@@ -497,53 +507,74 @@ export default function CommandCalendar({
     });
   }, [currentDate]);
 
+  // --- ENHANCED FORECASTING LOGIC ---
   const events = useMemo(() => {
     if (!data) return [];
+    
+    // 1. Base Events (from API - Single occurrences)
     const baseEvents = data.baseEvents.map(mapItemToEvent);
     const forecastEvents: EventType[] = [];
-    const today = new Date();
-    const forecastEndDate = addDays(today, 30);
+    
+    // 2. Determine Forecast Window (Current View Month + Buffer)
+    // We want to generate all recurring events visible in the current view
+    const today = startOfDay(new Date()); // Today (Local)
+    const year = currentDate.getFullYear();
+    const month = currentDate.getMonth();
+    
+    // Start from the beginning of the previous month to capture overlap
+    const viewStart = startOfDay(new Date(year, month - 1, 1)); 
+    // Go until the end of the next month
+    const viewEnd = endOfDay(new Date(year, month + 2, 0));
 
+    // 3. Iterate Rules
     data.recurring?.forEach((rule) => {
+      // Determine Start Point: Last processed OR Rule Start
       let cursor = rule.last_processed_date
-        ? new Date(rule.last_processed_date)
-        : new Date(rule.start_date);
-      if (isBefore(cursor, new Date(rule.start_date))) {
-        cursor = new Date(rule.start_date);
-      }
-      let nextOccurrence = new Date(cursor);
-      if (
-        rule.last_processed_date &&
-        (isAfter(nextOccurrence, today) || isSameDay(nextOccurrence, today))
-      ) {
-      } else {
-        nextOccurrence = getNextOccurrence(cursor, rule);
-      }
-      const ruleEndDate = rule.end_date ? new Date(rule.end_date) : null;
-      while (isBefore(nextOccurrence, forecastEndDate)) {
-        if (ruleEndDate && isAfter(nextOccurrence, ruleEndDate)) break;
+        ? parseLocalDate(rule.last_processed_date)
+        : parseLocalDate(rule.start_date);
+
+      // Fast-forward cursor if it's way in the past (before viewStart)
+      // This is an optimization. getNextOccurrence is cheap, but loop limits matter.
+      // We skip ahead until we are close to the view window.
+      // NOTE: This logic must be careful not to skip valid recurrences if the frequency is complex.
+      // For simple frequencies, we can just loop.
+      
+      let safety = 0;
+      
+      // Loop through occurrences until we pass the view end date
+      while (isBefore(cursor, viewEnd) && safety < 1000) {
+        const ruleEndDate = rule.end_date ? parseLocalDate(rule.end_date) : null;
+        if (ruleEndDate && isAfter(cursor, ruleEndDate)) break;
+
+        // If the occurrence falls within our view window AND is in the future relative to "last processed" logic
+        // (i.e., we don't want to show "forecasts" for dates that already have real transactions logged)
+        // Ideally, the API would filter out recurring rules that have a transaction for a specific date, 
+        // but here we just show all projected ones that are AFTER today.
+        
         if (
-          isAfter(nextOccurrence, today) ||
-          isSameDay(nextOccurrence, today)
+          (isAfter(cursor, today) || isSameDay(cursor, today)) && 
+          isAfter(cursor, viewStart)
         ) {
           forecastEvents.push({
-            id: `forecast-${rule.id}-${nextOccurrence.getTime()}`,
+            id: `forecast-${rule.id}-${cursor.getTime()}`,
             title: rule.description,
-            start: nextOccurrence,
+            start: new Date(cursor), // Clone date
             allDay: true,
             type: "forecast",
             amount: rule.amount,
             transactionType: rule.type,
           });
         }
-        nextOccurrence = getNextOccurrence(nextOccurrence, rule);
+        
+        cursor = getNextOccurrence(cursor, rule);
+        safety++;
       }
     });
 
     return [...baseEvents, ...forecastEvents].filter((event) =>
       filters.includes(event.type),
     );
-  }, [data, filters]);
+  }, [data, filters, currentDate]);
 
   const getDaysInMonth = () => {
     const year = currentDate.getFullYear();
@@ -600,19 +631,26 @@ export default function CommandCalendar({
 
   const handleEventFormSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    const dataToSave = {
-      id: eventFormData.id,
+    
+    // FIX: Only include ID if it is not an empty string
+    const dataToSave: any = {
       title: eventFormData.title,
       description: eventFormData.description || null,
       start_time: eventFormData.start_time,
       end_time: eventFormData.end_time || null,
       is_all_day: eventFormData.is_all_day,
     };
+    
+    if (eventFormData.id && eventFormData.id.trim() !== "") {
+      dataToSave.id = eventFormData.id;
+    }
 
     try {
       if (sheetState.isNew) {
+        // Ensure NO id is sent for creation
         await addEvent(dataToSave).unwrap();
       } else {
+        // Ensure id IS sent for update
         await updateEvent(dataToSave).unwrap();
       }
       toast.success(
@@ -668,12 +706,10 @@ export default function CommandCalendar({
     let containerClass = "";
     let Icon = CalendarIcon;
 
-    // Event styling matching original
     if (event.type === "event") {
       Icon = Briefcase;
       containerClass = "bg-primary/10 border-l-2 border-primary text-primary";
     }
-    // Task styling matching original
     else if (event.type === "task") {
       Icon = ListTodo;
       if (event.priority === "high") {
@@ -687,7 +723,6 @@ export default function CommandCalendar({
           "bg-muted/50 border-l-2 border-muted-foreground text-muted-foreground";
       }
     }
-    // Transaction/Forecast styling matching original
     else if (event.type === "forecast" || event.type === "transaction") {
       Icon = event.type === "forecast" ? TrendingUp : Banknote;
       const isEarning = event.transactionType === "earning";
@@ -698,12 +733,10 @@ export default function CommandCalendar({
       if (event.type === "forecast")
         containerClass += " opacity-70 border-dashed";
     }
-    // Transaction summary styling matching original
     else if (event.type === "transaction_summary") {
       Icon = Banknote;
       containerClass = "bg-card/40 border-l-2 border-border/20";
     }
-    // Habit summary styling matching original
     else if (event.type === "habit_summary") {
       Icon = CheckSquare;
       containerClass = "bg-secondary/30 border-l-2 border-border/30";

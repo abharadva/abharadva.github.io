@@ -29,6 +29,7 @@ export default function SupabaseMFASetup() {
 
   useEffect(() => {
     const protectPageAndEnroll = async () => {
+      if (!supabase) return;
       setIsLoadingState(true);
       const {
         data: { session },
@@ -68,6 +69,7 @@ export default function SupabaseMFASetup() {
 
   const handleVerify = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!supabase) return;
     setIsLoadingState(true);
     setError("");
 
@@ -106,7 +108,6 @@ export default function SupabaseMFASetup() {
   const copySecret = async () => {
     try {
       await navigator.clipboard.writeText(manualEntryKey);
-      // Optional: Add toast notification for success
     } catch (err) {
       console.error("Failed to copy secret:", err);
       setError("Failed to copy. Please copy manually.");

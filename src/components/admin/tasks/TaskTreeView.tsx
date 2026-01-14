@@ -19,6 +19,7 @@ import {
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
+  DropdownMenuSeparator,
 } from "@/components/ui/dropdown-menu";
 import { Badge } from "@/components/ui/badge";
 import {
@@ -31,10 +32,14 @@ import {
   Plus,
   CornerDownRight,
   CheckCircle2,
+  Zap,
 } from "lucide-react";
-import { cn } from "@/lib/utils";
+import { cn, parseLocalDate } from "@/lib/utils";
 import { TaskPriorityPill } from "./TaskPriorityPill";
 import { TaskStatusPill } from "./TaskStatusPill";
+import { useAppDispatch } from "@/store/hooks";
+import { startFocus } from "@/store/slices/focusSlice";
+import { toast } from "sonner";
 
 interface TaskTreeViewProps {
   tasks: Task[];
@@ -56,6 +61,7 @@ export function TaskTreeView({
   onDeleteSubTask,
 }: TaskTreeViewProps) {
   const [expandedTasks, setExpandedTasks] = useState<Set<string>>(new Set());
+  const dispatch = useAppDispatch();
 
   const toggleExpand = (taskId: string) => {
     const newExpanded = new Set(expandedTasks);
@@ -65,6 +71,17 @@ export function TaskTreeView({
       newExpanded.add(taskId);
     }
     setExpandedTasks(newExpanded);
+  };
+
+  const handleStartFocus = (task: Task) => {
+    dispatch(
+      startFocus({
+        durationMinutes: 25,
+        taskTitle: task.title,
+        taskId: task.id,
+      })
+    );
+    toast.success("Focus timer started for task");
   };
 
   if (tasks.length === 0) {
@@ -169,7 +186,7 @@ export function TaskTreeView({
                     {task.due_date ? (
                       <>
                         <Calendar className="mr-2 size-3.5" />
-                        {format(new Date(task.due_date), "MMM d, yyyy")}
+                        {format(parseLocalDate(task.due_date), "MMM d, yyyy")}
                       </>
                     ) : (
                       <span className="opacity-30 italic">No date</span>
@@ -199,6 +216,10 @@ export function TaskTreeView({
                         </Button>
                       </DropdownMenuTrigger>
                       <DropdownMenuContent align="end">
+                        <DropdownMenuItem onClick={() => handleStartFocus(task)}>
+                          <Zap className="mr-2 size-3.5 text-yellow-500" /> Start Focus
+                        </DropdownMenuItem>
+                        <DropdownMenuSeparator />
                         <DropdownMenuItem onClick={() => onEditTask(task)}>
                           <Edit className="mr-2 size-4" /> Edit
                         </DropdownMenuItem>

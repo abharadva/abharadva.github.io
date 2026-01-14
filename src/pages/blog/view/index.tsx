@@ -1,5 +1,3 @@
-// src/pages/blog/view/index.tsx
-
 import { useRouter } from "next/router";
 import { useEffect, useState } from "react";
 import type { BlogPost, SiteContent } from "@/types";
@@ -7,14 +5,13 @@ import Head from "next/head";
 import Link from "next/link";
 import { motion } from "framer-motion";
 import Layout from "@/components/layout";
-import { config as appConfig } from "@/lib/config";
+import { config as appConfig, isSupabaseConfigured } from "@/lib/config";
 import { cn, formatDate } from "@/lib/utils";
 import {
   Eye,
   Clock,
   Linkedin,
   ChevronRight,
-  Calendar,
   List,
   X,
 } from "lucide-react";
@@ -45,8 +42,10 @@ import {
 import { Skeleton } from "@/components/ui/skeleton";
 import { TableOfContents } from "@/components/table-of-contents";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { supabase } from "@/supabase/client";
 
-// ... (Keep PostBreadcrumb, PostMeta, PostContent, PostFooter components as they are) ...
+// --- COMPONENTS ---
+
 const PostBreadcrumb = ({ post }: { post: BlogPost }) => (
   <nav aria-label="breadcrumb" className="mb-4">
     <ol className="flex items-center gap-1.5 text-sm text-muted-foreground">
@@ -144,7 +143,7 @@ const PostFooter = ({
           {post.tags.map((tag) => (
             <Link
               key={tag}
-              href={`/blog/tags/${encodeURIComponent(tag.toLowerCase())}`}
+              href={`/blog?tag=${encodeURIComponent(tag.toLowerCase())}`}
             >
               <Badge
                 variant="secondary"
@@ -228,7 +227,7 @@ export default function BlogPostViewPage() {
   const { site: siteConfig } = appConfig;
 
   useEffect(() => {
-    if (post?.id && process.env.NODE_ENV === "production") {
+    if (post?.id && process.env.NODE_ENV === "production" && isSupabaseConfigured) {
       const timer = setTimeout(() => {
         incrementView(post.id);
       }, 5000);
@@ -371,7 +370,7 @@ export default function BlogPostViewPage() {
 
             {/* Desktop TOC Sidebar */}
             {!isMobile && post.show_toc && (
-              <aside className="lg:col-span-4">
+              <aside className="lg:col-span-4 hidden lg:block">
                 <div className="sticky top-28 space-y-8">
                   {post.content && (
                     <div className="p-1">

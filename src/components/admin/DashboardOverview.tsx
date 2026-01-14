@@ -1,35 +1,26 @@
-// src/components/admin/DashboardOverview.tsx
+"use client";
+
 import React, { useMemo } from "react";
-import Link from "next/link";
 import {
   Banknote,
   CheckCircle,
-  BrainCircuit,
   ListTodo,
-  StickyNote,
-  Timer,
-  ExternalLink,
-  TrendingDown,
   TrendingUp,
-  Plus,
-  AlertOctagon,
-  Pin,
   Target,
-  FileText,
   CalendarClock,
   Repeat,
   Eye,
   Zap,
+  ArrowUpRight,
+  ArrowDownLeft,
+  AlertOctagon,
+  Pin,
 } from "lucide-react";
 import {
   Bar,
   BarChart,
-  ResponsiveContainer,
-  CartesianGrid,
   XAxis,
-  YAxis,
 } from "recharts";
-import { Button } from "../ui/button";
 import {
   Card,
   CardContent,
@@ -43,11 +34,12 @@ import {
   ChartTooltip,
   ChartTooltipContent,
 } from "@/components/ui/chart";
-import { cn, getNextOccurrence } from "@/lib/utils";
-import { Progress } from "../ui/progress";
-import { Badge } from "../ui/badge";
-import { Separator } from "../ui/separator";
-import { addDays, format, isAfter, isBefore, isSameDay } from "date-fns";
+import { cn, getNextOccurrence, parseLocalDate } from "@/lib/utils";
+import { Badge } from "@/components/ui/badge";
+import { Separator } from "@/components/ui/separator";
+import { addDays, format, isAfter, isBefore, startOfDay, isSameDay } from "date-fns";
+import { Button } from "../ui/button";
+import { ExternalLink } from "lucide-react";
 
 const StatCard: React.FC<{
   title: string;
@@ -108,44 +100,66 @@ export default function DashboardOverview({
     });
   }, [dailyExpenses, dailyEarnings]);
 
+  // --- RECURRING FORECAST LOGIC ---
   const upcomingRecurring = useMemo(() => {
-    const today = new Date();
-    const next7Days = addDays(today, 7);
-    const upcoming: {
+    const today = startOfDay(new Date());
+    const next7Days = addDays(today, 8); // Look 7 days ahead (inclusive)
+    
+    // Create a flat list of all occurrences within the window
+    const occurrences: {
+      id: string;
       description: string;
       date: Date;
       amount: number;
       type: "earning" | "expense";
     }[] = [];
+
     recurring.forEach((rule) => {
+      // 1. Determine where to start calculating
       let cursor = rule.last_processed_date
-        ? new Date(rule.last_processed_date)
-        : new Date(rule.start_date);
-      if (isBefore(cursor, new Date(rule.start_date)))
-        cursor = new Date(rule.start_date);
-      let nextOccurrence = new Date(cursor);
-      if (isBefore(nextOccurrence, today)) {
-        nextOccurrence = getNextOccurrence(cursor, rule);
+        ? parseLocalDate(rule.last_processed_date)
+        : parseLocalDate(rule.start_date);
+
+      // 2. Fast-forward cursor to Today if it's in the past
+      // (This prevents showing "overdue" items from 2 years ago, we only want the *next* projected ones)
+      let safety = 0;
+      while (isBefore(cursor, today) && safety < 1000) {
+         cursor = getNextOccurrence(cursor, rule);
+         safety++;
       }
-      if (
-        (isAfter(nextOccurrence, today) || isSameDay(nextOccurrence, today)) &&
-        isBefore(nextOccurrence, next7Days)
-      ) {
-        upcoming.push({
-          description: rule.description,
-          date: nextOccurrence,
-          amount: rule.amount,
-          type: rule.type,
-        });
+
+      // 3. Project forward through the 7-day window
+      // This loop ensures DAILY items appear 7 times, Weekly items appear once or twice, etc.
+      safety = 0;
+      while (isBefore(cursor, next7Days) && safety < 100) {
+        const ruleEndDate = rule.end_date ? parseLocalDate(rule.end_date) : null;
+        
+        // Stop if we passed the rule's end date
+        if (ruleEndDate && isAfter(cursor, ruleEndDate)) break;
+
+        // If cursor matches or is after today, add to list
+        if (isAfter(cursor, today) || isSameDay(cursor, today)) {
+          occurrences.push({
+            id: `${rule.id}-${cursor.getTime()}`, // Unique ID for key
+            description: rule.description,
+            date: new Date(cursor),
+            amount: rule.amount,
+            type: rule.type,
+          });
+        }
+
+        // Move to next slot
+        cursor = getNextOccurrence(cursor, rule);
+        safety++;
       }
     });
-    return upcoming
-      .sort((a, b) => a.date.getTime() - b.date.getTime())
-      .slice(0, 3);
+
+    // Sort chronologically
+    return occurrences.sort((a, b) => a.date.getTime() - b.date.getTime()).slice(0, 5); // Limit to top 5 for UI space
   }, [recurring]);
 
   const goalProgress = primaryGoal
-    ? (primaryGoal.current_amount / primaryGoal.target_amount) * 100
+    ? Math.min((primaryGoal.current_amount / primaryGoal.target_amount) * 100, 100)
     : 0;
 
   return (
@@ -206,8 +220,8 @@ export default function DashboardOverview({
                       onClick={() => onNavigate("/admin/tasks")}
                     >
                       <AlertOctagon className="h-5 w-5 text-destructive shrink-0" />
-                      <div>
-                        <p className="font-semibold text-sm leading-tight text-destructive">
+                      <div className="min-w-0">
+                        <p className="font-semibold text-sm leading-tight text-destructive truncate">
                           {task.title}
                         </p>
                         <p className="text-[10px] uppercase font-bold text-destructive/80 mt-0.5">
@@ -223,8 +237,8 @@ export default function DashboardOverview({
                       onClick={() => onNavigate("/admin/tasks")}
                     >
                       <ListTodo className="h-5 w-5 text-amber-600 dark:text-amber-400 shrink-0" />
-                      <div>
-                        <p className="font-semibold text-sm leading-tight">
+                      <div className="min-w-0">
+                        <p className="font-semibold text-sm leading-tight truncate">
                           {task.title}
                         </p>
                         <p className="text-[10px] uppercase font-bold text-muted-foreground mt-0.5">
@@ -240,8 +254,8 @@ export default function DashboardOverview({
                       onClick={() => onNavigate("/admin/notes")}
                     >
                       <Pin className="h-5 w-5 text-primary shrink-0" />
-                      <div>
-                        <p className="font-semibold text-sm leading-tight line-clamp-1">
+                      <div className="min-w-0">
+                        <p className="font-semibold text-sm leading-tight truncate">
                           {note.title || "Untitled Note"}
                         </p>
                         <p className="text-[10px] uppercase font-bold text-muted-foreground mt-0.5">
@@ -357,7 +371,7 @@ export default function DashboardOverview({
             <CardContent className="space-y-6">
               <div>
                 <h4 className="text-xs font-bold uppercase tracking-wider text-muted-foreground mb-3 flex items-center gap-2">
-                  <CalendarClock className="size-3" /> Upcoming Deadlines
+                  <CalendarClock className="size-3" /> Upcoming Tasks
                 </h4>
                 {tasksDueSoon.length > 0 ? (
                   <div className="space-y-2">
@@ -377,7 +391,7 @@ export default function DashboardOverview({
                   </div>
                 ) : (
                   <p className="text-xs text-muted-foreground italic pl-2">
-                    No tasks due soon.
+                    No tasks due in next 7 days.
                   </p>
                 )}
               </div>
@@ -386,17 +400,17 @@ export default function DashboardOverview({
 
               <div>
                 <h4 className="text-xs font-bold uppercase tracking-wider text-muted-foreground mb-3 flex items-center gap-2">
-                  <Repeat className="size-3" /> Recurring Payments
+                  <Repeat className="size-3" /> Projected Finance
                 </h4>
                 {upcomingRecurring.length > 0 ? (
                   <div className="space-y-2">
-                    {upcomingRecurring.map((item, i) => (
+                    {upcomingRecurring.map((item) => (
                       <div
-                        key={i}
+                        key={item.id}
                         className="text-sm flex justify-between items-center p-2 rounded-md bg-secondary/30"
                       >
-                        <div className="flex flex-col">
-                          <span className="truncate max-w-[140px] font-medium">
+                        <div className="flex flex-col min-w-0 mr-2">
+                          <span className="truncate font-medium">
                             {item.description}
                           </span>
                           <span className="text-[10px] text-muted-foreground">
@@ -405,21 +419,25 @@ export default function DashboardOverview({
                         </div>
                         <span
                           className={cn(
-                            "font-mono text-xs font-bold",
+                            "font-mono text-xs font-bold whitespace-nowrap flex items-center gap-0.5",
                             item.type === "earning"
-                              ? "text-green-500"
-                              : "text-red-500",
+                              ? "text-emerald-500"
+                              : "text-rose-500",
                           )}
                         >
-                          {item.type === "earning" ? "+" : "-"}$
-                          {item.amount.toFixed(2)}
+                          {item.type === "earning" ? (
+                            <ArrowUpRight className="size-3" />
+                          ) : (
+                             <ArrowDownLeft className="size-3" />
+                          )}
+                          ${item.amount.toFixed(0)}
                         </span>
                       </div>
                     ))}
                   </div>
                 ) : (
                   <p className="text-xs text-muted-foreground italic pl-2">
-                    No recurring payments soon.
+                    No recurring payments scheduled.
                   </p>
                 )}
               </div>

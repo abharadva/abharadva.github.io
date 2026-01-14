@@ -1,75 +1,139 @@
-name: Supabase Keep alive
+name: Supabase Heartbeat Monitor
 
 on:
   schedule:
-    - cron: "0 */12 * * *"
+    # Run every 12 hours (00:00 and 12:00 UTC)
+    - cron: "0 0,12 * * *"
   workflow_dispatch:
 
 jobs:
-  ping-supabase:
+  health-check:
     runs-on: ubuntu-latest
-
     steps:
-      - name: Ping Supabase RPC Function
+      # 1. Ping Database
+      - name: 💓 Ping Supabase Database
         id: ping
         env:
           SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
           SUPABASE_ANON_KEY: ${{ secrets.NEXT_PUBLIC_SUPABASE_ANON_KEY }}
         run: |
-          echo "Pinging Supabase..."
-          HTTP_STATUS=$(curl -s -w "%{http_code}" -o response.txt \
+          HTTP_STATUS=$(curl -s -w "%{http_code}" -o response.json \
+            -X POST \
             -H "apikey: $SUPABASE_ANON_KEY" \
+            -H "Authorization: Bearer $SUPABASE_ANON_KEY" \
             -H "Content-Type: application/json" \
             "$SUPABASE_URL/rest/v1/rpc/ping")
 
-          RESPONSE_BODY=$(cat response.txt)
           echo "HTTP_STATUS=$HTTP_STATUS" >> $GITHUB_ENV
-          echo "RESPONSE_BODY<<EOF" >> $GITHUB_ENV
-          echo "$RESPONSE_BODY" >> $GITHUB_ENV
+          RESPONSE_BODY=$(cat response.json)
+          echo "RESPONSE_BODY=$RESPONSE_BODY" >> $GITHUB_ENV
+
+      # 2. Fetch Fun Content (Random rotation)
+      - name: 🎲 Fetch Random Fun Content
+        id: fun_content
+        run: |
+          # Generate random number 0-1
+          RAND=$(( $RANDOM % 2 ))
+          
+          if [ $RAND -eq 0 ]; then
+            # Fetch Programming Joke
+            TYPE="👨‍💻 Dev Joke"
+            CONTENT=$(curl -s "https://v2.jokeapi.dev/joke/Programming?blacklistFlags=nsfw,religious,political,racist,sexist&type=single" | jq -r '.joke')
+          
+          else
+            # Fetch Random Fact
+            TYPE="🧠 Did you know?"
+            CONTENT=$(curl -s "https://uselessfacts.jsph.pl/api/v2/facts/random" | jq -r '.text')
+          fi
+
+          # Fallback if API fails or returns null
+          if [ -z "$CONTENT" ] || [ "$CONTENT" == "null" ]; then
+            TYPE="ℹ️ Backup Fact"
+            CONTENT="This workflow keeps your free-tier Supabase project alive by preventing the 7-day inactivity pause."
+          fi
+
+          # Export to Env (Multilines supported for quotes)
+          echo "FUN_TYPE=$TYPE" >> $GITHUB_ENV
+          echo "FUN_CONTENT<<EOF" >> $GITHUB_ENV
+          echo "$CONTENT" >> $GITHUB_ENV
           echo "EOF" >> $GITHUB_ENV
 
-      - name: Send result to Discord
+      # 3. Send to Discord
+      - name: 📡 Broadcast to Discord
+        if: always()
         env:
           DISCORD_WEBHOOK: ${{ secrets.DISCORD_WEBHOOK_URL }}
           HTTP_STATUS: ${{ env.HTTP_STATUS }}
           RESPONSE_BODY: ${{ env.RESPONSE_BODY }}
-          GITHUB_REPOSITORY: ${{ github.repository }}
-          GITHUB_RUN_ID: ${{ github.run_id }}
+          FUN_TYPE: ${{ env.FUN_TYPE }}
+          FUN_CONTENT: ${{ env.FUN_CONTENT }}
+          REPO_NAME: ${{ github.repository }}
+          RUN_URL: "${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
         run: |
-          STATUS_EMOJI="🟢"
-          MESSAGE="✅ Supabase ping succeeded!"
-          COLOR=3066993  # Green
-
-          if [ "$HTTP_STATUS" != "200" ]; then
-            STATUS_EMOJI="🔴"
-            MESSAGE="❌ Supabase ping failed with status: $HTTP_STATUS"
-            COLOR=15158332  # Red
+          if [ "$HTTP_STATUS" == "200" ]; then
+            COLOR=5763719  # Green
+            TITLE="✅ System Nominal"
+            DESC="**Supabase Database is Active.**"
+            FIELD_NAME="Response"
+            FIELD_VALUE="\`$RESPONSE_BODY\`"
+          else
+            COLOR=15548997 # Red
+            TITLE="⚠️ System Alert"
+            DESC="**Supabase Ping Failed!**\nYour database might be paused."
+            FIELD_NAME="Error Code"
+            FIELD_VALUE="\`$HTTP_STATUS\`"
           fi
 
-          TIMESTAMP=$(date -u +"%Y-%m-%d %H:%M:%S UTC")
+          TIMESTAMP=$(date -u +"%Y-%m-%dT%H:%M:%S.000Z")
 
+          # Construct Payload
           PAYLOAD=$(jq -n \
-            --arg emoji "$STATUS_EMOJI" \
-            --arg msg "$MESSAGE" \
-            --arg body "$RESPONSE_BODY" \
-            --arg time "$TIMESTAMP" \
-            --arg repo "$GITHUB_REPOSITORY" \
-            --arg run "$GITHUB_RUN_ID" \
-            --arg url "https://github.com/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID" \
-            --argjson color "$COLOR" \
+            --arg title "$TITLE" \
+            --arg desc "$DESC" \
+            --arg color "$COLOR" \
+            --arg url "$RUN_URL" \
+            --arg f_name "$FIELD_NAME" \
+            --arg f_val "$FIELD_VALUE" \
+            --arg fun_title "$FUN_TYPE" \
+            --arg fun_val "$FUN_CONTENT" \
+            --arg footer "GitHub Actions • $REPO_NAME" \
+            --arg timestamp "$TIMESTAMP" \
             '{
-              "username": "Supabase Monitor",
-              "embeds": [{
-                "title": "\($emoji) Supabase RPC Ping",
-                "description": "\($msg)\n\n```json\n\($body)\n```",
-                "color": $color,
-                "footer": {
-                  "text": "Repo: \($repo) • Run: \($run) • \($time)"
+              username: "Supabase Monitor",
+              avatar_url: "https://github.githubassets.com/images/modules/logos_page/GitHub-Mark.png",
+              embeds: [{
+                title: $title,
+                description: $desc,
+                url: $url,
+                color: ($color | tonumber),
+                fields: [
+                  {
+                    name: "Latency Check",
+                    value: "Active",
+                    inline: true
+                  },
+                  {
+                    name: $f_name,
+                    value: $f_val,
+                    inline: true
+                  },
+                  {
+                    name: " ",
+                    value: " "
+                  },
+                  {
+                    name: $fun_title,
+                    value: $fun_val
+                  }
+                ],
+                footer: {
+                  text: $footer
                 },
-                "url": $url
+                timestamp: $timestamp
               }]
-            }')
+            }'
+          )
 
-          curl -s -H "Content-Type: application/json" \
-            -d "$PAYLOAD" \
-            "$DISCORD_WEBHOOK"
+          curl -H "Content-Type: application/json" \
+               -d "$PAYLOAD" \
+               "$DISCORD_WEBHOOK"

@@ -21,6 +21,7 @@ import type {
   Habit,
   InventoryItem,
 } from "@/types";
+import { format, subDays, addDays } from "date-fns";
 import { publicApi } from "./publicApi";
 
 type NavLink = {
@@ -49,9 +50,8 @@ type CalendarItem = {
   data: any;
 };
 
-const BUCKET_NAME = process.env.NEXT_PUBLIC_BUCKET_NAME || "blog-assets";
+const BUCKET_NAME = process.env.NEXT_PUBLIC_BUCKET_NAME || "assets";
 
-// Define a service using a base query and expected endpoints
 export const adminApi = createApi({
   reducerPath: "adminApi",
   baseQuery: fakeBaseQuery(),
@@ -74,11 +74,25 @@ export const adminApi = createApi({
     "SiteContent",
     "Habits",
     "Inventory",
+    "System"
   ],
   endpoints: (builder) => ({
-    // Auth & Security
+    checkAdminExists: builder.query<boolean, void>({
+      queryFn: async () => {
+        if (!supabase) return { data: true };
+        const { data, error } = await supabase.rpc("check_admin_exists");
+        if (error) {
+          console.error("RPC Error:", error);
+          return { data: true };
+        }
+        return { data };
+      },
+      providesTags: ["System"], // <--- Tag this query
+      keepUnusedDataFor: 300,
+    }),
     getMfaFactors: builder.query<Factor[], void>({
       queryFn: async () => {
+        if (!supabase) return { error: { message: "No DB" } };
         const { data, error } = await supabase.auth.mfa.listFactors();
         if (error) return { error };
         return { data: data?.totp || [] };
@@ -87,6 +101,7 @@ export const adminApi = createApi({
     }),
     unenrollMfaFactor: builder.mutation<null, string>({
       queryFn: async (factorId) => {
+        if (!supabase) return { error: { message: "No DB" } };
         const { error } = await supabase.auth.mfa.unenroll({ factorId });
         if (error) return { error };
         return { data: null };
@@ -95,6 +110,7 @@ export const adminApi = createApi({
     }),
     updateUserPassword: builder.mutation<null, string>({
       queryFn: async (newPassword) => {
+        if (!supabase) return { error: { message: "No DB" } };
         const { error } = await supabase.auth.updateUser({
           password: newPassword,
         });
@@ -104,29 +120,23 @@ export const adminApi = createApi({
     }),
     signOut: builder.mutation<null, void>({
       queryFn: async () => {
+        if (!supabase) return { error: { message: "No DB" } };
         const { error } = await supabase.auth.signOut();
         if (error) return { error };
         return { data: null };
       },
     }),
-    // Dashboard Data
+
+    // --- DASHBOARD DATA ---
     getDashboardData: builder.query<any, void>({
       queryFn: async () => {
+        if (!supabase) return { error: { message: "No DB" } };
+
         const now = new Date();
-        const todayISO = now.toISOString().split("T")[0];
-        const firstDayOfMonth = new Date(
-          now.getFullYear(),
-          now.getMonth(),
-          1,
-        ).toISOString();
-        const sevenDaysAgo = new Date();
-        sevenDaysAgo.setDate(now.getDate() - 7);
-        const sevenDaysAgoISO = sevenDaysAgo.toISOString().split("T")[0];
-        const sevenDaysFromNow = new Date();
-        sevenDaysFromNow.setDate(now.getDate() + 7);
-        const sevenDaysFromNowISO = sevenDaysFromNow
-          .toISOString()
-          .split("T")[0];
+        const todayISO = format(now, "yyyy-MM-dd");
+        const firstDayOfMonth = format(new Date(now.getFullYear(), now.getMonth(), 1), "yyyy-MM-dd");
+        const sevenDaysAgoISO = format(subDays(now, 7), "yyyy-MM-dd");
+        const sevenDaysFromNowISO = format(addDays(now, 7), "yyyy-MM-dd");
 
         const promises = [
           supabase.rpc("get_total_blog_views"),
@@ -252,20 +262,22 @@ export const adminApi = createApi({
         "Goals",
       ],
     }),
+
     getAnalyticsData: builder.query<AnalyticsData, void>({
       queryFn: async () => {
+        if (!supabase) return { error: { message: "No DB" } };
         const { data, error } = await supabase.rpc("get_analytics_overview");
         if (error) return { error };
         return { data };
       },
       providesTags: ["Analytics"],
     }),
-    // Calendar Data
     getCalendarData: builder.query<
       { baseEvents: CalendarItem[]; recurring: RecurringTransaction[] },
       { start: string; end: string }
     >({
       queryFn: async ({ start, end }) => {
+        if (!supabase) return { error: { message: "No DB" } };
         const [calendarDataRes, recurringRes] = await Promise.all([
           supabase.rpc("get_calendar_data", {
             start_date_param: start,
@@ -289,6 +301,7 @@ export const adminApi = createApi({
     }),
     addEvent: builder.mutation<Event, Partial<Event>>({
       queryFn: async (event) => {
+        if (!supabase) return { error: { message: "No DB" } };
         const { data, error } = await supabase
           .from("events")
           .insert(event)
@@ -301,6 +314,7 @@ export const adminApi = createApi({
     }),
     updateEvent: builder.mutation<Event, Partial<Event>>({
       queryFn: async (event) => {
+        if (!supabase) return { error: { message: "No DB" } };
         const { id, ...updateData } = event;
         const { data, error } = await supabase
           .from("events")
@@ -315,16 +329,16 @@ export const adminApi = createApi({
     }),
     deleteEvent: builder.mutation<{ id: string }, string>({
       queryFn: async (id) => {
+        if (!supabase) return { error: { message: "No DB" } };
         const { error } = await supabase.from("events").delete().eq("id", id);
         if (error) return { error };
         return { data: { id } };
       },
       invalidatesTags: ["Calendar"],
     }),
-
-    // Blog Posts (Admin)
     getAdminBlogPosts: builder.query<BlogPost[], void>({
       queryFn: async () => {
+        if (!supabase) return { error: { message: "No DB" } };
         const { data, error } = await supabase
           .from("blog_posts")
           .select("*")
@@ -335,13 +349,14 @@ export const adminApi = createApi({
       providesTags: (result) =>
         result
           ? [
-              ...result.map(({ id }) => ({ type: "AdminPosts" as const, id })),
-              { type: "AdminPosts", id: "LIST" },
-            ]
+            ...result.map(({ id }) => ({ type: "AdminPosts" as const, id })),
+            { type: "AdminPosts", id: "LIST" },
+          ]
           : [{ type: "AdminPosts", id: "LIST" }],
     }),
     addBlogPost: builder.mutation<BlogPost, Partial<BlogPost>>({
       queryFn: async (post) => {
+        if (!supabase) return { error: { message: "No DB" } };
         const { data, error } = await supabase
           .from("blog_posts")
           .insert(post)
@@ -354,6 +369,7 @@ export const adminApi = createApi({
     }),
     updateBlogPost: builder.mutation<BlogPost, Partial<BlogPost>>({
       queryFn: async (post) => {
+        if (!supabase) return { error: { message: "No DB" } };
         const { id, ...updateData } = post;
         const { data, error } = await supabase
           .from("blog_posts")
@@ -370,6 +386,7 @@ export const adminApi = createApi({
     }),
     deleteBlogPost: builder.mutation<{ post: BlogPost }, BlogPost>({
       queryFn: async (post) => {
+        if (!supabase) return { error: { message: "No DB" } };
         if (
           post.cover_image_url &&
           post.cover_image_url.includes(process.env.NEXT_PUBLIC_SUPABASE_URL!)
@@ -394,10 +411,9 @@ export const adminApi = createApi({
         { type: "AdminPosts", id: arg.id },
       ],
     }),
-
-    // Notes
     getNotes: builder.query<Note[], void>({
       queryFn: async () => {
+        if (!supabase) return { error: { message: "No DB" } };
         const { data, error } = await supabase
           .from("notes")
           .select("*")
@@ -410,6 +426,7 @@ export const adminApi = createApi({
     }),
     updateNote: builder.mutation<Note, Partial<Note>>({
       queryFn: async (note) => {
+        if (!supabase) return { error: { message: "No DB" } };
         const { id, ...updateData } = note;
         const { data, error } = await supabase
           .from("notes")
@@ -424,6 +441,7 @@ export const adminApi = createApi({
     }),
     addNote: builder.mutation<Note, Partial<Note>>({
       queryFn: async (note) => {
+        if (!supabase) return { error: { message: "No DB" } };
         const { data, error } = await supabase
           .from("notes")
           .insert(note)
@@ -436,16 +454,16 @@ export const adminApi = createApi({
     }),
     deleteNote: builder.mutation<{ id: string }, string>({
       queryFn: async (id) => {
+        if (!supabase) return { error: { message: "No DB" } };
         const { error } = await supabase.from("notes").delete().eq("id", id);
         if (error) return { error };
         return { data: { id } };
       },
       invalidatesTags: ["Notes"],
     }),
-
-    // Tasks
     getTasks: builder.query<Task[], void>({
       queryFn: async () => {
+        if (!supabase) return { error: { message: "No DB" } };
         const { data, error } = await supabase
           .from("tasks")
           .select("*, sub_tasks(*)")
@@ -457,6 +475,7 @@ export const adminApi = createApi({
     }),
     addTask: builder.mutation<Task, Partial<Task>>({
       queryFn: async (task) => {
+        if (!supabase) return { error: { message: "No DB" } };
         const { data, error } = await supabase
           .from("tasks")
           .insert(task)
@@ -469,6 +488,7 @@ export const adminApi = createApi({
     }),
     updateTask: builder.mutation<Task, Partial<Task>>({
       queryFn: async (task) => {
+        if (!supabase) return { error: { message: "No DB" } };
         const { id, ...updateData } = task;
         const { data, error } = await supabase
           .from("tasks")
@@ -479,7 +499,6 @@ export const adminApi = createApi({
         if (error) return { error };
         return { data };
       },
-      // Optimistic Update Logic
       async onQueryStarted(task, { dispatch, queryFulfilled }) {
         const patchResult = dispatch(
           adminApi.util.updateQueryData("getTasks", undefined, (draft) => {
@@ -499,6 +518,7 @@ export const adminApi = createApi({
     }),
     deleteTask: builder.mutation<{ id: string }, string>({
       queryFn: async (id) => {
+        if (!supabase) return { error: { message: "No DB" } };
         const { error } = await supabase.from("tasks").delete().eq("id", id);
         if (error) return { error };
         return { data: { id } };
@@ -507,6 +527,7 @@ export const adminApi = createApi({
     }),
     addSubTask: builder.mutation<SubTask, Partial<SubTask>>({
       queryFn: async (subTask) => {
+        if (!supabase) return { error: { message: "No DB" } };
         const { data, error } = await supabase
           .from("sub_tasks")
           .insert(subTask)
@@ -519,6 +540,7 @@ export const adminApi = createApi({
     }),
     updateSubTask: builder.mutation<SubTask, Partial<SubTask>>({
       queryFn: async (subTask) => {
+        if (!supabase) return { error: { message: "No DB" } };
         const { id, ...updateData } = subTask;
         const { data, error } = await supabase
           .from("sub_tasks")
@@ -533,6 +555,7 @@ export const adminApi = createApi({
     }),
     deleteSubTask: builder.mutation<{ id: string }, string>({
       queryFn: async (id) => {
+        if (!supabase) return { error: { message: "No DB" } };
         const { error } = await supabase
           .from("sub_tasks")
           .delete()
@@ -542,8 +565,6 @@ export const adminApi = createApi({
       },
       invalidatesTags: ["Tasks"],
     }),
-
-    // Finance
     getFinancialData: builder.query<
       {
         transactions: Transaction[];
@@ -553,6 +574,7 @@ export const adminApi = createApi({
       void
     >({
       queryFn: async () => {
+        if (!supabase) return { error: { message: "No DB" } };
         const [tranRes, goalRes, recurRes] = await Promise.all([
           supabase
             .from("transactions")
@@ -579,6 +601,7 @@ export const adminApi = createApi({
     }),
     saveTransaction: builder.mutation<Transaction, Partial<Transaction>>({
       queryFn: async (transaction) => {
+        if (!supabase) return { error: { message: "No DB" } };
         const { id, ...updateData } = transaction;
         const promise = id
           ? supabase.from("transactions").update(updateData).eq("id", id)
@@ -591,6 +614,7 @@ export const adminApi = createApi({
     }),
     deleteTransaction: builder.mutation<{ id: string }, string>({
       queryFn: async (id) => {
+        if (!supabase) return { error: { message: "No DB" } };
         const { error } = await supabase
           .from("transactions")
           .delete()
@@ -605,12 +629,13 @@ export const adminApi = createApi({
       Partial<RecurringTransaction>
     >({
       queryFn: async (rec) => {
+        if (!supabase) return { error: { message: "No DB" } };
         const { id, ...updateData } = rec;
         const promise = id
           ? supabase
-              .from("recurring_transactions")
-              .update(updateData)
-              .eq("id", id)
+            .from("recurring_transactions")
+            .update(updateData)
+            .eq("id", id)
           : supabase.from("recurring_transactions").insert(updateData);
         const { data, error } = await promise.select().single();
         if (error) return { error };
@@ -620,6 +645,7 @@ export const adminApi = createApi({
     }),
     deleteRecurring: builder.mutation<{ id: string }, string>({
       queryFn: async (id) => {
+        if (!supabase) return { error: { message: "No DB" } };
         const { error } = await supabase
           .from("recurring_transactions")
           .delete()
@@ -631,6 +657,7 @@ export const adminApi = createApi({
     }),
     saveGoal: builder.mutation<FinancialGoal, Partial<FinancialGoal>>({
       queryFn: async (goal) => {
+        if (!supabase) return { error: { message: "No DB" } };
         const { id, ...updateData } = goal;
         const promise = id
           ? supabase.from("financial_goals").update(updateData).eq("id", id)
@@ -646,6 +673,7 @@ export const adminApi = createApi({
       { goal: FinancialGoal; amount: number }
     >({
       queryFn: async ({ goal, amount }) => {
+        if (!supabase) return { error: { message: "No DB" } };
         const newCurrentAmount = goal.current_amount + amount;
         const { data, error } = await supabase
           .from("financial_goals")
@@ -676,6 +704,7 @@ export const adminApi = createApi({
     }),
     deleteGoal: builder.mutation<{ id: string }, string>({
       queryFn: async (id) => {
+        if (!supabase) return { error: { message: "No DB" } };
         const { error } = await supabase
           .from("financial_goals")
           .delete()
@@ -690,6 +719,7 @@ export const adminApi = createApi({
       { type: "edit" | "merge" | "delete"; oldName: string; newName?: string }
     >({
       queryFn: async ({ type, oldName, newName }) => {
+        if (!supabase) return { error: { message: "No DB" } };
         let rpcName:
           | "rename_transaction_category"
           | "merge_transaction_categories"
@@ -724,8 +754,6 @@ export const adminApi = createApi({
       },
       invalidatesTags: ["Transactions"],
     }),
-
-    // Learning
     getLearningData: builder.query<
       {
         subjects: LearningSubject[];
@@ -735,6 +763,7 @@ export const adminApi = createApi({
       void
     >({
       queryFn: async () => {
+        if (!supabase) return { error: { message: "No DB" } };
         const [subjectsRes, topicsRes, sessionsRes] = await Promise.all([
           supabase.from("learning_subjects").select("*").order("name"),
           supabase.from("learning_topics").select("*").order("title"),
@@ -764,6 +793,7 @@ export const adminApi = createApi({
       Partial<LearningSession>
     >({
       queryFn: async (session) => {
+        if (!supabase) return { error: { message: "No DB" } };
         const { data, error } = await supabase
           .from("learning_sessions")
           .insert(session)
@@ -779,6 +809,7 @@ export const adminApi = createApi({
       Partial<LearningSession>
     >({
       queryFn: async (session) => {
+        if (!supabase) return { error: { message: "No DB" } };
         const { id, ...updateData } = session;
         const { data, error } = await supabase
           .from("learning_sessions")
@@ -793,6 +824,7 @@ export const adminApi = createApi({
     }),
     deleteLearningSession: builder.mutation<{ id: string }, string>({
       queryFn: async (id) => {
+        if (!supabase) return { error: { message: "No DB" } };
         const { error } = await supabase
           .from("learning_sessions")
           .delete()
@@ -804,6 +836,7 @@ export const adminApi = createApi({
     }),
     saveSubject: builder.mutation<LearningSubject, Partial<LearningSubject>>({
       queryFn: async (subject) => {
+        if (!supabase) return { error: { message: "No DB" } };
         const { id, ...updateData } = subject;
         const promise = id
           ? supabase.from("learning_subjects").update(updateData).eq("id", id)
@@ -816,6 +849,7 @@ export const adminApi = createApi({
     }),
     deleteSubject: builder.mutation<{ id: string }, string>({
       queryFn: async (id) => {
+        if (!supabase) return { error: { message: "No DB" } };
         const { error } = await supabase
           .from("learning_subjects")
           .delete()
@@ -827,6 +861,7 @@ export const adminApi = createApi({
     }),
     saveTopic: builder.mutation<LearningTopic, Partial<LearningTopic>>({
       queryFn: async (topic) => {
+        if (!supabase) return { error: { message: "No DB" } };
         const { id, ...updateData } = topic;
         const promise = id
           ? supabase.from("learning_topics").update(updateData).eq("id", id)
@@ -839,6 +874,7 @@ export const adminApi = createApi({
     }),
     deleteTopic: builder.mutation<{ id: string }, string>({
       queryFn: async (id) => {
+        if (!supabase) return { error: { message: "No DB" } };
         const { error } = await supabase
           .from("learning_topics")
           .delete()
@@ -848,10 +884,9 @@ export const adminApi = createApi({
       },
       invalidatesTags: ["Learning"],
     }),
-
-    // Site Settings & Content
     getSiteSettings: builder.query<SiteContent, void>({
       queryFn: async () => {
+        if (!supabase) return { error: { message: "No DB" } };
         const { data, error } = await supabase
           .from("site_identity")
           .select("*")
@@ -863,6 +898,7 @@ export const adminApi = createApi({
     }),
     updateSiteSettings: builder.mutation<null, Partial<SiteContent>>({
       queryFn: async (updates) => {
+        if (!supabase) return { error: { message: "No DB" } };
         const { error } = await supabase
           .from("site_identity")
           .update(updates)
@@ -899,6 +935,7 @@ export const adminApi = createApi({
     }),
     getNavLinksAdmin: builder.query<NavLink[], void>({
       queryFn: async () => {
+        if (!supabase) return { error: { message: "No DB" } };
         const { data, error } = await supabase
           .from("navigation_links")
           .select("*")
@@ -910,6 +947,7 @@ export const adminApi = createApi({
     }),
     saveNavLink: builder.mutation<NavLink, Partial<NavLink>>({
       queryFn: async (link) => {
+        if (!supabase) return { error: { message: "No DB" } };
         const { id, ...updateData } = link;
         const promise = id
           ? supabase.from("navigation_links").update(updateData).eq("id", id)
@@ -922,6 +960,7 @@ export const adminApi = createApi({
     }),
     deleteNavLink: builder.mutation<{ id: string }, string>({
       queryFn: async (id) => {
+        if (!supabase) return { error: { message: "No DB" } };
         const { error } = await supabase
           .from("navigation_links")
           .delete()
@@ -933,6 +972,7 @@ export const adminApi = createApi({
     }),
     getPortfolioContent: builder.query<PortfolioSection[], void>({
       queryFn: async () => {
+        if (!supabase) return { error: { message: "No DB" } };
         const { data, error } = await supabase
           .from("portfolio_sections")
           .select(`*, portfolio_items (*)`)
@@ -949,6 +989,7 @@ export const adminApi = createApi({
     }),
     saveSection: builder.mutation<PortfolioSection, Partial<PortfolioSection>>({
       queryFn: async (section) => {
+        if (!supabase) return { error: { message: "No DB" } };
         const { id, ...updateData } = section;
         const promise = id
           ? supabase.from("portfolio_sections").update(updateData).eq("id", id)
@@ -961,6 +1002,7 @@ export const adminApi = createApi({
     }),
     deleteSection: builder.mutation<{ id: string }, string>({
       queryFn: async (id) => {
+        if (!supabase) return { error: { message: "No DB" } };
         const { error } = await supabase
           .from("portfolio_sections")
           .delete()
@@ -972,6 +1014,7 @@ export const adminApi = createApi({
     }),
     savePortfolioItem: builder.mutation<PortfolioItem, Partial<PortfolioItem>>({
       queryFn: async (item) => {
+        if (!supabase) return { error: { message: "No DB" } };
         const { id, ...updateData } = item;
         const promise = id
           ? supabase.from("portfolio_items").update(updateData).eq("id", id)
@@ -984,6 +1027,7 @@ export const adminApi = createApi({
     }),
     deletePortfolioItem: builder.mutation<{ id: string }, string>({
       queryFn: async (id) => {
+        if (!supabase) return { error: { message: "No DB" } };
         const { error } = await supabase
           .from("portfolio_items")
           .delete()
@@ -995,6 +1039,7 @@ export const adminApi = createApi({
     }),
     updateSectionOrder: builder.mutation<null, string[]>({
       queryFn: async (sectionIds) => {
+        if (!supabase) return { error: { message: "No DB" } };
         const { error } = await supabase.rpc("update_section_order", {
           section_ids: sectionIds,
         });
@@ -1003,10 +1048,9 @@ export const adminApi = createApi({
       },
       invalidatesTags: ["PortfolioContent"],
     }),
-
-    // Assets
     getAssets: builder.query<StorageAsset[], void>({
       queryFn: async () => {
+        if (!supabase) return { error: { message: "No DB" } };
         const { data, error } = await supabase
           .from("storage_assets")
           .select("*")
@@ -1018,6 +1062,7 @@ export const adminApi = createApi({
     }),
     addAsset: builder.mutation<StorageAsset, Partial<StorageAsset>>({
       queryFn: async (asset) => {
+        if (!supabase) return { error: { message: "No DB" } };
         const { data, error } = await supabase
           .from("storage_assets")
           .insert(asset)
@@ -1030,6 +1075,7 @@ export const adminApi = createApi({
     }),
     updateAsset: builder.mutation<StorageAsset, Partial<StorageAsset>>({
       queryFn: async (asset) => {
+        if (!supabase) return { error: { message: "No DB" } };
         const { id, ...updateData } = asset;
         const { data, error } = await supabase
           .from("storage_assets")
@@ -1044,8 +1090,9 @@ export const adminApi = createApi({
     }),
     deleteAsset: builder.mutation<{ id: string }, StorageAsset>({
       queryFn: async (asset) => {
+        if (!supabase) return { error: { message: "No DB" } };
         const { error: storageError } = await supabase.storage
-          .from(process.env.NEXT_PUBLIC_BUCKET_NAME || "blog-assets")
+          .from(process.env.NEXT_PUBLIC_BUCKET_NAME || "assets")
           .remove([asset.file_path]);
         if (storageError)
           console.warn(
@@ -1061,22 +1108,45 @@ export const adminApi = createApi({
       },
       invalidatesTags: ["Assets"],
     }),
+    moveAsset: builder.mutation<
+      null,
+      { assetId: string; oldPath: string; newPath: string }
+    >({
+      queryFn: async ({ assetId, oldPath, newPath }) => {
+        if (!supabase) return { error: { message: "No DB" } };
+        const { error: storageError } = await supabase.storage
+          .from(BUCKET_NAME)
+          .move(oldPath, newPath);
+
+        if (storageError) return { error: storageError };
+
+        const { error: dbError } = await supabase
+          .from("storage_assets")
+          .update({ file_path: newPath })
+          .eq("id", assetId);
+
+        if (dbError) return { error: dbError };
+
+        return { data: null };
+      },
+      invalidatesTags: ["Assets"],
+    }),
     rescanAssetUsage: builder.mutation<null, void>({
       queryFn: async () => {
+        if (!supabase) return { error: { message: "No DB" } };
         const { error } = await supabase.rpc("update_asset_usage");
         if (error) return { error };
         return { data: null };
       },
       invalidatesTags: ["Assets"],
     }),
-    // --- HABIT TRACKER ---
     getHabits: builder.query<Habit[], void>({
       queryFn: async () => {
+        if (!supabase) return { error: { message: "No DB" } };
         const today = new Date();
         const thirtyDaysAgo = new Date();
         thirtyDaysAgo.setDate(today.getDate() - 30);
 
-        // Fetch habits and their logs for the last 30 days
         const { data, error } = await supabase
           .from("habits")
           .select(`*, habit_logs(id, completed_date)`)
@@ -1089,9 +1159,9 @@ export const adminApi = createApi({
       },
       providesTags: ["Habits"],
     }),
-
     saveHabit: builder.mutation<Habit, Partial<Habit>>({
       queryFn: async (habit) => {
+        if (!supabase) return { error: { message: "No DB" } };
         const { id, ...updateData } = habit;
         const promise = id
           ? supabase.from("habits").update(updateData).eq("id", id)
@@ -1103,19 +1173,18 @@ export const adminApi = createApi({
       },
       invalidatesTags: ["Habits"],
     }),
-
     deleteHabit: builder.mutation<void, string>({
       queryFn: async (id) => {
+        if (!supabase) return { error: { message: "No DB" } };
         const { error } = await supabase.from("habits").delete().eq("id", id);
         if (error) return { error };
         return { data: undefined };
       },
       invalidatesTags: ["Habits"],
     }),
-
     toggleHabitLog: builder.mutation<void, { habit_id: string; date: string }>({
       queryFn: async ({ habit_id, date }) => {
-        // ... (keep existing queryFn logic) ...
+        if (!supabase) return { error: { message: "No DB" } };
         const { data: existing } = await supabase
           .from("habit_logs")
           .select("id")
@@ -1137,25 +1206,20 @@ export const adminApi = createApi({
         }
         return { data: undefined };
       },
-      // OPTIMISTIC UPDATE LOGIC
       async onQueryStarted({ habit_id, date }, { dispatch, queryFulfilled }) {
         const patchResult = dispatch(
           adminApi.util.updateQueryData("getHabits", undefined, (draft) => {
             const habit = draft.find((h) => h.id === habit_id);
             if (habit) {
               if (!habit.habit_logs) habit.habit_logs = [];
-
               const existingIndex = habit.habit_logs.findIndex(
                 (l) => l.completed_date === date,
               );
-
               if (existingIndex !== -1) {
-                // Remove locally
                 habit.habit_logs.splice(existingIndex, 1);
               } else {
-                // Add locally
                 habit.habit_logs.push({
-                  id: "temp-id-" + Date.now(), // Temporary ID
+                  id: "temp-id-" + Date.now(),
                   habit_id,
                   completed_date: date,
                 });
@@ -1170,27 +1234,27 @@ export const adminApi = createApi({
         }
       },
     }),
-    // --- FOCUS MODE ---
     logFocusSession: builder.mutation<
       null,
       { duration_minutes: number; task_id?: string | null; mode: string }
     >({
       queryFn: async (data) => {
+        if (!supabase) return { error: { message: "No DB" } };
         const { error } = await supabase.from("focus_logs").insert({
           duration_minutes: data.duration_minutes,
           task_id: data.task_id,
           mode: data.mode,
-          start_time: new Date().toISOString(), // Approximate start
+          start_time: new Date().toISOString(),
           completed: true,
         });
         if (error) return { error };
         return { data: null };
       },
-      invalidatesTags: ["Analytics"], // Update dashboard stats
+      invalidatesTags: ["Analytics"],
     }),
-    // --- INVENTORY ---
     getInventory: builder.query<InventoryItem[], void>({
       queryFn: async () => {
+        if (!supabase) return { error: { message: "No DB" } };
         const { data, error } = await supabase
           .from("inventory_items")
           .select("*")
@@ -1202,6 +1266,7 @@ export const adminApi = createApi({
     }),
     addInventoryItem: builder.mutation<InventoryItem, Partial<InventoryItem>>({
       queryFn: async (item) => {
+        if (!supabase) return { error: { message: "No DB" } };
         const { data, error } = await supabase
           .from("inventory_items")
           .insert(item)
@@ -1217,6 +1282,7 @@ export const adminApi = createApi({
       Partial<InventoryItem>
     >({
       queryFn: async (item) => {
+        if (!supabase) return { error: { message: "No DB" } };
         const { id, ...updateData } = item;
         const { data, error } = await supabase
           .from("inventory_items")
@@ -1231,6 +1297,7 @@ export const adminApi = createApi({
     }),
     deleteInventoryItem: builder.mutation<void, string>({
       queryFn: async (id) => {
+        if (!supabase) return { error: { message: "No DB" } };
         const { error } = await supabase
           .from("inventory_items")
           .delete()
@@ -1242,6 +1309,7 @@ export const adminApi = createApi({
     }),
     getSecuritySettings: builder.query<{ lockdown_level: number }, void>({
       queryFn: async () => {
+        if (!supabase) return { error: { message: "No DB" } };
         const { data, error } = await supabase
           .from("security_settings")
           .select("lockdown_level")
@@ -1253,6 +1321,7 @@ export const adminApi = createApi({
     }),
     updateLockdownLevel: builder.mutation<void, number>({
       queryFn: async (level) => {
+        if (!supabase) return { error: { message: "No DB" } };
         const { error } = await supabase
           .from("security_settings")
           .update({ lockdown_level: level })
@@ -1266,6 +1335,7 @@ export const adminApi = createApi({
 });
 
 export const {
+  useCheckAdminExistsQuery,
   useGetDashboardDataQuery,
   useGetAnalyticsDataQuery,
   useGetCalendarDataQuery,
@@ -1335,4 +1405,5 @@ export const {
   useDeleteInventoryItemMutation,
   useGetSecuritySettingsQuery,
   useUpdateLockdownLevelMutation,
+  useMoveAssetMutation,
 } = adminApi;

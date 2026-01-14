@@ -105,8 +105,7 @@ export default function NavigationManager() {
   const { data: links = [], isLoading } = useGetNavLinksAdminQuery();
   const [saveNavLink] = useSaveNavLinkMutation();
   const [deleteNavLink] = useDeleteNavLinkMutation();
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const [updateOrder] = useUpdateSectionOrderMutation();
+  
 
   useEffect(() => {
     setLocalLinks(links);

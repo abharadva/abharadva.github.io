@@ -29,6 +29,10 @@ export default function ProjectsPage() {
     (s) => s.title === "Featured Projects",
   );
 
+  const hasFeaturedProjects =
+    featuredSection?.portfolio_items &&
+    featuredSection.portfolio_items.length > 0;
+
   return (
     <Layout>
       <Head>
@@ -41,19 +45,23 @@ export default function ProjectsPage() {
       </Head>
 
       <main className="py-12 md:py-16">
-        <motion.header
-          initial={{ opacity: 0, y: -20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5 }}
-          className="mb-16 text-center"
-        >
-          <h1 className="text-5xl font-black tracking-tighter text-foreground md:text-6xl">
-            {content.heading}
-          </h1>
-          <p className="mt-3 text-lg text-muted-foreground">
-            A curated showcase of my proudest work and technical deep-dives.
-          </p>
-        </motion.header>
+        {/* Only show the main page header if we HAVE featured projects.
+            Otherwise, the GitHub projects component will show its own header below. */}
+        {hasFeaturedProjects && (
+          <motion.header
+            initial={{ opacity: 0, y: -20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5 }}
+            className="mb-16 text-center"
+          >
+            <h1 className="text-5xl font-black tracking-tighter text-foreground md:text-6xl">
+              Featured Work
+            </h1>
+            <p className="mt-3 text-lg text-muted-foreground">
+              A curated showcase of my proudest work and technical deep-dives.
+            </p>
+          </motion.header>
+        )}
 
         {isLoading && (
           <div className="flex justify-center py-16">
@@ -64,7 +72,7 @@ export default function ProjectsPage() {
         {!!error && (
           <Alert variant="destructive" className="max-w-2xl mx-auto my-16">
             <AlertTriangle className="h-4 w-4" />
-            <AlertTitle>Error Loading Case Studies</AlertTitle>
+            <AlertTitle>Error Loading Projects</AlertTitle>
             <AlertDescription>
               {error && typeof error === "object" && "message" in error
                 ? String((error as { message: unknown }).message)
@@ -73,24 +81,28 @@ export default function ProjectsPage() {
           </Alert>
         )}
 
-        {featuredSection?.portfolio_items &&
-          featuredSection.portfolio_items.length > 0 && (
-            <div className="mx-auto max-w-6xl space-y-24">
-              {featuredSection.portfolio_items.map((project, index) => (
-                <FeaturedProject
-                  key={project.id}
-                  project={project}
-                  index={index}
-                />
-              ))}
-            </div>
-          )}
+        {hasFeaturedProjects && (
+          <div className="mx-auto max-w-6xl space-y-24">
+            {featuredSection.portfolio_items!.map((project, index) => (
+              <FeaturedProject
+                key={project.id}
+                project={project}
+                index={index}
+              />
+            ))}
+          </div>
+        )}
 
-        <div className="my-24">
-          <Separator />
-        </div>
+        {hasFeaturedProjects && (
+          <div className="my-24">
+            <Separator />
+          </div>
+        )}
 
         <div className="mx-auto max-w-6xl">
+          {/* Always show title for GitHub projects if it's the only section, 
+              or if it follows featured projects. 
+              The internal component handles "My Projects" title. */}
           <ProjectsComponent showTitle={true} />
         </div>
       </main>

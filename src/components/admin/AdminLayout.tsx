@@ -1,5 +1,5 @@
 // src/components/admin/AdminLayout.tsx
-import React, { useState, ReactNode } from "react";
+import React, { useState, useEffect, ReactNode } from "react";
 import { useRouter } from "next/router";
 import Link from "next/link";
 import { Sidebar } from "@/components/admin/Sidebar";
@@ -17,7 +17,7 @@ import {
   LogOut,
   ExternalLink,
 } from "lucide-react";
-import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
+import { Sheet, SheetContent } from "@/components/ui/sheet";
 import { Separator } from "@/components/ui/separator";
 import { useAppSelector } from "@/store/hooks";
 import {
@@ -37,6 +37,10 @@ import {
 import FocusTimer from "./focus/FocusTimer";
 import { GlobalCommandPalette } from "@/components/GlobalCommandPalette";
 import Head from "next/head";
+import { isSupabaseConfigured } from "@/lib/config";
+import { cn } from "@/lib/utils";
+
+const SIDEBAR_STORAGE_KEY = "admin_sidebar_collapsed";
 
 const formatTime = (seconds: number) => {
   const h = Math.floor(seconds / 3600)
@@ -110,15 +114,40 @@ interface AdminLayoutProps {
 export function AdminLayout({ children, title }: AdminLayoutProps) {
   const router = useRouter();
   const [mobileSidebarOpen, setMobileSidebarOpen] = useState(false);
-  const { session } = useAuthGuard();
+  
+  // State for sidebar logic
+  const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
+  const [isSidebarInitialized, setIsSidebarInitialized] = useState(false);
+
+  const { session, isLoading } = useAuthGuard();
 
   const pageTitle = title ? `${title} | Admin Panel` : "Admin Panel";
 
   const { activeSession, elapsedTime } = useAppSelector(
     (state) => state.learningSession,
   );
-  const { data: learningData } = useGetLearningDataQuery();
+  
+  const { data: learningData } = useGetLearningDataQuery(undefined, {
+    skip: !isSupabaseConfigured,
+  });
   const [signOut] = useSignOutMutation();
+
+  // Load sidebar state on mount
+  useEffect(() => {
+    const savedState = localStorage.getItem(SIDEBAR_STORAGE_KEY);
+    if (savedState === "true") {
+      setIsSidebarCollapsed(true);
+    }
+    // Mark as initialized to enable CSS transitions after initial paint
+    // This prevents the sidebar from "animating" to closed state on refresh
+    setTimeout(() => setIsSidebarInitialized(true), 100);
+  }, []);
+
+  const toggleSidebar = () => {
+    const newState = !isSidebarCollapsed;
+    setIsSidebarCollapsed(newState);
+    localStorage.setItem(SIDEBAR_STORAGE_KEY, String(newState));
+  };
 
   const handleLogout = async () => {
     await signOut().unwrap();
@@ -129,8 +158,19 @@ export function AdminLayout({ children, title }: AdminLayoutProps) {
     ? learningData?.topics.find((t) => t.id === activeSession.topic_id)?.title
     : null;
 
+  if (!isSupabaseConfigured) {
+    return null;
+  }
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <Loader2 className="animate-spin" />
+      </div>
+    );
+  }
+
   return (
-    // FIX: Changed min-h-screen to min-h-dvh for better mobile browser support
     <div className="min-h-[100dvh] bg-secondary/30 flex flex-col">
       <Head>
         <title>{pageTitle}</title>
@@ -142,8 +182,19 @@ export function AdminLayout({ children, title }: AdminLayoutProps) {
       <GlobalCommandPalette />
       <FocusTimer />
 
-      <div className="hidden lg:fixed lg:inset-y-0 lg:z-50 lg:flex lg:w-64 lg:flex-col border-r border-border bg-background">
-        <Sidebar className="border-r-0" />
+      <div
+        className={cn(
+          "hidden lg:fixed lg:inset-y-0 lg:z-50 lg:flex lg:flex-col border-r border-border bg-background",
+          // Only animate width changes after initialization
+          isSidebarInitialized && "transition-all duration-300 ease-in-out",
+          isSidebarCollapsed ? "lg:w-16" : "lg:w-64",
+        )}
+      >
+        <Sidebar
+          className="border-r-0"
+          isCollapsed={isSidebarCollapsed}
+          toggleCollapse={toggleSidebar}
+        />
       </div>
 
       <Sheet open={mobileSidebarOpen} onOpenChange={setMobileSidebarOpen}>
@@ -152,7 +203,14 @@ export function AdminLayout({ children, title }: AdminLayoutProps) {
         </SheetContent>
       </Sheet>
 
-      <div className="lg:pl-64 flex flex-col min-h-[100dvh] transition-all duration-300">
+      <div
+        className={cn(
+          "flex flex-col min-h-[100dvh]",
+          // Only animate padding changes after initialization
+          isSidebarInitialized && "transition-all duration-300 ease-in-out",
+          isSidebarCollapsed ? "lg:pl-16" : "lg:pl-64",
+        )}
+      >
         <header className="sticky top-0 z-40 flex h-16 shrink-0 items-center gap-x-4 border-b border-border bg-background/80 px-4 shadow-sm backdrop-blur-sm sm:gap-x-6 sm:px-6 lg:px-8 justify-between lg:justify-start">
           <div className="flex items-center gap-4">
             <Button

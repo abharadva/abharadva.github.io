@@ -20,7 +20,10 @@ interface HeaderProps {
   searchTerm: string;
   setSearchTerm: (s: string) => void;
   onNewTask: () => void;
-  isMobile: boolean; // Add this prop
+  isMobile: boolean;
+  // Made optional to fix build error if parent doesn't pass them yet
+  showCompleted?: boolean;
+  setShowCompleted?: (b: boolean) => void;
 }
 
 export function TaskManagerHeader({
@@ -30,6 +33,8 @@ export function TaskManagerHeader({
   setSearchTerm,
   onNewTask,
   isMobile,
+  showCompleted,
+  setShowCompleted,
 }: HeaderProps) {
   return (
     <div className="flex flex-col gap-4 border-b bg-background/95 backdrop-blur pb-4 pt-2 supports-[backdrop-filter]:bg-background/60">
@@ -68,9 +73,15 @@ export function TaskManagerHeader({
             <DropdownMenuContent align="start" className="w-48">
               <DropdownMenuLabel>View Options</DropdownMenuLabel>
               <DropdownMenuSeparator />
-              <DropdownMenuCheckboxItem checked>
-                Show Completed
-              </DropdownMenuCheckboxItem>
+              {/* Only render if props are provided */}
+              {setShowCompleted && (
+                <DropdownMenuCheckboxItem
+                  checked={showCompleted}
+                  onCheckedChange={setShowCompleted}
+                >
+                  Show Completed
+                </DropdownMenuCheckboxItem>
+              )}
             </DropdownMenuContent>
           </DropdownMenu>
         </div>

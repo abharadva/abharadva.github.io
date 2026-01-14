@@ -98,6 +98,7 @@ export default function SecuritySettings() {
     useUpdateUserPasswordMutation();
 
   const handleUnenroll = async (factorId: string) => {
+    if (!supabase) return;
     const isConfirmed = await confirm({
       title: "Remove 2FA Method?",
       description:

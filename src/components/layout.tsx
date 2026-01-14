@@ -26,6 +26,11 @@ export default function Layout({ children, isAdmin = false }: LayoutProps) {
 
   useEffect(() => {
     const checkUser = async () => {
+      if (!supabase) {
+        setIsAuthenticated(false);
+        setIsAuthChecking(false);
+        return;
+      }
       const {
         data: { session },
       } = await supabase.auth.getSession();

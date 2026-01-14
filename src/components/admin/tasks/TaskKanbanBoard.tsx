@@ -6,7 +6,6 @@ import { Task } from "@/types";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { ScrollArea } from "@/components/ui/scroll-area";
 import {
   MoreHorizontal,
   Calendar,
@@ -16,18 +15,23 @@ import {
   Circle,
   Edit,
   Trash2,
+  Zap,
 } from "lucide-react";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
+  DropdownMenuSeparator,
 } from "@/components/ui/dropdown-menu";
 import { motion, PanInfo } from "framer-motion";
-import { cn } from "@/lib/utils";
+import { cn, parseLocalDate } from "@/lib/utils";
 import { format } from "date-fns";
 import { TaskPriorityPill } from "./TaskPriorityPill";
 import { useIsMobile } from "@/hooks/use-mobile";
+import { useAppDispatch } from "@/store/hooks";
+import { startFocus } from "@/store/slices/focusSlice";
+import { toast } from "sonner";
 
 // Type definition for the column configuration
 type Column = {
@@ -78,6 +82,7 @@ export function TaskKanbanBoard({
   onNewTask,
 }: TaskKanbanBoardProps) {
   const isMobile = useIsMobile();
+  const dispatch = useAppDispatch();
 
   const [draggingTaskId, setDraggingTaskId] = useState<string | null>(null);
   const [activeColumn, setActiveColumn] = useState<string | null>(null);
@@ -86,6 +91,17 @@ export function TaskKanbanBoard({
     todo: useRef<HTMLDivElement>(null),
     inprogress: useRef<HTMLDivElement>(null),
     done: useRef<HTMLDivElement>(null),
+  };
+
+  const handleStartFocus = (task: Task) => {
+    dispatch(
+      startFocus({
+        durationMinutes: 25,
+        taskTitle: task.title,
+        taskId: task.id,
+      })
+    );
+    toast.success("Focus timer started for task");
   };
 
   return (
@@ -104,7 +120,6 @@ export function TaskKanbanBoard({
               isDragging
                 ? "border-dashed border-primary/50"
                 : "border-border/50",
-              // Z-INDEX FIX: Elevate the active column
               activeColumn === col.id ? "z-20" : "z-10",
               isMobile
                 ? ""
@@ -150,9 +165,10 @@ export function TaskKanbanBoard({
                     onEdit={() => onEditTask(task)}
                     onDelete={() => onDeleteTask(task.id)}
                     onUpdateTask={onUpdateTask}
+                    onFocus={() => handleStartFocus(task)}
                     onDragStart={() => {
                       setDraggingTaskId(task.id);
-                      setActiveColumn(task.status as string); // Set active column
+                      setActiveColumn(task.status as string);
                     }}
                     onDragEnd={(event, info) => {
                       const point = info.point;
@@ -173,7 +189,7 @@ export function TaskKanbanBoard({
                         }
                       });
                       setDraggingTaskId(null);
-                      setActiveColumn(null); // Reset active column
+                      setActiveColumn(null);
                     }}
                     isDragging={draggingTaskId === task.id}
                   />
@@ -197,6 +213,7 @@ function KanbanCard({
   onEdit,
   onDelete,
   onUpdateTask,
+  onFocus,
   onDragStart,
   onDragEnd,
   isDragging,
@@ -205,6 +222,7 @@ function KanbanCard({
   onEdit: () => void;
   onDelete: () => void;
   onUpdateTask: (id: string, updates: Partial<Task>) => void;
+  onFocus: () => void;
   onDragStart: () => void;
   onDragEnd: (
     event: MouseEvent | TouchEvent | PointerEvent,
@@ -223,7 +241,6 @@ function KanbanCard({
       dragSnapToOrigin
       onDragStart={onDragStart}
       onDragEnd={onDragEnd}
-      // Z-INDEX FIX: Elevate the card itself while dragging
       whileDrag={{
         scale: 1.05,
         zIndex: 100,
@@ -263,6 +280,11 @@ function KanbanCard({
                   </Button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end">
+                  <DropdownMenuItem onClick={onFocus}>
+                    <Zap className="mr-2 size-3.5 text-yellow-500" /> Start
+                    Focus
+                  </DropdownMenuItem>
+                  <DropdownMenuSeparator />
                   <DropdownMenuItem onClick={onEdit}>
                     <Edit className="mr-2 size-3.5" /> Edit
                   </DropdownMenuItem>
@@ -286,7 +308,7 @@ function KanbanCard({
             {task.due_date && (
               <div className="flex items-center text-[10px] text-muted-foreground bg-secondary/50 px-1.5 py-0.5 rounded">
                 <Calendar className="size-3 mr-1" />
-                {format(new Date(task.due_date), "MMM d")}
+                {format(parseLocalDate(task.due_date), "MMM d")}
               </div>
             )}
           </div>
